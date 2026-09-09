@@ -157,7 +157,7 @@ export const MembershipCard: React.FC<MembershipCardProps> = ({
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <strong>Phân định rõ ràng (§2.3):</strong> Theo dõi (Follow) là kết nối tự do và hoàn toàn miễn phí. Đăng ký hội viên là chương trình gắn kết độc lập, cung cấp quyền lợi có điều kiện.
+            <strong>Hai lựa chọn độc lập:</strong> Theo dõi là kết nối tự do và hoàn toàn miễn phí. Đăng ký hội viên là chương trình gắn kết riêng, cung cấp các quyền lợi có điều kiện.
           </div>
           {onToggleFollow && (
             <button

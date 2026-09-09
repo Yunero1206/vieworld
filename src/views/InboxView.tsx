@@ -180,7 +180,7 @@ export const InboxView: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontWeight: '700', fontSize: 'var(--text-xs)' }}>
           <ShieldCheck size={16} />
-          <span>CAM KẾT MINH BẠCH & BẢO VỆ QUYỀN RIÊNG TƯ (§2.3, §7.2)</span>
+          <span>CAM KẾT MINH BẠCH & BẢO VỆ QUYỀN RIÊNG TƯ</span>
         </div>
         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', lineHeight: 1.5 }}>
           • <strong>Thông báo cục bộ:</strong> 100% thông báo diễn ra in-app. Không yêu cầu quyền Browser Push, không thu thập email hay số điện thoại của fan.

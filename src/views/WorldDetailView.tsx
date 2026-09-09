@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { WorldHeader } from '../components/WorldHeader';
+import { WorldScene } from '../components/WorldScene';
 import { NextMomentCard } from '../components/NextMomentCard';
 import {
   Calendar,
@@ -24,7 +25,20 @@ import { BenefitCard } from '../components/BenefitCard';
 export const WorldDetailView: React.FC = () => {
   const { worldId } = useParams<{ worldId: string }>();
   const { state, dispatch } = useApp();
-  const [activeTab, setActiveTab] = useState<'home' | 'sessions' | 'archive' | 'membership' | 'shop'>('home');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const availableTabs = ['home', 'sessions', 'archive', 'membership', 'shop'] as const;
+  type WorldTab = (typeof availableTabs)[number];
+  const requestedTab = searchParams.get('zone');
+  const activeTab: WorldTab = availableTabs.includes(requestedTab as WorldTab)
+    ? (requestedTab as WorldTab)
+    : 'home';
+
+  const openTab = (tab: WorldTab) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (tab === 'home') nextParams.delete('zone');
+    else nextParams.set('zone', tab);
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const world = worldId ? state.worlds[worldId] : undefined;
 
@@ -62,6 +76,7 @@ export const WorldDetailView: React.FC = () => {
   );
   const worldBenefits = Object.values(state.benefits).filter((b) => b.worldId === world.id);
   const isFollowed = state.followedWorldIds.includes(world.id);
+  const linkedWorld = world.linkedWorldIds.map((id) => state.worlds[id]).find(Boolean);
 
   const formatTime = (isoString: string) => {
     try {
@@ -79,19 +94,25 @@ export const WorldDetailView: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="world-detail-page">
       {/* World Header */}
       <WorldHeader world={world} />
 
+      {activeTab === 'home' && (
+        <WorldScene
+          world={world}
+          nextSession={nextSession}
+          sessionCount={worldSessions.length}
+          benefitCount={worldBenefits.length}
+          productCount={worldProducts.length}
+          linkedWorld={linkedWorld}
+          onOpenZone={openTab}
+        />
+      )}
+
       {/* World Tabs Navigation (§3.2) */}
       <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          borderBottom: '1px solid var(--border)',
-          paddingBottom: '2px',
-          overflowX: 'auto',
-        }}
+        className="world-zone-tabs"
         role="tablist"
         aria-label="Các mục trong thế giới"
       >
@@ -99,7 +120,7 @@ export const WorldDetailView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'home'}
-          onClick={() => setActiveTab('home')}
+          onClick={() => openTab('home')}
           className={`btn ${activeTab === 'home' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
           id="tab-world-home"
@@ -112,7 +133,7 @@ export const WorldDetailView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'sessions'}
-          onClick={() => setActiveTab('sessions')}
+          onClick={() => openTab('sessions')}
           className={`btn ${activeTab === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
           id="tab-world-sessions"
@@ -125,7 +146,7 @@ export const WorldDetailView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'archive'}
-          onClick={() => setActiveTab('archive')}
+          onClick={() => openTab('archive')}
           className={`btn ${activeTab === 'archive' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
           id="tab-world-archive"
@@ -138,7 +159,7 @@ export const WorldDetailView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'membership'}
-          onClick={() => setActiveTab('membership')}
+          onClick={() => openTab('membership')}
           className={`btn ${activeTab === 'membership' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
           id="tab-world-membership"
@@ -151,7 +172,7 @@ export const WorldDetailView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'shop'}
-          onClick={() => setActiveTab('shop')}
+          onClick={() => openTab('shop')}
           className={`btn ${activeTab === 'shop' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
           id="tab-world-shop"
@@ -182,7 +203,7 @@ export const WorldDetailView: React.FC = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             <div className="card">
-              <h3 className="card-title" style={{ fontSize: 'var(--text-base)' }}>Quy chế tham gia (§2.2)</h3>
+              <h3 className="card-title" style={{ fontSize: 'var(--text-base)' }}>Không gian an toàn cho fan</h3>
               <p className="card-desc">
                 Mọi tương tác trong không gian này hoàn toàn là dữ liệu mô phỏng. Huy hiệu DEMO gắn liền với mọi phòng họp. Không mạo danh con người thực.
               </p>
@@ -205,7 +226,7 @@ export const WorldDetailView: React.FC = () => {
               </p>
               <button
                 type="button"
-                onClick={() => setActiveTab('membership')}
+                onClick={() => openTab('membership')}
                 className="btn btn-secondary"
                 style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
                 id="home-goto-membership-btn"
@@ -316,7 +337,7 @@ export const WorldDetailView: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <Lock size={16} color="var(--primary)" />
               <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: 'var(--primary)' }}>
-                Chính sách xem lại Replay (§2.3)
+                Chính sách xem lại Replay
               </h2>
             </div>
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', lineHeight: 1.5 }}>
@@ -389,7 +410,7 @@ export const WorldDetailView: React.FC = () => {
               Hội viên & Danh mục Quyền lợi ({world.name})
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-              Minh bạch tuyệt đối giữa trạng thái hội viên và điều kiện kích hoạt từng quyền lợi (§2.3, §7.2).
+              Trạng thái hội viên và điều kiện kích hoạt từng quyền lợi luôn được tách bạch rõ ràng.
             </p>
           </header>
 

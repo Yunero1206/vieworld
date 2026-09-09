@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Compass, Globe, User, Mail, Sparkles, Info, Sliders, HelpCircle, ArrowRightLeft } from 'lucide-react';
 import { DemoBanner } from './DemoBanner';
 import { StatusNotice } from './StatusNotice';
@@ -14,6 +14,13 @@ export const AppShell: React.FC = () => {
   const { state, storageNotice, dismissNotice, dispatch, setTenant, resetActiveTenant } = useApp();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (!/jsdom/i.test(window.navigator.userAgent)) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [pathname]);
 
   const tenantConfig = getTenantConfig(state.activeTenantId);
   const unreadNotifCount = Object.values(state.notifications || {}).filter((n) => !n.isRead).length;
@@ -41,12 +48,13 @@ export const AppShell: React.FC = () => {
         <aside className="sidebar" aria-label="Điều hướng ứng dụng">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div className="brand-logo" data-testid="brand-logo">
+              <span className="brand-orbit" aria-hidden="true">✦</span>
               <span>{tenantConfig.labels.brandName}</span>
               <span className="brand-badge" data-testid="brand-badge">{tenantConfig.labels.brandBadge}</span>
             </div>
 
             {/* Quick Tenant Switcher Selector (§1, §3, P15) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div className="review-only-control">
               <label
                 htmlFor="quick-tenant-select"
                 style={{ fontSize: '10px', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -121,13 +129,13 @@ export const AppShell: React.FC = () => {
                   )}
                 </NavLink>
               </li>
-              <li className="nav-item">
+              <li className="nav-item nav-item--review-only">
                 <NavLink to="/studio" className={({ isActive }) => (isActive ? 'active' : '')} id="nav-studio">
                   <Sparkles size={20} aria-hidden="true" />
                   <span>{tenantConfig.labels.studioTitle}</span>
                 </NavLink>
               </li>
-              <li className="nav-item">
+              <li className="nav-item nav-item--review-only">
                 <NavLink to="/about-demo" className={({ isActive }) => (isActive ? 'active' : '')} id="nav-about">
                   <Info size={20} aria-hidden="true" />
                   <span>Về Demo</span>
@@ -136,7 +144,7 @@ export const AppShell: React.FC = () => {
             </ul>
           </nav>
 
-          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="sidebar-tools">
             <button
               type="button"
               onClick={() => setIsGuideOpen(true)}
@@ -146,7 +154,7 @@ export const AppShell: React.FC = () => {
               style={{ width: '100%', justifyContent: 'flex-start', fontSize: 'var(--text-xs)' }}
             >
               <HelpCircle size={16} color="var(--primary)" />
-              <span>Hướng dẫn demo</span>
+              <span>Trợ giúp</span>
             </button>
 
             <button
@@ -157,7 +165,7 @@ export const AppShell: React.FC = () => {
               style={{ width: '100%', justifyContent: 'flex-start', fontSize: 'var(--text-xs)' }}
             >
               <Sliders size={16} color="var(--primary)" />
-              <span>Bảng thử nghiệm & Kịch bản</span>
+              <span>Chế độ review</span>
             </button>
           </div>
         </aside>
@@ -166,34 +174,14 @@ export const AppShell: React.FC = () => {
           {/* Tenant Disclaimer Notice (§1, §2.3, §3, P15) */}
           <div
             data-testid="tenant-disclaimer-notice"
-            style={{
-              padding: '10px 16px',
-              marginBottom: '16px',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: tenantConfig.accentLight,
-              border: `1px solid ${tenantConfig.accentBorder}`,
-              fontSize: 'var(--text-xs)',
-              color: tenantConfig.accentHover,
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px',
-            }}
+            className="review-context-strip"
           >
-            <span>{tenantConfig.disclaimer}</span>
-            <span
-              style={{
-                fontSize: '11px',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(255,255,255,0.85)',
-                whiteSpace: 'nowrap',
-                border: `1px solid ${tenantConfig.accentBorder}`,
-              }}
-            >
-              Không gian: <code>{state.activeTenantId}</code>
+            <span className="review-context-strip__visible">
+              <span className="review-context-strip__dot" aria-hidden="true" />
+              DEMO · {tenantConfig.displayName} · Dữ liệu mô phỏng
             </span>
+            <span className="sr-only">{tenantConfig.disclaimer}</span>
+            <span className="sr-only">Không gian: <code>{state.activeTenantId}</code></span>
           </div>
           {/* Active Status & Recovery Notices */}
           {storageNotice && (

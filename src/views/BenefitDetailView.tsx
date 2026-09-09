@@ -89,7 +89,7 @@ export const BenefitDetailView: React.FC = () => {
             {benefit.title}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-            Đối soát điều kiện hội viên và quy trình kích hoạt quyền lợi trung thực (§2.3, §7.2).
+            Kiểm tra điều kiện hội viên và theo dõi từng bước kích hoạt quyền lợi.
           </p>
         </header>
 
@@ -140,7 +140,7 @@ export const BenefitDetailView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Award size={20} color="var(--primary)" />
             <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '800', margin: 0 }}>
-              Tư cách hội viên & Nguồn gốc quyền lợi (§2.3)
+              Tư cách hội viên & nguồn gốc quyền lợi
             </h2>
           </div>
 
@@ -192,7 +192,7 @@ export const BenefitDetailView: React.FC = () => {
 
             {benefit.status === 'pending' && (
               <p style={{ margin: 0 }}>
-                Quyền lợi đang ở trạng thái <strong>đang chờ xác thực (pending)</strong>. Mặc dù bạn có thể đã là hội viên tích cực, ban tổ chức vẫn cần đối soát phân bổ số lượng hoặc khung giờ trước khi cấp quyền. Theo hiến pháp (§2.3), quyền lợi pending không thể bị bỏ qua để kích hoạt trước hạn.
+                Quyền lợi đang ở trạng thái <strong>đang chờ xác thực (pending)</strong>. Dù bạn đã là hội viên tích cực, ban tổ chức vẫn cần kiểm tra số lượng hoặc khung giờ trước khi cấp quyền; trạng thái này không thể bị bỏ qua để kích hoạt trước hạn.
               </p>
             )}
 
@@ -280,7 +280,7 @@ export const BenefitDetailView: React.FC = () => {
                     Gặp vấn đề về phân bổ hoặc điều kiện đối soát?
                   </strong>
                   <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
-                    Mở hồ sơ hỗ trợ cục bộ để theo dõi tiến trình kiểm tra (§2.3, P09).
+                    Mở hồ sơ hỗ trợ cục bộ để theo dõi tiến trình kiểm tra.
                   </span>
                 </div>
                 <button
@@ -319,7 +319,7 @@ export const BenefitDetailView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <Info size={16} color="var(--primary)" />
             <strong style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>
-              Nguyên tắc trung thực về quyền lợi VieWorld (§2.3)
+              Quyền lợi VieWorld hoạt động thế nào
             </strong>
           </div>
           <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--muted)', display: 'flex', flexDirection: 'column', gap: '6px' }}>

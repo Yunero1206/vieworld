@@ -246,80 +246,73 @@ export const SessionControls: React.FC<SessionControlsProps> = ({
         </button>
       </div>
 
-      {/* Demo Operator Controls: Truthful Presence Simulation (§2.3, §5.2) */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          padding: '12px 16px',
-          backgroundColor: '#F8FAFC',
-          borderRadius: 'var(--radius-md)',
-          border: '1px dashed var(--border)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)' }}>
-            <span className="demo-badge">DEMO</span>
-            <strong>Mô phỏng hiện diện chân thực nghệ sĩ (§2.3, §5.2)</strong>
+      {/* Demo operator controls live behind a review-only disclosure. */}
+      <details className="session-review-controls">
+        <summary>
+          <span className="demo-badge">DEMO</span>
+          Công cụ review phiên
+        </summary>
+        <div className="session-review-controls__body">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <strong style={{ fontSize: 'var(--text-xs)' }}>Mô phỏng trạng thái hiện diện nghệ sĩ</strong>
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+              Hiện tại: <strong>{session.artistPresence}</strong>
+            </span>
           </div>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-            Hiện tại: <strong>{session.artistPresence}</strong>
-          </span>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {isDisconnected ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSimulateReconnect}
+                style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                id="simulate-reconnect-button"
+              >
+                <Wifi size={14} color="#10B981" />
+                <span>Kết nối lại tín hiệu nghệ sĩ</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSimulateDisconnect}
+                style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                id="simulate-disconnect-button"
+              >
+                <WifiOff size={14} color="#EF4444" />
+                <span>Ngắt kết nối nghệ sĩ (Thử nghiệm)</span>
+              </button>
+            )}
+
+            {/* End Session Operator Button (P06) */}
+            {isRunning && onSimulateEndSession && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSimulateEndSession}
+                style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: '#B91C1C' }}
+                id="simulate-end-session-button"
+              >
+                <span>Mô phỏng: Kết thúc phiên sự kiện</span>
+              </button>
+            )}
+
+            {/* Publish Replay Operator Button (P06) */}
+            {isEnded && session.replayStatus === 'pending_review' && onSimulatePublishReplay && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onSimulatePublishReplay}
+                style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: 'var(--primary)' }}
+                id="simulate-publish-replay-button"
+              >
+                <span>Mô phỏng: Duyệt bản ghi Replay</span>
+              </button>
+            )}
+          </div>
         </div>
-
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {isDisconnected ? (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onSimulateReconnect}
-              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
-              id="simulate-reconnect-button"
-            >
-              <Wifi size={14} color="#10B981" />
-              <span>Kết nối lại tín hiệu nghệ sĩ</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onSimulateDisconnect}
-              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
-              id="simulate-disconnect-button"
-            >
-              <WifiOff size={14} color="#EF4444" />
-              <span>Ngắt kết nối nghệ sĩ (Thử nghiệm)</span>
-            </button>
-          )}
-
-          {/* End Session Operator Button (P06) */}
-          {isRunning && onSimulateEndSession && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onSimulateEndSession}
-              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: '#B91C1C' }}
-              id="simulate-end-session-button"
-            >
-              <span>Mô phỏng: Kết thúc phiên sự kiện</span>
-            </button>
-          )}
-
-          {/* Publish Replay Operator Button (P06) */}
-          {isEnded && session.replayStatus === 'pending_review' && onSimulatePublishReplay && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onSimulatePublishReplay}
-              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: 'var(--primary)' }}
-              id="simulate-publish-replay-button"
-            >
-              <span>Mô phỏng: Duyệt bản ghi Replay</span>
-            </button>
-          )}
-        </div>
-      </div>
+      </details>
     </div>
   );
 };

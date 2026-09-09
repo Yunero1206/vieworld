@@ -75,6 +75,7 @@ describe('T06 Acceptance: The Signature Loop & My World', () => {
       expect(screen.getByText(/Bạn đã hoàn thành bình chọn \(1 lượt duy nhất\)/i)).toBeInTheDocument();
 
       // 6. End Session via Operator Demo Control
+      fireEvent.click(screen.getByText(/Công cụ review phiên/i));
       const endSessionBtn = screen.getByRole('button', { name: /Mô phỏng: Kết thúc phiên sự kiện/i });
       fireEvent.click(endSessionBtn);
       expect(screen.getByText('Đã kết thúc')).toBeInTheDocument();
@@ -141,6 +142,7 @@ describe('T06 Acceptance: The Signature Loop & My World', () => {
       fireEvent.click(screen.getByRole('button', { name: /Vào sân khấu trực tiếp/i }));
 
       // End session once
+      fireEvent.click(screen.getByText(/Công cụ review phiên/i));
       const endBtn = screen.getByRole('button', { name: /Mô phỏng: Kết thúc phiên sự kiện/i });
       fireEvent.click(endBtn);
 

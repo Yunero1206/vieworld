@@ -183,9 +183,9 @@ export const SessionView: React.FC = () => {
   };
 
   return (
-    <div className="container" style={{ padding: '24px 20px 60px 20px' }}>
+    <div className="container session-page">
       {/* Breadcrumb Navigation */}
-      <nav aria-label="Đường dẫn điều hướng" style={{ marginBottom: '16px' }}>
+      <nav aria-label="Đường dẫn điều hướng" className="session-breadcrumb">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--text-sm)' }}>
           <Link to="/worlds" style={{ color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <ArrowLeft size={14} />
@@ -275,6 +275,7 @@ export const SessionView: React.FC = () => {
 
       {/* Session Title Header */}
       <header
+        className="session-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -380,6 +381,7 @@ export const SessionView: React.FC = () => {
 
       {/* Main Layout Grid: Stage + Details */}
       <div
+        className="live-room"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
@@ -388,19 +390,24 @@ export const SessionView: React.FC = () => {
         }}
       >
         {/* Left / Top Area: Sân khấu & Media Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="live-room__stage-column">
           {/* Truthful Presence Panel (§2.3, §5.2) */}
           <PresencePanel session={session} />
 
           {/* 2D Avatar Stage (§2.3, §5.1, P13 Concert Larger Stage) */}
-          <AvatarStage
-            avatar={avatarAsset}
-            artistPresence={session.artistPresence}
-            isPaused={isPaused}
-            isMuted={isMuted}
-            reducedMotion={reducedMotion}
-            stageVariant={session.format === 'concert' ? 'concert' : session.format === 'listening' ? 'listening' : 'standard'}
-          />
+          <div className="live-room__stage-frame">
+            <AvatarStage
+              avatar={avatarAsset}
+              artistPresence={session.artistPresence}
+              isPaused={isPaused}
+              isMuted={isMuted}
+              reducedMotion={reducedMotion}
+              stageVariant={session.format === 'concert' ? 'concert' : session.format === 'listening' ? 'listening' : 'standard'}
+            />
+            <div className="fan-crowd" aria-hidden="true">
+              <span /><span /><span /><span /><span /><span /><span />
+            </div>
+          </div>
 
           {/* Simulated Ambient Audio Media Placeholder (§2.4, P13 User-Initiated Audio & Missing Media) */}
           <SilentMediaPlaceholder
@@ -457,7 +464,7 @@ export const SessionView: React.FC = () => {
         </div>
 
         {/* Right / Sidebar: Venue Info & Participation Status */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="live-room__interaction-column">
           {/* Fan Participation Status Card */}
           <section className="card" style={{ padding: '20px' }} aria-label="Trạng thái tham dự cá nhân">
             <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '700', marginBottom: '12px' }}>
@@ -544,6 +551,7 @@ export const SessionView: React.FC = () => {
 
           {/* Interactive Participation Area: Chat, Q&A, Polls (P05) */}
           <div
+            className="interaction-tabs"
             style={{
               display: 'flex',
               gap: '6px',

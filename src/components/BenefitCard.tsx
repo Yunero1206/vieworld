@@ -215,7 +215,7 @@ export const BenefitCard: React.FC<BenefitCardProps> = ({
             lineHeight: 1.5,
           }}
         >
-          <strong>Lưu ý quy chế (§2.3):</strong> Quyền ưu tiên mua sớm chỉ là thứ tự mở đợt mở bán thử nghiệm, không đảm bảo chắc chắn còn hàng trong kho và không bao gồm quyền tương tác riêng với nghệ sĩ.
+          <strong>Lưu ý:</strong> Quyền ưu tiên mua sớm chỉ là thứ tự mở đợt mở bán thử nghiệm, không đảm bảo chắc chắn còn hàng trong kho và không bao gồm quyền tương tác riêng với nghệ sĩ.
         </div>
       )}
 

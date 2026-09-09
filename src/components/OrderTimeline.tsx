@@ -34,7 +34,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
     {
       id: 'paid',
       title: '2. Thanh toán mô phỏng',
-      desc: 'Xác nhận trạng thái thanh toán thử nghiệm. Lưu ý hiến pháp (§2.3): Đơn hàng đã thanh toán không đồng nghĩa với đã bàn giao vật phẩm.',
+      desc: 'Xác nhận trạng thái thanh toán thử nghiệm. Đơn hàng đã thanh toán không đồng nghĩa với đã bàn giao vật phẩm.',
       icon: CreditCard,
       isCompleted: order.status === 'paid' || order.status === 'fulfilled',
       isActive: order.status === 'paid',
@@ -209,7 +209,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
       >
         <AlertCircle size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
         <span>
-          <strong>Nguyên tắc phân định (§2.3):</strong> Thanh toán mô phỏng tạo trạng thái `paid`. Bàn giao vật phẩm là hành động kiểm soát độc lập (`fulfilled`). Quyền sở hữu chỉ xuất hiện trong My World khi đơn hàng đã bàn giao thành công.
+          <strong>Thanh toán khác với bàn giao:</strong> Thanh toán mô phỏng tạo trạng thái `paid`. Bàn giao vật phẩm là hành động độc lập (`fulfilled`). Quyền sở hữu chỉ xuất hiện trong My World khi đơn hàng đã bàn giao thành công.
         </span>
       </div>
     </div>

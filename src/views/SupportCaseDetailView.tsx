@@ -156,7 +156,7 @@ export const SupportCaseDetailView: React.FC = () => {
             Hồ sơ hỗ trợ #{supportCase.id}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-            Hệ thống hỗ trợ và đối soát minh bạch · Không đưa ra cam kết SLA kinh doanh ảo (§2.3, §7.2).
+            Hệ thống hỗ trợ và kiểm tra minh bạch · Không đưa ra cam kết thời gian phản hồi giả định.
           </p>
         </header>
 
@@ -359,7 +359,7 @@ export const SupportCaseDetailView: React.FC = () => {
                 {supportCase.resolution}
               </p>
               <div style={{ color: '#065F46', fontSize: '11px', borderTop: '1px dashed #A7F3D0', paddingTop: '6px' }}>
-                <strong>Lưu ý Hiến pháp (§2.3):</strong> Việc giải quyết hồ sơ (resolved) chỉ xác lập kết luận dịch vụ. Quyền lợi hội viên không tự động được kích hoạt nếu chưa qua lệnh đối soát nguồn dữ liệu độc lập.
+                <strong>Lưu ý:</strong> Việc giải quyết hồ sơ chỉ xác lập kết luận dịch vụ. Quyền lợi hội viên không tự động được kích hoạt nếu chưa qua bước kiểm tra nguồn dữ liệu độc lập.
               </div>
             </div>
           )}
@@ -379,7 +379,7 @@ export const SupportCaseDetailView: React.FC = () => {
           </div>
 
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', margin: '0 0 20px 0', lineHeight: 1.5 }}>
-            Nguyên tắc trung thực (§2.3, P09): Hệ thống hiển thị các bước cập nhật thử nghiệm cục bộ, không bịa đặt cam kết phản hồi SLA kinh doanh ảo.
+            Hệ thống hiển thị trung thực các bước cập nhật thử nghiệm cục bộ và không hứa hẹn thời gian phản hồi không có thật.
           </p>
 
           <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -436,7 +436,7 @@ export const SupportCaseDetailView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <FileQuestion size={20} color="var(--primary)" />
             <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: 0, color: 'var(--primary)' }}>
-              Bàn mô phỏng vai trò vận hành hỗ trợ (§2.3, P09)
+              Bàn mô phỏng vận hành hỗ trợ
             </h3>
           </div>
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', margin: '0 0 16px 0', lineHeight: 1.5 }}>

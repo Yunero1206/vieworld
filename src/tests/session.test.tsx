@@ -198,6 +198,7 @@ describe('T04 Acceptance: Session Stage & Truthful Presence', () => {
       expect(avatarEl.getAttribute('data-frozen')).toBe('false');
 
       // Trigger disconnect simulation button
+      fireEvent.click(screen.getByText(/Công cụ review phiên/i));
       const disconnectBtn = screen.getByRole('button', { name: /Ngắt kết nối nghệ sĩ \(Thử nghiệm\)/i });
       fireEvent.click(disconnectBtn);
 

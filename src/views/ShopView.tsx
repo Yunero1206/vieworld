@@ -88,7 +88,7 @@ export const ShopView: React.FC = () => {
             Cửa hàng quà tặng lưu niệm {world.name}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0, maxWidth: '640px', lineHeight: 1.6 }}>
-            Vật phẩm thử nghiệm minh bạch số lượng và điều kiện. Không thu phí tài chính thật, không nhập thẻ ngân hàng hay địa chỉ giao dịch (§2.3, §7.2).
+            Vật phẩm thử nghiệm minh bạch số lượng và điều kiện. Không thu tiền thật, không yêu cầu thẻ ngân hàng hay địa chỉ giao dịch.
           </p>
         </header>
 

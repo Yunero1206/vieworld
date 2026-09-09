@@ -114,86 +114,39 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, viewMode = 'scenery
 
   // Scenery (Card) View Mode
   return (
-    <article
-      className="card"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Decorative scenery backdrop */}
-      <div
-        style={{
-          height: '110px',
-          margin: '-24px -24px 16px -24px',
-          background: isArtist
-            ? 'linear-gradient(135deg, #312E81 0%, #1E1B4B 100%)'
-            : 'linear-gradient(135deg, #0C4A6E 0%, #082F49 100%)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          padding: '16px',
-        }}
-      >
-        <span
-          className="tag"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: '#FFFFFF',
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          {isArtist ? <Sparkles size={12} style={{ marginRight: '4px' }} /> : <Radio size={12} style={{ marginRight: '4px' }} />}
-          {isArtist ? 'Nghệ sĩ hư cấu' : 'Chương trình IP'}
+    <article className={`world-card world-card--${isArtist ? 'artist' : 'ip'}`}>
+      <Link to={`/worlds/${world.id}`} className="world-card__art" aria-label={`Mở ${world.name}`}>
+        <span className="world-card__sun" aria-hidden="true" />
+        <span className="world-card__horizon" aria-hidden="true" />
+        <span className="world-card__platform" aria-hidden="true" />
+        <span className="world-card__figure" aria-hidden="true">
+          <span />
+        </span>
+        <span className="world-card__type">
+          {isArtist ? <Sparkles size={13} aria-hidden="true" /> : <Radio size={13} aria-hidden="true" />}
+          {isArtist ? 'Artist World' : 'IP World'}
         </span>
         <span className="demo-badge">DEMO</span>
-      </div>
+      </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-        <div
-          style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: isArtist ? 'var(--radius-full)' : 'var(--radius-md)',
-            backgroundColor: 'var(--surface)',
-            border: '2px solid var(--border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 'var(--text-lg)',
-            fontWeight: '800',
-            color: isArtist ? 'var(--primary)' : '#0284C7',
-            marginTop: '-40px',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-        >
-          {world.name.charAt(0)}
+      <div className="world-card__content">
+        <div className="world-card__title-row">
+          <div className="world-card__avatar" aria-hidden="true">{world.name.charAt(0)}</div>
+          <div>
+            <span>{isFollowed ? 'Bạn đang theo dõi' : 'Đang mở cửa'}</span>
+            <h3><Link to={`/worlds/${world.id}`}>{world.name}</Link></h3>
+          </div>
         </div>
-        <div style={{ minWidth: 0 }}>
-          <h3 style={{ fontSize: 'var(--text-md)', fontWeight: '700' }}>
-            <Link to={`/worlds/${world.id}`} style={{ color: 'var(--ink)' }}>
-              {world.name}
-            </Link>
-          </h3>
-        </div>
-      </div>
 
-      <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', lineHeight: 1.5, marginBottom: '16px', flex: 1 }}>
-        {world.description}
-      </p>
+        <p>{world.description}</p>
 
       {/* Linked Worlds display (Does NOT auto-follow) */}
       {world.linkedWorldIds.length > 0 && (
-        <div style={{ marginBottom: '16px', fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+          <div className="world-card__links">
+          <span>
             <Link2 size={12} /> Liên kết liên quan:
           </span>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          <div>
             {world.linkedWorldIds.map((lid) => {
               const linked = state.worlds[lid];
               if (!linked) return null;
@@ -201,8 +154,7 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, viewMode = 'scenery
                 <Link
                   key={lid}
                   to={`/worlds/${lid}`}
-                  className="tag hover-tag"
-                  style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+                    className="tag hover-tag"
                 >
                   {linked.name}
                 </Link>
@@ -212,12 +164,11 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, viewMode = 'scenery
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+        <div className="world-card__actions">
         <button
           type="button"
           onClick={handleFollowToggle}
           className={`btn ${isFollowed ? 'btn-secondary' : 'btn-primary'}`}
-          style={{ flex: 1, padding: '8px 12px' }}
           id={`scenery-follow-btn-${world.id}`}
           aria-label={isFollowed ? `Bỏ theo dõi ${world.name}` : `Theo dõi ${world.name}`}
         >
@@ -236,11 +187,11 @@ export const WorldCard: React.FC<WorldCardProps> = ({ world, viewMode = 'scenery
         <Link
           to={`/worlds/${world.id}`}
           className="btn btn-secondary"
-          style={{ padding: '8px 16px' }}
           id={`enter-world-btn-${world.id}`}
         >
           Vào World
         </Link>
+        </div>
       </div>
     </article>
   );

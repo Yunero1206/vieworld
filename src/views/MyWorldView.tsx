@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { WardrobeCustomizer } from '../components/WardrobeCustomizer';
 import { MomentCapsuleCard } from '../components/MomentCapsuleCard';
 import { WorldCard } from '../components/WorldCard';
 import { MembershipCard } from '../components/MembershipCard';
 import { BenefitCard } from '../components/BenefitCard';
+import { MyRoomScene } from '../components/MyRoomScene';
 import {
   User,
   Sparkles,
@@ -26,7 +27,20 @@ import {
 
 export const MyWorldView: React.FC = () => {
   const { state, dispatch } = useApp();
-  const [activeTab, setActiveTab] = useState<'capsules' | 'benefits' | 'orders' | 'support' | 'wardrobe' | 'follows' | 'history'>('capsules');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const availableTabs = ['capsules', 'benefits', 'orders', 'support', 'wardrobe', 'follows', 'history'] as const;
+  type MyWorldTab = (typeof availableTabs)[number];
+  const requestedTab = searchParams.get('drawer');
+  const activeTab: MyWorldTab = availableTabs.includes(requestedTab as MyWorldTab)
+    ? (requestedTab as MyWorldTab)
+    : 'capsules';
+
+  const openSection = (tab: MyWorldTab) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (tab === 'capsules') nextParams.delete('drawer');
+    else nextParams.set('drawer', tab);
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const { fanProfile, capsules, followedWorldIds, rsvpdSessionIds, participations, worlds, sessions } = state;
 
@@ -65,10 +79,21 @@ export const MyWorldView: React.FC = () => {
   };
 
   return (
-    <div className="container" style={{ padding: '24px 20px 60px 20px' }}>
+    <div className="container my-world-page">
+      <MyRoomScene
+        displayName={fanProfile.displayName}
+        accessoryName={fanProfile.wardrobeChoice?.accessoryId}
+        capsuleCount={earnedCapsules.length}
+        benefitCount={userBenefits.length}
+        orderCount={userOrders.length}
+        supportCount={userSupportCases.length}
+        upcomingCount={rsvpdSessions.length}
+        onOpenSection={openSection}
+      />
+
       {/* Profile Header */}
       <header
-        className="card"
+        className="card my-world-profile"
         style={{
           padding: '24px',
           marginBottom: '24px',
@@ -101,17 +126,15 @@ export const MyWorldView: React.FC = () => {
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: '800', margin: 0 }}>
+              <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: '800', margin: 0 }}>
                 {fanProfile.displayName}
-              </h1>
+              </h2>
               <span className="demo-badge">DEMO</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--muted)', fontSize: 'var(--text-xs)' }}>
               <span>@{fanProfile.username}</span>
               <span>·</span>
-              <span>Tenant: <code>{state.activeTenantId}</code></span>
-              <span>·</span>
-              <span>Phụ kiện: <strong>{fanProfile.wardrobeChoice?.accessoryId || 'Chưa chọn'}</strong></span>
+              <span>Góc riêng tư của bạn</span>
             </div>
           </div>
         </div>
@@ -159,13 +182,7 @@ export const MyWorldView: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div
-        style={{
-          display: 'flex',
-          gap: '8px',
-          borderBottom: '1px solid var(--border)',
-          marginBottom: '24px',
-          flexWrap: 'wrap',
-        }}
+        className="my-world-tabs"
         role="tablist"
         aria-label="Các mục không gian cá nhân My World"
       >
@@ -173,7 +190,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'capsules'}
-          onClick={() => setActiveTab('capsules')}
+          onClick={() => openSection('capsules')}
           className={`btn ${activeTab === 'capsules' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-capsules"
@@ -186,7 +203,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'benefits'}
-          onClick={() => setActiveTab('benefits')}
+          onClick={() => openSection('benefits')}
           className={`btn ${activeTab === 'benefits' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-benefits"
@@ -199,7 +216,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'orders'}
-          onClick={() => setActiveTab('orders')}
+          onClick={() => openSection('orders')}
           className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-orders"
@@ -212,7 +229,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'support'}
-          onClick={() => setActiveTab('support')}
+          onClick={() => openSection('support')}
           className={`btn ${activeTab === 'support' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-support"
@@ -225,7 +242,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'wardrobe'}
-          onClick={() => setActiveTab('wardrobe')}
+          onClick={() => openSection('wardrobe')}
           className={`btn ${activeTab === 'wardrobe' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-wardrobe"
@@ -238,7 +255,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'follows'}
-          onClick={() => setActiveTab('follows')}
+          onClick={() => openSection('follows')}
           className={`btn ${activeTab === 'follows' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-follows"
@@ -251,7 +268,7 @@ export const MyWorldView: React.FC = () => {
           type="button"
           role="tab"
           aria-selected={activeTab === 'history'}
-          onClick={() => setActiveTab('history')}
+          onClick={() => openSection('history')}
           className={`btn ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-history"
@@ -394,7 +411,7 @@ export const MyWorldView: React.FC = () => {
               </h2>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: 'var(--text-xs)', margin: '0 0 14px 0' }}>
-              Nguyên tắc hiến pháp (§2.3): Chỉ đơn hàng đã hoàn tất bàn giao mô phỏng (fulfilled) mới được ghi nhận quyền sở hữu. Đơn chờ (pending) hoặc đã thanh toán (paid) chưa được tính vào bộ sưu tập.
+              Chỉ vật phẩm đã hoàn tất bàn giao mô phỏng mới xuất hiện trong bộ sưu tập. Đơn đang chờ hoặc mới thanh toán chưa được tính là đã sở hữu.
             </p>
 
             {fulfilledOrders.length === 0 ? (
@@ -552,7 +569,7 @@ export const MyWorldView: React.FC = () => {
               </h2>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-              Minh bạch hồ sơ xử lý sự cố quyền lợi hoặc đơn hàng (§2.3, §7.2).
+              Theo dõi minh bạch các yêu cầu hỗ trợ về quyền lợi hoặc đơn hàng.
             </p>
           </header>
 
@@ -568,7 +585,7 @@ export const MyWorldView: React.FC = () => {
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('benefits')}
+                  onClick={() => openSection('benefits')}
                   className="btn btn-secondary"
                   style={{ fontSize: 'var(--text-xs)' }}
                 >
@@ -576,7 +593,7 @@ export const MyWorldView: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('orders')}
+                  onClick={() => openSection('orders')}
                   className="btn btn-secondary"
                   style={{ fontSize: 'var(--text-xs)' }}
                 >

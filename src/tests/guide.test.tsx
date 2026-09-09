@@ -100,7 +100,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
       // Launcher button in AppShell
       const launcherBtn = screen.getByTestId('open-world-guide-btn');
       expect(launcherBtn).toBeInTheDocument();
-      expect(launcherBtn).toHaveTextContent('Hướng dẫn demo');
+      expect(launcherBtn).toHaveTextContent('Trợ giúp');
 
       // Open guide modal
       fireEvent.click(launcherBtn);

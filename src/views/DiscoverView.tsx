@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { NextMomentCard } from '../components/NextMomentCard';
 import { WorldCard } from '../components/WorldCard';
-import { Sparkles, ArrowRight, ShieldCheck, Heart, Repeat, Compass } from 'lucide-react';
+import { ArrowRight, CalendarHeart, Play, Sparkles } from 'lucide-react';
 
 import { getTenantConfig } from '../domain/tenantConfig';
 
@@ -19,74 +19,67 @@ export const DiscoverView: React.FC = () => {
     Object.values(state.sessions)[0];
 
   const worldsList = Object.values(state.worlds);
+  const featuredWorld = nextSession ? state.worlds[nextSession.worldId] : worldsList[0];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Editorial Header Hero */}
-      <header>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <span className="demo-badge">{tenantConfig.labels.brandBadge}</span>
-          <span className="tag" style={{ backgroundColor: tenantConfig.accentLight, color: 'var(--primary)', fontWeight: '700' }}>
-            {tenantConfig.displayName.toUpperCase()}
-          </span>
+    <div className="discover-page">
+      <header className="discover-world-hero">
+        <div className="discover-world-hero__sky" aria-hidden="true">
+          <span className="discover-world-hero__planet" />
+          <span className="discover-world-hero__cloud discover-world-hero__cloud--one" />
+          <span className="discover-world-hero__cloud discover-world-hero__cloud--two" />
+          <span className="discover-world-hero__city" />
+          <span className="discover-world-hero__stage-light discover-world-hero__stage-light--one" />
+          <span className="discover-world-hero__stage-light discover-world-hero__stage-light--two" />
         </div>
-        <h1 data-testid="discover-hero-heading" style={{ fontSize: 'var(--text-2xl)', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '10px' }}>
-          {tenantConfig.contentPriorities.welcomeHeading}
-        </h1>
-        <p data-testid="discover-hero-desc" style={{ color: 'var(--muted)', fontSize: 'var(--text-base)', maxWidth: '680px', lineHeight: 1.6 }}>
-          {tenantConfig.contentPriorities.welcomeDescription}
-        </p>
+
+        <div className="discover-world-hero__copy">
+          <span className="discover-world-hero__eyebrow">
+            <Sparkles size={14} aria-hidden="true" />
+            {tenantConfig.labels.brandBadge} · Những world đang thức
+          </span>
+          <h1 data-testid="discover-hero-heading">{tenantConfig.contentPriorities.welcomeHeading}</h1>
+          <p data-testid="discover-hero-desc">
+            Tới gần nghệ sĩ qua sân khấu, âm nhạc và những kỷ niệm bạn có thể mang về căn phòng riêng.
+          </p>
+          <div className="discover-world-hero__actions">
+            {featuredWorld && (
+              <Link to={`/worlds/${featuredWorld.id}`} className="btn btn-light" id="hero-enter-world-btn">
+                <Play size={17} fill="currentColor" aria-hidden="true" />
+                Vào {featuredWorld.name}
+              </Link>
+            )}
+            <Link to="/worlds" className="btn btn-ghost-light">
+              <CalendarHeart size={17} aria-hidden="true" />
+              Xem các world
+            </Link>
+          </div>
+        </div>
+
+        {featuredWorld && (
+          <Link className="discover-world-hero__portal" to={`/worlds/${featuredWorld.id}`} aria-label={`Mở ${featuredWorld.name}`}>
+            <span aria-hidden="true">{featuredWorld.name.charAt(0)}</span>
+            <small>Tối nay tại</small>
+            <strong>{featuredWorld.name}</strong>
+          </Link>
+        )}
       </header>
 
-      {/* Next Moment Spotlight (§3.2) */}
+      <div className="discover-section-heading">
+        <div>
+          <span>Đang chờ bạn</span>
+          <h2>Khoảnh khắc tiếp theo</h2>
+        </div>
+        <p>Đăng ký nhắc, vào sân khấu và giữ lại một mảnh của đêm nay.</p>
+      </div>
       {nextSession && <NextMomentCard session={nextSession} />}
 
-      {/* Signature Loop Explanation Card */}
-      <section className="card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <Repeat size={18} color="var(--primary)" />
-          <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700' }}>Vòng lặp tương tác chuẩn (§2.1)</h2>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-            gap: '12px',
-            textAlign: 'center',
-            fontSize: 'var(--text-xs)',
-          }}
-        >
-          <div style={{ padding: '12px 8px', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>
-            <Compass size={18} color="var(--primary)" style={{ margin: '0 auto 6px auto' }} />
-            <strong>1. Khám phá</strong>
-            <p style={{ color: 'var(--muted)', marginTop: '2px' }}>Tìm khoảnh khắc mới</p>
-          </div>
-          <div style={{ padding: '12px 8px', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>
-            <Heart size={18} color="var(--primary)" style={{ margin: '0 auto 6px auto' }} />
-            <strong>2. Vào World & Theo dõi</strong>
-            <p style={{ color: 'var(--muted)', marginTop: '2px' }}>Gắn kết tự nguyện</p>
-          </div>
-          <div style={{ padding: '12px 8px', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>
-            <Sparkles size={18} color="var(--primary)" style={{ margin: '0 auto 6px auto' }} />
-            <strong>3. Tham gia & Lưu Capsule</strong>
-            <p style={{ color: 'var(--muted)', marginTop: '2px' }}>Nhận kỷ niệm số</p>
-          </div>
-          <div style={{ padding: '12px 8px', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>
-            <ShieldCheck size={18} color="var(--primary)" style={{ margin: '0 auto 6px auto' }} />
-            <strong>4. My World & Sở hữu</strong>
-            <p style={{ color: 'var(--muted)', marginTop: '2px' }}>Quyền lợi & Khôi phục</p>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Worlds Section */}
-      <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <section className="discover-worlds-section">
+        <div className="discover-section-heading discover-section-heading--with-action">
           <div>
-            <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '700' }}>Các không gian giải trí nổi bật</h2>
-            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
-              Mỗi thế giới sở hữu sự kiện, khoảnh khắc và cửa hàng VieSHOP riêng biệt.
-            </p>
+            <span>Chọn điểm đến</span>
+            <h2>Các không gian giải trí nổi bật</h2>
           </div>
           <Link to="/worlds" className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)' }} id="see-all-worlds-btn">
             <span>Xem tất cả ({worldsList.length})</span>
@@ -94,7 +87,7 @@ export const DiscoverView: React.FC = () => {
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+        <div className="discover-world-grid">
           {worldsList.map((world) => (
             <WorldCard key={world.id} world={world} viewMode="scenery" />
           ))}

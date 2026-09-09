@@ -98,7 +98,7 @@ export const OrderDetailView: React.FC = () => {
             Đơn hàng #{order.id}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-            Hóa đơn thử nghiệm · Không có giao dịch thương mại thực tế (§2.3, §7.2).
+            Hóa đơn thử nghiệm · Không có giao dịch thương mại thực tế.
           </p>
         </header>
 
@@ -218,7 +218,7 @@ export const OrderDetailView: React.FC = () => {
           {/* Interactive Simulation Action */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-              Thao tác thử nghiệm điều khiển trạng thái (§5.3)
+              Công cụ review trạng thái đơn hàng
             </span>
 
             {order.status === 'pending' && (
@@ -334,7 +334,7 @@ export const OrderDetailView: React.FC = () => {
                   Cần hỗ trợ hoặc thắc mắc về đơn hàng này?
                 </strong>
                 <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                  Gửi yêu cầu hỗ trợ mô phỏng để đội ngũ kiểm tra trạng thái đơn hàng (§2.3, P09).
+                  Gửi yêu cầu hỗ trợ mô phỏng để đội ngũ kiểm tra trạng thái đơn hàng.
                 </p>
               </div>
               <button

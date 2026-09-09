@@ -248,7 +248,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
 
       // No fake business SLAs are shown
       expect(screen.queryByText(/phản hồi trong (24h|48h)|giải quyết trong 24h/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/Không đưa ra cam kết SLA kinh doanh ảo/i)).toBeInTheDocument();
+      expect(screen.getByText(/Không đưa ra cam kết thời gian phản hồi giả định/i)).toBeInTheDocument();
 
       // 4. Operator Simulates Resolve
       const resolveBtn = screen.getByTestId('operator-resolve-btn');

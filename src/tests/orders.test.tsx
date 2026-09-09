@@ -476,7 +476,7 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       expect(inputs).toHaveLength(0);
 
       // Verify disclosures
-      expect(screen.getByText(/Không thu phí tài chính thật, không nhập thẻ ngân hàng hay địa chỉ giao dịch/i)).toBeInTheDocument();
+      expect(screen.getByText(/Không thu tiền thật, không yêu cầu thẻ ngân hàng hay địa chỉ giao dịch/i)).toBeInTheDocument();
     });
   });
 });
