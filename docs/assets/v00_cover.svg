@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#151426"/>
+  <circle cx="200" cy="150" r="280" fill="#6551C8" opacity="0.25"/>
+  <circle cx="1050" cy="500" r="320" fill="#A9E5D4" opacity="0.18"/>
+
+  <!-- Top Demo Banner -->
+  <rect x="0" y="0" width="1200" height="40" fill="#FFF4E5"/>
+  <text x="30" y="25" fill="#7A4100" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Bản thử nghiệm · Dữ liệu và tương tác mô phỏng (VieWorld v0.1.0 Prototype)</text>
+  <rect x="1060" y="8" width="110" height="24" rx="12" fill="#6551C8"/>
+  <text x="1115" y="24" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">DEMO BUILD</text>
+
+  <!-- Title & Branding -->
+  <text x="80" y="140" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="16" font-weight="800" letter-spacing="2">NGUYÊN MẪU QUAN HỆ NGƯỜI HÂM MỘ DI ĐỘNG</text>
+  <text x="80" y="210" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="56" font-weight="900" letter-spacing="-1">VieWorld</text>
+  <text x="325" y="210" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="56" font-weight="900">.</text>
+  <rect x="360" y="165" width="90" height="32" rx="8" fill="#6551C8"/>
+  <text x="405" y="186" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">v0.1.0</text>
+
+  <text x="80" y="260" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="20" font-weight="400" max-width="600">
+    Không gian kết nối chân thực, minh bạch giữa người hâm mộ và các thế giới giải trí hư cấu.
+  </text>
+  <text x="80" y="290" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="15">
+    Tác giả: Phạm Thanh Phú · Trạng thái: Hoàn tất 18 gói nền tảng P00–P17 (185/185 kiểm thử thành công)
+  </text>
+
+  <!-- The Signature Loop Visual Card -->
+  <rect x="80" y="340" width="1040" height="150" rx="16" fill="#201E3C" stroke="#6551C8" stroke-width="1.5"/>
+  <text x="110" y="375" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="14" font-weight="700">VÒNG LẶP ĐẶC TRƯNG (THE SIGNATURE LOOP — §1.1)</text>
+
+  <!-- Steps in loop -->
+  <g transform="translate(110, 400)">
+    <!-- Step 1 -->
+    <rect x="0" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#D8D9E1" stroke-width="1"/>
+    <text x="57" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">1. KHÁM PHÁ</text>
+    <text x="57" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Discover</text>
+
+    <!-- Arrow -->
+    <path d="M125 30 L140 30" stroke="#6551C8" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Step 2 -->
+    <rect x="150" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#D8D9E1" stroke-width="1"/>
+    <text x="207" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">2. THẾ GIỚI</text>
+    <text x="207" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">World Detail</text>
+
+    <!-- Arrow -->
+    <path d="M275 30 L290 30" stroke="#6551C8" stroke-width="2"/>
+
+    <!-- Step 3 -->
+    <rect x="300" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#D8D9E1" stroke-width="1"/>
+    <text x="357" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">3. THEO DÕI</text>
+    <text x="357" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Follow / RSVP</text>
+
+    <!-- Arrow -->
+    <path d="M425 30 L440 30" stroke="#6551C8" stroke-width="2"/>
+
+    <!-- Step 4 -->
+    <rect x="450" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#6551C8" stroke-width="2"/>
+    <text x="507" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">4. THAM GIA</text>
+    <text x="507" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Live Session</text>
+
+    <!-- Arrow -->
+    <path d="M575 30 L590 30" stroke="#6551C8" stroke-width="2"/>
+
+    <!-- Step 5 -->
+    <rect x="600" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#D8D9E1" stroke-width="1"/>
+    <text x="657" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">5. KỶ NIỆM</text>
+    <text x="657" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Moment Capsule</text>
+
+    <!-- Arrow -->
+    <path d="M725 30 L740 30" stroke="#6551C8" stroke-width="2"/>
+
+    <!-- Step 6 -->
+    <rect x="750" y="0" width="115" height="60" rx="8" fill="#151426" stroke="#D8D9E1" stroke-width="1"/>
+    <text x="807" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">6. CỦA TÔI</text>
+    <text x="807" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">My World (/me)</text>
+
+    <!-- Arrow -->
+    <path d="M875 30 L890 30" stroke="#6551C8" stroke-width="2"/>
+
+    <!-- Step 7 -->
+    <rect x="900" y="0" width="105" height="60" rx="8" fill="#151426" stroke="#A9E5D4" stroke-width="1"/>
+    <text x="952" y="25" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700" text-anchor="middle">7. TÁI NGỘ</text>
+    <text x="952" y="44" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Return</text>
+  </g>
+
+  <!-- Bottom Core Metrics Bar -->
+  <rect x="80" y="525" width="230" height="90" rx="12" fill="#201E3C" stroke="#374151" stroke-width="1"/>
+  <text x="100" y="555" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">KIỂM THỬ CHẤP NHẬN</text>
+  <text x="100" y="590" fill="#34D399" font-family="system-ui, sans-serif" font-size="28" font-weight="800">185 / 185 PASS</text>
+
+  <rect x="340" y="525" width="230" height="90" rx="12" fill="#201E3C" stroke="#374151" stroke-width="1"/>
+  <text x="360" y="555" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">BỘ QUY TẮC BẤT BIẾN</text>
+  <text x="360" y="590" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="28" font-weight="800">15 QUYẾT ĐỊNH</text>
+
+  <rect x="600" y="525" width="230" height="90" rx="12" fill="#201E3C" stroke="#374151" stroke-width="1"/>
+  <text x="620" y="555" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">KHÔNG GIAN (TENANTS)</text>
+  <text x="620" y="590" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="26" font-weight="800">VieWorld·MFan·FanMe</text>
+
+  <rect x="860" y="525" width="260" height="90" rx="12" fill="#201E3C" stroke="#374151" stroke-width="1"/>
+  <text x="880" y="555" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">TRUY XUẤT MẠNG BÊN NGOÀI</text>
+  <text x="880" y="590" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="28" font-weight="800">0 YÊU CẦU (OFFLINE)</text>
+</svg>

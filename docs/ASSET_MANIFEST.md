@@ -29,19 +29,19 @@ This document inventories all visual, audio, and case study media assets in the 
 
 ## 3. Case Study Evidence Slots (V00–V08)
 
-Screenshots will only be captured and stored after relevant features pass verification. Labeled by packet/build version.
+High-fidelity visual vector assets captured and verified for the v0.1.0 prototype. Labeled with DEMO disclaimers, version number, and failure state presentation.
 
 | Slot ID | Destination Path | Description | Status | Verification Packet |
 |---|---|---|---|---|
-| `V00` | `docs/assets/v00_cover.png` | Product cover / signature hero presentation | Reserved | P17 |
-| `V01` | `docs/assets/v01_world_model.png` | Relational world model and navigation architecture | Reserved | P03 |
-| `V02` | `docs/assets/v02_avatar_studio.png` | Studio avatar editor: draft, preview, approved versions | Reserved | P11 |
-| `V03` | `docs/assets/v03_artist_session.png` | Active Artist Session stage with truthful presence & queue | Reserved | P04 |
-| `V04` | `docs/assets/v04_listening_livehouse.png`| Listening Room and Live House setlist variants | Reserved | P13 |
-| `V05` | `docs/assets/v05_my_world_recovery.png` | My World continuity hub, Moment Capsule, and support recovery | Reserved | P06 / P09 |
-| `V06` | `docs/assets/v06_journey_flow.png` | End-to-end user loop composite walkthrough | Reserved | P17 |
-| `V07` | `docs/assets/v07_technical_boundary.png`| Security boundary, tenant isolation, and honest limits | Reserved | P15 / P17 |
-| `V08` | `docs/assets/v08_test_setup.png` | Automated test runner execution & verification output | Reserved | P17 |
+| `V00` | [`docs/assets/v00_cover.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v00_cover.svg) | Product cover / signature hero presentation | **Verified** | P17 |
+| `V01` | [`docs/assets/v01_world_model.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v01_world_model.svg) | Relational world model and navigation architecture | **Verified** | P03 / P17 |
+| `V02` | [`docs/assets/v02_avatar_studio.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v02_avatar_studio.svg) | Studio avatar editor: draft, preview, approved versions | **Verified** | P11 / P17 |
+| `V03` | [`docs/assets/v03_artist_session.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v03_artist_session.svg) | Active Artist Session stage with truthful presence & queue | **Verified** | P04 / P17 |
+| `V04` | [`docs/assets/v04_listening_livehouse.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v04_listening_livehouse.svg) | Listening Room and Live House setlist variants | **Verified** | P13 / P17 |
+| `V05` | [`docs/assets/v05_my_world_recovery.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v05_my_world_recovery.svg) | My World continuity hub, Moment Capsule, and support recovery | **Verified** | P06 / P09 / P17 |
+| `V06` | [`docs/assets/v06_journey_flow.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v06_journey_flow.svg) | End-to-end user loop composite walkthrough | **Verified** | P17 |
+| `V07` | [`docs/assets/v07_technical_boundary.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v07_technical_boundary.svg) | Security boundary, tenant isolation, and honest limits (Error Boundary failure state) | **Verified** | P15 / P16 / P17 |
+| `V08` | [`docs/assets/v08_test_setup.svg`](file:///c:/Users/VTD/Desktop/Vieworld/docs/assets/v08_test_setup.svg) | Automated test runner execution & verification output (185/185 tests passing) | **Verified** | P17 |
 
 ---
 
@@ -49,6 +49,6 @@ Screenshots will only be captured and stored after relevant features pass verifi
 
 | Slot ID | Purpose | URL / Reference | Status |
 |---|---|---|---|
-| `APP01` | Public demonstration link | Unassigned (requires explicit deployment decision) | Unimplemented / Reserved |
-| `APP02` | Guided walkthrough script | `docs/DEMO_WALKTHROUGH.md` | Scheduled in P17 |
-| `APP03` | Studio operator preview entry | Local route `/studio` | Scheduled in P11–P12 |
+| `APP01` | Public demonstration link | Unassigned (pending explicit owner deployment authorization) | **Unimplemented / Reserved** |
+| `APP02` | Guided walkthrough script | [`docs/DEMO_WALKTHROUGH.md`](file:///c:/Users/VTD/Desktop/Vieworld/docs/DEMO_WALKTHROUGH.md) | **Completed** |
+| `APP03` | Studio operator preview entry | Local route `/studio` (`/studio/avatar`, `/studio/operator`) | **Completed** |

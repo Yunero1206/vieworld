@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#151426"/>
+  
+  <!-- Demo Header Banner -->
+  <rect x="0" y="0" width="1200" height="36" fill="#FFF4E5"/>
+  <text x="30" y="23" fill="#7A4100" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Bản thử nghiệm · Dữ liệu và tương tác mô phỏng (VieWorld v0.1.0 — Slot V03: Session Venue)</text>
+  <rect x="1070" y="6" width="100" height="24" rx="12" fill="#6551C8"/>
+  <text x="1120" y="22" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">DEMO</text>
+
+  <!-- Title -->
+  <text x="60" y="80" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">SÂN KHẤU TRỰC TIẾP &amp; HIỆN DIỆN TRUNG THỰC (§2.3, §5.2, P04, P05)</text>
+  <text x="60" y="115" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="28" font-weight="800">Artist Session — Truthful Presence, Moderation &amp; Q&amp;A Queue</text>
+
+  <!-- Left: Avatar Venue Stage -->
+  <rect x="60" y="150" width="660" height="475" rx="16" fill="#201E3C" stroke="#6551C8" stroke-width="1.5"/>
+
+  <!-- Presence Indicator Bar (Constitutional §2.3) -->
+  <rect x="85" y="175" width="610" height="48" rx="8" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <circle cx="110" cy="199" r="6" fill="#34D399"/>
+  <text x="125" y="204" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13" font-weight="700">HIỆN DIỆN: NGHỆ SĨ ĐANG CÓ MẶT (PRESENT)</text>
+  <rect x="495" y="187" width="65" height="24" rx="12" fill="#6551C8"/>
+  <text x="527" y="203" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="10" font-weight="800" text-anchor="middle">DEMO</text>
+  <text x="575" y="204" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">AI Use: none</text>
+
+  <!-- Stage Box -->
+  <rect x="85" y="235" width="610" height="260" rx="12" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <circle cx="390" cy="345" r="95" fill="#6551C8" opacity="0.18"/>
+  <ellipse cx="390" cy="460" rx="170" ry="24" fill="rgba(255,255,255,0.04)" stroke="#A9E5D4" stroke-width="1"/>
+
+  <!-- Avatar Silhouette in Stage -->
+  <g transform="translate(340, 260)">
+    <circle cx="50" cy="50" r="45" fill="#A9E5D4" opacity="0.35"/>
+    <path d="M20 145 C20 115 35 105 50 105 C65 105 80 115 80 145 Z" fill="#201E3C" stroke="#6551C8" stroke-width="2"/>
+    <rect x="44" y="85" width="12" height="24" rx="3" fill="#FCD34D"/>
+    <circle cx="50" cy="70" r="28" fill="#FDE68A" stroke="#20212B" stroke-width="1.5"/>
+    <path d="M25 65 C25 45 35 38 50 38 C65 38 75 45 75 65 C70 58 62 58 50 62 C38 58 30 58 25 65 Z" fill="#312E81"/>
+    <circle cx="42" cy="70" r="2.5" fill="#1E1B4B"/>
+    <circle cx="58" cy="70" r="2.5" fill="#1E1B4B"/>
+    <!-- Mic icon vector -->
+    <rect x="75" y="115" width="8" height="18" rx="4" fill="#A9E5D4"/>
+    <line x1="79" y1="133" x2="79" y2="145" stroke="#A9E5D4" stroke-width="2"/>
+  </g>
+
+  <!-- Invariant Notice Box -->
+  <rect x="85" y="510" width="610" height="95" rx="8" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="105" y="536" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="12" font-weight="700">NGUYÊN TẮC HIỆN DIỆN KHÔNG THỂ BỊ THAY THẾ (§2.3)</text>
+  <text x="105" y="562" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">
+    Nếu nghệ sĩ mất kết nối, hệ thống lập tức hiển thị "reconnecting" hoặc "disconnected".
+  </text>
+  <text x="105" y="585" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">
+    Avatar dừng hoạt ảnh idle. Hệ thống tuyệt đối KHÔNG đưa AI vào giả giọng hoặc đóng thế nghệ sĩ.
+  </text>
+
+  <!-- Right: Moderated Interaction Queue (Q&A and Polls) -->
+  <rect x="745" y="150" width="395" height="475" rx="16" fill="#201E3C" stroke="#374151" stroke-width="1.5"/>
+  <text x="770" y="185" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700">HÀNG ĐỢI HỎI ĐÁP &amp; KHẢO SÁT (§5.3)</text>
+
+  <!-- Active Selected Question Box -->
+  <rect x="770" y="205" width="345" height="120" rx="10" fill="#151426" stroke="#6551C8" stroke-width="1.5"/>
+  <text x="786" y="230" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="800">CÂU HỎI ĐƯỢC CHỌN TRẢ LỜI (SELECTED)</text>
+  <text x="786" y="258" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13" font-weight="600">
+    "Anh Đạt có dự định phát hành bản acoustic cho ca khúc Màn Đêm không?"
+  </text>
+  <text x="786" y="295" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">
+    Gửi bởi: fan-linh · Invariant: "Selected" chưa phải là "Answered"
+  </text>
+  <text x="786" y="312" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11">
+    Chỉ khi nghệ sĩ xác nhận hoàn tất thì câu hỏi mới chuyển trạng thái.
+  </text>
+
+  <!-- Live Poll Card -->
+  <rect x="770" y="340" width="345" height="135" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="786" y="365" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="11" font-weight="700">BÌNH CHỌN TRỰC TIẾP (LIVE POLL)</text>
+  <text x="786" y="390" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">Ca khúc kết màn hôm nay?</text>
+  
+  <!-- Option 1 bar -->
+  <rect x="786" y="405" width="310" height="24" rx="4" fill="#374151"/>
+  <rect x="786" y="405" width="190" height="24" rx="4" fill="#6551C8"/>
+  <text x="795" y="421" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Khúc Hát Đêm (61%)</text>
+
+  <!-- Option 2 bar -->
+  <rect x="786" y="435" width="310" height="24" rx="4" fill="#374151"/>
+  <rect x="786" y="435" width="120" height="24" rx="4" fill="#0F766E"/>
+  <text x="795" y="451" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Thành Phố Sương (39%)</text>
+
+  <!-- Non-negotiable notice -->
+  <rect x="770" y="490" width="345" height="115" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="786" y="515" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700">KHÔNG CÓ TÍNH NĂNG TRẢ TIỀN MUA LƯỢT (§4)</text>
+  <text x="786" y="540" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="11">• Không có SuperChat, donate tiền để ưu tiên câu hỏi.</text>
+  <text x="786" y="562" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="11">• Không có tin nhắn riêng tư tạo cảm giác thân mật giả tạo.</text>
+  <text x="786" y="584" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="10">Mọi tương tác đều được kiểm duyệt vì văn hóa cộng đồng lành mạnh.</text>
+</svg>

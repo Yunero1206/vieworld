@@ -5,14 +5,18 @@ import { NextMomentCard } from '../components/NextMomentCard';
 import { WorldCard } from '../components/WorldCard';
 import { Sparkles, ArrowRight, ShieldCheck, Heart, Repeat, Compass } from 'lucide-react';
 
+import { getTenantConfig } from '../domain/tenantConfig';
+
 export const DiscoverView: React.FC = () => {
   const { state } = useApp();
+  const tenantConfig = getTenantConfig(state.activeTenantId);
 
-  // Find priority next moment session (e.g. session-dropin-01)
+  // Find priority next moment session (e.g. session-dropin-01 or tenant-scoped fallback)
   const nextSession =
     Object.values(state.sessions).find((s) => s.status === 'running') ||
     Object.values(state.sessions).find((s) => s.status === 'scheduled') ||
-    state.sessions['session-dropin-01'];
+    state.sessions['session-dropin-01'] ||
+    Object.values(state.sessions)[0];
 
   const worldsList = Object.values(state.worlds);
 
@@ -21,16 +25,16 @@ export const DiscoverView: React.FC = () => {
       {/* Editorial Header Hero */}
       <header>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <span className="demo-badge">DEMO PROTOTYPE</span>
-          <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)' }}>
-            VÒNG LẶP TRẢI NGHIỆM ĐẦU TIÊN
+          <span className="demo-badge">{tenantConfig.labels.brandBadge}</span>
+          <span className="tag" style={{ backgroundColor: tenantConfig.accentLight, color: 'var(--primary)', fontWeight: '700' }}>
+            {tenantConfig.displayName.toUpperCase()}
           </span>
         </div>
-        <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '10px' }}>
-          Khám phá thế giới người hâm mộ
+        <h1 data-testid="discover-hero-heading" style={{ fontSize: 'var(--text-2xl)', fontWeight: '800', letterSpacing: '-0.5px', marginBottom: '10px' }}>
+          {tenantConfig.contentPriorities.welcomeHeading}
         </h1>
-        <p style={{ color: 'var(--muted)', fontSize: 'var(--text-base)', maxWidth: '680px', lineHeight: 1.6 }}>
-          VieWorld là nguyên mẫu kết nối người hâm mộ và thế giới giải trí qua những khoảnh khắc trực tuyến có ý nghĩa, lưu giữ kỷ niệm và quyền lợi minh bạch.
+        <p data-testid="discover-hero-desc" style={{ color: 'var(--muted)', fontSize: 'var(--text-base)', maxWidth: '680px', lineHeight: 1.6 }}>
+          {tenantConfig.contentPriorities.welcomeDescription}
         </p>
       </header>
 

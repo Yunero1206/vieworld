@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#151426"/>
+  
+  <!-- Demo Header Banner -->
+  <rect x="0" y="0" width="1200" height="36" fill="#FFF4E5"/>
+  <text x="30" y="23" fill="#7A4100" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Bản thử nghiệm · Dữ liệu và tương tác mô phỏng (VieWorld v0.1.0 — Slot V07: Technical Boundaries)</text>
+  <rect x="1070" y="6" width="100" height="24" rx="12" fill="#6551C8"/>
+  <text x="1120" y="22" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">DEMO</text>
+
+  <!-- Title -->
+  <text x="60" y="75" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">CÁC RANH GIỚI KỸ THUẬT, BẢO MẬT &amp; CÔ LẬP NỀN TẢNG (§4, P15, P16)</text>
+  <text x="60" y="105" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="26" font-weight="800">Security Guardrails, Tenant Isolation &amp; ErrorBoundary Fallbacks</text>
+
+  <!-- Left Card: Tenant Isolation Proof (P15) -->
+  <rect x="60" y="135" width="520" height="495" rx="16" fill="#201E3C" stroke="#6551C8" stroke-width="1.5"/>
+  <text x="85" y="168" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700">CÔ LẬP DỮ LIỆU ĐA NỀN TẢNG (MULTI-TENANT ISOLATION)</text>
+
+  <!-- 3 Tenant Columns -->
+  <g transform="translate(85, 190)">
+    <!-- Tenant 1: VieWorld -->
+    <rect x="0" y="0" width="145" height="150" rx="8" fill="#151426" stroke="#6551C8" stroke-width="1.5"/>
+    <rect x="12" y="12" width="70" height="20" rx="10" fill="#6551C8"/>
+    <text x="47" y="26" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="10" font-weight="800" text-anchor="middle">VIEWORLD</text>
+    <text x="12" y="52" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Nguyên mẫu gốc</text>
+    <text x="12" y="75" fill="#34D399" font-family="system-ui, sans-serif" font-size="11">✓ Đơn hàng #pin_01</text>
+    <text x="12" y="95" fill="#34D399" font-family="system-ui, sans-serif" font-size="11">✓ Replay đã claimed</text>
+    <text x="12" y="115" fill="#34D399" font-family="system-ui, sans-serif" font-size="11">✓ Q&amp;A câu hỏi gửi</text>
+    <text x="12" y="135" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="10">Role: operator/fan</text>
+
+    <!-- Tenant 2: MFan -->
+    <rect x="160" y="0" width="145" height="150" rx="8" fill="#151426" stroke="#B45309" stroke-width="1.5"/>
+    <rect x="172" y="12" width="60" height="20" rx="10" fill="#B45309"/>
+    <text x="202" y="26" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="10" font-weight="800" text-anchor="middle">MFAN</text>
+    <text x="172" y="52" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Đối tác demo</text>
+    <text x="172" y="75" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">0 đơn từ VieWorld</text>
+    <text x="172" y="95" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="11">Replay: eligible</text>
+    <text x="172" y="115" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">0 câu hỏi VieWorld</text>
+    <text x="172" y="135" fill="#34D399" font-family="system-ui, sans-serif" font-size="10">Role: fan (Reset)</text>
+
+    <!-- Tenant 3: FanMe -->
+    <rect x="320" y="0" width="145" height="150" rx="8" fill="#151426" stroke="#0F766E" stroke-width="1.5"/>
+    <rect x="332" y="12" width="65" height="20" rx="10" fill="#0F766E"/>
+    <text x="364" y="26" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="10" font-weight="800" text-anchor="middle">FANME</text>
+    <text x="332" y="52" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Độc lập demo</text>
+    <text x="332" y="75" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">0 đơn từ VieWorld</text>
+    <text x="332" y="95" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="11">Replay: eligible</text>
+    <text x="332" y="115" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">0 câu hỏi VieWorld</text>
+    <text x="332" y="135" fill="#34D399" font-family="system-ui, sans-serif" font-size="10">Role: fan (Reset)</text>
+  </g>
+
+  <!-- Isolation Proof Statement -->
+  <rect x="85" y="360" width="465" height="110" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="105" y="388" fill="#34D399" font-family="system-ui, sans-serif" font-size="12" font-weight="700">CHỨNG MINH KHÔNG RÒ RỈ DỮ LIỆU (T15 VERIFIED)</text>
+  <text x="105" y="415" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">
+    Tạo đơn hàng, nhận quyền lợi, gửi câu hỏi ở VieWorld → Chuyển sang MFan &amp; FanMe:
+  </text>
+  <text x="105" y="438" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="12">
+    Toàn bộ dữ liệu của VieWorld không hề xuất hiện. Quay về VieWorld: Mọi thứ nguyên vẹn!
+  </text>
+  <text x="105" y="458" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="11">
+    Vai trò Artist/Operator được cô lập nghiêm ngặt, tự động quay về "fan" khi đổi không gian.
+  </text>
+
+  <!-- Non-Affiliation Disclaimer Box -->
+  <rect x="85" y="485" width="465" height="120" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="105" y="513" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="12" font-weight="700">TUYÊN BỐ KHÔNG LIÊN KẾT TÀI KHOẢN THẬT (§1, §2.3)</text>
+  <text x="105" y="538" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="11">• Không sử dụng API cào dữ liệu (scraping) từ các trang đối tác bên thứ ba.</text>
+  <text x="105" y="558" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="11">• Không sử dụng nhãn hiệu độc quyền thật (chỉ dùng nhãn demo MFan, FanMe).</text>
+  <text x="105" y="578" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="10">Minh bạch tuyệt đối: Bản thử nghiệm không kết nối với bất kỳ tài khoản thực nào.</text>
+
+  <!-- Right Card: Defensive Error Boundary & Failure State (P16) -->
+  <rect x="620" y="135" width="520" height="495" rx="16" fill="#201E3C" stroke="#EF4444" stroke-width="1.5"/>
+  <text x="645" y="168" fill="#EF4444" font-family="system-ui, sans-serif" font-size="13" font-weight="700">TRẠNG THÁI XỬ LÝ LỖI PHÒNG THỦ (ERROR BOUNDARY FAILURE STATE)</text>
+
+  <!-- Error Boundary UI Card Mockup -->
+  <rect x="645" y="190" width="470" height="260" rx="12" fill="#151426" stroke="#EF4444" stroke-width="1"/>
+  <circle cx="880" cy="245" r="24" fill="#FDF2F3"/>
+  <path d="M880 232 L880 248 M880 254 L880 256" stroke="#A52838" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="880" y="290" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="800" text-anchor="middle">Đã xảy ra lỗi giao diện không mong muốn</text>
+  <text x="880" y="318" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle" max-width="400">
+    Hệ thống đã tự động ngăn cách lỗi để bảo vệ toàn vẹn dữ liệu của bạn.
+  </text>
+
+  <!-- Action buttons inside Error Boundary -->
+  <rect x="710" y="340" width="100" height="32" rx="6" fill="#6551C8"/>
+  <text x="760" y="360" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">Thử lại</text>
+
+  <rect x="830" y="340" width="110" height="32" rx="6" fill="#201E3C" stroke="#374151"/>
+  <text x="885" y="360" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Về trang chủ</text>
+
+  <rect x="960" y="340" width="110" height="32" rx="6" fill="#201E3C" stroke="#374151"/>
+  <text x="1015" y="360" fill="#EF4444" font-family="system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Tải lại trang</text>
+
+  <text x="880" y="415" fill="#34D399" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle">
+    ✓ Không để màn hình trắng (Blank Screen) · Không rò rỉ mã lỗi nội bộ hay mật khẩu
+  </text>
+
+  <!-- Security Checklist Box -->
+  <rect x="645" y="465" width="470" height="140" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="665" y="493" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="12" font-weight="700">AN TOÀN BẢO MẬT &amp; CHỐNG TẤN CÔNG (SECURITY ASSURANCES)</text>
+  <text x="665" y="520" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">✓ Zero dangerouslySetInnerHTML: 100% văn bản được mã hóa an toàn chống XSS.</text>
+  <text x="665" y="545" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">✓ Zero credential capture: Tuyệt đối không lưu mật khẩu hay trường thẻ tín dụng.</text>
+  <text x="665" y="570" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">✓ Prompt Injection Defense: VieGuide đánh chặn tự động lệnh phá rào cản.</text>
+  <text x="665" y="593" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">Khả năng tự hồi phục khi trình duyệt từ chối quyền lưu trữ hoặc hết hạn ngạch bộ nhớ.</text>
+</svg>

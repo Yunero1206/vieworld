@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#151426"/>
+  
+  <!-- Demo Header Banner -->
+  <rect x="0" y="0" width="1200" height="36" fill="#FFF4E5"/>
+  <text x="30" y="23" fill="#7A4100" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Bản thử nghiệm · Dữ liệu và tương tác mô phỏng (VieWorld v0.1.0 — Slot V06: Signature Loop)</text>
+  <rect x="1070" y="6" width="100" height="24" rx="12" fill="#6551C8"/>
+  <text x="1120" y="22" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">DEMO</text>
+
+  <!-- Title -->
+  <text x="60" y="75" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">SƠ ĐỒ HÀNH TRÌNH KHÁM PHÁ VÀ SỞ HỮU TOÀN DIỆN (§1.1, P06)</text>
+  <text x="60" y="105" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="26" font-weight="800">End-to-End User Loop &amp; Core State Transition Composite</text>
+
+  <!-- Flow Grid Steps: 6 Major Stations -->
+  <!-- Station 1: Discover & IP World -->
+  <g transform="translate(60, 135)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#A9E5D4" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#0F766E"/>
+    <text x="30" y="33" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">1</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">Khám Phá &amp; Điểm Đến</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Vào / khám phá Neon Sessions</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Chuyển tiếp sang Vũ Thanh Đạt (Artist A)</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Thao tác: Nhấn "Theo dõi" (Follow)</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Follow ≠ Membership</text>
+  </g>
+
+  <!-- Station 2: RSVP & Live House Session -->
+  <g transform="translate(430, 135)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#6551C8" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#6551C8"/>
+    <text x="30" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">2</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">RSVP &amp; Phòng Trực Tiếp</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Đăng ký nhận nhắc nhở sự kiện</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Vào phòng /sessions/session-dropin-01</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Hiện diện: Nghệ sĩ hiện diện thật (DEMO)</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Lobby ≠ Live Attendance</text>
+  </g>
+
+  <!-- Station 3: Interaction, Q&A, Poll -->
+  <g transform="translate(800, 135)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#FBBF24" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#B45309"/>
+    <text x="30" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">3</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">Tương Tác &amp; Bình Chọn</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Gửi câu hỏi vào hàng đợi Q&amp;A</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Tham gia bỏ phiếu khảo sát trực tiếp</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Trò chuyện có điều phối viên</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Selected ≠ Answered</text>
+  </g>
+
+  <!-- Station 4: Moment Capsule Awarded -->
+  <g transform="translate(60, 315)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#34D399" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#065F46"/>
+    <text x="30" y="33" fill="#34D399" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">4</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">Kết Thúc &amp; Moment Capsule</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Phiên trực tiếp kết thúc chuẩn mực</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Nhận Viên Nang Kỷ Niệm (Capsule)</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Khán giả xem lại sau này không có live capsule</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Replay ≠ Live Capsule</text>
+  </g>
+
+  <!-- Station 5: VieSHOP & Decoupled Fulfilment -->
+  <g transform="translate(430, 315)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#3B82F6" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#1D4ED8"/>
+    <text x="30" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">5</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">VieSHOP &amp; Giao Hàng</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Đặt mua Huy hiệu Pin mô phỏng</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Không thu thập thẻ ngân hàng hay địa chỉ</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Thanh toán xong → Giao hàng mới mở sở hữu</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Paid ≠ Fulfilled</text>
+  </g>
+
+  <!-- Station 6: My World Persistence & Return -->
+  <g transform="translate(800, 315)">
+    <rect width="340" height="150" rx="12" fill="#201E3C" stroke="#EC4899" stroke-width="1.5"/>
+    <rect x="16" y="14" width="28" height="28" rx="14" fill="#BE185D"/>
+    <text x="30" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="800" text-anchor="middle">6</text>
+    <text x="56" y="33" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="16" font-weight="700">My World (/me) &amp; Tái Ngộ</text>
+    <text x="16" y="65" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Toàn bộ kỷ niệm, đơn hàng lưu tại /me</text>
+    <text x="16" y="85" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• F5 làm mới trình duyệt: Dữ liệu vẹn nguyên</text>
+    <text x="16" y="105" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">• Nhận thông báo cho phiên kế tiếp</text>
+    <text x="16" y="130" fill="#34D399" font-family="system-ui, sans-serif" font-size="11" font-weight="700">Invariant: Tồn lưu an toàn trong Namespace</text>
+  </g>
+
+  <!-- Bottom Proof Bar -->
+  <rect x="60" y="490" width="1080" height="145" rx="12" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="90" y="522" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700">KIỂM THỨC VÒNG LẶP TOÀN PHẦN (THE LOOP TEST SUITE — loop.test.tsx)</text>
+  <text x="90" y="550" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13">
+    Kiểm thử T06 đã tự động thực thi trọn vẹn toàn bộ 6 chặng liên hoàn: Follow → RSVP → Join Running Session → Hỏi đáp &amp; Bình chọn → Kết thúc phiên → Lưu Capsule → Kiểm tra My World sau F5.
+  </text>
+  <text x="90" y="578" fill="#34D399" font-family="system-ui, sans-serif" font-size="13" font-weight="700">
+    Kết quả: 5/5 bài kiểm thử vòng lặp thành công tuyệt đối · Không phát sinh trùng lặp khi người dùng bấm đúp.
+  </text>
+  <text x="90" y="605" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">
+    Mọi trạng thái chuyển đổi đều là hàm thuần túy (pure reducer) xác định, đảm bảo tính ổn định tối đa cho ứng dụng.
+  </text>
+</svg>

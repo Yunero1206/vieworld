@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sliders, RefreshCw, Layers, AlertCircle, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -23,6 +23,28 @@ export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose }) => 
     type: 'scenario' | 'reset';
     scenarioKey?: keyof typeof scenarioPresets;
   } | null>(null);
+
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previouslyFocusedElement.current = document.activeElement as HTMLElement;
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          onClose();
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else if (previouslyFocusedElement.current) {
+      previouslyFocusedElement.current.focus();
+    }
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

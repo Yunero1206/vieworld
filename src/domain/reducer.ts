@@ -2,7 +2,7 @@
  * VieWorld Pure Domain Action Reducer & Guard Invariants (§5.3 & docs/CONTRACTS.md)
  */
 
-import { AppAction, AppState, Order, Participation, Question, SupportCase } from './types';
+import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Question, SupportCase } from './types';
 import { createInitialState } from '../data/fixtures';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -69,9 +69,35 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ? state.rsvpdSessionIds.filter((id) => id !== action.sessionId)
         : [...state.rsvpdSessionIds, action.sessionId];
 
+      const updatedNotifs = { ...state.notifications };
+      const rsvpNotifId = `notif-rsvp-${action.sessionId}`;
+
+      if (!isRsvpd) {
+        if (state.notificationPreferences?.sessionReminders !== false) {
+          updatedNotifs[rsvpNotifId] = {
+            id: rsvpNotifId,
+            tenantId: state.activeTenantId,
+            version: 1,
+            fanId: state.fanProfile.id,
+            type: 'session_reminder',
+            category: 'session',
+            sourceAttribution: 'session_system',
+            title: `Nhắc nhở: Bạn đã giữ chỗ cho "${session.title}"`,
+            body: `Phiên tương tác ảo do Ban tổ chức quản lý sẽ diễn ra theo lịch trình. Sảnh chờ sẽ mở trước giờ diễn.`,
+            isRead: false,
+            targetRoute: `/sessions/${session.id}`,
+            createdAt: state.demoTime,
+            updatedAt: state.demoTime,
+          };
+        }
+      } else {
+        delete updatedNotifs[rsvpNotifId];
+      }
+
       return {
         ...state,
         rsvpdSessionIds: newRsvp,
+        notifications: updatedNotifs,
         lastError: undefined,
       };
     }
@@ -349,7 +375,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Invariant: Fan sees 'selected', NOT 'answered'.
      */
     case 'SELECT_QUESTION': {
-      const q = state.questions[action.questionId];
+      const questionId = (action as any).questionId || (action as any).payload?.questionId;
+      const q = state.questions[questionId];
       if (!q) {
         return {
           ...state,
@@ -357,16 +384,21 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         };
       }
 
+      const updatedQuestions = { ...state.questions };
+      Object.values(updatedQuestions).forEach((item) => {
+        if (item.sessionId === q.sessionId && item.status === 'selected' && item.id !== q.id) {
+          updatedQuestions[item.id] = { ...item, status: 'submitted' };
+        }
+      });
+      updatedQuestions[questionId] = {
+        ...q,
+        status: 'selected',
+        updatedAt: state.demoTime,
+      };
+
       return {
         ...state,
-        questions: {
-          ...state.questions,
-          [action.questionId]: {
-            ...q,
-            status: 'selected',
-            updatedAt: state.demoTime,
-          },
-        },
+        questions: updatedQuestions,
       };
     }
 
@@ -375,7 +407,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Invariant: Sets status to 'answered', strictly distinct from 'selected'.
      */
     case 'ANSWER_QUESTION': {
-      const q = state.questions[action.questionId];
+      const questionId = (action as any).questionId || (action as any).payload?.questionId;
+      const q = state.questions[questionId];
       if (!q) {
         return {
           ...state,
@@ -387,9 +420,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         questions: {
           ...state.questions,
-          [action.questionId]: {
+          [questionId]: {
             ...q,
             status: 'answered',
+            updatedAt: state.demoTime,
+          },
+        },
+      };
+    }
+
+    case 'CLOSE_QUESTION': {
+      const questionId = (action as any).questionId || (action as any).payload?.questionId;
+      const q = state.questions[questionId];
+      if (!q) {
+        return {
+          ...state,
+          lastError: { code: 'QUESTION_NOT_FOUND', message: 'Không tìm thấy câu hỏi.' },
+        };
+      }
+
+      return {
+        ...state,
+        questions: {
+          ...state.questions,
+          [questionId]: {
+            ...q,
+            status: 'closed',
             updatedAt: state.demoTime,
           },
         },
@@ -441,14 +497,36 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Sets artistPresence to 'present' with DEMO flag.
      */
     case 'START_SESSION': {
-      const session = state.sessions[action.sessionId];
-      const avatar = state.avatarAssets[action.avatarAssetId];
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      const avatarAssetId = (action as any).avatarAssetId || (action as any).payload?.avatarAssetId || session?.avatarAssetId;
+      const avatar = state.avatarAssets[avatarAssetId];
 
       if (!session) {
         return { ...state, lastError: { code: 'SESSION_NOT_FOUND', message: 'Phiên không tồn tại.' } };
       }
 
-      if (!avatar || avatar.status !== 'approved') {
+      if (!avatar) {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_NOT_FOUND',
+            message: 'Không tìm thấy tài sản avatar.',
+          },
+        };
+      }
+
+      if (avatar.status === 'retired') {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_RETIRED',
+            message: 'Avatar này đã ngưng sử dụng (retired), không thể bắt đầu phiên sự kiện mới.',
+          },
+        };
+      }
+
+      if (avatar.status !== 'approved') {
         return {
           ...state,
           lastError: {
@@ -464,6 +542,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           lastError: {
             code: 'AVATAR_CONTEXT_DISALLOWED',
             message: `Avatar không được cấp phép cho định dạng sự kiện '${session.format}'.`,
+          },
+        };
+      }
+
+      if (session.rightsApproved === false) {
+        return {
+          ...state,
+          lastError: {
+            code: 'RIGHTS_NOT_APPROVED',
+            message: 'Cần hoàn tất danh mục kiểm tra bản quyền và sự đồng thuận của nghệ sĩ trước khi bắt đầu phiên sự kiện.',
           },
         };
       }
@@ -484,13 +572,170 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'OPEN_LOBBY': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) {
+        return { ...state, lastError: { code: 'SESSION_NOT_FOUND', message: 'Phiên không tồn tại.' } };
+      }
+      if (session.status !== 'scheduled') {
+        return {
+          ...state,
+          lastError: { code: 'INVALID_SESSION_STATE', message: 'Chỉ phiên đang lên lịch mới có thể mở phòng chờ.' },
+        };
+      }
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            status: 'open',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'PAUSE_SESSION': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            status: 'paused',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'RESUME_SESSION': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            status: 'running',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'CANCEL_SESSION': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            status: 'cancelled',
+            artistPresence: 'absent',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'UPDATE_SEGMENT_MODE': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const segmentMode = (action as any).segmentMode || (action as any).payload?.segmentMode;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            segmentMode: segmentMode || (session.segmentMode === 'live' ? 'recorded' : 'live'),
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'TOGGLE_CHAT_PAUSED': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      const isPaused = (action as any).isPaused !== undefined
+        ? (action as any).isPaused
+        : (action as any).payload?.isPaused !== undefined
+        ? (action as any).payload?.isPaused
+        : !session.isChatPaused;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            isChatPaused: isPaused,
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'APPROVE_SESSION_RIGHTS': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      const checklist = (action as any).checklist || (action as any).payload?.checklist || {
+        musicClearance: true,
+        artistConsent: true,
+        safetyReview: true,
+      };
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            rightsApproved: true,
+            rightsChecklist: checklist,
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
     /**
      * Disconnect Artist Guard:
      * - Invariant: Artist presence becomes 'disconnected' or 'reconnecting'.
      * - Never substituted by AI pretending to be the artist!
      */
     case 'DISCONNECT_ARTIST': {
-      const session = state.sessions[action.sessionId];
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
       if (!session) return state;
 
       return {
@@ -507,7 +752,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     case 'RECONNECT_ARTIST': {
-      const session = state.sessions[action.sessionId];
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
       if (!session) return state;
 
       return {
@@ -538,6 +784,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
       // If fan attended live, ensure capsule exists
       let updatedCapsules = state.capsules;
+      let updatedNotifs = { ...state.notifications };
+
       if (hasLiveParticipation) {
         const capsuleKey = `capsule_${fanId}_${session.id}`;
         if (!updatedCapsules[capsuleKey]) {
@@ -556,6 +804,27 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             },
           };
         }
+
+        if (state.notificationPreferences?.capsuleReady !== false) {
+          const capsuleNotifId = `notif-capsule-${session.id}`;
+          if (!updatedNotifs[capsuleNotifId]) {
+            updatedNotifs[capsuleNotifId] = {
+              id: capsuleNotifId,
+              tenantId: state.activeTenantId,
+              version: 1,
+              fanId,
+              type: 'capsule_ready',
+              category: 'capsule',
+              sourceAttribution: 'platform',
+              title: 'Kỷ vật Moment Capsule đã sẵn sàng!',
+              body: `Moment Capsule ghi nhận sự tham gia của bạn tại "${session.title}" đã được lưu trữ trong My World.`,
+              isRead: false,
+              targetRoute: '/me',
+              createdAt: state.demoTime,
+              updatedAt: state.demoTime,
+            };
+          }
+        }
       }
 
       return {
@@ -571,6 +840,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           },
         },
         capsules: updatedCapsules,
+        notifications: updatedNotifs,
       };
     }
 
@@ -579,7 +849,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Transitions replayStatus from 'pending_review' to 'available'.
      */
     case 'PUBLISH_REPLAY': {
-      const session = state.sessions[action.sessionId];
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
       if (!session) return state;
 
       return {
@@ -589,6 +860,24 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [session.id]: {
             ...session,
             replayStatus: 'available',
+            updatedAt: state.demoTime,
+          },
+        },
+      };
+    }
+
+    case 'WITHDRAW_REPLAY': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const session = state.sessions[sessionId];
+      if (!session) return state;
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            replayStatus: 'withdrawn',
             updatedAt: state.demoTime,
           },
         },
@@ -645,12 +934,33 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         requestId: action.requestId,
       };
 
+      const updatedNotifs = { ...state.notifications };
+      if (state.notificationPreferences?.orderUpdates !== false) {
+        const orderNotifId = `notif-order-${orderId}-created`;
+        updatedNotifs[orderNotifId] = {
+          id: orderNotifId,
+          tenantId: state.activeTenantId,
+          version: 1,
+          fanId: state.fanProfile.id,
+          type: 'order_update',
+          category: 'order',
+          sourceAttribution: 'platform',
+          title: `Đơn hàng mới #${orderId}`,
+          body: `Đơn hàng mô phỏng "${product.title}" đã được khởi tạo thành công tại VieSHOP.`,
+          isRead: false,
+          targetRoute: `/orders/${orderId}`,
+          createdAt: state.demoTime,
+          updatedAt: state.demoTime,
+        };
+      }
+
       return {
         ...state,
         orders: {
           ...state.orders,
           [orderId]: order,
         },
+        notifications: updatedNotifs,
         lastError: undefined,
       };
     }
@@ -715,6 +1025,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         };
       }
 
+      const updatedNotifs = { ...state.notifications };
+      if (state.notificationPreferences?.orderUpdates !== false) {
+        const fulfillNotifId = `notif-order-${order.id}-fulfilled`;
+        updatedNotifs[fulfillNotifId] = {
+          id: fulfillNotifId,
+          tenantId: state.activeTenantId,
+          version: 1,
+          fanId: order.fanId,
+          type: 'order_update',
+          category: 'order',
+          sourceAttribution: 'platform',
+          title: `Đơn hàng #${order.id} đã hoàn tất bàn giao`,
+          body: `Vật phẩm mô phỏng đã được thêm vào Bộ sưu tập My World của bạn.`,
+          isRead: false,
+          targetRoute: `/orders/${order.id}`,
+          createdAt: state.demoTime,
+          updatedAt: state.demoTime,
+        };
+      }
+
       return {
         ...state,
         orders: {
@@ -725,6 +1055,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             updatedAt: state.demoTime,
           },
         },
+        notifications: updatedNotifs,
         lastError: undefined,
       };
     }
@@ -745,16 +1076,25 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
 
       if (benefit.status === 'claimed') {
-        return state; // Idempotent
+        return state; // Idempotent: already claimed, no-op
       }
 
       if (benefit.status !== 'eligible') {
+        let actionableResolution = benefit.nextAction;
+        if (benefit.status === 'pending') {
+          actionableResolution = 'Quyền lợi đang chờ đối soát từ ban tổ chức, vui lòng thử lại sau.';
+        } else if (benefit.status === 'expired') {
+          actionableResolution = 'Quyền lợi đã hết hạn sử dụng. Vui lòng gia hạn hội viên hoặc tham gia các chương trình mới.';
+        } else if (benefit.status === 'revoked') {
+          actionableResolution = 'Quyền lợi đã bị thu hồi do không đáp ứng điều kiện chương trình.';
+        }
+
         return {
           ...state,
           lastError: {
             code: 'BENEFIT_NOT_ELIGIBLE',
             message: `Quyền lợi đang ở trạng thái '${benefit.status}', chưa đủ điều kiện để kích hoạt.`,
-            actionableResolution: benefit.nextAction,
+            actionableResolution,
           },
         };
       }
@@ -766,6 +1106,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [benefit.id]: {
             ...benefit,
             status: 'claimed',
+            nextAction: 'Quyền lợi đã được kích hoạt thành công. Bạn có thể sử dụng ngay trong các phiên sự kiện hoặc kho tư liệu.',
             updatedAt: state.demoTime,
           },
         },
@@ -774,19 +1115,148 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     /**
+     * Upgrade / Renew Membership Guard:
+     * - Invariant: Upgrades/renews membership for the fan in the given world.
+     * - Invariant: Simulated only — does not request payment or financial details.
+     * - Invariant: Idempotent if already active.
+     * - Invariant: Active membership does NOT automatically make every benefit eligible (e.g. early access remains pending).
+     * - Invariant: Renewing an expired membership does not silently reset or mutate existing benefit state.
+     */
+    case 'UPGRADE_MEMBERSHIP': {
+      const world = state.worlds[action.worldId];
+      if (!world) {
+        return {
+          ...state,
+          lastError: {
+            code: 'WORLD_NOT_FOUND',
+            message: `Không tìm thấy thế giới với mã định danh ${action.worldId}.`,
+          },
+        };
+      }
+
+      const fanId = state.fanProfile.id;
+      const existingMembership = Object.values(state.memberships).find(
+        (m) => m.worldId === action.worldId && m.fanId === fanId
+      );
+
+      // If already active, idempotent no-op
+      if (existingMembership && existingMembership.status === 'active') {
+        return state;
+      }
+
+      // Calculate 1-year expiry in demo time
+      let expiresAt = '2027-09-09T13:00:00.000Z';
+      try {
+        const d = new Date(state.demoTime);
+        d.setUTCFullYear(d.getUTCFullYear() + 1);
+        expiresAt = d.toISOString();
+      } catch {
+        // fallback
+      }
+
+      const membershipId =
+        existingMembership?.id ||
+        (action.worldId === 'artist-a' ? 'member-a-01' : `member-${action.worldId}-${fanId}`);
+
+      const newMembership: Membership = {
+        id: membershipId,
+        tenantId: state.activeTenantId,
+        version: (existingMembership?.version || 0) + 1,
+        updatedAt: state.demoTime,
+        fanId,
+        worldId: action.worldId,
+        status: 'active',
+        expiresAt,
+      };
+
+      // Check if benefits exist for this world.
+      // If brand new fan with no benefits for this world, seed canonical benefits for artist-a:
+      let updatedBenefits = state.benefits;
+      const existingWorldBenefits = Object.values(state.benefits).filter((b) => b.worldId === action.worldId);
+
+      if (existingWorldBenefits.length === 0 && action.worldId === 'artist-a') {
+        updatedBenefits = {
+          ...state.benefits,
+          'benefit-replay-01': {
+            id: 'benefit-replay-01',
+            tenantId: state.activeTenantId,
+            version: 1,
+            updatedAt: state.demoTime,
+            fanId,
+            worldId: 'artist-a',
+            title: 'Quyền xem lại kho lưu trữ Replay',
+            status: 'eligible',
+            reasonCode: 'ACTIVE_MEMBERSHIP_VERIFIED',
+            sourceRef: membershipId,
+            nextAction: 'Nhấn để kích hoạt quyền xem lại các phiên Drop-in đã kết thúc.',
+          },
+          'benefit-early-access-01': {
+            id: 'benefit-early-access-01',
+            tenantId: state.activeTenantId,
+            version: 1,
+            updatedAt: state.demoTime,
+            fanId,
+            worldId: 'artist-a',
+            title: 'Xác thực quyền mua sớm vé Live House',
+            status: 'pending',
+            reasonCode: 'PENDING_ORGANIZER_DISPATCH',
+            sourceRef: membershipId,
+            nextAction: 'Hệ thống đang đối soát dữ liệu phân bổ đợt mở bán.',
+          },
+        };
+      }
+
+      return {
+        ...state,
+        memberships: {
+          ...state.memberships,
+          [membershipId]: newMembership,
+        },
+        benefits: updatedBenefits,
+        lastError: undefined,
+      };
+    }
+
+    /**
      * Support Case Guard:
-     * - Invariant: Reuses existing open/investigating case for same subject to prevent duplicates.
+     * - Invariant: Reuses existing active (open/acknowledged/investigating) case for same subject to prevent duplicates.
+     * - Invariant: Validates subject existence; returns SUBJECT_NOT_FOUND if subject does not exist.
      */
     case 'OPEN_SUPPORT_CASE': {
+      if (action.subjectType === 'benefit' && !state.benefits[action.subjectId]) {
+        return {
+          ...state,
+          lastError: {
+            code: 'SUBJECT_NOT_FOUND',
+            message: `Không tìm thấy quyền lợi với mã định danh ${action.subjectId}.`,
+            actionableResolution: 'Vui lòng kiểm tra lại danh sách quyền lợi trong My World.',
+          },
+        };
+      }
+
+      if (action.subjectType === 'order' && !state.orders[action.subjectId]) {
+        return {
+          ...state,
+          lastError: {
+            code: 'SUBJECT_NOT_FOUND',
+            message: `Không tìm thấy đơn hàng với mã định danh ${action.subjectId}.`,
+            actionableResolution: 'Vui lòng kiểm tra lại lịch sử đơn hàng trong My World.',
+          },
+        };
+      }
+
       const existing = Object.values(state.supportCases).find(
         (c) => c.subjectId === action.subjectId && c.status !== 'closed' && c.status !== 'resolved'
       );
 
       if (existing) {
-        return state; // Reuses open case
+        return {
+          ...state,
+          lastError: undefined,
+        }; // Reuses open active case idempotently
       }
 
-      const caseId = `case_${Date.now()}_${action.subjectId.substring(0, 6)}`;
+      const caseId = `case_${Date.now()}_${action.subjectId.substring(0, 8)}`;
       const newCase: SupportCase = {
         id: caseId,
         tenantId: state.activeTenantId,
@@ -809,13 +1279,87 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     }
 
+    case 'ACKNOWLEDGE_SUPPORT_CASE': {
+      const sc = state.supportCases[action.caseId];
+      if (!sc) {
+        return {
+          ...state,
+          lastError: { code: 'CASE_NOT_FOUND', message: 'Không tìm thấy hồ sơ hỗ trợ.' },
+        };
+      }
+
+      return {
+        ...state,
+        supportCases: {
+          ...state.supportCases,
+          [sc.id]: {
+            ...sc,
+            status: 'acknowledged',
+            nextAction: 'Đội ngũ hỗ trợ đã tiếp nhận và đang xếp hàng xử lý.',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'INVESTIGATE_SUPPORT_CASE': {
+      const sc = state.supportCases[action.caseId];
+      if (!sc) {
+        return {
+          ...state,
+          lastError: { code: 'CASE_NOT_FOUND', message: 'Không tìm thấy hồ sơ hỗ trợ.' },
+        };
+      }
+
+      return {
+        ...state,
+        supportCases: {
+          ...state.supportCases,
+          [sc.id]: {
+            ...sc,
+            status: 'investigating',
+            nextAction: 'Đang tiến hành đối soát dữ liệu với ban tổ chức và hệ thống phân bổ.',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
     /**
      * Resolve Support Case Guard:
      * - Invariant: Resolving support updates case outcome; does NOT automatically grant entitlement.
+     * - Constitutional rule (§2.3): Resolution and reconciliation are strictly decoupled.
      */
     case 'RESOLVE_SUPPORT_CASE': {
       const sc = state.supportCases[action.caseId];
-      if (!sc) return state;
+      if (!sc) {
+        return {
+          ...state,
+          lastError: { code: 'CASE_NOT_FOUND', message: 'Không tìm thấy hồ sơ hỗ trợ.' },
+        };
+      }
+
+      const updatedNotifs = { ...state.notifications };
+      if (state.notificationPreferences?.supportUpdates !== false) {
+        const supportNotifId = `notif-support-${sc.id}-resolved`;
+        updatedNotifs[supportNotifId] = {
+          id: supportNotifId,
+          tenantId: state.activeTenantId,
+          version: 1,
+          fanId: sc.fanId,
+          type: 'support_update',
+          category: 'support',
+          sourceAttribution: 'platform',
+          title: `Cập nhật hồ sơ đối soát #${sc.id}`,
+          body: `Bộ phận hỗ trợ đã có kết luận: "${action.resolution}"`,
+          isRead: false,
+          targetRoute: `/support/${sc.id}`,
+          createdAt: state.demoTime,
+          updatedAt: state.demoTime,
+        };
+      }
 
       return {
         ...state,
@@ -825,10 +1369,109 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             ...sc,
             status: 'resolved',
             resolution: action.resolution,
-            nextAction: 'Hồ sơ đã được xử lý xong.',
+            nextAction: 'Hồ sơ đã được xử lý xong với kết luận cụ thể.',
             updatedAt: state.demoTime,
           },
         },
+        notifications: updatedNotifs,
+        lastError: undefined,
+      };
+    }
+
+    case 'CLOSE_SUPPORT_CASE': {
+      const sc = state.supportCases[action.caseId];
+      if (!sc) return state;
+
+      return {
+        ...state,
+        supportCases: {
+          ...state.supportCases,
+          [sc.id]: {
+            ...sc,
+            status: 'closed',
+            nextAction: 'Hồ sơ đã được đóng lại.',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    /**
+     * Reconcile Benefit Action:
+     * - Explicit operator/system reconciliation action that mutates benefit state to eligible.
+     * - Separated from case resolution.
+     */
+    case 'RECONCILE_BENEFIT': {
+      const benefit = state.benefits[action.benefitId];
+      if (!benefit) {
+        return {
+          ...state,
+          lastError: { code: 'BENEFIT_NOT_FOUND', message: 'Không tìm thấy quyền lợi cần đối soát.' },
+        };
+      }
+
+      const updatedNotifs = { ...state.notifications };
+      if (state.notificationPreferences?.supportUpdates !== false) {
+        const reconcileNotifId = `notif-reconcile-${benefit.id}`;
+        updatedNotifs[reconcileNotifId] = {
+          id: reconcileNotifId,
+          tenantId: state.activeTenantId,
+          version: 1,
+          fanId: benefit.fanId,
+          type: 'support_update',
+          category: 'support',
+          sourceAttribution: 'organizer',
+          title: `Quyền lợi "${benefit.title}" đã được xác minh`,
+          body: `Dữ liệu quyền lợi đã được ban tổ chức đồng bộ sang trạng thái Hợp lệ (ELIGIBLE). Bạn có thể kích hoạt và mua hàng ưu tiên.`,
+          isRead: false,
+          targetRoute: `/benefits/${benefit.id}`,
+          createdAt: state.demoTime,
+          updatedAt: state.demoTime,
+        };
+      }
+
+      return {
+        ...state,
+        benefits: {
+          ...state.benefits,
+          [benefit.id]: {
+            ...benefit,
+            status: 'eligible',
+            reasonCode: 'RECONCILED_ORGANIZER_APPROVED',
+            nextAction: 'Dữ liệu phân bổ đã được xác minh thành công. Quyền lợi đã sẵn sàng để kích hoạt.',
+            updatedAt: state.demoTime,
+          },
+        },
+        notifications: updatedNotifs,
+        lastError: undefined,
+      };
+    }
+
+    /**
+     * Reconcile Order Action:
+     * - Explicit operator/system reconciliation action for order discrepancies.
+     */
+    case 'RECONCILE_ORDER': {
+      const order = state.orders[action.orderId];
+      if (!order) {
+        return {
+          ...state,
+          lastError: { code: 'ORDER_NOT_FOUND', message: 'Không tìm thấy đơn hàng cần đối soát.' },
+        };
+      }
+
+      return {
+        ...state,
+        orders: {
+          ...state.orders,
+          [order.id]: {
+            ...order,
+            sourceRef: 'VieSHOP-RECONCILED',
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
       };
     }
 
@@ -867,6 +1510,312 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             privateNote: action.privateNote !== undefined ? action.privateNote : capsule.privateNote,
             updatedAt: state.demoTime,
           },
+        },
+      };
+    }
+
+    case 'MARK_NOTIFICATION_READ': {
+      const notif = state.notifications[action.notificationId];
+      if (!notif || notif.isRead) return state;
+
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          [notif.id]: {
+            ...notif,
+            isRead: true,
+            updatedAt: state.demoTime,
+          },
+        },
+      };
+    }
+
+    case 'MARK_ALL_NOTIFICATIONS_READ': {
+      const updated = { ...state.notifications };
+      let changed = false;
+      for (const id of Object.keys(updated)) {
+        if (!updated[id].isRead) {
+          updated[id] = { ...updated[id], isRead: true, updatedAt: state.demoTime };
+          changed = true;
+        }
+      }
+      if (!changed) return state;
+
+      return {
+        ...state,
+        notifications: updated,
+      };
+    }
+
+    case 'UPDATE_NOTIFICATION_PREFERENCES': {
+      return {
+        ...state,
+        notificationPreferences: {
+          ...state.notificationPreferences,
+          ...action.preferences,
+        },
+      };
+    }
+
+    case 'CREATE_NOTIFICATION': {
+      const notif = action.notification;
+      const category =
+        notif.category ||
+        (notif.type.includes('session')
+          ? 'session'
+          : notif.type.includes('capsule')
+          ? 'capsule'
+          : notif.type.includes('support')
+          ? 'support'
+          : notif.type.includes('order')
+          ? 'order'
+          : 'promotional');
+      const prefs = state.notificationPreferences;
+      if (prefs) {
+        if (category === 'session' && !prefs.sessionReminders) return state;
+        if (category === 'capsule' && !prefs.capsuleReady) return state;
+        if (category === 'support' && !prefs.supportUpdates) return state;
+        if (category === 'order' && !prefs.orderUpdates) return state;
+        if (category === 'promotional' && !prefs.promotional) return state;
+      }
+
+      return {
+        ...state,
+        notifications: {
+          ...state.notifications,
+          [notif.id]: notif,
+        },
+      };
+    }
+
+    case 'SAVE_AVATAR_DRAFT': {
+      const assetData = (action as any).asset || (action as any).payload?.avatar || (action as any).payload?.asset;
+      if (!assetData) return state;
+      const existing = state.avatarAssets[assetData.id];
+      const version = (existing?.version || 0) + 1;
+      const draftAsset: AvatarAsset = {
+        id: assetData.id,
+        tenantId: state.activeTenantId,
+        version,
+        updatedAt: state.demoTime,
+        ownerWorldId: assetData.ownerWorldId,
+        status: 'draft',
+        parts: assetData.parts,
+        allowedContexts: assetData.allowedContexts,
+        replayAllowed: assetData.replayAllowed,
+      };
+
+      return {
+        ...state,
+        avatarAssets: {
+          ...state.avatarAssets,
+          [draftAsset.id]: draftAsset,
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'APPROVE_AVATAR_ASSET': {
+      const assetId = (action as any).assetId || (action as any).payload?.assetId;
+      const customApprovalRef = (action as any).approvalRef || (action as any).payload?.approvalRef;
+      const asset = state.avatarAssets[assetId];
+      if (!asset) {
+        return {
+          ...state,
+          lastError: { code: 'AVATAR_NOT_FOUND', message: 'Không tìm thấy avatar để phê duyệt.' },
+        };
+      }
+
+      const approvalRef = customApprovalRef || `APPROVAL-SIM-2026-${asset.id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8).toUpperCase()}`;
+      const approvedAsset: AvatarAsset = {
+        ...asset,
+        status: 'approved',
+        approvalRef,
+        version: asset.version + 1,
+        updatedAt: state.demoTime,
+      };
+
+      // Also update owner world's avatarAssetId if it was the draft being published
+      const world = state.worlds[asset.ownerWorldId];
+      let updatedWorlds = state.worlds;
+      if (world) {
+        updatedWorlds = {
+          ...state.worlds,
+          [world.id]: {
+            ...world,
+            avatarAssetId: approvedAsset.id,
+            updatedAt: state.demoTime,
+          },
+        };
+      }
+
+      return {
+        ...state,
+        avatarAssets: {
+          ...state.avatarAssets,
+          [approvedAsset.id]: approvedAsset,
+        },
+        worlds: updatedWorlds,
+        lastError: undefined,
+      };
+    }
+
+    case 'RETIRE_AVATAR_ASSET': {
+      const assetId = (action as any).assetId || (action as any).payload?.assetId;
+      const asset = state.avatarAssets[assetId];
+      if (!asset) {
+        return {
+          ...state,
+          lastError: { code: 'AVATAR_NOT_FOUND', message: 'Không tìm thấy avatar để ngưng sử dụng.' },
+        };
+      }
+
+      const retiredAsset: AvatarAsset = {
+        ...asset,
+        status: 'retired',
+        version: asset.version + 1,
+        updatedAt: state.demoTime,
+      };
+
+      return {
+        ...state,
+        avatarAssets: {
+          ...state.avatarAssets,
+          [retiredAsset.id]: retiredAsset,
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'REVERT_AVATAR_VERSION': {
+      const worldId = (action as any).worldId || (action as any).payload?.worldId;
+      const targetAssetId = (action as any).targetAssetId || (action as any).assetId || (action as any).payload?.assetId || (action as any).payload?.targetAssetId;
+      const world = state.worlds[worldId];
+      if (!world) {
+        return {
+          ...state,
+          lastError: { code: 'WORLD_NOT_FOUND', message: 'Không tìm thấy thế giới.' },
+        };
+      }
+
+      const targetAsset = state.avatarAssets[targetAssetId];
+      if (!targetAsset || targetAsset.ownerWorldId !== worldId) {
+        return {
+          ...state,
+          lastError: { code: 'AVATAR_NOT_FOUND', message: 'Avatar không thuộc thế giới này.' },
+        };
+      }
+
+      if (targetAsset.status !== 'approved') {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_NOT_APPROVED',
+            message: 'Chỉ avatar đã được phê duyệt mới có thể kích hoạt làm avatar chính của thế giới.',
+          },
+        };
+      }
+
+      return {
+        ...state,
+        worlds: {
+          ...state.worlds,
+          [world.id]: {
+            ...world,
+            avatarAssetId: targetAsset.id,
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    case 'ASSIGN_AVATAR_TO_SESSION': {
+      const sessionId = (action as any).sessionId || (action as any).payload?.sessionId;
+      const avatarAssetId = (action as any).avatarAssetId || (action as any).payload?.avatarAssetId;
+      const session = state.sessions[sessionId];
+      if (!session) {
+        return {
+          ...state,
+          lastError: { code: 'SESSION_NOT_FOUND', message: 'Phiên sự kiện không tồn tại.' },
+        };
+      }
+
+      if (session.status === 'ended' || session.status === 'cancelled') {
+        return {
+          ...state,
+          lastError: {
+            code: 'SESSION_CLOSED',
+            message: 'Không thể thay đổi avatar cho phiên đã kết thúc hoặc bị hủy.',
+          },
+        };
+      }
+
+      const avatar = state.avatarAssets[avatarAssetId];
+      if (!avatar) {
+        return {
+          ...state,
+          lastError: { code: 'AVATAR_NOT_FOUND', message: 'Không tìm thấy avatar.' },
+        };
+      }
+
+      if (avatar.status === 'retired') {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_RETIRED',
+            message: 'Avatar đã ngưng sử dụng (retired), không thể gán cho phiên mới.',
+          },
+        };
+      }
+
+      if (avatar.status !== 'approved') {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_NOT_APPROVED',
+            message: 'Chỉ avatar đã được phê duyệt mới có thể gán vào phiên sự kiện.',
+          },
+        };
+      }
+
+      if (!avatar.allowedContexts.includes(session.format)) {
+        return {
+          ...state,
+          lastError: {
+            code: 'AVATAR_CONTEXT_DISALLOWED',
+            message: `Avatar không được cấp phép cho định dạng '${session.format}'.`,
+          },
+        };
+      }
+
+      return {
+        ...state,
+        sessions: {
+          ...state.sessions,
+          [session.id]: {
+            ...session,
+            avatarAssetId: avatar.id,
+            updatedAt: state.demoTime,
+          },
+        },
+        lastError: undefined,
+      };
+    }
+
+    /**
+     * Fan Profile Role Update:
+     * - Allows local simulation of fan/artist/operator roles within active tenant.
+     * - Invariant: Official role never transfers across tenant switches.
+     */
+    case 'SET_FAN_ROLE': {
+      return {
+        ...state,
+        fanProfile: {
+          ...state.fanProfile,
+          role: action.role,
+          updatedAt: state.demoTime,
         },
       };
     }

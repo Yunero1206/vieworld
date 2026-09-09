@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Music, ShieldCheck, Play, Pause } from 'lucide-react';
+import { Volume2, VolumeX, Music, ShieldCheck, Play, Pause, Lock, AlertCircle } from 'lucide-react';
 
 export interface SilentMediaPlaceholderProps {
   isMuted: boolean;
@@ -7,6 +7,8 @@ export interface SilentMediaPlaceholderProps {
   isPlaying: boolean;
   onTogglePlay: () => void;
   reducedMotion?: boolean;
+  mediaStatus?: 'cleared_local' | 'missing' | 'expired';
+  trackTitle?: string;
 }
 
 export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
@@ -15,8 +17,13 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
   isPlaying,
   onTogglePlay,
   reducedMotion = false,
+  mediaStatus = 'cleared_local',
+  trackTitle = 'demo-audio-ambient-loop-v1 (Âm thanh thử nghiệm nội bộ)',
 }) => {
-  const isVisualActive = isPlaying && !isMuted && !reducedMotion;
+  const isExpired = mediaStatus === 'expired';
+  const isMissing = mediaStatus === 'missing';
+  const effectivePlaying = isPlaying && !isExpired;
+  const isVisualActive = effectivePlaying && !isMuted && !reducedMotion;
 
   // 12 bars for simulated acoustic spectrum
   const spectrumHeights = [30, 65, 45, 80, 50, 90, 75, 40, 85, 60, 35, 70];
@@ -28,46 +35,122 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
         padding: '16px 20px',
         backgroundColor: '#1E1B4B',
         color: '#FFFFFF',
-        border: '1px solid rgba(169, 229, 212, 0.2)',
+        border: isExpired
+          ? '1px solid rgba(239, 68, 68, 0.4)'
+          : isMissing
+          ? '1px solid rgba(245, 158, 11, 0.4)'
+          : '1px solid rgba(169, 229, 212, 0.2)',
         borderRadius: 'var(--radius-lg)',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
       }}
       aria-label="Khối âm thanh mô phỏng thử nghiệm"
+      data-testid="silent-media-player"
     >
+      {/* Missing Media Notice */}
+      {isMissing && (
+        <div
+          style={{
+            padding: '8px 12px',
+            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+            border: '1px solid #F59E0B',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: 'var(--text-xs)',
+            color: '#FCD34D',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+          data-testid="missing-media-notice"
+        >
+          <AlertCircle size={14} color="#FBBF24" style={{ flexShrink: 0 }} />
+          <span>
+            Tệp âm thanh mẫu không khả dụng — Trình mô phỏng im lặng (Silent Demo Mode) vẫn hoạt động bình thường.
+          </span>
+        </div>
+      )}
+
+      {/* Expired Rights Notice */}
+      {isExpired && (
+        <div
+          style={{
+            padding: '8px 12px',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid #EF4444',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: 'var(--text-xs)',
+            color: '#FCA5A5',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+          data-testid="expired-rights-audio-notice"
+        >
+          <Lock size={14} color="#F87171" style={{ flexShrink: 0 }} />
+          <span>
+            Bản quyền âm thanh đã hết hạn — Tính năng phát lại bị vô hiệu hóa theo thỏa thuận bản quyền.
+          </span>
+        </div>
+      )}
+
       {/* Header bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Music size={16} color="#A9E5D4" />
           <span style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: '#E0E7FF' }}>
-            demo-audio-ambient-loop-v1 (Âm thanh thử nghiệm nội bộ)
+            {trackTitle}
           </span>
           <span className="demo-badge">DEMO</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Play/Pause toggle */}
+          {/* Play/Pause toggle - Disabled if expired */}
           <button
             type="button"
-            onClick={onTogglePlay}
+            onClick={isExpired ? undefined : onTogglePlay}
+            disabled={isExpired}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
-              backgroundColor: isPlaying ? 'rgba(255, 255, 255, 0.1)' : 'var(--accent)',
-              color: isPlaying ? '#FFFFFF' : '#151426',
+              backgroundColor: isExpired
+                ? 'rgba(255, 255, 255, 0.05)'
+                : effectivePlaying
+                ? 'rgba(255, 255, 255, 0.1)'
+                : 'var(--accent)',
+              color: isExpired ? 'rgba(255, 255, 255, 0.4)' : effectivePlaying ? '#FFFFFF' : '#151426',
               border: 'none',
               borderRadius: 'var(--radius-sm)',
               fontSize: 'var(--text-xs)',
               fontWeight: '700',
-              cursor: 'pointer',
+              cursor: isExpired ? 'not-allowed' : 'pointer',
+              opacity: isExpired ? 0.6 : 1,
             }}
-            aria-label={isPlaying ? 'Tạm dừng âm thanh' : 'Phát âm thanh'}
+            data-testid="audio-play-toggle"
+            aria-label={
+              isExpired
+                ? 'Phát âm thanh bị vô hiệu hóa do hết hạn bản quyền'
+                : effectivePlaying
+                ? 'Tạm dừng âm thanh'
+                : 'Phát âm thanh'
+            }
           >
-            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            <span>{isPlaying ? 'Tạm dừng' : 'Phát tiếp'}</span>
+            {isExpired ? (
+              <Lock size={14} />
+            ) : effectivePlaying ? (
+              <Pause size={14} />
+            ) : (
+              <Play size={14} />
+            )}
+            <span>
+              {isExpired
+                ? 'Hết hạn bản quyền'
+                : effectivePlaying
+                ? 'Tạm dừng'
+                : 'Phát âm thanh'}
+            </span>
           </button>
 
           {/* Mute/Unmute toggle */}
@@ -87,6 +170,7 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
               fontWeight: '700',
               cursor: 'pointer',
             }}
+            data-testid="audio-mute-toggle"
             aria-label={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}
           >
             {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}

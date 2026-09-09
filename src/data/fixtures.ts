@@ -14,6 +14,8 @@ import {
   FanProfile,
   Question,
   Poll,
+  Notification,
+  NotificationPreferences,
 } from '../domain/types';
 
 export const INITIAL_DEMO_TIME = '2026-09-09T13:00:00.000Z'; // 20:00 Asia/Ho_Chi_Minh
@@ -25,6 +27,7 @@ export const DEFAULT_FAN_PROFILE: FanProfile = {
   updatedAt: INITIAL_DEMO_TIME,
   username: 'linh_nguyen',
   displayName: 'Linh Nguyễn',
+  role: 'fan',
   avatarUrl: '',
   wardrobeChoice: {
     accessoryId: 'lightstick-star',
@@ -110,6 +113,12 @@ export const CANONICAL_SESSIONS: Record<string, Session> = {
     replayStatus: 'pending_review',
     scheduledStartTime: INITIAL_DEMO_TIME,
     demo: true,
+    rightsApproved: true,
+    rightsChecklist: {
+      musicClearance: true,
+      artistConsent: true,
+      safetyReview: true,
+    },
   },
   'session-listen-01': {
     id: 'session-listen-01',
@@ -125,8 +134,36 @@ export const CANONICAL_SESSIONS: Record<string, Session> = {
     segmentMode: 'recorded',
     aiUse: 'captions',
     replayStatus: 'not_planned',
+    mediaStatus: 'cleared_local',
     scheduledStartTime: '2026-09-10T14:00:00.000Z',
     demo: true,
+    rightsApproved: true,
+    rightsChecklist: {
+      musicClearance: true,
+      artistConsent: true,
+      safetyReview: true,
+    },
+    trackNotes: [
+      {
+        trackNumber: 1,
+        title: 'Neon Prelude (Bản nháp Acoustic)',
+        duration: '03:24',
+        notes: 'Bản thu mộc guitar tại phòng thu Sài Gòn, 08/2026. Thử nghiệm âm hưởng mộc mạc trước khi phối khí.',
+        isCurrent: true,
+      },
+      {
+        trackNumber: 2,
+        title: 'Ánh Đèn Đêm (Demo Version)',
+        duration: '04:10',
+        notes: 'Bản phối synthwave thử nghiệm với nhịp điệu hoài niệm.',
+      },
+      {
+        trackNumber: 3,
+        title: 'Outro: Ký Ức Thành Phố',
+        duration: '02:45',
+        notes: 'Đoạn outro không lời khép lại tuyển tập phòng nghe Neon Sessions.',
+      },
+    ],
   },
   'session-house-01': {
     id: 'session-house-01',
@@ -143,8 +180,66 @@ export const CANONICAL_SESSIONS: Record<string, Session> = {
     segmentMode: 'live',
     aiUse: 'none',
     replayStatus: 'not_planned',
+    mediaStatus: 'cleared_local',
     scheduledStartTime: '2026-09-12T13:00:00.000Z',
     demo: true,
+    rightsApproved: false,
+    rightsChecklist: {
+      musicClearance: false,
+      artistConsent: false,
+      safetyReview: false,
+    },
+    setlist: [
+      { order: 1, title: 'Mở màn: Khát Vọng Tuổi Trẻ', status: 'completed' },
+      { order: 2, title: 'Điểm Tựa Tương Lai (Bản phối Live House)', status: 'performing' },
+      { order: 3, title: 'Giai Điệu Kỷ Niệm', status: 'upcoming' },
+      { order: 4, title: 'Encore: Ánh Sáng VieWorld', status: 'upcoming' },
+    ],
+    callSampleCues: [
+      {
+        id: 'cue-01',
+        cueText: 'VI-E-WORLD!',
+        prompt: 'Hô vang tên cộng đồng cùng nghệ sĩ tại nhịp dạo đầu!',
+        actionLabel: 'Hô vang: VIEWORLD',
+      },
+      {
+        id: 'cue-02',
+        cueText: 'ĐIỆP KHÚC!',
+        prompt: 'Hòa giọng vào đoạn điệp khúc cao trào!',
+        actionLabel: 'Hòa giọng điệp khúc',
+      },
+      {
+        id: 'cue-03',
+        cueText: 'LIGHTSTICK XANH!',
+        prompt: 'Bật và vẫy lightstick ảo theo nhịp trống dồn!',
+        actionLabel: 'Vẫy lightstick ảo',
+      },
+    ],
+  },
+  'session-expired-01': {
+    id: 'session-expired-01',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'artist-a',
+    title: 'Đêm Nhạc Kỷ Niệm Mùa 1 (Bản quyền đã hết hạn)',
+    avatarAssetId: 'avatar-a-v1',
+    format: 'listening',
+    status: 'ended',
+    hostRole: 'team',
+    artistPresence: 'absent',
+    segmentMode: 'recorded',
+    aiUse: 'none',
+    replayStatus: 'expired',
+    mediaStatus: 'expired',
+    scheduledStartTime: '2026-08-01T14:00:00.000Z',
+    demo: true,
+    rightsApproved: true,
+    rightsChecklist: {
+      musicClearance: true,
+      artistConsent: true,
+      safetyReview: true,
+    },
   },
 };
 
@@ -247,12 +342,377 @@ export const INITIAL_POLLS: Record<string, Poll> = {
   },
 };
 
+export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
+  sessionReminders: true,
+  capsuleReady: true,
+  supportUpdates: true,
+  orderUpdates: true,
+  promotional: false,
+};
+
+export const INITIAL_NOTIFICATIONS: Record<string, Notification> = {
+  'notif-welcome': {
+    id: 'notif-welcome',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    fanId: 'fan-linh',
+    type: 'session_reminder',
+    category: 'session',
+    sourceAttribution: 'platform',
+    title: 'Chào mừng bạn đến với Không gian Nghệ sĩ VieWorld',
+    body: 'Khám phá các thế giới nghệ sĩ ảo, đăng ký giữ chỗ (RSVP) và nhận kỷ vật Moment Capsule sau mỗi phiên giao lưu.',
+    isRead: false,
+    targetRoute: '/worlds',
+    createdAt: '2026-09-09T08:00:00Z',
+    updatedAt: '2026-09-09T08:00:00Z',
+  },
+  'notif-rsvp-dropin': {
+    id: 'notif-rsvp-dropin',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    fanId: 'fan-linh',
+    type: 'session_reminder',
+    category: 'session',
+    sourceAttribution: 'session_system',
+    title: 'Nhắc nhở: Phiên giao lưu nghệ sĩ ảo sắp diễn ra',
+    body: 'Bạn đã đăng ký giữ chỗ (RSVP) cho "Đêm Nhạc Trực Tuyến: Giao Lưu & Thử Nghiệm". Sảnh chờ sẽ mở trước giờ diễn.',
+    isRead: false,
+    targetRoute: '/sessions/session-dropin-01',
+    createdAt: '2026-09-09T12:00:00Z',
+    updatedAt: '2026-09-09T12:00:00Z',
+  },
+};
+
 /**
- * Creates the initial application baseline state
+ * Scoped Fixture Sets for MFan Partner Configuration (§1, §3, P15)
+ * Distinct simulated entities without scraping external sites or using official marks.
+ */
+export const MFAN_WORLDS: Record<string, World> = {
+  'world-mfan-artist-m': {
+    id: 'world-mfan-artist-m',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist',
+    name: 'Artist M (MFan Demo)',
+    description: 'Không gian cộng đồng fandom của nghệ sĩ giả lập Artist M trong cấu hình đối tác MFan.',
+    linkedWorldIds: ['world-mfan-showcase'],
+    avatarAssetId: 'avatar-mfan-m1',
+    bannerAssetId: 'asset-world-mfan-banner',
+  },
+  'world-mfan-showcase': {
+    id: 'world-mfan-showcase',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'ip',
+    name: 'MFan Showcase Stage',
+    description: 'Sân khấu tổng hợp các sự kiện giao lưu trực tuyến đối tác MFan.',
+    linkedWorldIds: ['world-mfan-artist-m'],
+    bannerAssetId: 'asset-world-mfan-showcase-banner',
+  },
+};
+
+export const MFAN_AVATARS: Record<string, AvatarAsset> = {
+  'avatar-mfan-m1': {
+    id: 'avatar-mfan-m1',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    ownerWorldId: 'world-mfan-artist-m',
+    status: 'approved',
+    approvalRef: 'APPROVAL-MFAN-2026-01',
+    allowedContexts: ['dropin', 'listening', 'concert'],
+    replayAllowed: true,
+    parts: {
+      base: 'stage_classic',
+      outfit: 'festival_hoodie',
+      accessory: 'earpiece_glow',
+    },
+  },
+};
+
+export const MFAN_SESSIONS: Record<string, Session> = {
+  'session-mfan-01': {
+    id: 'session-mfan-01',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'world-mfan-artist-m',
+    title: 'MFan Fandom Meet & Greet Demo',
+    format: 'dropin',
+    status: 'scheduled',
+    scheduledStartTime: '2026-09-09T14:00:00.000Z',
+    hostRole: 'artist',
+    artistPresence: 'absent',
+    segmentMode: 'live',
+    aiUse: 'none',
+    replayStatus: 'not_planned',
+    demo: true,
+    rightsApproved: true,
+    mediaStatus: 'cleared_local',
+    avatarAssetId: 'avatar-mfan-m1',
+  },
+};
+
+export const MFAN_MEMBERSHIPS: Record<string, Membership> = {
+  'member-mfan-01': {
+    id: 'member-mfan-01',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    fanId: 'fan-linh',
+    worldId: 'world-mfan-artist-m',
+    status: 'active',
+    expiresAt: '2027-01-01T00:00:00.000Z',
+  },
+};
+
+export const MFAN_BENEFITS: Record<string, Benefit> = {
+  'benefit-mfan-01': {
+    id: 'benefit-mfan-01',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    fanId: 'fan-linh',
+    worldId: 'world-mfan-artist-m',
+    title: 'MFan Priority Pass',
+    status: 'eligible',
+    reasonCode: 'ACTIVE_MEMBERSHIP_VERIFIED',
+    sourceRef: 'member-mfan-01',
+    nextAction: 'Quyền ưu tiên nhận thông báo và tham gia phòng chờ sớm sự kiện MFan.',
+  },
+  'benefit-replay-01': {
+    id: 'benefit-replay-01',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    fanId: 'fan-linh',
+    worldId: 'world-mfan-artist-m',
+    title: 'Quyền xem lại Replay (MFan Demo)',
+    status: 'eligible',
+    reasonCode: 'ACTIVE_MEMBERSHIP_VERIFIED',
+    sourceRef: 'member-mfan-01',
+    nextAction: 'Nhấn để kích hoạt quyền xem lại các phiên Drop-in đã kết thúc.',
+  },
+};
+
+export const MFAN_PRODUCTS: Record<string, Product> = {
+  'product-mfan-lightband': {
+    id: 'product-mfan-lightband',
+    tenantId: 'mfan-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'world-mfan-artist-m',
+    title: 'Vòng tay phát sáng MFan Lightband (Demo)',
+    priceVND: 120000,
+    stockCount: 50,
+    isAvailable: true,
+  },
+};
+
+export const MFAN_FAN_PROFILE: FanProfile = {
+  id: 'fan-linh',
+  tenantId: 'mfan-demo',
+  version: 1,
+  updatedAt: INITIAL_DEMO_TIME,
+  username: 'linh_mfan',
+  displayName: 'Linh Nguyễn (MFan)',
+  role: 'fan',
+  avatarUrl: '',
+  wardrobeChoice: {
+    accessoryId: 'earpiece_glow',
+    equippedAt: INITIAL_DEMO_TIME,
+  },
+};
+
+/**
+ * Scoped Fixture Sets for FanMe Partner Configuration (§1, §3, P15)
+ * Distinct simulated creator space without scraping external sites or using official marks.
+ */
+export const FANME_WORLDS: Record<string, World> = {
+  'world-fanme-creator-k': {
+    id: 'world-fanme-creator-k',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist',
+    name: 'Creator K (FanMe Demo)',
+    description: 'Kênh sáng tạo nội dung và âm nhạc của nhà sáng tạo hư cấu Creator K trên FanMe.',
+    linkedWorldIds: ['world-fanme-lounge'],
+    avatarAssetId: 'avatar-fanme-k1',
+    bannerAssetId: 'asset-world-fanme-banner',
+  },
+  'world-fanme-lounge': {
+    id: 'world-fanme-lounge',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'ip',
+    name: 'FanMe Live Lounge',
+    description: 'Không gian phát sóng trực tiếp và trò chuyện sáng tạo định kỳ.',
+    linkedWorldIds: ['world-fanme-creator-k'],
+    bannerAssetId: 'asset-world-fanme-lounge-banner',
+  },
+};
+
+export const FANME_AVATARS: Record<string, AvatarAsset> = {
+  'avatar-fanme-k1': {
+    id: 'avatar-fanme-k1',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    ownerWorldId: 'world-fanme-creator-k',
+    status: 'approved',
+    approvalRef: 'APPROVAL-FANME-2026-01',
+    allowedContexts: ['dropin', 'listening'],
+    replayAllowed: true,
+    parts: {
+      base: 'cyber_neon',
+      outfit: 'cyber_suit',
+      accessory: 'visor_neon',
+    },
+  },
+};
+
+export const FANME_SESSIONS: Record<string, Session> = {
+  'session-fanme-01': {
+    id: 'session-fanme-01',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'world-fanme-creator-k',
+    title: 'FanMe Creator Live Chat Demo',
+    format: 'dropin',
+    status: 'scheduled',
+    scheduledStartTime: '2026-09-09T15:00:00.000Z',
+    hostRole: 'artist',
+    artistPresence: 'absent',
+    segmentMode: 'live',
+    aiUse: 'none',
+    replayStatus: 'not_planned',
+    demo: true,
+    rightsApproved: true,
+    mediaStatus: 'cleared_local',
+    avatarAssetId: 'avatar-fanme-k1',
+  },
+};
+
+export const FANME_MEMBERSHIPS: Record<string, Membership> = {
+  'member-fanme-01': {
+    id: 'member-fanme-01',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    fanId: 'fan-linh',
+    worldId: 'world-fanme-creator-k',
+    status: 'active',
+    expiresAt: '2027-01-01T00:00:00.000Z',
+  },
+};
+
+export const FANME_BENEFITS: Record<string, Benefit> = {
+  'benefit-fanme-01': {
+    id: 'benefit-fanme-01',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    fanId: 'fan-linh',
+    worldId: 'world-fanme-creator-k',
+    title: 'FanMe Digital Badge (Demo)',
+    status: 'eligible',
+    reasonCode: 'ACTIVE_MEMBERSHIP_VERIFIED',
+    sourceRef: 'member-fanme-01',
+    nextAction: 'Huy hiệu số chứng nhận người ủng hộ kênh Creator K.',
+  },
+};
+
+export const FANME_PRODUCTS: Record<string, Product> = {
+  'product-fanme-photocard': {
+    id: 'product-fanme-photocard',
+    tenantId: 'fanme-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'world-fanme-creator-k',
+    title: 'Bộ thẻ ảnh số FanMe Digital Photocard (Demo)',
+    priceVND: 50000,
+    stockCount: 100,
+    isAvailable: true,
+  },
+};
+
+export const FANME_FAN_PROFILE: FanProfile = {
+  id: 'fan-linh',
+  tenantId: 'fanme-demo',
+  version: 1,
+  updatedAt: INITIAL_DEMO_TIME,
+  username: 'linh_fanme',
+  displayName: 'Linh Nguyễn (FanMe)',
+  role: 'fan',
+  avatarUrl: '',
+  wardrobeChoice: {
+    accessoryId: 'visor_neon',
+    equippedAt: INITIAL_DEMO_TIME,
+  },
+};
+
+/**
+ * Creates the initial application baseline state for the specified tenant
  */
 export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppState {
+  if (tenantId === 'mfan-demo') {
+    return {
+      activeTenantId: 'mfan-demo',
+      demoTime: INITIAL_DEMO_TIME,
+      worlds: structuredClone(MFAN_WORLDS),
+      avatarAssets: structuredClone(MFAN_AVATARS),
+      sessions: structuredClone(MFAN_SESSIONS),
+      memberships: structuredClone(MFAN_MEMBERSHIPS),
+      benefits: structuredClone(MFAN_BENEFITS),
+      participations: {},
+      orders: {},
+      supportCases: {},
+      fanProfile: structuredClone(MFAN_FAN_PROFILE),
+      products: structuredClone(MFAN_PRODUCTS),
+      questions: {},
+      polls: {},
+      capsules: {},
+      notifications: {},
+      notificationPreferences: structuredClone(DEFAULT_NOTIFICATION_PREFERENCES),
+      followedWorldIds: ['world-mfan-artist-m'],
+      rsvpdSessionIds: ['session-mfan-01'],
+      inLobbySessionIds: [],
+    };
+  }
+
+  if (tenantId === 'fanme-demo') {
+    return {
+      activeTenantId: 'fanme-demo',
+      demoTime: INITIAL_DEMO_TIME,
+      worlds: structuredClone(FANME_WORLDS),
+      avatarAssets: structuredClone(FANME_AVATARS),
+      sessions: structuredClone(FANME_SESSIONS),
+      memberships: structuredClone(FANME_MEMBERSHIPS),
+      benefits: structuredClone(FANME_BENEFITS),
+      participations: {},
+      orders: {},
+      supportCases: {},
+      fanProfile: structuredClone(FANME_FAN_PROFILE),
+      products: structuredClone(FANME_PRODUCTS),
+      questions: {},
+      polls: {},
+      capsules: {},
+      notifications: {},
+      notificationPreferences: structuredClone(DEFAULT_NOTIFICATION_PREFERENCES),
+      followedWorldIds: ['world-fanme-creator-k'],
+      rsvpdSessionIds: ['session-fanme-01'],
+      inLobbySessionIds: [],
+    };
+  }
+
+  // Canonical Baseline: vieworld-demo
   return {
-    activeTenantId: tenantId,
+    activeTenantId: 'vieworld-demo',
     demoTime: INITIAL_DEMO_TIME,
     worlds: structuredClone(CANONICAL_WORLDS),
     avatarAssets: structuredClone(CANONICAL_AVATARS),
@@ -267,7 +727,8 @@ export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppSta
     questions: structuredClone(INITIAL_QUESTIONS),
     polls: structuredClone(INITIAL_POLLS),
     capsules: {},
-    notifications: {},
+    notifications: structuredClone(INITIAL_NOTIFICATIONS),
+    notificationPreferences: structuredClone(DEFAULT_NOTIFICATION_PREFERENCES),
     followedWorldIds: ['artist-a'],
     rsvpdSessionIds: ['session-dropin-01'],
     inLobbySessionIds: [],
@@ -291,6 +752,7 @@ export const scenarioPresets = {
       participations: {},
       capsules: {},
       questions: {},
+      notifications: {},
     };
   },
 

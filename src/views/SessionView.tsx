@@ -9,6 +9,9 @@ import { QuestionQueue } from '../components/QuestionQueue';
 import { LivePollPanel } from '../components/LivePollPanel';
 import { FanChatPanel } from '../components/FanChatPanel';
 import { StatusNotice } from '../components/StatusNotice';
+import { TrackNotesPanel } from '../components/TrackNotesPanel';
+import { SetlistPanel } from '../components/SetlistPanel';
+import { CallSampleCueBar } from '../components/CallSampleCueBar';
 import {
   Calendar,
   Clock,
@@ -22,6 +25,8 @@ import {
   MessageSquare,
   HelpCircle,
   BarChart3,
+  Star,
+  Lock,
 } from 'lucide-react';
 
 export const SessionView: React.FC = () => {
@@ -30,7 +35,8 @@ export const SessionView: React.FC = () => {
 
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(true);
+  // Acceptance T13 Invariant: No autoplay audio. Audio playback is strictly user-initiated.
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [interactionTab, setInteractionTab] = useState<'chat' | 'questions' | 'poll'>('chat');
 
@@ -85,7 +91,9 @@ export const SessionView: React.FC = () => {
   }
 
   const world = state.worlds[session.worldId];
-  const avatarAsset = session.avatarAssetId ? state.avatarAssets[session.avatarAssetId] : undefined;
+  const rawAvatarAsset = session.avatarAssetId ? state.avatarAssets[session.avatarAssetId] : undefined;
+  // Constitutional Invariant (§2.3, P11): Draft or retired avatar strictly does not leak into fan session
+  const avatarAsset = rawAvatarAsset && rawAvatarAsset.status === 'approved' ? rawAvatarAsset : undefined;
 
   const isRsvpd = state.rsvpdSessionIds.includes(session.id);
   const isInLobby = state.inLobbySessionIds.includes(session.id);
@@ -93,6 +101,7 @@ export const SessionView: React.FC = () => {
   const hasJoinedLive = Boolean(state.participations[participationKey]);
   const replayParticipationKey = `part_${state.fanProfile.id}_${session.id}_replay`;
   const hasWatchedReplay = Boolean(state.participations[replayParticipationKey]);
+  const activeSelectedQuestion = sessionQuestions.find((q) => q.status === 'selected');
 
   // Format time in Asia/Ho_Chi_Minh timezone (§2.1)
   const formatVietnamTime = (isoString: string) => {
@@ -236,6 +245,34 @@ export const SessionView: React.FC = () => {
         </div>
       )}
 
+      {/* Expired Rights Session Alert */}
+      {(session.replayStatus === 'expired' || session.mediaStatus === 'expired') && (
+        <div
+          style={{
+            padding: '16px 20px',
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: 'var(--radius-md)',
+            color: '#991B1B',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+          data-testid="expired-rights-session-banner"
+        >
+          <Lock size={24} color="#DC2626" />
+          <div>
+            <strong style={{ display: 'block', fontSize: 'var(--text-sm)' }}>
+              Bản quyền nội dung đã hết hạn (Expired Rights)
+            </strong>
+            <span style={{ fontSize: 'var(--text-xs)' }}>
+              Theo thỏa thuận bản quyền nội dung với đơn vị nắm giữ bản quyền, phiên sự kiện này không còn khả dụng để phát lại. Kỷ niệm số và ghi chú cá nhân trong My World của bạn vẫn được bảo lưu nguyên vẹn.
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Session Title Header */}
       <header
         style={{
@@ -250,7 +287,29 @@ export const SessionView: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
             {getStatusBadge()}
-            <span className="tag">{session.format}</span>
+            <span className="tag" data-testid="session-format-tag">{session.format}</span>
+            <span
+              className="tag"
+              style={{
+                backgroundColor: session.segmentMode === 'recorded' ? '#F3F4F6' : '#DCFCE7',
+                color: session.segmentMode === 'recorded' ? '#374151' : '#15803D',
+                fontWeight: '700',
+              }}
+              data-testid="segment-mode-tag"
+            >
+              {session.segmentMode === 'recorded' ? 'Đã ghi hình trước (Recorded)' : 'Trực tiếp (Live)'}
+            </span>
+            <span
+              className="tag"
+              style={{
+                backgroundColor: session.hostRole === 'team' ? '#EDE9FE' : '#FEF3C7',
+                color: session.hostRole === 'team' ? 'var(--primary)' : '#B45309',
+                fontWeight: '700',
+              }}
+              data-testid="host-role-tag"
+            >
+              {session.hostRole === 'team' ? 'Đội ngũ phụ trách (Team)' : 'Nghệ sĩ (Artist)'}
+            </span>
             <span className="demo-badge">DEMO</span>
           </div>
           <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: '800', margin: '0 0 6px 0' }}>
@@ -267,11 +326,63 @@ export const SessionView: React.FC = () => {
         </div>
       </header>
 
+      {/* Active Selected Question Broadcast Banner (P12 Operator Propagation) */}
+      {activeSelectedQuestion && session.status === 'running' && (
+        <div
+          data-testid="active-selected-question-banner"
+          className="card"
+          style={{
+            padding: '14px 18px',
+            marginBottom: '20px',
+            backgroundColor: '#F0FDF4',
+            border: '1px solid #86EFAC',
+            borderRadius: 'var(--radius-md)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <div
+            style={{
+              padding: '8px',
+              backgroundColor: '#DCFCE7',
+              borderRadius: 'var(--radius-sm)',
+              color: '#166534',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Star size={18} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#15803D',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                display: 'block',
+              }}
+            >
+              ★ CÂU HỎI ĐANG ĐƯỢC NGHỆ SĨ TRẢ LỜI TRỰC TIẾP
+            </span>
+            <div style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: '#14532D', marginTop: '2px' }}>
+              "{activeSelectedQuestion.content}"
+            </div>
+            <div style={{ fontSize: '11px', color: '#166534', marginTop: '2px' }}>
+              Người hỏi: {activeSelectedQuestion.authorName || 'Khán giả'}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Layout Grid: Stage + Details */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
           gap: '24px',
           alignItems: 'start',
         }}
@@ -281,23 +392,45 @@ export const SessionView: React.FC = () => {
           {/* Truthful Presence Panel (§2.3, §5.2) */}
           <PresencePanel session={session} />
 
-          {/* 2D Avatar Stage (§2.3, §5.1) */}
+          {/* 2D Avatar Stage (§2.3, §5.1, P13 Concert Larger Stage) */}
           <AvatarStage
             avatar={avatarAsset}
             artistPresence={session.artistPresence}
             isPaused={isPaused}
             isMuted={isMuted}
             reducedMotion={reducedMotion}
+            stageVariant={session.format === 'concert' ? 'concert' : session.format === 'listening' ? 'listening' : 'standard'}
           />
 
-          {/* Simulated Ambient Audio Media Placeholder (§2.4) */}
+          {/* Simulated Ambient Audio Media Placeholder (§2.4, P13 User-Initiated Audio & Missing Media) */}
           <SilentMediaPlaceholder
             isMuted={isMuted}
             onToggleMute={() => setIsMuted((prev) => !prev)}
             isPlaying={isPlayingAudio}
             onTogglePlay={() => setIsPlayingAudio((prev) => !prev)}
             reducedMotion={reducedMotion}
+            mediaStatus={session.mediaStatus || (session.replayStatus === 'expired' ? 'expired' : 'cleared_local')}
+            trackTitle={
+              session.format === 'listening' && session.trackNotes?.[0]
+                ? `${session.trackNotes[0].title} (Phòng nghe Neon)`
+                : undefined
+            }
           />
+
+          {/* Live House: Call Sample Cues (Interaction Simulation, no multi-user sync) */}
+          {session.format === 'concert' && (
+            <CallSampleCueBar cues={session.callSampleCues} />
+          )}
+
+          {/* Listening Room: Track Notes & Liner Notes */}
+          {session.format === 'listening' && (
+            <TrackNotesPanel trackNotes={session.trackNotes} />
+          )}
+
+          {/* Live House: Concert Performance Setlist */}
+          {session.format === 'concert' && (
+            <SetlistPanel setlist={session.setlist} />
+          )}
 
           {/* Session Fan & Stage Controls */}
           <SessionControls
@@ -466,6 +599,7 @@ export const SessionView: React.FC = () => {
               sessionId={session.id}
               currentFanId={state.fanProfile.id}
               currentFanName={state.fanProfile.displayName}
+              isChatPaused={session.isChatPaused}
             />
           )}
 

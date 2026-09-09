@@ -16,19 +16,22 @@ import {
   ArrowLeft,
   AlertTriangle,
   Tag,
+  Award,
 } from 'lucide-react';
+import { MembershipCard } from '../components/MembershipCard';
+import { BenefitCard } from '../components/BenefitCard';
 
 export const WorldDetailView: React.FC = () => {
   const { worldId } = useParams<{ worldId: string }>();
   const { state, dispatch } = useApp();
-  const [activeTab, setActiveTab] = useState<'home' | 'sessions' | 'archive' | 'shop'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'sessions' | 'archive' | 'membership' | 'shop'>('home');
 
   const world = worldId ? state.worlds[worldId] : undefined;
 
   // Graceful recovery for invalid world ID (§6, §3.3)
   if (!world) {
     return (
-      <div className="card" style={{ maxWidth: '520px', margin: '40px auto', textAlign: 'center', padding: '40px 24px' }}>
+      <div className="card" data-testid="world-not-found-recovery" style={{ maxWidth: '520px', margin: '40px auto', textAlign: 'center', padding: '40px 24px' }}>
         <AlertTriangle size={48} color="var(--danger)" style={{ margin: '0 auto 16px auto' }} />
         <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: '800', marginBottom: '8px' }}>
           Không tìm thấy không gian
@@ -52,6 +55,13 @@ export const WorldDetailView: React.FC = () => {
 
   // Filter products for this world
   const worldProducts = Object.values(state.products).filter((p) => p.worldId === world.id);
+
+  // Membership & Benefits for this world (§3.3, §7.2)
+  const worldMembership = Object.values(state.memberships).find(
+    (m) => m.worldId === world.id && m.fanId === state.fanProfile.id
+  );
+  const worldBenefits = Object.values(state.benefits).filter((b) => b.worldId === world.id);
+  const isFollowed = state.followedWorldIds.includes(world.id);
 
   const formatTime = (isoString: string) => {
     try {
@@ -127,6 +137,19 @@ export const WorldDetailView: React.FC = () => {
         <button
           type="button"
           role="tab"
+          aria-selected={activeTab === 'membership'}
+          onClick={() => setActiveTab('membership')}
+          className={`btn ${activeTab === 'membership' ? 'btn-primary' : 'btn-secondary'}`}
+          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          id="tab-world-membership"
+        >
+          <Award size={16} />
+          <span>Hội viên & Quyền lợi ({worldBenefits.length})</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
           aria-selected={activeTab === 'shop'}
           onClick={() => setActiveTab('shop')}
           className={`btn ${activeTab === 'shop' ? 'btn-primary' : 'btn-secondary'}`}
@@ -169,6 +192,26 @@ export const WorldDetailView: React.FC = () => {
               <p className="card-desc">
                 Tham dự các buổi giao lưu trực tiếp để nhận Moment Capsule độc quyền lưu trong My World của bạn.
               </p>
+            </div>
+            <div className="card" style={{ backgroundColor: '#FAF5FF', border: '1px solid #E9D5FF' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <Award size={18} color="var(--primary)" />
+                <h3 className="card-title" style={{ fontSize: 'var(--text-base)', color: 'var(--primary)', margin: 0 }}>
+                  Chương trình Hội viên
+                </h3>
+              </div>
+              <p className="card-desc" style={{ marginBottom: '12px' }}>
+                Trạng thái: <strong>{worldMembership?.status ? worldMembership.status.toUpperCase() : 'CHƯA THAM GIA'}</strong> · {worldBenefits.length} quyền lợi công bố.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab('membership')}
+                className="btn btn-secondary"
+                style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
+                id="home-goto-membership-btn"
+              >
+                Xem chi tiết hội viên & quyền lợi →
+              </button>
             </div>
           </div>
         </div>
@@ -317,6 +360,14 @@ export const WorldDetailView: React.FC = () => {
                       >
                         Xem lại bản ghi
                       </button>
+                    ) : s.replayStatus === 'expired' ? (
+                      <span
+                        className="tag"
+                        style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', fontWeight: '700' }}
+                        data-testid={`archive-replay-expired-${s.id}`}
+                      >
+                        Bản quyền đã hết hạn
+                      </span>
                     ) : (
                       <span className="tag" style={{ backgroundColor: 'var(--bg)', color: 'var(--muted)' }}>
                         {s.replayStatus === 'pending_review' ? 'Chờ kiểm duyệt' : 'Chưa khả dụng'}
@@ -327,6 +378,52 @@ export const WorldDetailView: React.FC = () => {
               </article>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* TAB: HỘI VIÊN & QUYỀN LỢI (MEMBERSHIP) */}
+      {activeTab === 'membership' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <header>
+            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '800', margin: '0 0 4px 0' }}>
+              Hội viên & Danh mục Quyền lợi ({world.name})
+            </h2>
+            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+              Minh bạch tuyệt đối giữa trạng thái hội viên và điều kiện kích hoạt từng quyền lợi (§2.3, §7.2).
+            </p>
+          </header>
+
+          <MembershipCard
+            world={world}
+            membership={worldMembership}
+            onUpgrade={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId: world.id })}
+            isFollowed={isFollowed}
+            onToggleFollow={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: world.id })}
+          />
+
+          <section aria-label={`Danh sách quyền lợi của ${world.name}`}>
+            <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', marginBottom: '12px' }}>
+              Danh mục quyền lợi ({worldBenefits.length})
+            </h3>
+
+            {worldBenefits.length === 0 ? (
+              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+                  Chưa có danh mục quyền lợi công bố cho thế giới này.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {worldBenefits.map((b) => (
+                  <BenefitCard
+                    key={b.id}
+                    benefit={b}
+                    onClaim={(id) => dispatch({ type: 'CLAIM_BENEFIT', benefitId: id })}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       )}
 
@@ -369,27 +466,75 @@ export const WorldDetailView: React.FC = () => {
                       Còn lại trong kho: <strong>{p.stockCount}</strong> chiếc · Mã: <code>{p.id}</code>
                     </div>
                     {p.requiredBenefitId && (
-                      <div className="tag" style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '11px', marginBottom: '12px' }}>
-                        Yêu cầu quyền lợi: {p.requiredBenefitId}
+                      <div
+                        className="tag"
+                        style={{
+                          backgroundColor:
+                            state.benefits[p.requiredBenefitId]?.status === 'eligible' ||
+                            state.benefits[p.requiredBenefitId]?.status === 'claimed'
+                              ? '#ECFDF5'
+                              : '#FEF3C7',
+                          color:
+                            state.benefits[p.requiredBenefitId]?.status === 'eligible' ||
+                            state.benefits[p.requiredBenefitId]?.status === 'claimed'
+                              ? '#065F46'
+                              : '#92400E',
+                          fontSize: '11px',
+                          marginBottom: '12px',
+                          display: 'block',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        Yêu cầu quyền lợi: {p.requiredBenefitId} · {state.benefits[p.requiredBenefitId]?.status ? state.benefits[p.requiredBenefitId].status.toUpperCase() : 'CHƯA CÓ'}
                       </div>
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dispatch({
-                        type: 'CREATE_ORDER',
-                        productId: p.id,
-                        requestId: `req_${Date.now()}`,
-                      });
-                    }}
-                    className="btn btn-primary"
-                    style={{ width: '100%', fontSize: 'var(--text-xs)', padding: '8px' }}
-                    id={`order-product-btn-${p.id}`}
-                  >
-                    Mô phỏng đặt hàng
-                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      disabled={
+                        !p.isAvailable ||
+                        p.stockCount <= 0 ||
+                        (Boolean(p.requiredBenefitId) &&
+                          state.benefits[p.requiredBenefitId!]?.status !== 'eligible' &&
+                          state.benefits[p.requiredBenefitId!]?.status !== 'claimed')
+                      }
+                      onClick={() => {
+                        dispatch({
+                          type: 'CREATE_ORDER',
+                          productId: p.id,
+                          requestId: `req_${p.id}_${state.fanProfile.id}`,
+                        });
+                      }}
+                      className="btn btn-primary"
+                      style={{
+                        width: '100%',
+                        fontSize: 'var(--text-xs)',
+                        padding: '8px',
+                        opacity:
+                          !p.isAvailable ||
+                          p.stockCount <= 0 ||
+                          (Boolean(p.requiredBenefitId) &&
+                            state.benefits[p.requiredBenefitId!]?.status !== 'eligible' &&
+                            state.benefits[p.requiredBenefitId!]?.status !== 'claimed')
+                            ? 0.6
+                            : 1,
+                      }}
+                      id={`order-product-btn-${p.id}`}
+                    >
+                      {!p.isAvailable || p.stockCount <= 0
+                        ? 'Hết hàng trong kho'
+                        : Boolean(p.requiredBenefitId) &&
+                          state.benefits[p.requiredBenefitId!]?.status !== 'eligible' &&
+                          state.benefits[p.requiredBenefitId!]?.status !== 'claimed'
+                        ? 'Mô phỏng đặt hàng (Chưa đủ điều kiện)'
+                        : 'Mô phỏng đặt hàng'}
+                    </button>
+                    <span style={{ fontSize: '10px', color: 'var(--muted)', display: 'block', textAlign: 'center', marginTop: '4px' }}>
+                      Mô phỏng · Không thu phí thật
+                    </span>
+                  </div>
                 </article>
               ))}
             </div>

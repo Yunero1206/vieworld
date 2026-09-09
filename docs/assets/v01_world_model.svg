@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="675" fill="#151426"/>
+  
+  <!-- Demo Header Banner -->
+  <rect x="0" y="0" width="1200" height="36" fill="#FFF4E5"/>
+  <text x="30" y="23" fill="#7A4100" font-family="system-ui, sans-serif" font-size="13" font-weight="700">Bản thử nghiệm · Dữ liệu và tương tác mô phỏng (VieWorld v0.1.0 — Slot V01)</text>
+  <rect x="1070" y="6" width="100" height="24" rx="12" fill="#6551C8"/>
+  <text x="1120" y="22" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">DEMO</text>
+
+  <!-- Title -->
+  <text x="60" y="80" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">KIẾN TRÚC MÔ HÌNH THẾ GIỚI QUAN HỆ (§1, §3, §5.2)</text>
+  <text x="60" y="115" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="28" font-weight="800">Relational World Model &amp; Destination Architecture</text>
+
+  <!-- Central IP World: Neon Sessions -->
+  <rect x="60" y="160" width="500" height="460" rx="16" fill="#201E3C" stroke="#A9E5D4" stroke-width="1.5"/>
+  <rect x="84" y="184" width="80" height="24" rx="12" fill="#0F766E"/>
+  <text x="124" y="200" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">IP WORLD</text>
+  <text x="180" y="202" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12">/worlds/neon-sessions</text>
+  <text x="84" y="245" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Neon Sessions</text>
+  <text x="84" y="275" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="14" max-width="450">
+    Chương trình âm nhạc đêm phát sóng trực tiếp, quy tụ nhiều nghệ sĩ độc lập.
+  </text>
+
+  <!-- Linked World Connection Indicator -->
+  <rect x="84" y="320" width="450" height="110" rx="12" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="104" y="348" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="12" font-weight="700">LIÊN KẾT THẾ GIỚI (linkedWorldIds: ['artist-a'])</text>
+  <text x="104" y="375" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="14" font-weight="600">→ Nghệ sĩ tham gia: Vũ Thanh Đạt (Artist A)</text>
+  <text x="104" y="405" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12">Người hâm mộ có thể điều hướng xuyên suốt mà không mất ngữ cảnh theo dõi.</text>
+
+  <rect x="84" y="450" width="450" height="140" rx="12" fill="#151426" stroke="#374151" stroke-width="1"/>
+  <text x="104" y="478" fill="#FBBF24" font-family="system-ui, sans-serif" font-size="12" font-weight="700">TÍNH CHÂN THỰC CỦA SỰ KIỆN KẾ TIẾP</text>
+  <text x="104" y="508" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13">Phiên sắp diễn ra: Tập 04 — Đêm Nhạc Mộc (Drop-in)</text>
+  <text x="104" y="535" fill="#34D399" font-family="system-ui, sans-serif" font-size="12">Trạng thái: Đã lên lịch (scheduled) · DEMO Badge luôn hiển thị</text>
+  <text x="104" y="562" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">Tuyệt đối không hiển thị đếm ngược giả lập hay tạo cảm giác phát sóng trực tiếp khi chưa diễn ra.</text>
+
+  <!-- Artist World: Artist A -->
+  <rect x="640" y="160" width="500" height="460" rx="16" fill="#201E3C" stroke="#6551C8" stroke-width="1.5"/>
+  <rect x="664" y="184" width="100" height="24" rx="12" fill="#6551C8"/>
+  <text x="714" y="200" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="800" text-anchor="middle">ARTIST WORLD</text>
+  <text x="780" y="202" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="12">/worlds/artist-a</text>
+  <text x="664" y="245" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Vũ Thanh Đạt (Artist A)</text>
+  <text x="664" y="275" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="14">
+    Nghệ sĩ indie pop điện tử hư cấu, phát triển âm nhạc độc lập tại TP.HCM.
+  </text>
+
+  <!-- Features in Artist World -->
+  <g transform="translate(664, 320)">
+    <!-- Follow vs Membership Distinction Box -->
+    <rect x="0" y="0" width="452" height="85" rx="10" fill="#151426" stroke="#6551C8" stroke-width="1"/>
+    <text x="20" y="28" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Ranh giới bất biến: Theo dõi (Follow) ≠ Hội viên (Membership)</text>
+    <text x="20" y="52" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13">Theo dõi là tương tác tự do, miễn phí và không bao giờ tự ý tạo hội viên.</text>
+    <text x="20" y="72" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="11">Hội viên Tier Bạc/Vàng là hợp đồng riêng, xét duyệt điều kiện nhận quyền lợi.</text>
+
+    <!-- Connected Sub-Modules -->
+    <rect x="0" y="100" width="140" height="80" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+    <text x="16" y="128" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700">VieSHOP</text>
+    <text x="16" y="150" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">Huy hiệu Pin, Áo</text>
+    <text x="16" y="168" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="10">Thương mại minh bạch</text>
+
+    <rect x="156" y="100" width="140" height="80" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+    <text x="172" y="128" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700">QUYỀN LỢI</text>
+    <text x="172" y="150" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">Xem lại &amp; Ưu đãi</text>
+    <text x="172" y="168" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="10">Kiểm tra tư cách</text>
+
+    <rect x="312" y="100" width="140" height="80" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+    <text x="328" y="128" fill="#A9E5D4" font-family="system-ui, sans-serif" font-size="11" font-weight="700">SÂN KHẤU ẢO</text>
+    <text x="328" y="150" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="12">Avatar 2D</text>
+    <text x="328" y="168" fill="#9CA3AF" font-family="system-ui, sans-serif" font-size="10">Hiện diện trung thực</text>
+
+    <rect x="0" y="195" width="452" height="75" rx="10" fill="#151426" stroke="#374151" stroke-width="1"/>
+    <text x="20" y="222" fill="#34D399" font-family="system-ui, sans-serif" font-size="12" font-weight="700">CHẾ ĐỘ XEM ĐA DẠNG: PHONG CẢNH (SCENERY) &amp; DANH SÁCH (LIST)</text>
+    <text x="20" y="246" fill="#D8D9E1" font-family="system-ui, sans-serif" font-size="12">
+      Hỗ trợ chuyển đổi nhanh để thử nghiệm kiểm thử không phụ thuộc bố cục ảnh.
+    </text>
+  </g>
+</svg>

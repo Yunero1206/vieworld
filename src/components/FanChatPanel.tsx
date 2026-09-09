@@ -16,6 +16,7 @@ export interface FanChatPanelProps {
   currentFanId: string;
   currentFanName: string;
   initialMessages?: ChatMessage[];
+  isChatPaused?: boolean;
 }
 
 export const FanChatPanel: React.FC<FanChatPanelProps> = ({
@@ -23,6 +24,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
   currentFanId,
   currentFanName,
   initialMessages,
+  isChatPaused = false,
 }) => {
   // Default seeded messages if none passed
   const defaultSeededMessages: ChatMessage[] = [
@@ -77,7 +79,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
   const charCount = inputText.length;
   const isTooLong = charCount > 140;
   const isSendDisabled =
-    isMuted || cooldownSeconds > 0 || inputText.trim().length === 0 || isTooLong;
+    isMuted || isChatPaused || cooldownSeconds > 0 || inputText.trim().length === 0 || isTooLong;
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,14 +303,31 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
 
       {/* Input Form with Slow Mode & Length limit */}
       <form onSubmit={handleSendMessage} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {isChatPaused && (
+          <div
+            data-testid="chat-paused-notice"
+            style={{
+              padding: '6px 10px',
+              backgroundColor: '#FEF3C7',
+              color: '#92400E',
+              fontSize: 'var(--text-xs)',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: '600',
+            }}
+          >
+            Kênh trò chuyện đang tạm dừng theo yêu cầu của ban điều hành.
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '8px' }}>
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            disabled={isMuted}
+            disabled={isMuted || isChatPaused}
             placeholder={
-              isMuted
+              isChatPaused
+                ? 'Kênh chat đang tạm dừng bởi điều hành viên.'
+                : isMuted
                 ? 'Trò chuyện đang bị tắt tiếng. Bật trò chuyện để gửi tin nhắn.'
                 : 'Nhập tin nhắn giao lưu (tối đa 140 ký tự)...'
             }
@@ -321,6 +340,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
               border: isTooLong ? '1px solid #EF4444' : '1px solid var(--border)',
             }}
             id="chat-input-field"
+            data-testid="chat-input-field"
             aria-label="Nội dung tin nhắn trò chuyện"
           />
 

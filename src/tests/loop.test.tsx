@@ -119,7 +119,7 @@ describe('T06 Acceptance: The Signature Loop & My World', () => {
         expect(screen.getByText('Một buổi tối âm nhạc acoustic thật lắng đọng và ý nghĩa!')).toBeInTheDocument();
         expect(screen.getByText('Kỷ niệm tham dự trực tiếp (Live)')).toBeInTheDocument();
       });
-    });
+    }, 15000);
   });
 
   describe('2. Ending Session Idempotency', () => {

@@ -20,20 +20,57 @@ export interface World extends BaseRecord {
   bannerAssetId?: string;
 }
 
+export type SessionFormat = 'dropin' | 'listening' | 'concert';
+
+export interface AvatarParts {
+  base?: 'stage_classic' | 'cyber_neon' | 'acoustic_minimal' | string;
+  outfit?: 'midnight_jacket' | 'festival_hoodie' | 'cyber_suit' | string;
+  accessory?: 'none' | 'earpiece_glow' | 'visor_neon' | 'star_badge' | string;
+  [key: string]: string | undefined;
+}
+
 export interface AvatarAsset extends BaseRecord {
   ownerWorldId: string;
   status: 'draft' | 'approved' | 'retired';
-  parts: Record<string, string>; // accessory and style configurations
+  parts: AvatarParts; // accessory and style configurations
   approvalRef?: string;
-  allowedContexts: ('dropin' | 'listening' | 'concert')[];
+  allowedContexts: SessionFormat[];
   replayAllowed: boolean;
+}
+
+export interface SessionRightsChecklist {
+  musicClearance: boolean;
+  artistConsent: boolean;
+  safetyReview: boolean;
+}
+
+export interface TrackNote {
+  trackNumber: number;
+  title: string;
+  duration: string;
+  notes: string;
+  isCurrent?: boolean;
+}
+
+export interface SetlistItem {
+  order: number;
+  title: string;
+  status: 'completed' | 'performing' | 'upcoming';
+  notes?: string;
+}
+
+export interface CallSampleCue {
+  id: string;
+  cueText: string;
+  prompt: string;
+  actionLabel: string;
 }
 
 export interface Session extends BaseRecord {
   worldId: string;
   title: string;
   avatarAssetId?: string;
-  format: 'dropin' | 'listening' | 'concert';
+  format: SessionFormat;
   status: 'scheduled' | 'open' | 'running' | 'paused' | 'ended' | 'cancelled';
   hostRole: 'artist' | 'team';
   artistPresence: 'absent' | 'present' | 'reconnecting' | 'disconnected';
@@ -42,6 +79,13 @@ export interface Session extends BaseRecord {
   replayStatus: 'not_planned' | 'pending_review' | 'available' | 'expired' | 'withdrawn';
   scheduledStartTime: string;
   demo: true;
+  rightsApproved?: boolean;
+  rightsChecklist?: SessionRightsChecklist;
+  isChatPaused?: boolean;
+  trackNotes?: TrackNote[];
+  setlist?: SetlistItem[];
+  callSampleCues?: CallSampleCue[];
+  mediaStatus?: 'cleared_local' | 'missing' | 'expired';
 }
 
 export interface Membership extends BaseRecord {
@@ -86,10 +130,13 @@ export interface SupportCase extends BaseRecord {
   resolution?: string;
 }
 
+export type FanRole = 'fan' | 'artist' | 'operator';
+
 export interface FanProfile extends BaseRecord {
   username: string;
   displayName: string;
   avatarUrl?: string;
+  role?: FanRole;
   wardrobeChoice?: {
     accessoryId: string;
     equippedAt: string;
@@ -151,11 +198,22 @@ export interface Capsule extends BaseRecord {
 
 export interface Notification extends BaseRecord {
   fanId: string;
-  type: 'session_reminder' | 'capsule_ready' | 'support_update' | 'order_update';
+  type: 'session_reminder' | 'capsule_ready' | 'support_update' | 'order_update' | 'promotional';
   title: string;
   body: string;
   isRead: boolean;
   targetRoute: string;
+  createdAt?: string;
+  category?: 'session' | 'capsule' | 'support' | 'order' | 'promotional';
+  sourceAttribution?: 'platform' | 'organizer' | 'session_system';
+}
+
+export interface NotificationPreferences {
+  sessionReminders: boolean; // Event reminders for RSVP / sessions
+  capsuleReady: boolean;     // Moment capsule generated reminders
+  supportUpdates: boolean;   // Support & reconciliation updates
+  orderUpdates: boolean;     // Order fulfilment and receipt updates
+  promotional: boolean;      // Promotional announcements
 }
 
 export interface ConsentRecord extends BaseRecord {
@@ -208,6 +266,7 @@ export interface AppState {
   polls: Record<string, Poll>;
   capsules: Record<string, Capsule>;
   notifications: Record<string, Notification>;
+  notificationPreferences: NotificationPreferences;
   followedWorldIds: string[];
   rsvpdSessionIds: string[];
   inLobbySessionIds: string[]; // Sessions where fan is currently in lobby
@@ -227,7 +286,7 @@ export type AppAction =
   | { type: 'SELECT_QUESTION'; questionId: string }
   | { type: 'ANSWER_QUESTION'; questionId: string }
   | { type: 'VOTE_POLL'; pollId: string; optionId: string }
-  | { type: 'START_SESSION'; sessionId: string; avatarAssetId: string }
+  | { type: 'START_SESSION'; sessionId?: string; avatarAssetId?: string; payload?: { sessionId?: string; avatarAssetId?: string } }
   | { type: 'DISCONNECT_ARTIST'; sessionId: string }
   | { type: 'RECONNECT_ARTIST'; sessionId: string }
   | { type: 'END_SESSION'; sessionId: string }
@@ -237,9 +296,66 @@ export type AppAction =
   | { type: 'CREATE_ORDER'; productId: string; requestId: string }
   | { type: 'CLAIM_BENEFIT'; benefitId: string }
   | { type: 'OPEN_SUPPORT_CASE'; subjectType: 'benefit' | 'order'; subjectId: string }
+  | { type: 'ACKNOWLEDGE_SUPPORT_CASE'; caseId: string }
+  | { type: 'INVESTIGATE_SUPPORT_CASE'; caseId: string }
   | { type: 'RESOLVE_SUPPORT_CASE'; caseId: string; resolution: string }
+  | { type: 'CLOSE_SUPPORT_CASE'; caseId: string }
+  | { type: 'RECONCILE_BENEFIT'; benefitId: string }
+  | { type: 'RECONCILE_ORDER'; orderId: string }
+  | { type: 'MARK_NOTIFICATION_READ'; notificationId: string }
+  | { type: 'MARK_ALL_NOTIFICATIONS_READ' }
+  | { type: 'UPDATE_NOTIFICATION_PREFERENCES'; preferences: Partial<NotificationPreferences> }
+  | { type: 'CREATE_NOTIFICATION'; notification: Notification }
+  | {
+      type: 'SAVE_AVATAR_DRAFT';
+      asset?: {
+        id: string;
+        ownerWorldId: string;
+        parts: AvatarParts;
+        allowedContexts: SessionFormat[];
+        replayAllowed: boolean;
+      };
+      payload?: {
+        avatar?: AvatarAsset;
+        asset?: any;
+      };
+    }
+  | {
+      type: 'APPROVE_AVATAR_ASSET';
+      assetId?: string;
+      approvalRef?: string;
+      payload?: { assetId?: string; approvalRef?: string };
+    }
+  | { type: 'RETIRE_AVATAR_ASSET'; assetId?: string; payload?: { assetId?: string } }
+  | {
+      type: 'REVERT_AVATAR_VERSION';
+      worldId?: string;
+      targetAssetId?: string;
+      payload?: { worldId?: string; assetId?: string; targetAssetId?: string };
+    }
+  | {
+      type: 'ASSIGN_AVATAR_TO_SESSION';
+      sessionId?: string;
+      avatarAssetId?: string;
+      payload?: { sessionId?: string; avatarAssetId?: string };
+    }
+  | { type: 'OPEN_LOBBY'; sessionId: string }
+  | { type: 'PAUSE_SESSION'; sessionId: string }
+  | { type: 'RESUME_SESSION'; sessionId: string }
+  | { type: 'CANCEL_SESSION'; sessionId: string }
+  | { type: 'UPDATE_SEGMENT_MODE'; sessionId: string; segmentMode: 'live' | 'recorded' }
+  | { type: 'TOGGLE_CHAT_PAUSED'; sessionId: string }
+  | { type: 'WITHDRAW_REPLAY'; sessionId: string }
+  | {
+      type: 'APPROVE_SESSION_RIGHTS';
+      sessionId: string;
+      checklist?: SessionRightsChecklist;
+    }
+  | { type: 'CLOSE_QUESTION'; questionId: string }
   | { type: 'SAVE_CAPSULE'; capsuleId: string; privateNote?: string; isSaved?: boolean }
   | { type: 'EQUIP_WARDROBE'; accessoryId: string }
+  | { type: 'UPGRADE_MEMBERSHIP'; worldId: string }
+  | { type: 'SET_FAN_ROLE'; role: FanRole }
   | { type: 'SWITCH_TENANT'; targetTenantId: TenantId }
   | { type: 'LOAD_SCENARIO'; scenarioState: AppState }
   | { type: 'ADVANCE_DEMO_TIME'; newIsoTime: string }
