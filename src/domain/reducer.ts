@@ -297,6 +297,29 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         };
       }
 
+      // Idempotency check (§2.3, P05 Acceptance T05):
+      // 1. By requestId if provided
+      if (action.requestId) {
+        const existingByReq = Object.values(state.questions).find(
+          (q) => q.requestId === action.requestId
+        );
+        if (existingByReq) {
+          return state;
+        }
+      }
+
+      // 2. By identical content submitted by the same fan for the same session in submitted/under_review
+      const existingDuplicate = Object.values(state.questions).find(
+        (q) =>
+          q.sessionId === session.id &&
+          q.fanId === state.fanProfile.id &&
+          q.content === trimmed &&
+          (q.status === 'submitted' || q.status === 'under_review')
+      );
+      if (existingDuplicate) {
+        return state;
+      }
+
       const qId = `question_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const newQuestion: Question = {
         id: qId,
@@ -308,6 +331,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         authorName: state.fanProfile.displayName,
         content: trimmed,
         status: 'submitted',
+        requestId: action.requestId,
       };
 
       return {
@@ -340,6 +364,32 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [action.questionId]: {
             ...q,
             status: 'selected',
+            updatedAt: state.demoTime,
+          },
+        },
+      };
+    }
+
+    /**
+     * Answer Question Guard:
+     * - Invariant: Sets status to 'answered', strictly distinct from 'selected'.
+     */
+    case 'ANSWER_QUESTION': {
+      const q = state.questions[action.questionId];
+      if (!q) {
+        return {
+          ...state,
+          lastError: { code: 'QUESTION_NOT_FOUND', message: 'Không tìm thấy câu hỏi.' },
+        };
+      }
+
+      return {
+        ...state,
+        questions: {
+          ...state.questions,
+          [action.questionId]: {
+            ...q,
+            status: 'answered',
             updatedAt: state.demoTime,
           },
         },

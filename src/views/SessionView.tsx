@@ -5,6 +5,9 @@ import { PresencePanel } from '../components/PresencePanel';
 import { AvatarStage } from '../components/AvatarStage';
 import { SilentMediaPlaceholder } from '../components/SilentMediaPlaceholder';
 import { SessionControls } from '../components/SessionControls';
+import { QuestionQueue } from '../components/QuestionQueue';
+import { LivePollPanel } from '../components/LivePollPanel';
+import { FanChatPanel } from '../components/FanChatPanel';
 import { StatusNotice } from '../components/StatusNotice';
 import {
   Calendar,
@@ -16,6 +19,9 @@ import {
   AlertTriangle,
   Globe,
   Radio,
+  MessageSquare,
+  HelpCircle,
+  BarChart3,
 } from 'lucide-react';
 
 export const SessionView: React.FC = () => {
@@ -26,9 +32,18 @@ export const SessionView: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [interactionTab, setInteractionTab] = useState<'chat' | 'questions' | 'poll'>('chat');
 
   // Safe Recovery Screen when session is invalid
   const session = sessionId ? state.sessions[sessionId] : undefined;
+
+  // Query questions and active poll for this session
+  const sessionQuestions = session
+    ? Object.values(state.questions).filter((q) => q.sessionId === session.id)
+    : [];
+  const sessionPoll = session
+    ? Object.values(state.polls).find((p) => p.sessionId === session.id)
+    : undefined;
 
   if (!session) {
     return (
@@ -391,6 +406,93 @@ export const SessionView: React.FC = () => {
               )}
             </div>
           </section>
+
+          {/* Interactive Participation Area: Chat, Q&A, Polls (P05) */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '6px',
+              borderBottom: '1px solid var(--border)',
+              paddingBottom: '2px',
+            }}
+            role="tablist"
+            aria-label="Các kênh tương tác phiên sự kiện"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={interactionTab === 'chat'}
+              onClick={() => setInteractionTab('chat')}
+              className={`btn ${interactionTab === 'chat' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 'var(--text-xs)', padding: '8px 12px' }}
+              id="tab-btn-chat"
+            >
+              <MessageSquare size={14} />
+              <span>Trò chuyện</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={interactionTab === 'questions'}
+              onClick={() => setInteractionTab('questions')}
+              className={`btn ${interactionTab === 'questions' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 'var(--text-xs)', padding: '8px 12px' }}
+              id="tab-btn-questions"
+            >
+              <HelpCircle size={14} />
+              <span>Câu hỏi Q&A ({sessionQuestions.length})</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={interactionTab === 'poll'}
+              onClick={() => setInteractionTab('poll')}
+              className={`btn ${interactionTab === 'poll' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ fontSize: 'var(--text-xs)', padding: '8px 12px' }}
+              id="tab-btn-poll"
+            >
+              <BarChart3 size={14} />
+              <span>Bình chọn {sessionPoll && '●'}</span>
+            </button>
+          </div>
+
+          {/* Active Interaction Tab Panel Content */}
+          {interactionTab === 'chat' && (
+            <FanChatPanel
+              sessionId={session.id}
+              currentFanId={state.fanProfile.id}
+              currentFanName={state.fanProfile.displayName}
+            />
+          )}
+
+          {interactionTab === 'questions' && (
+            <QuestionQueue
+              session={session}
+              questions={sessionQuestions}
+              currentFanId={state.fanProfile.id}
+              onSubmitQuestion={(content, reqId) =>
+                dispatch({
+                  type: 'SUBMIT_QUESTION',
+                  sessionId: session.id,
+                  content,
+                  requestId: reqId,
+                })
+              }
+              onSelectQuestion={(qId) => dispatch({ type: 'SELECT_QUESTION', questionId: qId })}
+              onAnswerQuestion={(qId) => dispatch({ type: 'ANSWER_QUESTION', questionId: qId })}
+            />
+          )}
+
+          {interactionTab === 'poll' && (
+            <LivePollPanel
+              poll={sessionPoll}
+              onVote={(pollId, optionId) =>
+                dispatch({ type: 'VOTE_POLL', pollId, optionId })
+              }
+            />
+          )}
 
           {/* Stage Asset & Ethics Disclosure Card (§2.3, §5.1) */}
           <section className="card" style={{ padding: '20px' }} aria-label="Cam kết hiện diện chân thực">

@@ -111,6 +111,19 @@ export interface Question extends BaseRecord {
   authorName: string;
   content: string;
   status: 'submitted' | 'under_review' | 'selected' | 'answered' | 'closed';
+  requestId?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  sessionId: string;
+  fanId: string;
+  authorName: string;
+  text: string;
+  timestamp: string;
+  isSample?: boolean;
+  isReported?: boolean;
+  reportRef?: string;
 }
 
 export interface PollOption {
@@ -210,8 +223,9 @@ export type AppAction =
   | { type: 'LEAVE_LOBBY'; sessionId: string }
   | { type: 'JOIN_LIVE_SESSION'; sessionId: string }
   | { type: 'WATCH_REPLAY'; sessionId: string }
-  | { type: 'SUBMIT_QUESTION'; sessionId: string; content: string }
+  | { type: 'SUBMIT_QUESTION'; sessionId: string; content: string; requestId?: string }
   | { type: 'SELECT_QUESTION'; questionId: string }
+  | { type: 'ANSWER_QUESTION'; questionId: string }
   | { type: 'VOTE_POLL'; pollId: string; optionId: string }
   | { type: 'START_SESSION'; sessionId: string; avatarAssetId: string }
   | { type: 'DISCONNECT_ARTIST'; sessionId: string }
