@@ -1,0 +1,95 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { AppShell } from './components/AppShell';
+import { HomeView } from './views/HomeView';
+import { AboutDemoView } from './views/AboutDemoView';
+
+const RoutePlaceholder: React.FC<{ title: string; packet: string; description: string }> = ({
+  title,
+  packet,
+  description,
+}) => (
+  <div className="card" style={{ maxWidth: '640px', margin: '40px auto', textAlign: 'center' }}>
+    <div style={{ display: 'inline-block', marginBottom: '12px' }}>
+      <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontWeight: '700' }}>
+        LẬP TRÌNH THEO GÓI · {packet}
+      </span>
+    </div>
+    <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '700', marginBottom: '8px' }}>{title}</h2>
+    <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', marginBottom: '20px', lineHeight: 1.6 }}>
+      {description}
+    </p>
+    <Link to="/" className="btn btn-secondary" style={{ display: 'inline-flex' }}>
+      Quay lại Khám phá
+    </Link>
+  </div>
+);
+
+export const App: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<AppShell />}>
+          <Route index element={<HomeView />} />
+          <Route path="about-demo" element={<AboutDemoView />} />
+          <Route
+            path="worlds"
+            element={
+              <RoutePlaceholder
+                title="Thế giới Nghệ sĩ & IP (Worlds)"
+                packet="P03"
+                description="Danh sách các World được theo dõi và điểm đến của Artist A, Neon Sessions sẽ được hoàn thiện trong gói P03."
+              />
+            }
+          />
+          <Route
+            path="me"
+            element={
+              <RoutePlaceholder
+                title="Không gian cá nhân (My World)"
+                packet="P06"
+                description="Kỷ niệm, theo dõi, tủ đồ phụ kiện avatar miễn phí và quyền lợi của fan sẽ được kích hoạt tại gói P06."
+              />
+            }
+          />
+          <Route
+            path="inbox"
+            element={
+              <RoutePlaceholder
+                title="Hộp thư thông báo trung thực (Inbox)"
+                packet="P10"
+                description="Các nhắc nhở cục bộ về phiên trực tiếp, xác nhận đơn hàng và cập nhật hỗ trợ sẽ có mặt tại P10."
+              />
+            }
+          />
+          <Route
+            path="studio"
+            element={
+              <RoutePlaceholder
+                title="Bàn điều khiển Studio Demo"
+                packet="P11–P12"
+                description="Xem trước vai trò điều hành, quản lý phiên và duyệt avatar cho nghệ sĩ hư cấu."
+              />
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <div className="card" style={{ maxWidth: '480px', margin: '40px auto', textAlign: 'center' }}>
+                <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '700', marginBottom: '8px' }}>
+                  Không tìm thấy trang
+                </h2>
+                <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', marginBottom: '16px' }}>
+                  Đường dẫn không hợp lệ hoặc tính năng chưa được mở trong nguyên mẫu.
+                </p>
+                <Link to="/" className="btn btn-primary">
+                  Về trang chủ
+                </Link>
+              </div>
+            }
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+};
