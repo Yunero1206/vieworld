@@ -530,6 +530,33 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'END_SESSION': {
       const session = state.sessions[action.sessionId];
       if (!session) return state;
+      if (session.status === 'ended') return state; // Idempotent: ending twice creates no duplicate
+
+      const fanId = state.fanProfile.id;
+      const livePartKey = `part_${fanId}_${session.id}_live`;
+      const hasLiveParticipation = Boolean(state.participations[livePartKey]);
+
+      // If fan attended live, ensure capsule exists
+      let updatedCapsules = state.capsules;
+      if (hasLiveParticipation) {
+        const capsuleKey = `capsule_${fanId}_${session.id}`;
+        if (!updatedCapsules[capsuleKey]) {
+          updatedCapsules = {
+            ...updatedCapsules,
+            [capsuleKey]: {
+              id: capsuleKey,
+              tenantId: state.activeTenantId,
+              version: 1,
+              updatedAt: state.demoTime,
+              fanId,
+              sessionId: session.id,
+              worldId: session.worldId,
+              participationId: livePartKey,
+              isSaved: true,
+            },
+          };
+        }
+      }
 
       return {
         ...state,
@@ -543,6 +570,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             updatedAt: state.demoTime,
           },
         },
+        capsules: updatedCapsules,
       };
     }
 
@@ -835,8 +863,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           ...state.capsules,
           [capsule.id]: {
             ...capsule,
-            isSaved: true,
-            privateNote: action.privateNote ?? capsule.privateNote,
+            isSaved: action.isSaved !== undefined ? action.isSaved : true,
+            privateNote: action.privateNote !== undefined ? action.privateNote : capsule.privateNote,
             updatedAt: state.demoTime,
           },
         },

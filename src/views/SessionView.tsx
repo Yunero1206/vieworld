@@ -318,6 +318,8 @@ export const SessionView: React.FC = () => {
             onToggleReducedMotion={() => setReducedMotion((prev) => !prev)}
             onSimulateDisconnect={() => dispatch({ type: 'DISCONNECT_ARTIST', sessionId: session.id })}
             onSimulateReconnect={() => dispatch({ type: 'RECONNECT_ARTIST', sessionId: session.id })}
+            onSimulateEndSession={() => dispatch({ type: 'END_SESSION', sessionId: session.id })}
+            onSimulatePublishReplay={() => dispatch({ type: 'PUBLISH_REPLAY', sessionId: session.id })}
           />
         </div>
 

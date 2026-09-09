@@ -32,6 +32,8 @@ export interface SessionControlsProps {
   onToggleReducedMotion: () => void;
   onSimulateDisconnect: () => void;
   onSimulateReconnect: () => void;
+  onSimulateEndSession?: () => void;
+  onSimulatePublishReplay?: () => void;
 }
 
 export const SessionControls: React.FC<SessionControlsProps> = ({
@@ -52,6 +54,8 @@ export const SessionControls: React.FC<SessionControlsProps> = ({
   onToggleReducedMotion,
   onSimulateDisconnect,
   onSimulateReconnect,
+  onSimulateEndSession,
+  onSimulatePublishReplay,
 }) => {
   const isRunning = session.status === 'running';
   const isOpen = session.status === 'open' || session.status === 'scheduled';
@@ -286,6 +290,32 @@ export const SessionControls: React.FC<SessionControlsProps> = ({
             >
               <WifiOff size={14} color="#EF4444" />
               <span>Ngắt kết nối nghệ sĩ (Thử nghiệm)</span>
+            </button>
+          )}
+
+          {/* End Session Operator Button (P06) */}
+          {isRunning && onSimulateEndSession && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onSimulateEndSession}
+              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: '#B91C1C' }}
+              id="simulate-end-session-button"
+            >
+              <span>Mô phỏng: Kết thúc phiên sự kiện</span>
+            </button>
+          )}
+
+          {/* Publish Replay Operator Button (P06) */}
+          {isEnded && session.replayStatus === 'pending_review' && onSimulatePublishReplay && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onSimulatePublishReplay}
+              style={{ fontSize: 'var(--text-xs)', padding: '6px 12px', color: 'var(--primary)' }}
+              id="simulate-publish-replay-button"
+            >
+              <span>Mô phỏng: Duyệt bản ghi Replay</span>
             </button>
           )}
         </div>

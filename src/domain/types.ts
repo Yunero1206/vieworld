@@ -238,9 +238,37 @@ export type AppAction =
   | { type: 'CLAIM_BENEFIT'; benefitId: string }
   | { type: 'OPEN_SUPPORT_CASE'; subjectType: 'benefit' | 'order'; subjectId: string }
   | { type: 'RESOLVE_SUPPORT_CASE'; caseId: string; resolution: string }
-  | { type: 'SAVE_CAPSULE'; capsuleId: string; privateNote?: string }
+  | { type: 'SAVE_CAPSULE'; capsuleId: string; privateNote?: string; isSaved?: boolean }
   | { type: 'EQUIP_WARDROBE'; accessoryId: string }
   | { type: 'SWITCH_TENANT'; targetTenantId: TenantId }
   | { type: 'LOAD_SCENARIO'; scenarioState: AppState }
   | { type: 'ADVANCE_DEMO_TIME'; newIsoTime: string }
   | { type: 'CLEAR_ERROR' };
+
+export interface WardrobeAccessory {
+  id: string;
+  name: string;
+  description: string;
+  previewColor: string;
+}
+
+export const PRESET_ACCESSORIES: WardrobeAccessory[] = [
+  {
+    id: 'accessory_classic',
+    name: 'Huy hiệu Ngôi sao Cổ điển',
+    description: 'Huy hiệu kim loại vàng kỷ niệm phong cách sân khấu cổ điển.',
+    previewColor: '#F59E0B',
+  },
+  {
+    id: 'earpiece_glow',
+    name: 'Tai nghe Neon Phát sáng',
+    description: 'Phụ kiện tai nghe sân khấu phát ánh sáng xanh ngọc dịu.',
+    previewColor: '#10B981',
+  },
+  {
+    id: 'visor_neon',
+    name: 'Kính thực tế ảo Cyber',
+    description: 'Kính viền neon hiện đại lấy cảm hứng từ thế giới Neon Sessions.',
+    previewColor: '#8B5CF6',
+  },
+];

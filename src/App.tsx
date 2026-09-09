@@ -6,6 +6,7 @@ import { DiscoverView } from './views/DiscoverView';
 import { WorldsView } from './views/WorldsView';
 import { WorldDetailView } from './views/WorldDetailView';
 import { SessionView } from './views/SessionView';
+import { MyWorldView } from './views/MyWorldView';
 import { AboutDemoView } from './views/AboutDemoView';
 
 const RoutePlaceholder: React.FC<{ title: string; packet: string; description: string }> = ({
@@ -40,16 +41,7 @@ export const App: React.FC = () => {
             <Route path="worlds" element={<WorldsView />} />
             <Route path="worlds/:worldId" element={<WorldDetailView />} />
             <Route path="sessions/:sessionId" element={<SessionView />} />
-            <Route
-              path="me"
-              element={
-                <RoutePlaceholder
-                  title="Không gian cá nhân (My World)"
-                  packet="P06"
-                  description="Kỷ niệm, theo dõi, tủ đồ phụ kiện avatar miễn phí và quyền lợi của fan sẽ được kích hoạt tại gói P06."
-                />
-              }
-            />
+            <Route path="me" element={<MyWorldView />} />
             <Route
               path="inbox"
               element={
