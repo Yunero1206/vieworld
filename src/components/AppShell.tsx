@@ -1,18 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Compass, Globe, User, Mail, Sparkles, Info } from 'lucide-react';
+import { Compass, Globe, User, Mail, Sparkles, Info, Sliders } from 'lucide-react';
 import { DemoBanner } from './DemoBanner';
+import { StatusNotice } from './StatusNotice';
+import { ResetDrawer } from './ResetDrawer';
+import { useApp } from '../context/AppContext';
 
 export const AppShell: React.FC = () => {
+  const { state, storageNotice, dismissNotice, dispatch } = useApp();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const getTenantLabel = () => {
+    switch (state.activeTenantId) {
+      case 'mfan-demo':
+        return 'MFan';
+      case 'fanme-demo':
+        return 'FanMe';
+      case 'vieworld-demo':
+      default:
+        return 'VieWorld';
+    }
+  };
+
   return (
     <div className="app-container">
       <DemoBanner />
 
       <div className="app-shell">
         <aside className="sidebar" aria-label="Điều hướng ứng dụng">
-          <div className="brand-logo">
-            <span>VieWorld</span>
-            <span className="brand-badge">PROTOTYPE</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="brand-logo">
+              <span>{getTenantLabel()}</span>
+              <span className="brand-badge">PROTOTYPE</span>
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>
+              Tenant: <code>{state.activeTenantId}</code>
+            </div>
           </div>
 
           <nav aria-label="Menu chính">
@@ -55,9 +78,42 @@ export const AppShell: React.FC = () => {
               </li>
             </ul>
           </nav>
+
+          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              id="sidebar-scenario-drawer-btn"
+              className="btn btn-secondary"
+              style={{ width: '100%', justifyContent: 'flex-start', fontSize: 'var(--text-xs)' }}
+            >
+              <Sliders size={16} color="var(--primary)" />
+              <span>Bảng thử nghiệm & Kịch bản</span>
+            </button>
+          </div>
         </aside>
 
         <main className="main-content" id="main-content">
+          {/* Active Status & Recovery Notices */}
+          {storageNotice && (
+            <StatusNotice
+              message={storageNotice}
+              type="info"
+              onDismiss={dismissNotice}
+            />
+          )}
+
+          {/* Domain Error Notice */}
+          {state.lastError && (
+            <StatusNotice
+              message={`${state.lastError.message}${
+                state.lastError.actionableResolution ? ` — ${state.lastError.actionableResolution}` : ''
+              }`}
+              type="error"
+              onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })}
+            />
+          )}
+
           <Outlet />
         </main>
       </div>
@@ -88,8 +144,22 @@ export const AppShell: React.FC = () => {
               <span>Hộp thư</span>
             </NavLink>
           </li>
+          <li className="mobile-nav-item">
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              id="mobile-nav-drawer-btn"
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: 'var(--muted)', fontSize: 'var(--text-xs)' }}
+            >
+              <Sliders size={22} color="var(--primary)" aria-hidden="true" />
+              <span>Kịch bản</span>
+            </button>
+          </li>
         </ul>
       </nav>
+
+      {/* Reset & Scenario Drawer */}
+      <ResetDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </div>
   );
 };
