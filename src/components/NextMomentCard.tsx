@@ -143,7 +143,21 @@ export const NextMomentCard: React.FC<NextMomentCardProps> = ({ session, showWor
             )}
           </button>
 
-          {world && (
+          <Link
+            to={`/sessions/${session.id}`}
+            className="btn btn-primary"
+            style={{
+              padding: '10px 18px',
+              fontSize: 'var(--text-sm)',
+              justifyContent: 'center',
+            }}
+            id={`enter-session-btn-${session.id}`}
+          >
+            <span>Vào phiên sự kiện</span>
+            <ArrowRight size={14} />
+          </Link>
+
+          {showWorldLink && world && (
             <Link
               to={`/worlds/${world.id}`}
               className="btn btn-secondary"

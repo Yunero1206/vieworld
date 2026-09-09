@@ -5,6 +5,7 @@ import { AppShell } from './components/AppShell';
 import { DiscoverView } from './views/DiscoverView';
 import { WorldsView } from './views/WorldsView';
 import { WorldDetailView } from './views/WorldDetailView';
+import { SessionView } from './views/SessionView';
 import { AboutDemoView } from './views/AboutDemoView';
 
 const RoutePlaceholder: React.FC<{ title: string; packet: string; description: string }> = ({
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
             <Route path="about-demo" element={<AboutDemoView />} />
             <Route path="worlds" element={<WorldsView />} />
             <Route path="worlds/:worldId" element={<WorldDetailView />} />
+            <Route path="sessions/:sessionId" element={<SessionView />} />
             <Route
               path="me"
               element={

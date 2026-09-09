@@ -223,6 +223,15 @@ export const WorldDetailView: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Link
+                        to={`/sessions/${s.id}`}
+                        className="btn btn-secondary"
+                        style={{ fontSize: 'var(--text-xs)', padding: '6px 14px' }}
+                        id={`session-list-enter-${s.id}`}
+                      >
+                        <span>Vào phiên</span>
+                      </Link>
+
                       {s.status !== 'ended' && (
                         <button
                           type="button"
@@ -291,7 +300,14 @@ export const WorldDetailView: React.FC = () => {
                     </p>
                   </div>
 
-                  <div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <Link
+                      to={`/sessions/${s.id}`}
+                      className="btn btn-secondary"
+                      style={{ fontSize: 'var(--text-xs)', padding: '6px 14px' }}
+                    >
+                      Xem sân khấu
+                    </Link>
                     {s.replayStatus === 'available' ? (
                       <button
                         type="button"
