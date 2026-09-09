@@ -2,7 +2,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AppShell } from './components/AppShell';
-import { HomeView } from './views/HomeView';
+import { DiscoverView } from './views/DiscoverView';
+import { WorldsView } from './views/WorldsView';
+import { WorldDetailView } from './views/WorldDetailView';
 import { AboutDemoView } from './views/AboutDemoView';
 
 const RoutePlaceholder: React.FC<{ title: string; packet: string; description: string }> = ({
@@ -32,18 +34,10 @@ export const App: React.FC = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AppShell />}>
-            <Route index element={<HomeView />} />
+            <Route index element={<DiscoverView />} />
             <Route path="about-demo" element={<AboutDemoView />} />
-            <Route
-              path="worlds"
-              element={
-                <RoutePlaceholder
-                  title="Thế giới Nghệ sĩ & IP (Worlds)"
-                  packet="P03"
-                  description="Danh sách các World được theo dõi và điểm đến của Artist A, Neon Sessions sẽ được hoàn thiện trong gói P03."
-                />
-              }
-            />
+            <Route path="worlds" element={<WorldsView />} />
+            <Route path="worlds/:worldId" element={<WorldDetailView />} />
             <Route
               path="me"
               element={
