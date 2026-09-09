@@ -9,7 +9,7 @@ This matrix tracks acceptance criteria across all packets. No test may be marked
 | Test ID | Packet | Description / Key Invariants | Status | Evidence Path |
 |---|---|---|---|---|
 | **T00** | P00 | Install, build, typecheck succeed; no secrets; workspace preserved; P01 named next; app opens minimal shell with DEMO banner. | **PASSED** | `src/tests/bootstrap.test.tsx`, `npm.cmd run build` (exit 0), `npm.cmd test` (3/3 passed) |
-| **T01** | P01 | Follow never creates membership; lobby entry & replay never create live attendance; attendance granted once; duplicate action IDs idempotent; cancelled session cannot be joined. | NOT RUN | `src/tests/domain.test.ts` (Scheduled) |
+| **T01** | P01 | Follow never creates membership; lobby entry & replay never create live attendance; attendance granted once; duplicate action IDs idempotent; cancelled session cannot be joined. | **PASSED** | `src/tests/domain.test.ts` (21/21 passed), `npm.cmd test` (24/24 passed) |
 | **T02** | P02 | Refresh preserves follows; corrupted saved state visibly recovers; storage denial falls back gracefully; tenant reset deletes only target namespace; keyboard & 390px mobile layout function. | NOT RUN | `src/tests/storage.test.ts` (Scheduled) |
 | **T03** | P03 | Discover → IP → artist journey works; follow/RSVP persist; scenery / list view preserves state; Artist World displays next moment without fake live presence. | NOT RUN | `src/tests/worlds.test.tsx` (Scheduled) |
 | **T04** | P04 | Presence copy distinguishes all §5 states; disconnect removes artist presence; pause/reduced-motion works; no mic/camera requests; invalid session ID recovers. | NOT RUN | `src/tests/session.test.tsx` (Scheduled) |
