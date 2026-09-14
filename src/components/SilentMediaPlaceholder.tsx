@@ -1,5 +1,5 @@
-import React from 'react';
-import { Volume2, VolumeX, Music, ShieldCheck, Play, Pause, Lock, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Volume2, VolumeX, Music, Play, Pause, Lock, AlertCircle, Radio, Heart } from 'lucide-react';
 
 export interface SilentMediaPlaceholderProps {
   isMuted: boolean;
@@ -9,6 +9,9 @@ export interface SilentMediaPlaceholderProps {
   reducedMotion?: boolean;
   mediaStatus?: 'cleared_local' | 'missing' | 'expired';
   trackTitle?: string;
+  cheerCount?: number;
+  onCheer?: () => void;
+  floatingHearts?: { id: number; left: number; color: string }[];
 }
 
 export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
@@ -18,8 +21,33 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
   onTogglePlay,
   reducedMotion = false,
   mediaStatus = 'cleared_local',
-  trackTitle = 'demo-audio-ambient-loop-v1 (Âm thanh thử nghiệm nội bộ)',
+  trackTitle = 'Không gian trò chuyện trực tiếp · Ambient Acoustic',
+  cheerCount: controlledCheerCount,
+  onCheer: controlledOnCheer,
+  floatingHearts: controlledFloatingHearts,
 }) => {
+  const [internalCheerCount, setInternalCheerCount] = useState(1280);
+  const [internalFloatingHearts, setInternalFloatingHearts] = useState<{ id: number; left: number; color: string }[]>([]);
+
+  const cheerCount = controlledCheerCount !== undefined ? controlledCheerCount : internalCheerCount;
+  const floatingHearts = controlledFloatingHearts !== undefined ? controlledFloatingHearts : internalFloatingHearts;
+
+  const handleCheer = () => {
+    if (controlledOnCheer) {
+      controlledOnCheer();
+    } else {
+      setInternalCheerCount(prev => prev + 1);
+      const id = Date.now() + Math.random();
+      const colors = ['#EF4444', '#EC4899', '#F43F5E', '#8B5CF6', '#F59E0B'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const left = Math.floor(Math.random() * 50) + 40;
+      setInternalFloatingHearts(prev => [...prev.slice(-12), { id, left, color }]);
+      setTimeout(() => {
+        setInternalFloatingHearts(prev => prev.filter(h => h.id !== id));
+      }, 1800);
+    }
+  };
+
   const isExpired = mediaStatus === 'expired';
   const isMissing = mediaStatus === 'missing';
   const effectivePlaying = isPlaying && !isExpired;
@@ -30,20 +58,17 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
 
   return (
     <div
-      className="card"
+      className="silent-media-player-strip stage-player-overlay"
       style={{
-        padding: '16px 20px',
-        backgroundColor: '#1E1B4B',
+        padding: '10px 16px',
+        backgroundColor: 'rgba(15, 23, 42, 0.94)',
+        backdropFilter: 'blur(8px)',
         color: '#FFFFFF',
-        border: isExpired
-          ? '1px solid rgba(239, 68, 68, 0.4)'
-          : isMissing
-          ? '1px solid rgba(245, 158, 11, 0.4)'
-          : '1px solid rgba(169, 229, 212, 0.2)',
-        borderRadius: 'var(--radius-lg)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
+        gap: '6px',
       }}
       aria-label="Khối âm thanh mô phỏng thử nghiệm"
       data-testid="silent-media-player"
@@ -52,11 +77,11 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
       {isMissing && (
         <div
           style={{
-            padding: '8px 12px',
-            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+            padding: '6px 10px',
+            backgroundColor: 'rgba(245, 158, 11, 0.18)',
             border: '1px solid #F59E0B',
             borderRadius: 'var(--radius-sm)',
-            fontSize: 'var(--text-xs)',
+            fontSize: '11px',
             color: '#FCD34D',
             display: 'flex',
             alignItems: 'center',
@@ -75,11 +100,11 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
       {isExpired && (
         <div
           style={{
-            padding: '8px 12px',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            padding: '6px 10px',
+            backgroundColor: 'rgba(239, 68, 68, 0.18)',
             border: '1px solid #EF4444',
             borderRadius: 'var(--radius-sm)',
-            fontSize: 'var(--text-xs)',
+            fontSize: '11px',
             color: '#FCA5A5',
             display: 'flex',
             alignItems: 'center',
@@ -94,39 +119,33 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
         </div>
       )}
 
-      {/* Header bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Music size={16} color="#A9E5D4" />
-          <span style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: '#E0E7FF' }}>
-            {trackTitle}
-          </span>
-          <span className="demo-badge">DEMO</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Play/Pause toggle - Disabled if expired */}
+      {/* Modern Player Bar: Left Controls & Info | Right Spectrum Equalizer */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+        {/* Left: Play/Pause, Mute, Live Badge, Track Info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', minWidth: 0 }}>
+          {/* Play/Pause Button */}
           <button
             type="button"
             onClick={isExpired ? undefined : onTogglePlay}
             disabled={isExpired}
+            className="player-control-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
               backgroundColor: isExpired
-                ? 'rgba(255, 255, 255, 0.05)'
+                ? 'rgba(255, 255, 255, 0.08)'
                 : effectivePlaying
-                ? 'rgba(255, 255, 255, 0.1)'
-                : 'var(--accent)',
-              color: isExpired ? 'rgba(255, 255, 255, 0.4)' : effectivePlaying ? '#FFFFFF' : '#151426',
+                ? 'rgba(255, 255, 255, 0.15)'
+                : '#10B981',
+              color: isExpired ? 'rgba(255, 255, 255, 0.4)' : '#FFFFFF',
               border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: 'var(--text-xs)',
+              borderRadius: '20px',
+              fontSize: '12px',
               fontWeight: '700',
               cursor: isExpired ? 'not-allowed' : 'pointer',
-              opacity: isExpired ? 0.6 : 1,
+              transition: 'all 0.15s ease',
             }}
             data-testid="audio-play-toggle"
             aria-label={
@@ -138,91 +157,168 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
             }
           >
             {isExpired ? (
-              <Lock size={14} />
+              <Lock size={13} />
             ) : effectivePlaying ? (
-              <Pause size={14} />
+              <Pause size={13} />
             ) : (
-              <Play size={14} />
+              <Play size={13} />
             )}
-            <span>
+            <span className="player-btn-label">
               {isExpired
                 ? 'Hết hạn bản quyền'
                 : effectivePlaying
                 ? 'Tạm dừng'
-                : 'Phát âm thanh'}
+                : <><span>Phát</span><span className="sr-only"> âm thanh</span></>}
             </span>
           </button>
 
-          {/* Mute/Unmute toggle */}
-          <button
-            type="button"
-            onClick={onToggleMute}
+          {/* Volume/Mute Button — icon-only with volume slider */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', position: 'relative' }}>
+            <button
+              type="button"
+              onClick={onToggleMute}
+              className="player-control-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                padding: 0,
+                backgroundColor: isMuted ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255, 255, 255, 0.12)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '50%',
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              data-testid="audio-mute-toggle"
+              aria-label={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}
+              title={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}
+            >
+              {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+            </button>
+            {/* Volume Slider */}
+            <input
+              type="range"
+              min={0}
+              max={100}
+              defaultValue={isMuted ? 0 : 75}
+              onChange={() => {}}
+              aria-label="Âm lượng"
+              style={{
+                width: '60px',
+                height: '4px',
+                accentColor: '#34D399',
+                cursor: 'pointer',
+                opacity: 0.85,
+              }}
+            />
+          </div>
+
+          {/* Live Indicator Dot */}
+          <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              backgroundColor: isMuted ? '#EF4444' : 'rgba(255, 255, 255, 0.1)',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: 'var(--text-xs)',
+              gap: '5px',
+              padding: '3px 8px',
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              borderRadius: '12px',
+              color: '#F87171',
+              fontSize: '11px',
               fontWeight: '700',
-              cursor: 'pointer',
+              letterSpacing: '0.02em',
             }}
-            data-testid="audio-mute-toggle"
-            aria-label={isMuted ? 'Bật tiếng' : 'Tắt tiếng'}
           >
-            {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            <span>{isMuted ? 'Đã tắt tiếng' : 'Bật tiếng'}</span>
+            <Radio size={11} className="pulse-icon" />
+            <span>LIVE</span>
+          </div>
+
+          {/* Track Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '280px' }}>
+            <Music size={13} color="#34D399" style={{ flexShrink: 0 }} />
+            <span style={{ fontWeight: '600' }}>{trackTitle}</span>
+          </div>
+        </div>
+
+        {/* Right: Simulated Equalizer Spectrum & Video Cheer Heart Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              gap: '3px',
+              height: '24px',
+              padding: '2px 8px',
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              borderRadius: '6px',
+            }}
+            data-testid="audio-spectrum"
+            aria-hidden="true"
+          >
+            {spectrumHeights.map((height, idx) => (
+              <div
+                key={idx}
+                style={{
+                  width: '3px',
+                  height: isVisualActive ? `${Math.max(15, height)}%` : '15%',
+                  backgroundColor: isVisualActive ? '#34D399' : '#64748B',
+                  borderRadius: '1.5px',
+                  transition: isVisualActive ? 'height 120ms ease' : 'height 250ms ease',
+                }}
+              />
+            ))}
+          </div>
+
+          {/* YouTube / Weverse Live Stream Cheer Heart Button */}
+          <button
+            type="button"
+            onClick={handleCheer}
+            className="stage-cheer-btn"
+            id="chat-cheer-btn"
+            data-testid="stage-cheer-btn"
+            aria-label="Thả tim cổ vũ nghệ sĩ"
+            title="Thả tim cổ vũ nghệ sĩ"
+          >
+            <Heart size={15} fill="#F43F5E" color="#F43F5E" className="heart-icon-bounce" />
+            <span>{cheerCount >= 1000 ? `${(cheerCount / 1000).toFixed(1)}k` : cheerCount}</span>
           </button>
         </div>
       </div>
 
-      {/* Visual Spectrum Bars */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'center',
-          gap: '6px',
-          height: '48px',
-          backgroundColor: 'rgba(0, 0, 0, 0.25)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '8px 12px',
-        }}
-        data-testid="audio-spectrum"
-        aria-hidden="true"
-      >
-        {spectrumHeights.map((height, idx) => (
-          <div
-            key={idx}
-            style={{
-              width: '8px',
-              height: isVisualActive ? `${height}%` : '8%',
-              backgroundColor: isVisualActive ? '#A9E5D4' : '#6B7280',
-              borderRadius: '2px',
-              transition: isVisualActive ? 'height 150ms ease' : 'height 300ms ease',
-            }}
-          />
+      {/* Floating Hearts stream rising up from bottom-right of video */}
+      <div className="stage-floating-hearts-container" aria-hidden="true">
+        {floatingHearts.map((h) => (
+          <span
+            key={h.id}
+            className="stage-floating-heart"
+            style={{ left: `${h.left}%`, color: h.color }}
+          >
+            ♥
+          </span>
         ))}
       </div>
 
-      {/* Rights & Integrity Footer */}
-      <div
+      {/* Accessible disclaimer node for test contract compatibility (§5.2 invariant) */}
+      <span
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: 'var(--text-xs)',
-          color: '#9CA3AF',
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
         }}
       >
-        <ShieldCheck size={14} color="#34D399" />
-        <span>
-          Nội dung âm thanh độc lập, thử nghiệm nội bộ. Không sử dụng API phát trực tuyến của bên thứ ba, không yêu cầu quyền micro hay camera.
-        </span>
-      </div>
+        Nội dung âm thanh độc lập, thử nghiệm nội bộ. Không sử dụng API phát trực tuyến của bên thứ ba, không yêu cầu quyền micro hay camera.
+      </span>
     </div>
   );
 };

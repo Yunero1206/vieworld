@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { WorldHeader } from '../components/WorldHeader';
-import { WorldScene } from '../components/WorldScene';
+import { WorldScene, WorldZone } from '../components/WorldScene';
 import { NextMomentCard } from '../components/NextMomentCard';
 import {
   Calendar,
@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   Tag,
   Award,
+  Music2,
+  ArrowUpRight,
 } from 'lucide-react';
 import { MembershipCard } from '../components/MembershipCard';
 import { BenefitCard } from '../components/BenefitCard';
@@ -26,18 +28,25 @@ export const WorldDetailView: React.FC = () => {
   const { worldId } = useParams<{ worldId: string }>();
   const { state, dispatch } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
-  const availableTabs = ['home', 'sessions', 'archive', 'membership', 'shop'] as const;
-  type WorldTab = (typeof availableTabs)[number];
-  const requestedTab = searchParams.get('zone');
-  const activeTab: WorldTab = availableTabs.includes(requestedTab as WorldTab)
-    ? (requestedTab as WorldTab)
-    : 'home';
 
-  const openTab = (tab: WorldTab) => {
+  const availableZones = ['home', 'sessions', 'listening', 'archive', 'membership', 'shop'] as const;
+  type WorldTab = (typeof availableZones)[number];
+
+  const rawRequestedZone = searchParams.get('zone');
+  const isKnownZone = rawRequestedZone
+    ? (availableZones as readonly string[]).includes(rawRequestedZone)
+    : true;
+  const activeTab: WorldTab = isKnownZone && rawRequestedZone ? (rawRequestedZone as WorldTab) : 'home';
+
+  const openTab = (tab: WorldTab | WorldZone) => {
     const nextParams = new URLSearchParams(searchParams);
-    if (tab === 'home') nextParams.delete('zone');
-    else nextParams.set('zone', tab);
-    setSearchParams(nextParams, { replace: true });
+    if (tab === 'home') {
+      nextParams.delete('zone');
+    } else {
+      nextParams.set('zone', tab);
+    }
+    // Standard history push (no replace: true) so Back/Forward history acts naturally
+    setSearchParams(nextParams);
   };
 
   const world = worldId ? state.worlds[worldId] : undefined;
@@ -66,6 +75,7 @@ export const WorldDetailView: React.FC = () => {
   const nextSession =
     worldSessions.find((s) => s.status === 'running') ||
     worldSessions.find((s) => s.status === 'scheduled');
+  const listeningSessions = worldSessions.filter((s) => s.format === 'listening');
 
   // Filter products for this world
   const worldProducts = Object.values(state.products).filter((p) => p.worldId === world.id);
@@ -98,19 +108,40 @@ export const WorldDetailView: React.FC = () => {
       {/* World Header */}
       <WorldHeader world={world} />
 
-      {activeTab === 'home' && (
-        <WorldScene
-          world={world}
-          nextSession={nextSession}
-          sessionCount={worldSessions.length}
-          benefitCount={worldBenefits.length}
-          productCount={worldProducts.length}
-          linkedWorld={linkedWorld}
-          onOpenZone={openTab}
-        />
+      {/* Defensive Notification for Invalid Zone Query */}
+      {!isKnownZone && (
+        <div
+          className="card"
+          data-testid="invalid-zone-notice"
+          style={{
+            backgroundColor: '#FFFBEB',
+            borderColor: 'var(--warning)',
+            padding: '12px 18px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangle size={18} color="var(--warning)" />
+            <span style={{ fontSize: 'var(--text-sm)' }}>
+              Khu vực <code>{rawRequestedZone}</code> không tồn tại trong nhà nhạc. Bạn đang ở Trang chủ (Diorama).
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => openTab('home')}
+            className="btn btn-secondary"
+            style={{ fontSize: 'var(--text-xs)', padding: '4px 10px' }}
+          >
+            Về Nhà Nhạc
+          </button>
+        </div>
       )}
 
-      {/* World Tabs Navigation (§3.2) */}
+      {/* World Tabs Navigation (§3.2 - Weverse Community Tabs) */}
       <div
         className="world-zone-tabs"
         role="tablist"
@@ -121,8 +152,7 @@ export const WorldDetailView: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'home'}
           onClick={() => openTab('home')}
-          className={`btn ${activeTab === 'home' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          className={`world-zone-tab ${activeTab === 'home' ? 'active' : ''}`}
           id="tab-world-home"
         >
           <Home size={16} />
@@ -134,8 +164,7 @@ export const WorldDetailView: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'sessions'}
           onClick={() => openTab('sessions')}
-          className={`btn ${activeTab === 'sessions' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          className={`world-zone-tab ${activeTab === 'sessions' ? 'active' : ''}`}
           id="tab-world-sessions"
         >
           <Calendar size={16} />
@@ -145,10 +174,21 @@ export const WorldDetailView: React.FC = () => {
         <button
           type="button"
           role="tab"
+          aria-selected={activeTab === 'listening'}
+          onClick={() => openTab('listening')}
+          className={`world-zone-tab ${activeTab === 'listening' ? 'active' : ''}`}
+          id="tab-world-listening"
+        >
+          <Music2 size={16} />
+          <span>Góc nghe đĩa than ({listeningSessions.length})</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
           aria-selected={activeTab === 'archive'}
           onClick={() => openTab('archive')}
-          className={`btn ${activeTab === 'archive' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          className={`world-zone-tab ${activeTab === 'archive' ? 'active' : ''}`}
           id="tab-world-archive"
         >
           <Archive size={16} />
@@ -160,8 +200,7 @@ export const WorldDetailView: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'membership'}
           onClick={() => openTab('membership')}
-          className={`btn ${activeTab === 'membership' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          className={`world-zone-tab ${activeTab === 'membership' ? 'active' : ''}`}
           id="tab-world-membership"
         >
           <Award size={16} />
@@ -173,8 +212,7 @@ export const WorldDetailView: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'shop'}
           onClick={() => openTab('shop')}
-          className={`btn ${activeTab === 'shop' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '8px 16px', fontSize: 'var(--text-sm)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0' }}
+          className={`world-zone-tab ${activeTab === 'shop' ? 'active' : ''}`}
           id="tab-world-shop"
         >
           <ShoppingBag size={16} />
@@ -182,9 +220,111 @@ export const WorldDetailView: React.FC = () => {
         </button>
       </div>
 
-      {/* TAB 1: TRANG CHỦ (HOME) */}
+      {/* SPATIAL NAVIGATION WHEN INSIDE A PLACE */}
+      {activeTab !== 'home' && (
+        <div className="spatial-place-container">
+          <div className="spatial-nav-bar">
+            <button
+              type="button"
+              onClick={() => openTab('home')}
+              className="btn btn-secondary spatial-walkout-btn"
+              id="spatial-exit-btn"
+              aria-label="Quay về Nhà nhạc"
+            >
+              <ArrowLeft size={16} />
+              <span>← Về Nhà Nhạc (Diorama)</span>
+            </button>
+
+            <div className="spatial-breadcrumb">
+              <span>✦ VieWorld</span>
+              <span>/</span>
+              <span>{world.name}</span>
+              <span>/</span>
+              <strong className="spatial-breadcrumb__current">
+                {activeTab === 'sessions' && 'Sân khấu trung tâm'}
+                {activeTab === 'listening' && 'Góc nghe đĩa than'}
+                {activeTab === 'archive' && 'Bảng lưu diễn & Ký ức'}
+                {activeTab === 'membership' && 'Hội Quán Fandom'}
+                {activeTab === 'shop' && 'Tiệm quà VieSHOP'}
+              </strong>
+            </div>
+
+            {/* Quick Switcher */}
+            <div className="mini-travel-dock" aria-label="Chuyển nhanh khu vực">
+              <button
+                type="button"
+                onClick={() => openTab('home')}
+                className="mini-dock-btn"
+                title="Về Nhà Nhạc"
+              >
+                <Home size={14} />
+                <span>Diorama</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openTab('sessions')}
+                className={`mini-dock-btn ${activeTab === 'sessions' ? 'active' : ''}`}
+                title="Sân khấu"
+              >
+                <Radio size={14} />
+                <span>Sân khấu</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openTab('listening')}
+                className={`mini-dock-btn ${activeTab === 'listening' ? 'active' : ''}`}
+                title="Góc nghe đĩa than"
+              >
+                <Music2 size={14} />
+                <span>Góc nghe</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openTab('archive')}
+                className={`mini-dock-btn ${activeTab === 'archive' ? 'active' : ''}`}
+                title="Bảng lưu diễn"
+              >
+                <Archive size={14} />
+                <span>Lưu diễn</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => openTab('membership')}
+                className={`mini-dock-btn ${activeTab === 'membership' ? 'active' : ''}`}
+                title="Hội quán"
+              >
+                <Award size={14} />
+                <span>Hội quán</span>
+              </button>
+              <Link
+                to={`/worlds/${world.id}/shop`}
+                className={`mini-dock-btn ${activeTab === 'shop' ? 'active' : ''}`}
+                title="Mở toàn màn hình Shop"
+              >
+                <ShoppingBag size={14} />
+                <span>Shop</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 1: TRANG CHỦ (HOME - DIORAMA VENUE) */}
       {activeTab === 'home' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <WorldScene
+          world={world}
+          nextSession={nextSession}
+          sessionCount={worldSessions.length}
+          benefitCount={worldBenefits.length}
+          productCount={worldProducts.length}
+          linkedWorld={linkedWorld}
+          onOpenZone={openTab}
+          fanDisplayName={state.fanProfile.displayName}
+        />
+      )}
+
+      {activeTab === 'home' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
           {nextSession ? (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -238,15 +378,24 @@ export const WorldDetailView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: PHIÊN SỰ KIỆN (SESSIONS) */}
+      {/* TAB 2: PHIÊN SỰ KIỆN (SESSIONS — SÂN KHẤU TRUNG TÂM) */}
       {activeTab === 'sessions' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700' }}>Danh sách các phiên giao lưu & âm nhạc</h2>
+          <header>
+            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700', margin: '0 0 4px 0' }}>
+              Sân khấu trung tâm — Các phiên biểu diễn & giao lưu
+            </h2>
+            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+              Không gian sân khấu chính của {world.name}. Mọi chỉ báo trực tiếp đều có nhãn DEMO sát cạnh để đảm bảo tính trung thực.
+            </p>
+          </header>
+
           {worldSessions.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {worldSessions.map((s) => {
                 const isRsvpd = state.rsvpdSessionIds.includes(s.id);
                 const isLive = s.status === 'running';
+                const isOpen = s.status === 'open';
                 return (
                   <article
                     key={s.id}
@@ -265,24 +414,24 @@ export const WorldDetailView: React.FC = () => {
                         <span
                           className="tag"
                           style={{
-                            backgroundColor: isLive ? 'var(--danger-bg)' : 'var(--bg)',
-                            color: isLive ? 'var(--danger)' : 'var(--primary)',
+                            backgroundColor: isLive ? 'var(--danger-bg)' : isOpen ? '#ECFDF5' : 'var(--bg)',
+                            color: isLive ? 'var(--danger)' : isOpen ? '#065F46' : 'var(--primary)',
                             fontWeight: '700',
                           }}
                         >
                           {isLive ? <Radio size={12} style={{ marginRight: '4px' }} /> : <Calendar size={12} style={{ marginRight: '4px' }} />}
-                          {isLive ? 'ĐANG DIỄN RA' : s.status === 'ended' ? 'ĐÃ KẾT THÚC' : 'SẮP DIỄN RA'}
+                          {isLive ? 'ĐANG DIỄN RA' : isOpen ? 'PHÒNG CHỜ MỞ' : s.status === 'ended' ? 'ĐÃ KẾT THÚC' : 'SẮP DIỄN RA'}
                         </span>
                         <span className="demo-badge">DEMO</span>
                         <span className="tag" style={{ fontSize: '11px' }}>
-                          {s.format === 'listening' ? 'Phòng nghe' : s.format === 'concert' ? 'Live House' : 'Drop-in'}
+                          {s.format === 'listening' ? 'Phòng nghe đĩa than' : s.format === 'concert' ? 'Live House' : 'Drop-in'}
                         </span>
                       </div>
                       <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '700', marginBottom: '4px' }}>
                         {s.title}
                       </h3>
                       <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                        Thời gian: {formatTime(s.scheduledStartTime)} (Asia/Ho_Chi_Minh) · Phân đoạn: {s.segmentMode === 'recorded' ? 'Bản ghi đội ngũ' : 'Trực tiếp'}
+                        Thời gian: {formatTime(s.scheduledStartTime)} (Asia/Ho_Chi_Minh) · Phân đoạn: {s.segmentMode === 'recorded' ? 'Bản ghi đội ngũ' : 'Trực tiếp'} · Nghệ sĩ: {s.artistPresence === 'present' ? 'Có mặt' : s.artistPresence === 'absent' ? 'Vắng mặt' : 'Đang kết nối lại'}
                       </p>
                     </div>
 
@@ -324,25 +473,135 @@ export const WorldDetailView: React.FC = () => {
             </div>
           ) : (
             <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
-              <p style={{ color: 'var(--muted)' }}>Chưa có phiên sự kiện nào.</p>
+              <p style={{ color: 'var(--muted)' }}>Chưa có phiên sự kiện nào cho không gian này.</p>
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 3: KHO LƯU TRỮ REPLAY (ARCHIVE) */}
+      {/* TAB 3: GÓC NGHE ĐĨA THAN (LISTENING ROOMS) */}
+      {activeTab === 'listening' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} data-testid="zone-listening-panel">
+          <header>
+            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700', margin: '0 0 4px 0' }}>
+              Góc nghe đĩa than — Listening Rooms
+            </h2>
+            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+              Các phiên định dạng nghe nhạc mộc mạc và liner notes độc quyền. Âm thanh chỉ phát khi có thao tác người dùng (User-Initiated Audio), không tự động autoplay.
+            </p>
+          </header>
+
+          {listeningSessions.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {listeningSessions.map((s) => {
+                const isRsvpd = state.rsvpdSessionIds.includes(s.id);
+                const isLive = s.status === 'running';
+                return (
+                  <article
+                    key={s.id}
+                    className="card"
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '16px',
+                      padding: '16px 20px',
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span
+                          className="tag"
+                          style={{
+                            backgroundColor: isLive ? 'var(--danger-bg)' : 'var(--bg)',
+                            color: isLive ? 'var(--danger)' : 'var(--primary)',
+                            fontWeight: '700',
+                          }}
+                        >
+                          <Music2 size={12} style={{ marginRight: '4px' }} />
+                          {isLive ? 'ĐANG PHÁT · LIVE' : s.status === 'ended' ? 'ĐÃ PHÁT XONG' : 'SẮP PHÁT'}
+                        </span>
+                        <span className="demo-badge">DEMO</span>
+                        <span className="tag" style={{ fontSize: '11px' }}>
+                          {s.trackNotes?.length || 0} bài trong liner notes
+                        </span>
+                      </div>
+                      <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '700', marginBottom: '4px' }}>
+                        {s.title}
+                      </h3>
+                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+                        Thời gian: {formatTime(s.scheduledStartTime)} (Asia/Ho_Chi_Minh) · Bản quyền mẫu: cleared_local
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Link
+                        to={`/sessions/${s.id}`}
+                        className="btn btn-primary"
+                        style={{ fontSize: 'var(--text-xs)', padding: '6px 14px' }}
+                        id={`listening-enter-${s.id}`}
+                      >
+                        <span>Vào phòng nghe →</span>
+                      </Link>
+
+                      {s.status !== 'ended' && (
+                        <button
+                          type="button"
+                          onClick={() => dispatch({ type: 'TOGGLE_RSVP', sessionId: s.id })}
+                          className={`btn ${isRsvpd ? 'btn-secondary' : 'btn-primary'}`}
+                          style={{ fontSize: 'var(--text-xs)', padding: '6px 14px' }}
+                        >
+                          {isRsvpd ? (
+                            <>
+                              <CheckCircle2 size={14} color="#059669" />
+                              <span>Đã RSVP</span>
+                            </>
+                          ) : (
+                            <>
+                              <Bell size={14} />
+                              <span>Đặt nhắc hẹn</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="card" style={{ padding: '32px 24px', textAlign: 'center' }}>
+              <Music2 size={32} color="var(--muted)" style={{ margin: '0 auto 8px auto' }} />
+              <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+                Hiện chưa có phiên nghe nhạc đĩa than (listening) nào cho không gian này.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 4: KHO LƯU TRỮ REPLAY & BẢNG KÝ ỨC (ARCHIVE) */}
       {activeTab === 'archive' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} data-testid="zone-archive-panel">
           <div className="card" style={{ backgroundColor: '#EDE9FE', border: '1px solid #DDD6FE' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <Lock size={16} color="var(--primary)" />
-              <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: 'var(--primary)' }}>
-                Chính sách xem lại Replay
+              <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: '700', color: 'var(--primary)', margin: 0 }}>
+                Chính sách xem lại Replay & Ký ức nhà nhạc
               </h2>
             </div>
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', lineHeight: 1.5, margin: '0 0 8px 0' }}>
               Khán giả xem lại bản ghi Replay sẽ được ghi nhận nhật ký xem lại (replay_view), nhưng <strong>tuyệt đối không nhận chứng nhận tham dự trực tiếp (live_attendance)</strong>.
             </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                ✦ Đây là kho lưu trữ chung của nhà nhạc {world.name}. Kỷ niệm riêng của bạn được lưu tại phòng cá nhân.
+              </span>
+              <Link to="/me" className="btn btn-secondary" style={{ fontSize: '11px', padding: '4px 10px' }}>
+                Xem kệ kỷ niệm tại Phòng tôi →
+              </Link>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -402,7 +661,7 @@ export const WorldDetailView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB: HỘI VIÊN & QUYỀN LỢI (MEMBERSHIP) */}
+      {/* TAB 5: HỘI VIÊN & QUYỀN LỢI (MEMBERSHIP) */}
       {activeTab === 'membership' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <header>
@@ -410,7 +669,7 @@ export const WorldDetailView: React.FC = () => {
               Hội viên & Danh mục Quyền lợi ({world.name})
             </h2>
             <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
-              Trạng thái hội viên và điều kiện kích hoạt từng quyền lợi luôn được tách bạch rõ ràng.
+              Theo dõi (Follow) là miễn phí để nhận thông tin; Hội viên (Membership) là tư cách riêng để kích hoạt các đặc quyền được công bố.
             </p>
           </header>
 
@@ -448,15 +707,43 @@ export const WorldDetailView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 4: VIESHOP (SHOP) */}
+      {/* TAB 6: VIESHOP (SHOP) */}
       {activeTab === 'shop' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} data-testid="zone-shop-panel">
           <header>
-            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700' }}>Cửa hàng quà tặng lưu niệm VieSHOP</h2>
-            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
+            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '700', margin: '0 0 4px 0' }}>
+              Cửa hàng quà lưu niệm VieSHOP
+            </h2>
+            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
               Vật phẩm kỷ niệm có điều kiện và số lượng minh bạch. Không thu phí thanh toán thật.
             </p>
           </header>
+
+          {/* Canonical Shop Link Notice */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 16px',
+              backgroundColor: 'var(--surface-subtle)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+              Đích chuẩn cửa hàng: <code>/worlds/{world.id}/shop</code>
+            </span>
+            <Link
+              to={`/worlds/${world.id}/shop`}
+              className="btn btn-secondary"
+              style={{ fontSize: 'var(--text-xs)', padding: '4px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              id="canonical-shop-link"
+            >
+              <span>Mở trang Shop riêng</span>
+              <ArrowUpRight size={13} />
+            </Link>
+          </div>
 
           {worldProducts.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>

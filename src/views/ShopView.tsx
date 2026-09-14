@@ -50,6 +50,12 @@ export const ShopView: React.FC = () => {
     });
   };
 
+  const getProductImage = (id: string) => {
+    if (id.includes('pin')) return '/images/product-pin.jpg';
+    if (id.includes('shirt')) return '/images/product-shirt.jpg';
+    return null;
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* World Header */}
@@ -136,13 +142,14 @@ export const ShopView: React.FC = () => {
               (requiredBenefit && (requiredBenefit.status === 'eligible' || requiredBenefit.status === 'claimed'));
 
             const isOutOfStock = !product.isAvailable || product.stockCount <= 0;
+            const productImg = getProductImage(product.id);
 
             return (
               <article
                 key={product.id}
                 className="card"
                 style={{
-                  padding: '24px',
+                  padding: '20px',
                   backgroundColor: 'var(--surface)',
                   borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border)',
@@ -150,23 +157,33 @@ export const ShopView: React.FC = () => {
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                   gap: '16px',
+                  boxShadow: 'var(--shadow-xs)',
                 }}
                 data-testid={`shop-product-card-${product.id}`}
               >
                 <div>
                   <div
                     style={{
-                      height: '140px',
-                      backgroundColor: 'var(--bg)',
+                      width: '100%',
+                      aspectRatio: '1 / 1',
+                      backgroundColor: 'var(--surface-subtle)',
                       borderRadius: 'var(--radius-md)',
+                      overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       marginBottom: '16px',
-                      color: 'var(--primary)',
                     }}
                   >
-                    <Tag size={40} />
+                    {productImg ? (
+                      <img
+                        src={productImg}
+                        alt={product.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <Tag size={40} color="var(--muted)" />
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>

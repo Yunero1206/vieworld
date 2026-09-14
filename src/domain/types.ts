@@ -113,12 +113,26 @@ export interface Participation extends BaseRecord {
 }
 
 export interface Order extends BaseRecord {
+  createdAt?: string;
+  paidAt?: string;
+  fulfilledAt?: string;
+  shipment?: { events: { stage: number; at: string }[]; estimatedAt: string };
+  checkoutId?: string;
+  quantity?: number;
+  unitPriceVND?: number;
+  productTitle?: string;
+  productImage?: string;
+  deliveryType?: 'physical' | 'digital' | 'bundle';
+  digitalSlot?: 'shirt' | 'hat' | 'lightstick' | string;
+  estimatedShipping?: string;
+  batchLabel?: string;
   fanId: string;
   worldId: string;
   productId: string;
   status: 'pending' | 'paid' | 'fulfilled' | 'cancelled' | 'refunded';
   sourceRef: string;
   requestId: string; // Idempotency key
+  optionLabel?: string;
 }
 
 export interface SupportCase extends BaseRecord {
@@ -133,6 +147,9 @@ export interface SupportCase extends BaseRecord {
 export type FanRole = 'fan' | 'artist' | 'operator';
 
 export interface FanProfile extends BaseRecord {
+  avatarPreset?: 'original' | 'wave' | 'bob' | 'curl';
+  displaySlots?: Partial<Record<'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement', string>>;
+  publicIdentity?: { bio: string; mood: string; badge?: 10 | 20; productIds?: string[] };
   username: string;
   displayName: string;
   avatarUrl?: string;
@@ -141,6 +158,11 @@ export interface FanProfile extends BaseRecord {
     accessoryId: string;
     equippedAt: string;
   };
+  showcaseSlots?: [string | null, string | null, string | null];
+  worldJourney?: { visitedWorldIds: string[]; readNoteIds: string[]; lastWorldId?: string };
+  digitalLook?: { shirt?: string; hat?: string; lightstick?: string };
+  savedProductIds?: string[];
+  roomDesign?: import('../world/places').RoomDesign;
 }
 
 export interface Product extends BaseRecord {
@@ -150,6 +172,20 @@ export interface Product extends BaseRecord {
   stockCount: number;
   isAvailable: boolean;
   requiredBenefitId?: string;
+  familyId?: string;
+  category?: 'merch' | 'album' | 'membership' | 'ticket';
+  delivery?: 'physical' | 'digital' | 'bundle';
+  image?: string;
+  digitalImage?: string;
+  description?: string;
+  includes?: string[];
+  sizes?: string[];
+  digitalSlot?: 'shirt' | 'hat' | 'lightstick';
+  digitalItemId?: string;
+  previewOnly?: boolean;
+  releaseType?: 'in_stock' | 'pre_order';
+  estimatedShipping?: string;
+  batchLabel?: string;
 }
 
 export interface Question extends BaseRecord {
@@ -171,6 +207,8 @@ export interface ChatMessage {
   isSample?: boolean;
   isReported?: boolean;
   reportRef?: string;
+  isVip?: boolean;
+  badgeLabel?: string;
 }
 
 export interface PollOption {
@@ -249,6 +287,9 @@ export interface DomainError {
  * Consolidated Application State Container
  */
 export interface AppState {
+  cart?: import('../world/commerce').CartLine[];
+  ticketArchive?: import('../world/history').HistoryCard[];
+  hallMessages?: Record<string, ChatMessage[]>;
   activeTenantId: TenantId;
   demoTime: string; // ISO UTC injected clock
   lastError?: DomainError;
@@ -276,6 +317,24 @@ export interface AppState {
  * Pure Action Definitions
  */
 export type AppAction =
+  | { type: 'SET_DISPLAY_SLOT'; slot: 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement'; itemId?: string }
+  | { type: 'ADVANCE_SHIPMENT'; orderId: string; expectedStage: number }
+  | { type: 'ADD_TO_CART'; productId: string; optionLabel?: string }
+  | { type: 'SET_CART_QUANTITY'; key: string; quantity: number }
+  | { type: 'CHECKOUT_CART'; requestId: string; fingerprint: string }
+  | { type: 'PAY_CHECKOUT'; checkoutId: string }
+  | { type: 'CANCEL_CHECKOUT'; checkoutId: string }
+  | { type: 'IMPORT_DEMO_CARDS' }
+  | { type: 'RETURN_HISTORY_CARDS'; cardIds: string[] }
+  | { type: 'SAVE_PUBLIC_IDENTITY'; bio: string; mood: string; badge?: 10 | 20; productIds?: string[] }
+  | { type: 'SAVE_ROOM_DESIGN'; design: import('../world/places').RoomDesign }
+  | { type: 'SEND_HALL_MESSAGE'; worldId: string; text: string; requestId: string }
+  | { type: 'REPORT_HALL_MESSAGE'; worldId: string; messageId: string }
+  | { type: 'TOGGLE_SAVED_PRODUCT'; productId: string }
+  | { type: 'EQUIP_DIGITAL_PRODUCT'; productId: string }
+  | { type: 'REMOVE_DIGITAL_SLOT'; slot: 'shirt' | 'hat' | 'lightstick' }
+  | { type: 'VISIT_FAN_WORLD'; worldId: string }
+  | { type: 'READ_ARTIST_NOTE'; noteId: string }
   | { type: 'TOGGLE_FOLLOW'; worldId: string }
   | { type: 'TOGGLE_RSVP'; sessionId: string }
   | { type: 'ENTER_LOBBY'; sessionId: string }
@@ -293,7 +352,7 @@ export type AppAction =
   | { type: 'PUBLISH_REPLAY'; sessionId: string }
   | { type: 'SIMULATE_PAYMENT'; orderId: string; requestId: string }
   | { type: 'SIMULATE_FULFILMENT'; orderId: string }
-  | { type: 'CREATE_ORDER'; productId: string; requestId: string }
+  | { type: 'CREATE_ORDER'; productId: string; requestId: string; optionLabel?: string }
   | { type: 'CLAIM_BENEFIT'; benefitId: string }
   | { type: 'OPEN_SUPPORT_CASE'; subjectType: 'benefit' | 'order'; subjectId: string }
   | { type: 'ACKNOWLEDGE_SUPPORT_CASE'; caseId: string }
@@ -354,6 +413,9 @@ export type AppAction =
   | { type: 'CLOSE_QUESTION'; questionId: string }
   | { type: 'SAVE_CAPSULE'; capsuleId: string; privateNote?: string; isSaved?: boolean }
   | { type: 'EQUIP_WARDROBE'; accessoryId: string }
+  | { type: 'SET_AVATAR_PRESET'; preset: 'original' | 'wave' | 'bob' | 'curl' }
+  | { type: 'SET_SHOWCASE_SLOT'; slotIndex: 0 | 1 | 2; capsuleId: string | null }
+  | { type: 'CLEAR_SHOWCASE_SLOT'; slotIndex: 0 | 1 | 2 }
   | { type: 'UPGRADE_MEMBERSHIP'; worldId: string }
   | { type: 'SET_FAN_ROLE'; role: FanRole }
   | { type: 'SWITCH_TENANT'; targetTenantId: TenantId }

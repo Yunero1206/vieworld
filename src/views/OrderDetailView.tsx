@@ -2,6 +2,9 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { OrderTimeline } from '../components/OrderTimeline';
+import { orderAmount } from '../world/commerce';
+import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { getTenantConfig } from '../domain/tenantConfig';
 import {
   CreditCard,
   PackageCheck,
@@ -15,10 +18,17 @@ import {
 export const OrderDetailView: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { state, dispatch } = useApp();
+  const tenantConfig = getTenantConfig(state.activeTenantId);
 
   const order = orderId ? state.orders[orderId] : undefined;
   const product = order ? state.products[order.productId] : undefined;
   const world = order ? state.worlds[order.worldId] : undefined;
+
+  const productTitle = order?.productTitle || product?.title || order?.productId;
+  const deliveryType = order?.deliveryType || product?.delivery || 'physical';
+  const productImage = order?.productImage || product?.image;
+  const digitalSlot = order?.digitalSlot || product?.digitalSlot;
+  const estimatedShipping = order?.estimatedShipping || product?.estimatedShipping;
 
   const formatVietnamTime = (isoString?: string) => {
     if (!isoString) return '';
@@ -36,7 +46,7 @@ export const OrderDetailView: React.FC = () => {
     }
   };
 
-  if (!order) {
+  if (!order || order.fanId !== state.fanProfile.id || order.tenantId !== state.activeTenantId) {
     return (
       <div className="container" style={{ padding: '40px 20px' }}>
         <div className="card" data-testid="order-not-found-recovery" style={{ maxWidth: '540px', margin: '0 auto', textAlign: 'center', padding: '40px 24px' }}>
@@ -50,10 +60,10 @@ export const OrderDetailView: React.FC = () => {
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <Link to="/me" className="btn btn-primary">
               <ArrowLeft size={16} />
-              <span>Về My World</span>
+              <span>Về My Space</span>
             </Link>
-            <Link to="/worlds" className="btn btn-secondary">
-              Khám phá Worlds
+            <Link to="/shop" className="btn btn-secondary">
+              Khám phá {tenantConfig.labels.shopTitle}
             </Link>
           </div>
         </div>
@@ -66,17 +76,17 @@ export const OrderDetailView: React.FC = () => {
       {/* Breadcrumb Navigation */}
       <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
         <Link
-          to="/me"
+          to="/me?panel=bag"
           className="btn btn-secondary"
           style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
           id="order-back-to-myworld-btn"
         >
           <ArrowLeft size={14} />
-          <span>Quay lại My World</span>
+          <span>Đơn hàng của tôi</span>
         </Link>
         {world && (
           <Link
-            to={`/worlds/${world.id}/shop`}
+            to={`/shop?artist=${world.id}`}
             className="btn btn-secondary"
             style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
           >
@@ -90,18 +100,19 @@ export const OrderDetailView: React.FC = () => {
         <header>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontWeight: '700' }}>
-              CHI TIẾT ĐƠN HÀNG VIESHOP
+              CHI TIẾT ĐƠN HÀNG {tenantConfig.labels.shopTitle.toUpperCase()}
             </span>
             <span className="demo-badge">DEMO</span>
           </div>
           <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: '800', margin: '0 0 8px 0' }}>
-            Đơn hàng #{order.id}
+            Đơn hàng · {order.id.slice(-8)}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
             Hóa đơn thử nghiệm · Không có giao dịch thương mại thực tế.
           </p>
         </header>
 
+        {order.checkoutId&&<Link className="fw-text-button" to={`/checkout/${order.checkoutId}`}>← Xem toàn bộ lần mua này</Link>}
         {/* Order Receipt Summary Card */}
         <section
           className="card"
@@ -127,8 +138,14 @@ export const OrderDetailView: React.FC = () => {
               </div>
               <div>
                 <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: '0 0 4px 0' }}>
-                  {product ? product.title : order.productId}
+                  {productTitle}
                 </h3>
+                <p style={{fontSize:12,lineHeight:1.8}}>
+                  {DELIVERY_LABELS[deliveryType]}{order.optionLabel ? ` · Size ${order.optionLabel}` : ''}
+                  {estimatedShipping ? ` · ${estimatedShipping}` : ''}
+                  <br/>
+                  {deliveryType === 'digital' ? 'Vật phẩm avatar · Không giao hàng ngoài đời' : deliveryType === 'bundle' ? 'Gồm hàng thật và digital · Bàn giao demo xác nhận cả hai phần' : 'Chỉ hàng thật · Không tự kèm quyền sở hữu digital'}
+                </p>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
                   Không gian: <strong>{world ? world.name : order.worldId}</strong> · Mã định danh yêu cầu: <code>{order.requestId}</code>
                 </div>
@@ -136,6 +153,7 @@ export const OrderDetailView: React.FC = () => {
             </div>
 
             {/* Status Badge */}
+            {['cancelled','refunded'].includes(order.status)&&<span className="tag" data-testid="order-status-badge">{order.status==='cancelled'?'Đã hủy':'Đã hoàn tiền'}</span>}
             <div>
               {order.status === 'pending' && (
                 <span
@@ -198,12 +216,12 @@ export const OrderDetailView: React.FC = () => {
             <div>
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'block' }}>Số tiền (Mô phỏng)</span>
               <strong style={{ fontSize: 'var(--text-lg)', color: 'var(--primary)' }}>
-                {product ? product.priceVND.toLocaleString('vi-VN') : '0'} VND
+                {orderAmount(order,state).toLocaleString('vi-VN')} VND
               </strong>
             </div>
 
             <div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'block' }}>Nguồn đặt hàng</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'block' }}>Số lượng: {order.quantity || 1} · Nguồn đặt hàng</span>
               <code style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)' }}>{order.sourceRef}</code>
             </div>
 
@@ -218,10 +236,11 @@ export const OrderDetailView: React.FC = () => {
           {/* Interactive Simulation Action */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-              Công cụ review trạng thái đơn hàng
+              Thanh toán và bàn giao là hai bước riêng
             </span>
 
-            {order.status === 'pending' && (
+            {order.status === 'pending' && order.checkoutId && <Link className="fw-button" to={`/checkout/${order.checkoutId}`}>Thanh toán cả lần mua →</Link>}
+            {order.status === 'pending' && !order.checkoutId && (
               <button
                 type="button"
                 onClick={() =>
@@ -241,7 +260,7 @@ export const OrderDetailView: React.FC = () => {
               </button>
             )}
 
-            {order.status === 'paid' && (
+            {order.status === 'paid' && deliveryType === 'digital' && (
               <button
                 type="button"
                 onClick={() =>
@@ -266,14 +285,27 @@ export const OrderDetailView: React.FC = () => {
                   <CheckCircle2 size={16} />
                   <span>Đã ghi nhận quyền sở hữu</span>
                 </span>
-                <Link to="/me" className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)', padding: '8px 14px' }}>
-                  Xem trong My World
+                <Link to={digitalSlot ? '/me?panel=wardrobe' : '/me?panel=bag'} className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)', padding: '8px 14px' }}>
+                  {digitalSlot ? 'Mở tủ đồ digital' : 'Xem đồ đã nhận'}
                 </Link>
               </div>
             )}
           </div>
         </section>
 
+        {productImage && (
+          <section className="v6-order-product">
+            <img src={`/images/merch-v2/${productImage}.png`} alt={productTitle} />
+            <div>
+              <h2>{productTitle}</h2>
+              <p>{order.quantity || 1} món{order.optionLabel ? ` · Size ${order.optionLabel}` : ''}</p>
+              {estimatedShipping && <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '4px 0' }}>{estimatedShipping}</p>}
+              <p>Tiền hàng: {orderAmount(order, state).toLocaleString('vi-VN')} ₫</p>
+              <p>{deliveryType === 'digital' ? 'Giao digital: không tính phí vận chuyển' : 'Phí giao hàng mẫu: 0 ₫ · chưa thu tiền thật'}</p>
+              <strong>Tổng thanh toán: {orderAmount(order, state).toLocaleString('vi-VN')} ₫</strong>
+            </div>
+          </section>
+        )}
         {/* Order Timeline Stepper */}
         <OrderTimeline order={order} />
 

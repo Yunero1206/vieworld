@@ -170,7 +170,10 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
             <span>Hướng dẫn demo · Không phải nghệ sĩ</span>
           </div>
 
-          <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', lineHeight: '1.5' }}>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--ink)', fontWeight: '500', lineHeight: '1.5' }}>
+            Cẩm nang VieWorld: Tra cứu nhanh và chính xác thông tin về hội viên, lịch phát sóng, quyền lợi và các hoạt động của nghệ sĩ.
+          </p>
+          <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4' }}>
             Trợ lý tra cứu thông tin tĩnh được kiểm duyệt cục bộ. Không sử dụng API mô hình ngôn ngữ trực tuyến (LLM là X02 riêng biệt). Không có thẩm quyền can thiệp hay thay đổi dữ liệu ứng dụng.
           </p>
         </div>

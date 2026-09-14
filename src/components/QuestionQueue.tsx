@@ -103,16 +103,20 @@ export const QuestionQueue: React.FC<QuestionQueueProps> = ({
     <div
       className="card"
       style={{
-        padding: '20px',
+        padding: '16px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
+        gap: '12px',
         backgroundColor: 'var(--surface)',
+        flex: 1,
+        minHeight: 0,
+        height: '100%',
+        overflow: 'hidden',
       }}
       aria-label="Hàng đợi câu hỏi Q&A"
     >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <HelpCircle size={18} color="var(--primary)" />
           <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '700', margin: 0 }}>
@@ -126,7 +130,7 @@ export const QuestionQueue: React.FC<QuestionQueueProps> = ({
       </div>
 
       {/* Submission Form */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>
         <div style={{ position: 'relative' }}>
           <textarea
             value={content}
@@ -213,7 +217,7 @@ export const QuestionQueue: React.FC<QuestionQueueProps> = ({
       </div>
 
       {/* Question List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px', flex: 1, minHeight: '180px', overflowY: 'auto' }}>
         {questions.length === 0 ? (
           <div style={{ padding: '24px', textAlign: 'center', color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
             Chưa có câu hỏi nào trong phiên này. Hãy là người đầu tiên gửi câu hỏi!

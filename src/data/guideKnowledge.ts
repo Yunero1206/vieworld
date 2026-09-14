@@ -50,7 +50,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Tư cách Hội viên',
     title: 'Tư cách Hội viên & Điều kiện nâng cấp',
     description:
-      'Hội viên (Membership) là mối quan hệ gắn kết chính thức với từng Thế giới nghệ sĩ. Khác với Theo dõi (Follow miễn phí), hội viên tích cực được quyền kiểm tra tính đủ điều kiện nhận các quyền lợi độc quyền. Người dùng có thể nâng cấp hoặc hủy tại trang thế giới nghệ sĩ.',
+      'Hội viên là mối quan hệ gắn kết với từng nhà nhạc, tách biệt với Theo dõi miễn phí. Mở Túi đồ → Hội viên & quyền lợi để xem tư cách, nâng cấp mô phỏng và nhận quyền lợi đủ điều kiện. VieWorld không thu tiền thật trong bản thử nghiệm.',
     keywords: [
       'hội viên',
       'membership',
@@ -63,7 +63,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'điều kiện',
     ],
     actionLink: {
-      to: '/worlds/artist-a',
+      to: '/worlds/artist-a?panel=membership',
       label: 'Đến trang Hội viên Artist A',
     },
     sourceTitle: 'docs/CONSTITUTION.md §3 (Follow vs. Membership)',
@@ -172,8 +172,8 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'attendance',
     ],
     actionLink: {
-      to: '/me',
-      label: 'Đến Bộ sưu tập Kỷ niệm số trong My World',
+      to: '/me?panel=capsules',
+      label: 'Mở kệ kỷ niệm trong phòng',
     },
     sourceTitle: 'docs/CONSTITUTION.md §3 (Attendance vs. Replay)',
     updatedAt: '2026-09-09',
@@ -197,8 +197,8 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'giải quyết',
     ],
     actionLink: {
-      to: '/me',
-      label: 'Xem mục Hỗ trợ & Đối soát trong My World',
+      to: '/me?panel=support',
+      label: 'Mở hỗ trợ trong phòng',
     },
     sourceTitle: 'docs/DECISIONS.md DEC-008 (Decoupled Support Resolution)',
     updatedAt: '2026-09-09',
@@ -231,10 +231,10 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
   {
     id: 'guide-card-tenants',
     topic: 'tenants',
-    topicLabel: 'Chuyển đổi Tenant & Portability',
-    title: 'Tính di động & Cách ly dữ liệu đối tác (VieWorld, MFan, FanMe)',
+    topicLabel: 'Một thế giới, một danh tính',
+    title: 'Cùng một bạn ở nhà nhạc, phòng riêng và VieSHOP',
     description:
-      'VieWorld chứng minh khả năng di động đa đối tác. Khi chuyển đổi giữa VieWorld, MFan và FanMe trong bảng kịch bản, toàn bộ dữ liệu người dùng, theo dõi và giỏ hàng được cách ly tuyệt đối, không rò rỉ dữ liệu giữa các môi trường.',
+      'VieWorld có một trải nghiệm chung với bốn tab: Artist Home, Moments, My Space và VieSHOP. Logo VieWorld đưa về quảng trường. Bộ sưu tập riêng nằm trong My Space. Đổi nhà nhạc không đổi tài khoản hay diện mạo. Avatar, kỷ niệm và đơn hàng cùng đi theo bạn. Dữ liệu thử nghiệm chỉ được lưu trong trình duyệt này; chưa đồng bộ tài khoản qua dịch vụ bên ngoài. Các kho demo cũ được giữ nguyên để tránh mất dữ liệu, không còn là các giao diện công khai riêng.',
     keywords: [
       'tenant',
       'mfan',
@@ -247,11 +247,11 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'reset',
     ],
     actionLink: {
-      to: '/about-demo',
-      label: 'Xem giới thiệu & Disclosures của Demo',
+      to: '/me?section=collection',
+      label: 'Mở bộ sưu tập trong My Space',
     },
-    sourceTitle: 'docs/CONSTITUTION.md §3 (Portability vs. Shared Accounts)',
-    updatedAt: '2026-09-09',
+    sourceTitle: 'docs/CONSTITUTION.md v1.1 (One fan experience)',
+    updatedAt: '2026-09-11',
   },
 ];
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PRESET_ACCESSORIES, WardrobeAccessory } from '../domain/types';
 import { Sparkles, Check, ShieldCheck } from 'lucide-react';
+import { AvatarRenderer } from './AvatarRenderer';
 
 export interface WardrobeCustomizerProps {
   equippedAccessoryId?: string;
@@ -77,59 +78,13 @@ export const WardrobeCustomizer: React.FC<WardrobeCustomizerProps> = ({
           }}
           data-testid="avatar-preview-box"
         >
-          {/* Stylized 2D Vector Avatar Mini Graphic */}
-          <svg
-            width="140"
-            height="160"
-            viewBox="0 0 200 240"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-label="Minh họa xem trước diện mạo avatar"
-          >
-            {/* Stage aura */}
-            <circle cx="100" cy="110" r="65" fill="#6551C8" opacity="0.3" />
-
-            {/* Torso */}
-            <path d="M55 210C55 175 75 160 100 160C125 160 145 175 145 210V220H55V210Z" fill="#201E3C" stroke="#6551C8" strokeWidth="3" />
-            <path d="M75 160L90 195L100 180L110 195L125 160" stroke="#A9E5D4" strokeWidth="2.5" strokeLinecap="round" />
-
-            {/* Neck & Head */}
-            <rect x="90" y="130" width="20" height="35" rx="6" fill="#FCD34D" />
-            <circle cx="100" cy="105" r="42" fill="#FDE68A" stroke="#20212B" strokeWidth="2.5" />
-
-            {/* Hair */}
-            <path d="M60 100C60 65 75 55 100 55C125 55 140 65 140 100C130 90 120 90 100 95C80 90 70 90 60 100Z" fill="#312E81" />
-
-            {/* Eyes */}
-            <ellipse cx="86" cy="105" rx="4" ry="5.5" fill="#1E1B4B" />
-            <ellipse cx="114" cy="105" rx="4" ry="5.5" fill="#1E1B4B" />
-            <circle cx="88" cy="103" r="1.5" fill="#FFFFFF" />
-            <circle cx="116" cy="103" r="1.5" fill="#FFFFFF" />
-
-            {/* Smile */}
-            <path d="M94 122C97 125 103 125 106 122" stroke="#B45309" strokeWidth="2" strokeLinecap="round" />
-
-            {/* DYNAMIC ACCESSORY VECTOR DRAWINGS */}
-            {selectedAccessoryId === 'earpiece_glow' && (
-              <g data-testid="preview-accessory-earpiece">
-                <circle cx="140" cy="108" r="6" fill="#10B981" />
-                <circle cx="140" cy="108" r="10" stroke="#10B981" strokeWidth="1.5" opacity="0.7" />
-              </g>
-            )}
-
-            {selectedAccessoryId === 'visor_neon' && (
-              <g data-testid="preview-accessory-visor">
-                <rect x="74" y="98" width="52" height="14" rx="4" fill="rgba(139, 92, 246, 0.7)" stroke="#A78BFA" strokeWidth="2" />
-                <line x1="74" y1="105" x2="126" y2="105" stroke="#FFFFFF" strokeWidth="1" opacity="0.6" />
-              </g>
-            )}
-
-            {selectedAccessoryId === 'accessory_classic' && (
-              <g data-testid="preview-accessory-star">
-                <polygon points="100,166 103,174 111,174 105,178 107,186 100,181 93,186 95,178 89,174 97,174" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
-              </g>
-            )}
-          </svg>
+          <AvatarRenderer
+            role="fan"
+            accessoryId={selectedAccessoryId}
+            size="preview"
+            displayName="Bạn"
+            testId="avatar-preview-renderer"
+          />
 
           <span style={{ fontSize: 'var(--text-xs)', color: 'rgba(255, 255, 255, 0.7)', marginTop: '8px' }}>
             Xem trước: <strong>{selectedAccessory.name}</strong>

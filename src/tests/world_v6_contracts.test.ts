@@ -1,0 +1,21 @@
+import { describe,it,expect } from 'vitest';
+import { appReducer } from '../domain/reducer';
+import { createInitialState } from '../data/fixtures';
+import { displayOptions,displayedItems } from '../world/display';
+import { historyCards } from '../world/history';
+import { currentPublicFan } from '../world/community';
+import { saveState,loadState } from '../services/storageAdapter';
+const initial=()=>createInitialState('vieworld-demo');
+function receipt(productId='product-star-shirt-real'){
+ let s=appReducer(initial(),{type:'CREATE_ORDER',productId,optionLabel:'M',requestId:'v6'});
+ const o=Object.values(s.orders)[0];s=appReducer(s,{type:'SIMULATE_PAYMENT',orderId:o.id,requestId:o.requestId});return {s,id:o.id};
+}
+describe('World v6 purposeful display and parcel contracts',()=>{
+ it('never grants display ownership on payment',()=>{const {s}=receipt();expect(displayOptions(s)).toEqual([]);expect(appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'shirt',itemId:'product-star-shirt-real'}).lastError?.code).toBe('DISPLAY_NOT_OWNED');});
+ it('records five physical stages and only grants ownership at delivery',()=>{let {s,id}=receipt();const paidAt=s.orders[id].paidAt;for(let i=0;i<5;i++){s={...s,demoTime:`2026-09-12T${String(8+i).padStart(2,'0')}:00:00Z`};s=appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:i});expect(s.orders[id].status).toBe(i===4?'fulfilled':'paid');expect(s.orders[id].shipment?.events).toHaveLength(i+1);}expect(s.orders[id].paidAt).toBe(paidAt);expect(s.orders[id].shipment?.events[0].at).not.toBe(s.orders[id].fulfilledAt);expect(displayOptions(s).some(i=>i.id==='product-star-shirt-real')).toBe(true);});
+ it('does not skip or duplicate shipping stages',()=>{let {s,id}=receipt();expect(appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:2})).toBe(s);s=appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0});expect(appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0})).toBe(s);});
+ it('rejects shipping digital, unpaid, foreign or closed receipts',()=>{let {s,id}=receipt('product-lightstick-digital');expect(appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0}).lastError).toBeDefined();({s,id}=receipt());for(const status of ['pending','cancelled','refunded'] as const){const v={...s,orders:{...s.orders,[id]:{...s.orders[id],status}}};expect(appReducer(v,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0}).orders).toEqual(v.orders);}s={...s,fanProfile:{...s.fanProfile,id:'other'}};expect(appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0}).orders).toEqual(s.orders);});
+ it('display checks category, persists, and hides revoked ownership in visitor projection',()=>{let {s,id}=receipt();s=appReducer(s,{type:'SIMULATE_FULFILMENT',orderId:id});expect(appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'disc',itemId:'product-star-shirt-real'}).lastError).toBeDefined();s=appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'shirt',itemId:'product-star-shirt-real'});expect(displayedItems(s)).toHaveLength(1);saveState(s);expect(displayedItems(loadState(s.activeTenantId,s.fanProfile.id).state)).toHaveLength(1);s={...s,orders:{...s.orders,[id]:{...s.orders[id],status:'refunded'}}};expect(currentPublicFan(s).displayItems).toEqual([]);});
+ it('ticket and earned achievement fixtures preserve history when cleared',()=>{let s=appReducer(initial(),{type:'IMPORT_DEMO_CARDS'});const ids=historyCards(s).map(c=>c.id);s=appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'ticket',itemId:ids[0]});expect(appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'achievement',itemId:'badge-10'}).lastError).toBeDefined();s=appReducer(s,{type:'RETURN_HISTORY_CARDS',cardIds:ids.slice(0,10)});s=appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'achievement',itemId:'badge-10'});expect(displayedItems(s)).toHaveLength(2);const cards=s.ticketArchive;s=appReducer(s,{type:'SET_DISPLAY_SLOT',slot:'ticket'});expect(s.ticketArchive).toBe(cards);expect(displayedItems(s)).toHaveLength(1);});
+ it('persisted shipping has honest timestamps without rewriting old orders',()=>{let {s,id}=receipt();s=appReducer(s,{type:'ADVANCE_SHIPMENT',orderId:id,expectedStage:0});saveState(s);expect(loadState(s.activeTenantId,s.fanProfile.id).state.orders[id].shipment).toEqual(s.orders[id].shipment);});
+});

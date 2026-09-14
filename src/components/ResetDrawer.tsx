@@ -8,9 +8,10 @@ import { scenarioPresets } from '../data/fixtures';
 export interface ResetDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  allowTenantSwitch?: boolean;
 }
 
-export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose }) => {
+export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose, allowTenantSwitch = true }) => {
   const {
     state,
     isMemoryFallback,
@@ -156,7 +157,7 @@ export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose }) => 
         </section>
 
         {/* Tenant Configuration Switcher */}
-        <section style={{ marginBottom: '24px' }}>
+        {allowTenantSwitch && <section style={{ marginBottom: '24px' }}>
           <label htmlFor="tenant-select" style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>
             KHÔNG GIAN NỀN TẢNG (TENANT)
           </label>
@@ -181,6 +182,7 @@ export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose }) => 
           </select>
         </section>
 
+        }
         {/* Named Scenario Presets */}
         <section style={{ marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>

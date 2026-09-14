@@ -1,35 +1,42 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-import { AppShell } from './components/AppShell';
-import { DiscoverView } from './views/DiscoverView';
-import { WorldsView } from './views/WorldsView';
-import { WorldDetailView } from './views/WorldDetailView';
-import { SessionView } from './views/SessionView';
-import { MyWorldView } from './views/MyWorldView';
-import { BenefitDetailView } from './views/BenefitDetailView';
-import { ShopView } from './views/ShopView';
-import { OrderDetailView } from './views/OrderDetailView';
-import { SupportCaseDetailView } from './views/SupportCaseDetailView';
-import { InboxView } from './views/InboxView';
-import { StudioOverviewView } from './views/StudioOverviewView';
-import { AvatarStudioView } from './views/AvatarStudioView';
-import { OperatorConsoleView } from './views/OperatorConsoleView';
-import { AboutDemoView } from './views/AboutDemoView';
+import { FanShell as AppShell } from './components/FanShell';
+const FanWorldView = lazy(() => import('./views/FanWorldView').then(m => ({default:m.FanWorldView})));
+const FanShopView = lazy(() => import('./views/FanShopView').then(m => ({default:m.FanShopView})));
+import { WorldPlazaView } from './views/WorldPlazaView';
+const SessionView = lazy(() => import('./views/SessionView').then(m => ({default:m.SessionView})));
+const BenefitDetailView = lazy(() => import('./views/BenefitDetailView').then(m => ({default:m.BenefitDetailView})));
+const OrderDetailView = lazy(() => import('./views/OrderDetailView').then(m => ({default:m.OrderDetailView})));
+const SupportCaseDetailView = lazy(() => import('./views/SupportCaseDetailView').then(m => ({default:m.SupportCaseDetailView})));
+const InboxView = lazy(() => import('./views/InboxView').then(m => ({default:m.InboxView})));
+const StudioOverviewView = lazy(() => import('./views/StudioOverviewView').then(m => ({default:m.StudioOverviewView})));
+const AvatarStudioView = lazy(() => import('./views/AvatarStudioView').then(m => ({default:m.AvatarStudioView})));
+const OperatorConsoleView = lazy(() => import('./views/OperatorConsoleView').then(m => ({default:m.OperatorConsoleView})));
 
+const CartView=lazy(()=>import('./views/CartView').then(m=>({default:m.CartView})));
+const MemberSpaceView=lazy(()=>import('./views/MemberSpaceView').then(m=>({default:m.MemberSpaceView})));
+const ArtistGalleryView=lazy(()=>import('./views/ArtistGalleryView').then(m=>({default:m.ArtistGalleryView})));
 export const App: React.FC = () => {
   return (
     <AppProvider>
       <BrowserRouter>
-        <Routes>
+        <Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Routes>
           <Route path="/" element={<AppShell />}>
-            <Route index element={<DiscoverView />} />
-            <Route path="about-demo" element={<AboutDemoView />} />
-            <Route path="worlds" element={<WorldsView />} />
-            <Route path="worlds/:worldId" element={<WorldDetailView />} />
-            <Route path="worlds/:worldId/shop" element={<ShopView />} />
+            <Route index element={<WorldPlazaView />} />
+            <Route path="about-demo" element={<Navigate to="/" replace />} />
+            <Route path="worlds" element={<WorldPlazaView />} />
+            <Route path="worlds/:worldId" element={<FanWorldView />} />
+            <Route path="worlds/:worldId/moments" element={<FanWorldView />} />
+            <Route path="worlds/:worldId/archive" element={<FanWorldView />} />
+            <Route path="artists" element={<ArtistGalleryView />} />
+            <Route path="moments" element={<FanWorldView />} />
+            <Route path="archive" element={<FanWorldView />} />
+            <Route path="cart" element={<CartView />} /><Route path="checkout/:checkoutId" element={<CartView />} /><Route path="members/:fanId" element={<MemberSpaceView />} />
+            <Route path="shop" element={<FanShopView />} />
+            <Route path="worlds/:worldId/shop" element={<FanShopView />} />
             <Route path="sessions/:sessionId" element={<SessionView />} />
-            <Route path="me" element={<MyWorldView />} />
+            <Route path="me" element={<FanWorldView />} />
             <Route path="benefits/:benefitId" element={<BenefitDetailView />} />
             <Route path="orders/:orderId" element={<OrderDetailView />} />
             <Route path="support/:caseId" element={<SupportCaseDetailView />} />
@@ -55,7 +62,7 @@ export const App: React.FC = () => {
               }
             />
           </Route>
-        </Routes>
+        </Routes></Suspense>
       </BrowserRouter>
     </AppProvider>
   );

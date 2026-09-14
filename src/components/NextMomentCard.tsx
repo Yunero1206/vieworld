@@ -53,11 +53,13 @@ export const NextMomentCard: React.FC<NextMomentCardProps> = ({ session, showWor
     <section
       className="card"
       style={{
-        background: 'linear-gradient(135deg, #201E3C 0%, #151426 100%)',
+        background: 'linear-gradient(135deg, #111827 0%, #1E1B4B 100%)',
         color: '#FFFFFF',
-        border: 'none',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: 'var(--radius-xl)',
         position: 'relative',
         overflow: 'hidden',
+        boxShadow: 'var(--shadow-md)',
       }}
       aria-label="Khoảnh khắc tiếp theo"
     >

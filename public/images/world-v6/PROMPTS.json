@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-09-12",
+  "tool": "image_gen",
+  "assets": [
+    {
+      "file": "myspace.webp",
+      "original": "myspace.png",
+      "source": "C:/Users/VTD/.codex/generated_images/01a086bb-5c47-71f1-b0e7-f34233a2a358/exec-c929f3d7-ded5-4385-a56d-b134fa83642d.png",
+      "prompt": "Use case: stylized-concept. Create a replacement interactive fan My Space background using the attached existing room as STYLE REFERENCE only. Retain cozy miniature 3D isometric dollhouse illustration, sage painted wood walls, pale warm oak floor, rounded cream cutaway perimeter, soft afternoon lighting and cream exterior. Wide 16:9 entire room visible. Redesign as a PERSONAL FAN DISPLAY STUDIO, NOT A LIVING ROOM. Absolutely NO sofa, couch, armchairs, coffee table or people. Five clearly separated purposeful EMPTY display fixtures arranged around perimeter: left wall garment rail with one empty hanger (shirt slot, centered x22% y40%); adjacent framed ticket pinboard with blank insert (x39% y29%); low right wall record player cabinet and empty standing album sleeve holder (x76% y58%); right rear slim cylindrical lightstick stand (x80% y34%); central back illuminated wooden trophy niche empty (x58% y25%). Keep these five fixtures large and identifiable, no merchandise painted in, only empty placeholders for interactive objects. Small natural plants only at far corners. Central open floor with small round woven rug around x48% y68% for an externally composited chibi fan, leaving generous head clearance. Camera closer than reference so a chibi figure of 20% image height feels proportional. No text, labels, icons, UI, watermark or characters. Production game background, not a screenshot.",
+      "reference": "/images/world-v4/myspace.webp"
+    },
+    {
+      "file": "artist.webp",
+      "original": "artist.png",
+      "source": "C:/Users/VTD/.codex/generated_images/01a086bb-5c47-71f1-b0e7-f34233a2a358/exec-a6bf3818-a0cf-4284-8eb0-83c1de539016.png",
+      "prompt": "Create a cozy miniature 3D isometric artist discovery gallery for a fan webgame. Wide 16:9 complete cutaway architectural diorama on warm ivory background, sage green wooden panels, pale oak and cream stone, rounded corners, soft afternoon sunlight, same warm handcrafted dollhouse style as a fan bedroom. This is a welcoming public gallery of artists, NOT a bedroom, NOT a concert stage: no sofas, microphones, stage, screens, people or text. A generous airy central tiled courtyard, a curved arcade along the back with three large blank portrait display panels recessed in separate archways, subtle record-shaped wall ornaments, small potted plants, two low benches along far edges. Leave central foreground open. The archway frames are blank cream for future UI overlays; no names, no lettering, no UI cards or watermark. Elegant restrained composition, real spatial depth and tactile cozy materials, camera high enough to see the whole hall."
+    },
+    {
+      "file": "shirt-cutout.webp",
+      "original": "shirt-cutout.png",
+      "prompt": "Use case: background-extraction. Edit target: attached cream Star Club shirt image. Remove ONLY the entire cream backdrop and floor/contact shadow. Keep the exact cream short sleeve shirt, olive collar, tiny olive star badge, cute miniature 3D texture and shape unchanged. Output one isolated shirt with genuinely transparent alpha background, not white or checkerboard pixels. Full shirt centered with minimal transparent margin, no hanger, no stand, no text, no additional objects. Asset for compositing on a fan room garment rail.",
+      "reference": "/images/merch-v2/shirt-digital.png",
+      "purpose": "Decorative shirt representation only; does not grant digital wearable with physical receipt."
+    }
+  ],
+  "integration": "Versioned originals retained; Sharp WebP quality88; interactive UI and characters composed in React; no baked labels."
+}

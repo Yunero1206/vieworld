@@ -2,6 +2,7 @@
  * VieWorld Canonical Synthetic Fixtures (§5.1, §5.4 & docs/CONTRACTS.md)
  */
 
+import { NEW_MERCH } from '../world/merchCatalog';
 import {
   AppState,
   TenantId,
@@ -33,6 +34,7 @@ export const DEFAULT_FAN_PROFILE: FanProfile = {
     accessoryId: 'lightstick-star',
     equippedAt: INITIAL_DEMO_TIME,
   },
+  showcaseSlots: [null, null, null],
 };
 
 export const CANONICAL_WORLDS: Record<string, World> = {
@@ -44,9 +46,33 @@ export const CANONICAL_WORLDS: Record<string, World> = {
     type: 'artist',
     name: 'Artist A',
     description: 'Thế giới âm nhạc và khoảnh khắc kết nối chân thực của nghệ sĩ hư cấu Artist A.',
-    linkedWorldIds: ['neon-sessions'],
+    linkedWorldIds: ['neon-sessions', 'artist-mira', 'artist-kai'],
     avatarAssetId: 'avatar-a-v1',
     bannerAssetId: 'asset-world-artist-a-banner',
+  },
+  'artist-mira': {
+    id: 'artist-mira',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist',
+    name: 'MIRA',
+    description: 'Không gian Dream Pop & Lofi R&B mộng mơ, nơi những giai điệu ánh trăng vỗ về tâm hồn.',
+    linkedWorldIds: ['artist-a', 'artist-kai'],
+    avatarAssetId: 'avatar-mira-v1',
+    bannerAssetId: 'asset-world-mira-banner',
+  },
+  'artist-kai': {
+    id: 'artist-kai',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist',
+    name: 'KAI',
+    description: 'Sân khấu Future Beats & Cyber-Pop ngập tràn năng lượng đường phố và hiệu ứng ánh sáng neon điện tử.',
+    linkedWorldIds: ['artist-a', 'artist-mira'],
+    avatarAssetId: 'avatar-kai-v1',
+    bannerAssetId: 'asset-world-kai-banner',
   },
   'neon-sessions': {
     id: 'neon-sessions',
@@ -93,6 +119,38 @@ export const CANONICAL_AVATARS: Record<string, AvatarAsset> = {
       accessory: 'visor_neon',
     },
   },
+  'avatar-mira-v1': {
+    id: 'avatar-mira-v1',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    ownerWorldId: 'artist-mira',
+    status: 'approved',
+    approvalRef: 'APPROVAL-MIRA-2026-01',
+    allowedContexts: ['dropin', 'listening', 'concert'],
+    replayAllowed: true,
+    parts: {
+      base: 'stage_classic',
+      outfit: 'festival_hoodie',
+      accessory: 'lightstick_star',
+    },
+  },
+  'avatar-kai-v1': {
+    id: 'avatar-kai-v1',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    ownerWorldId: 'artist-kai',
+    status: 'approved',
+    approvalRef: 'APPROVAL-KAI-2026-01',
+    allowedContexts: ['dropin', 'listening', 'concert'],
+    replayAllowed: true,
+    parts: {
+      base: 'stage_classic',
+      outfit: 'midnight_jacket',
+      accessory: 'visor_neon',
+    },
+  },
 };
 
 export const CANONICAL_SESSIONS: Record<string, Session> = {
@@ -112,6 +170,54 @@ export const CANONICAL_SESSIONS: Record<string, Session> = {
     aiUse: 'none',
     replayStatus: 'pending_review',
     scheduledStartTime: INITIAL_DEMO_TIME,
+    demo: true,
+    rightsApproved: true,
+    rightsChecklist: {
+      musicClearance: true,
+      artistConsent: true,
+      safetyReview: true,
+    },
+  },
+  'session-mira-dropin': {
+    id: 'session-mira-dropin',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'artist-mira',
+    title: 'MIRA: Giờ trà lofi & nghe thử bản thảo Luna',
+    avatarAssetId: 'avatar-mira-v1',
+    format: 'dropin',
+    status: 'scheduled',
+    hostRole: 'artist',
+    artistPresence: 'present',
+    segmentMode: 'live',
+    aiUse: 'none',
+    replayStatus: 'pending_review',
+    scheduledStartTime: '2026-09-15T13:00:00.000Z',
+    demo: true,
+    rightsApproved: true,
+    rightsChecklist: {
+      musicClearance: true,
+      artistConsent: true,
+      safetyReview: true,
+    },
+  },
+  'session-kai-pulse': {
+    id: 'session-kai-pulse',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    updatedAt: INITIAL_DEMO_TIME,
+    worldId: 'artist-kai',
+    title: 'KAI: Live Beat Laboratory & Thử thách nhịp điệu',
+    avatarAssetId: 'avatar-kai-v1',
+    format: 'dropin',
+    status: 'scheduled',
+    hostRole: 'artist',
+    artistPresence: 'present',
+    segmentMode: 'live',
+    aiUse: 'none',
+    replayStatus: 'pending_review',
+    scheduledStartTime: '2026-09-16T14:00:00.000Z',
     demo: true,
     rightsApproved: true,
     rightsChecklist: {
@@ -524,6 +630,7 @@ export const MFAN_FAN_PROFILE: FanProfile = {
     accessoryId: 'earpiece_glow',
     equippedAt: INITIAL_DEMO_TIME,
   },
+  showcaseSlots: [null, null, null],
 };
 
 /**
@@ -654,6 +761,7 @@ export const FANME_FAN_PROFILE: FanProfile = {
     accessoryId: 'visor_neon',
     equippedAt: INITIAL_DEMO_TIME,
   },
+  showcaseSlots: [null, null, null],
 };
 
 /**
@@ -723,7 +831,7 @@ export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppSta
     orders: {},
     supportCases: {},
     fanProfile: structuredClone(DEFAULT_FAN_PROFILE),
-    products: structuredClone(CANONICAL_PRODUCTS),
+    products: { ...structuredClone(CANONICAL_PRODUCTS), ...structuredClone(NEW_MERCH) },
     questions: structuredClone(INITIAL_QUESTIONS),
     polls: structuredClone(INITIAL_POLLS),
     capsules: {},

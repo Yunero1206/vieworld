@@ -58,9 +58,17 @@ export const DiscoverView: React.FC = () => {
 
         {featuredWorld && (
           <Link className="discover-world-hero__portal" to={`/worlds/${featuredWorld.id}`} aria-label={`Mở ${featuredWorld.name}`}>
-            <span aria-hidden="true">{featuredWorld.name.charAt(0)}</span>
-            <small>Tối nay tại</small>
-            <strong>{featuredWorld.name}</strong>
+            <span aria-hidden="true">
+              {featuredWorld.type === 'artist' ? (
+                <img src="/images/artist-a-chibi.jpg" alt={featuredWorld.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} />
+              ) : (
+                featuredWorld.name.charAt(0)
+              )}
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <small>Tối nay tại</small>
+              <strong>{featuredWorld.name}</strong>
+            </div>
           </Link>
         )}
       </header>

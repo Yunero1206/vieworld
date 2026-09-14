@@ -366,7 +366,9 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       // Product 1: Pin (open, in-stock)
       expect(screen.getByText(/Huy hiệu kim loại kỷ niệm Star Drop-in/i)).toBeInTheDocument();
       expect(screen.getByText(/150.000 VND/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Tồn kho thử nghiệm:/i)).toHaveLength(2);
+      expect(screen.getAllByText(/Tồn kho thử nghiệm:/i)).toHaveLength(
+        Object.values(createInitialState('vieworld-demo').products).filter(p => p.worldId === 'artist-a').length
+      );
 
       // Product 2: Shirt (gated by benefit-early-access-01 which is pending)
       expect(screen.getByText(/Áo thun kỷ niệm Midnight Neon Tour/i)).toBeInTheDocument();
@@ -414,10 +416,10 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       // Step 3: Verify OrderDetailView rendered
       expect(screen.getByText(/CHI TIẾT ĐƠN HÀNG VIESHOP/i)).toBeInTheDocument();
       expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/Chờ thanh toán \(Pending\)/i);
-      expect(screen.getByText(/Tiến trình xử lý đơn hàng/i)).toBeInTheDocument();
+      expect(screen.getByText(/HÀNH TRÌNH ĐƠN HÀNG/i)).toBeInTheDocument();
 
       // Stepper shows Pending step active
-      expect(screen.getByText(/1. Khởi tạo đơn hàng \(Mô phỏng\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/^Khởi tạo đơn hàng$/i)).toBeInTheDocument();
 
       // Step 4: Click "Mô phỏng: Thanh toán đơn hàng"
       const payBtn = screen.getByTestId('simulate-payment-btn');
@@ -428,20 +430,20 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       expect(screen.queryByTestId('simulate-payment-btn')).not.toBeInTheDocument();
 
       // INVARIANT: Fulfilment button now visible, but NOT yet fulfilled
-      const fulfillBtn = screen.getByTestId('simulate-fulfilment-btn');
+      const fulfillBtn = screen.getByTestId('advance-shipment-btn');
       expect(fulfillBtn).toBeInTheDocument();
-      expect(screen.getByText(/Đơn hàng đã thanh toán không đồng nghĩa với đã bàn giao vật phẩm/i)).toBeInTheDocument();
+      expect(screen.getByText(/Thanh toán không đồng nghĩa đã nhận đồ/i)).toBeInTheDocument();
 
       // Step 5: Click "Mô phỏng: Xác nhận bàn giao vật phẩm"
-      fireEvent.click(fulfillBtn);
+      for(let stage=0;stage<5;stage++)fireEvent.click(screen.getByTestId('advance-shipment-btn'));
 
       // Status badge updates to Fulfilled
       expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/Đã bàn giao \(Fulfilled\)/i);
-      expect(screen.getByText(/Đơn vị phân phối hoàn tất giao vật phẩm/i)).toBeInTheDocument();
+      expect(screen.getByText(/Hoàn tất bàn giao vật phẩm/i)).toBeInTheDocument();
       expect(screen.getByText(/Đã ghi nhận quyền sở hữu/i)).toBeInTheDocument();
 
       // Step 6: Navigate to My World (/me)
-      const myWorldLink = screen.getByRole('link', { name: /Xem trong My World/i });
+      const myWorldLink = screen.getByRole('link', { name: /Xem đồ đã nhận/i });
       fireEvent.click(myWorldLink);
 
       // In My World, switch to "Đơn hàng & Sở hữu" tab

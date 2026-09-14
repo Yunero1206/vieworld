@@ -8,7 +8,8 @@
  */
 
 import { AppState, TenantId } from '../domain/types';
-import { createInitialState } from '../data/fixtures';
+import { createInitialState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
+import { withMerchCatalog } from '../world/merchCatalog';
 
 export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY_PREFIX = 'vieworld_v1';
@@ -91,7 +92,7 @@ export function loadState(
       try {
         const parsed = JSON.parse(raw);
         return {
-          state: parsed.state,
+          state: withMerchCatalog(parsed.state),
           isMemoryFallback: true,
           notice: 'Chế độ lưu tạm trong bộ nhớ: trình duyệt không cho phép lưu trữ cục bộ.',
         };
@@ -130,8 +131,24 @@ export function loadState(
       };
     }
 
+    if (parsed.state?.fanProfile && !parsed.state.fanProfile.showcaseSlots) {
+      parsed.state.fanProfile.showcaseSlots = [null, null, null];
+    }
+
+    if (parsed.state?.activeTenantId === 'vieworld-demo' && parsed.state?.worlds) {
+      for (const [id, w] of Object.entries(CANONICAL_WORLDS)) {
+        if (!parsed.state.worlds[id]) parsed.state.worlds[id] = structuredClone(w);
+      }
+      for (const [id, a] of Object.entries(CANONICAL_AVATARS)) {
+        if (!parsed.state.avatarAssets[id]) parsed.state.avatarAssets[id] = structuredClone(a);
+      }
+      for (const [id, s] of Object.entries(CANONICAL_SESSIONS)) {
+        if (!parsed.state.sessions[id]) parsed.state.sessions[id] = structuredClone(s);
+      }
+    }
+
     return {
-      state: parsed.state,
+      state: withMerchCatalog(parsed.state),
       isMemoryFallback: false,
     };
   } catch {

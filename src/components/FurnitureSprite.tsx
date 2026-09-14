@@ -1,0 +1,8 @@
+import { RoomItem } from '../world/places';
+import { useState } from 'react';
+/** Native editable props, separate from the raster room so they can move and rotate. */
+export function FurnitureSprite({kind}:{kind:RoomItem['kind']}){
+  const [failed,setFailed]=useState(false);
+  if(!failed)return <img className="vw-prop-image" src={`/images/world-v4/prop-${kind}.webp`} alt="" draggable={false} onError={()=>setFailed(true)}/>;
+  return <svg viewBox="0 0 100 110" aria-hidden="true"><ellipse cx="50" cy="97" rx="37" ry="8" fill="#574b3320"/>{kind==='chair'?<><path d="M22 80v19m53-17v17" stroke="#766344" strokeWidth="5"/><path d="M24 67V25Q26 11 42 15L74 24V70Z" fill="#7c9b91" stroke="#506c64" strokeWidth="2"/><path d="M23 64L61 57L81 70L46 85Z" fill="#9fb6a6" stroke="#506c64" strokeWidth="2"/><path d="M16 52L28 57V77L17 71ZM73 53L85 60V82L73 76Z" fill="#6e8e82"/><path d="M28 80L47 89L75 82V90L47 97L28 88Z" fill="#638579"/></>:kind==='table'?<><path d="M24 54v40m51-40v40m-27-25v34" stroke="#97724e" strokeWidth="6"/><path d="M12 46L52 27L90 47L48 70Z" fill="#caa576" stroke="#98794e" strokeWidth="2"/><path d="M12 46v8l36 22l42-23v-6L48 70Z" fill="#af885e"/></>:kind==='plant'?<><path d="M28 71L34 95Q50 104 67 95L73 71Z" fill="#c09b74"/><ellipse cx="50" cy="71" rx="23" ry="8" fill="#6f6747"/><path d="M50 75V28" stroke="#64784d" strokeWidth="3"/><path d="M49 53Q8 41 23 18Q45 19 49 53M52 43Q54 6 77 17Q87 35 52 43M49 70Q19 76 17 49Q38 39 49 70M52 65Q66 37 85 48Q84 74 52 65" fill="#819569"/></>:<><ellipse cx="50" cy="94" rx="22" ry="6" fill="#998366"/><path d="M50 94V38" stroke="#a38864" strokeWidth="5"/><path d="M31 15H69L83 47Q50 57 17 47Z" fill="#f4dfaa" stroke="#bba47b" strokeWidth="2"/><ellipse cx="50" cy="48" rx="32" ry="6" fill="#fff1c9"/></>}</svg>;
+}

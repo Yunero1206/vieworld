@@ -1,0 +1,52 @@
+{
+  "generationMode": "builtin imagegen; six originals plus three separately generated digital variants",
+  "disclosure": "Fictional AI concepts; not photographs of manufactured merchandise. Original files preserved.",
+  "physicalPromptTemplate": "Use case: product-mockup. Asset type: VieWorld fictional fan-world shop catalog image, {name}. Primary request: {subject} Scene/backdrop: clean warm ivory seamless studio background #f8f6f0, soft contact shadow. Composition: square image, single centered product or the specified album set, object occupies 65 percent, ample breathing room, entire silhouette visible. Lighting: soft warm window/softbox light, high-end catalog aesthetic consistent with a welcoming wood-and-ivory fan world. No props, no people, no UI, no watermark, no real brand names or logos, no text except explicitly requested. Generate ONE final image.",
+  "assets": [
+    {
+      "file": "shirt-physical.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-1fdcc6f7-7feb-47d5-a445-e02b5788ed4f.png",
+      "subject": "A single premium oversized ivory cotton fan merchandise T-shirt, embroidered small olive-green five-point star on left chest and subtle olive ribbed collar. Photorealistic real fabric weave, draped naturally on an invisible mannequin, front three-quarter view, no human or hanger."
+    },
+    {
+      "file": "cap-physical.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-5329edd4-8f4a-4541-9cb4-51726fc64cdd.png",
+      "subject": "A single premium sage-olive cotton baseball cap, small cream five-point star embroidered on the front, curved brim, visible subtle stitching, adjustable back. Photorealistic product photography, three-quarter view."
+    },
+    {
+      "file": "cd-physical.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-a05be3dc-0fc8-444d-b65f-36150c46bb5d.png",
+      "subject": "A physical music CD album set: one cream paper sleeve with an abstract olive-green star and midnight-blue concentric music grooves, a silver compact disc partially sliding out. Photorealistic paper texture and metallic diffraction, tasteful minimal cover, no faces."
+    },
+    {
+      "file": "lightstick-physical.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-bdfe2787-130e-4043-81c5-0331d5b938da.png",
+      "subject": "An original fan concert lightstick, warm ivory ergonomic handle, clear spherical head enclosing a simple olive-green five-point star illuminated mint-green, short cream wrist strap. Photorealistic transparent acrylic, restrained glow. It must be an original design, not any existing band's lightstick."
+    },
+    {
+      "file": "membership-digital.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-ae5a1b1c-242a-4dff-a2e5-8d429a73ee52.png",
+      "subject": "One premium virtual membership pass floating at a slight angle, deep olive rounded card with embossed gold five-point star, finely etched concentric rings, mint edge glow. Only text 'MEMBER' and small 'DEMO'. Stylized polished 3D game collectible, no QR code, barcode, personal data, or real-world ticket validation."
+    },
+    {
+      "file": "ticket-digital.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-96ed4bc1-b105-4e30-80aa-462562618ad1.png",
+      "subject": "One virtual concert ticket collectible floating at a slight angle, midnight-purple paper-like card with scalloped short edges, cream star, subtle mint stage-beam motif. Only text 'LIVE HOUSE' and small 'DEMO'. Stylized polished 3D game collectible, no QR code, barcode, date, seat, or redeemable code."
+    },
+    {
+      "file": "shirt-digital.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-a0c8e783-ed7c-45cf-bbcf-15575ae335f3.png",
+      "prompt": "Use case: style-transfer. Reference image: the attached physical merchandise product, for design identity. Create its DIGITAL GAME ITEM counterpart for VieWorld. Keep the same ivory/olive/mint palette, star motif and product silhouette. Transform only the material/style into a charming rounded matte-clay 2.5D game inventory collectible, visibly simplified and chunky, not a photograph. Single standalone item, no person/mannequin/body, centered fully visible with ample margins, warm ivory studio background and soft grounding shadow. Square catalog image. No labels, text, logos, badges or interface. This is a digital wearable/handheld item matching the physical design."
+    },
+    {
+      "file": "cap-digital.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-ddcf2111-a32c-4015-afcb-8a37505abb58.png",
+      "prompt": "Use case: style-transfer. Reference image: the attached physical merchandise product, for design identity. Create its DIGITAL GAME ITEM counterpart for VieWorld. Keep the same ivory/olive/mint palette, star motif and product silhouette. Transform only the material/style into a charming rounded matte-clay 2.5D game inventory collectible, visibly simplified and chunky, not a photograph. Single standalone item, no person/mannequin/body, centered fully visible with ample margins, warm ivory studio background and soft grounding shadow. Square catalog image. No labels, text, logos, badges or interface. This is a digital wearable/handheld item matching the physical design."
+    },
+    {
+      "file": "lightstick-digital.png",
+      "original": "C:\\Users\\VTD\\.codex\\generated_images\\01a086bb-5c47-71f1-b0e7-f34233a2a358\\exec-a7e3d5d0-cf4a-4f04-8e7b-8fef01251015.png",
+      "prompt": "Use case: style-transfer. Reference image: the attached physical merchandise product, for design identity. Create its DIGITAL GAME ITEM counterpart for VieWorld. Keep the same ivory/olive/mint palette, star motif and product silhouette. Transform only the material/style into a charming rounded matte-clay 2.5D game inventory collectible, visibly simplified and chunky, not a photograph. Single standalone item, no person/mannequin/body, centered fully visible with ample margins, warm ivory studio background and soft grounding shadow. Square catalog image. No labels, text, logos, badges or interface. This is a digital wearable/handheld item matching the physical design."
+    }
+  ]
+}

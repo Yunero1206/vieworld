@@ -29,7 +29,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
         const membershipCard = result.cards.find((c) => c.topic === 'membership');
         expect(membershipCard).toBeDefined();
         expect(membershipCard?.title).toContain('Tư cách Hội viên');
-        expect(membershipCard?.actionLink.to).toBe('/worlds/artist-a');
+        expect(membershipCard?.actionLink.to).toBe('/worlds/artist-a?panel=membership');
         expect(membershipCard?.sourceTitle).toContain('docs/CONSTITUTION.md §3');
         expect(membershipCard?.updatedAt).toBe('2026-09-09');
       }
@@ -137,7 +137,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
 
       // Verify valid navigation link to actual app object
       const actionLinks = screen.getAllByTestId('guide-action-link');
-      expect(actionLinks[0]).toHaveAttribute('href', '/worlds/artist-a');
+      expect(actionLinks[0]).toHaveAttribute('href', '/worlds/artist-a?panel=membership');
       expect(actionLinks[0]).toHaveTextContent('Đến trang Hội viên Artist A');
     });
 

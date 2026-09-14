@@ -568,6 +568,7 @@ export const AvatarStudioView: React.FC = () => {
 
             {/* The Actual Stage Rendering */}
             <AvatarStage
+              previewDraft
               avatar={workingPreviewAsset}
               artistPresence={previewPresence}
               reducedMotion={!animationsEnabled}

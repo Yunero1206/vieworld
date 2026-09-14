@@ -7,6 +7,8 @@ import { WorldCard } from '../components/WorldCard';
 import { MembershipCard } from '../components/MembershipCard';
 import { BenefitCard } from '../components/BenefitCard';
 import { MyRoomScene } from '../components/MyRoomScene';
+import { AvatarRenderer } from '../components/AvatarRenderer';
+import { getTenantConfig } from '../domain/tenantConfig';
 import {
   User,
   Sparkles,
@@ -39,7 +41,7 @@ export const MyWorldView: React.FC = () => {
     const nextParams = new URLSearchParams(searchParams);
     if (tab === 'capsules') nextParams.delete('drawer');
     else nextParams.set('drawer', tab);
-    setSearchParams(nextParams, { replace: true });
+    setSearchParams(nextParams);
   };
 
   const { fanProfile, capsules, followedWorldIds, rsvpdSessionIds, participations, worlds, sessions } = state;
@@ -78,6 +80,30 @@ export const MyWorldView: React.FC = () => {
     }
   };
 
+  const tenantConfig = getTenantConfig(state.activeTenantId);
+
+  // 3-slot showcase shelf resolution for Room Diorama and Shelf Manager (§Job 07)
+  const rawShowcaseSlots = (fanProfile.showcaseSlots || [null, null, null]) as [
+    string | null,
+    string | null,
+    string | null
+  ];
+
+  const roomShowcaseSlots = ([0, 1, 2] as const).map((idx) => {
+    const capsuleId = rawShowcaseSlots[idx];
+    if (!capsuleId) return null;
+    const capsule = state.capsules[capsuleId];
+    if (!capsule || capsule.fanId !== fanProfile.id || !capsule.isSaved) return null;
+    const session = sessions[capsule.sessionId];
+    const world = worlds[capsule.worldId];
+    return {
+      id: capsule.id,
+      title: `Kỷ niệm #${idx + 1}`,
+      sessionTitle: session?.title,
+      worldName: world?.name,
+    };
+  });
+
   return (
     <div className="container my-world-page">
       <MyRoomScene
@@ -88,6 +114,18 @@ export const MyWorldView: React.FC = () => {
         orderCount={userOrders.length}
         supportCount={userSupportCases.length}
         upcomingCount={rsvpdSessions.length}
+        participationCount={participationList.length}
+        recentCapsules={earnedCapsules.slice(0, 3).map((c, idx) => ({
+          id: c.id,
+          title: `Kỷ niệm #${idx + 1}`,
+          sessionTitle: sessions[c.sessionId]?.title,
+          worldName: worlds[c.worldId]?.name,
+        }))}
+        showcaseSlots={roomShowcaseSlots}
+        onSlotClick={() => openSection('capsules')}
+        onRemoveSlot={(slotIdx) => dispatch({ type: 'CLEAR_SHOWCASE_SLOT', slotIndex: slotIdx })}
+        myWorldTitle={tenantConfig.labels.myWorldTitle}
+        capsulesTitle={tenantConfig.labels.capsulesTitle}
         onOpenSection={openSection}
       />
 
@@ -107,21 +145,30 @@ export const MyWorldView: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div
+            className="my-world-profile-avatar"
+            data-testid="profile-header-avatar"
             style={{
               width: '56px',
               height: '56px',
               borderRadius: '50%',
-              backgroundColor: 'var(--primary)',
-              color: '#FFFFFF',
+              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '24px',
-              fontWeight: '800',
+              backgroundColor: 'var(--surface)',
+              border: '2px solid var(--primary)',
               boxShadow: '0 4px 12px rgba(101, 81, 200, 0.3)',
+              position: 'relative',
             }}
           >
-            {fanProfile.displayName.charAt(0)}
+            <AvatarRenderer
+              role="fan"
+              accessoryId={fanProfile.wardrobeChoice?.accessoryId}
+              size="md"
+              displayName={fanProfile.displayName}
+              testId="profile-avatar-renderer"
+            />
+            <span className="sr-only">{fanProfile.displayName.charAt(0)}</span>
           </div>
 
           <div>
@@ -194,6 +241,7 @@ export const MyWorldView: React.FC = () => {
           className={`btn ${activeTab === 'capsules' ? 'btn-primary' : 'btn-secondary'}`}
           style={{ fontSize: 'var(--text-sm)', padding: '10px 16px' }}
           id="tab-btn-my-capsules"
+          data-testid="tab-btn-my-capsules"
         >
           <Sparkles size={16} />
           <span>Kỷ niệm số ({earnedCapsules.length})</span>
@@ -304,27 +352,160 @@ export const MyWorldView: React.FC = () => {
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
-              {earnedCapsules.map((capsule) => {
-                const session = sessions[capsule.sessionId];
-                const world = worlds[capsule.worldId];
+            <>
+              {/* 3-Slot Showcase Shelf Manager (§Job 07) */}
+              <div
+                className="card showcase-shelf-manager"
+                data-testid="showcase-shelf-manager"
+                style={{
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <Gift size={18} color="var(--primary)" />
+                      <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: 0 }}>
+                        Kệ trưng bày phòng tôi (3 ô)
+                      </h3>
+                      <span className="demo-badge">DEMO</span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+                      Chọn tối đa 3 kỷ niệm đã lưu để trưng bày lên kệ diorama trong phòng của bạn. Một kỷ niệm tối đa một ô.
+                    </p>
+                  </div>
 
-                return (
-                  <MomentCapsuleCard
-                    key={capsule.id}
-                    capsule={capsule}
-                    session={session}
-                    world={world}
-                    onSaveNote={(cId, note) =>
-                      dispatch({ type: 'SAVE_CAPSULE', capsuleId: cId, privateNote: note })
-                    }
-                    onToggleSaved={(cId, saved) =>
-                      dispatch({ type: 'SAVE_CAPSULE', capsuleId: cId, isSaved: saved })
-                    }
-                  />
-                );
-              })}
-            </div>
+                  <span
+                    className="tag"
+                    style={{ backgroundColor: '#EEF2FF', color: '#4338CA', fontWeight: '700' }}
+                    data-testid="shelf-manager-status"
+                  >
+                    {rawShowcaseSlots.filter(Boolean).length}/3 ô đang trưng bày
+                  </span>
+                </div>
+
+                <div className="showcase-cubbies-grid">
+                  {([0, 1, 2] as const).map((slotIdx) => {
+                    const capsuleId = rawShowcaseSlots[slotIdx];
+                    const capsule = capsuleId ? state.capsules[capsuleId] : undefined;
+                    const isOccupied = !!(capsule && capsule.fanId === fanProfile.id && capsule.isSaved);
+                    const session = isOccupied ? sessions[capsule.sessionId] : undefined;
+                    const world = isOccupied ? worlds[capsule.worldId] : undefined;
+
+                    return (
+                      <div
+                        key={slotIdx}
+                        className={`showcase-cubby ${isOccupied ? 'showcase-cubby--occupied' : 'showcase-cubby--empty'}`}
+                        data-testid={`shelf-manager-cubby-${slotIdx}`}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <strong style={{ fontSize: 'var(--text-xs)', color: isOccupied ? 'var(--primary)' : 'var(--muted)' }}>
+                            Ô {slotIdx + 1}
+                          </strong>
+                          {isOccupied ? (
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              style={{ padding: '2px 8px', fontSize: '10px', color: '#DC2626' }}
+                              onClick={() => dispatch({ type: 'CLEAR_SHOWCASE_SLOT', slotIndex: slotIdx })}
+                              data-testid={`shelf-manager-remove-${slotIdx}`}
+                            >
+                              Gỡ bỏ
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '10px', color: 'var(--muted)', fontStyle: 'italic' }}>
+                              Trống
+                            </span>
+                          )}
+                        </div>
+
+                        {isOccupied ? (
+                          <div>
+                            <span
+                              style={{ fontSize: 'var(--text-xs)', fontWeight: '700', display: 'block', color: 'var(--ink)' }}
+                              data-testid={`shelf-cubby-title-${slotIdx}`}
+                            >
+                              [Kỷ niệm] {session?.title || capsule.privateNote || 'Khoảnh khắc trực tiếp'}
+                            </span>
+                            {world && (
+                              <small style={{ fontSize: '10px', color: 'var(--muted)' }}>
+                                {world.name}
+                              </small>
+                            )}
+                          </div>
+                        ) : (
+                          <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)' }}>
+                            Chưa chọn kỷ niệm. Bạn có thể chọn nhanh từ danh mục:
+                          </p>
+                        )}
+
+                        {/* Quick selector dropdown */}
+                        <select
+                          className="input"
+                          style={{ fontSize: '11px', padding: '4px 6px', borderRadius: 'var(--radius-sm)' }}
+                          data-testid={`shelf-manager-select-${slotIdx}`}
+                          aria-label={`Chọn kỷ niệm cho Ô ${slotIdx + 1}`}
+                          value={isOccupied && capsuleId ? capsuleId : ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val) {
+                              dispatch({ type: 'SET_SHOWCASE_SLOT', slotIndex: slotIdx, capsuleId: val });
+                            } else {
+                              dispatch({ type: 'CLEAR_SHOWCASE_SLOT', slotIndex: slotIdx });
+                            }
+                          }}
+                        >
+                          <option value="">{isOccupied ? 'Thay thế bằng kỷ niệm khác...' : '+ Chọn kỷ niệm trưng bày...'}</option>
+                          {earnedCapsules.filter((c) => c.isSaved).map((c) => {
+                            const s = sessions[c.sessionId];
+                            const currentSlot = rawShowcaseSlots.indexOf(c.id);
+                            return (
+                              <option key={c.id} value={c.id}>
+                                [Kỷ niệm] {s?.title || c.privateNote || c.id} {currentSlot !== -1 ? `(đang ở Ô ${currentSlot + 1})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Capsule Cards Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
+                {earnedCapsules.map((capsule) => {
+                  const session = sessions[capsule.sessionId];
+                  const world = worlds[capsule.worldId];
+                  const currentSlotIdx = rawShowcaseSlots.indexOf(capsule.id);
+
+                  return (
+                    <MomentCapsuleCard
+                      key={capsule.id}
+                      capsule={capsule}
+                      session={session}
+                      world={world}
+                      currentSlotIndex={currentSlotIdx !== -1 ? (currentSlotIdx as 0 | 1 | 2) : undefined}
+                      onSaveNote={(cId, note) =>
+                        dispatch({ type: 'SAVE_CAPSULE', capsuleId: cId, privateNote: note })
+                      }
+                      onToggleSaved={(cId, saved) =>
+                        dispatch({ type: 'SAVE_CAPSULE', capsuleId: cId, isSaved: saved })
+                      }
+                      onAssignSlot={(cId, slotIdx) =>
+                        dispatch({ type: 'SET_SHOWCASE_SLOT', slotIndex: slotIdx, capsuleId: cId })
+                      }
+                      onRemoveFromSlot={(slotIdx) =>
+                        dispatch({ type: 'CLEAR_SHOWCASE_SLOT', slotIndex: slotIdx })
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -710,38 +891,10 @@ export const MyWorldView: React.FC = () => {
       {/* TAB 3: THẾ GIỚI THEO DÕI & LỊCH HẸN RSVP */}
       {activeTab === 'follows' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          {/* Followed Worlds */}
-          <section aria-label="Danh sách thế giới đang theo dõi">
+          {/* RSVP Upcoming Sessions (Prioritized for Wall Calendar interaction) */}
+          <section aria-label="Danh sách sự kiện đã đăng ký nhắc" id="rsvp-calendar-section">
             <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '800', marginBottom: '14px' }}>
-              Thế giới đang theo dõi ({followedWorlds.length})
-            </h2>
-
-            {followedWorlds.length === 0 ? (
-              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
-                <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: '0 0 12px 0' }}>
-                  Bạn chưa theo dõi thế giới người hâm mộ nào.
-                </p>
-                <Link to="/worlds" className="btn btn-primary" style={{ display: 'inline-flex' }}>
-                  Khám phá Worlds
-                </Link>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                {followedWorlds.map((w) => (
-                  <WorldCard
-                    key={w.id}
-                    world={w}
-                    viewMode="list"
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* RSVP Upcoming Sessions */}
-          <section aria-label="Danh sách sự kiện đã đăng ký nhắc">
-            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '800', marginBottom: '14px' }}>
-              Sự kiện đã nhắc (RSVP) ({rsvpdSessions.length})
+              Lịch hẹn sự kiện (RSVP) ({rsvpdSessions.length})
             </h2>
 
             {rsvpdSessions.length === 0 ? (
@@ -749,6 +902,11 @@ export const MyWorldView: React.FC = () => {
                 <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
                   Bạn chưa đăng ký nhận thông báo sự kiện nào.
                 </p>
+                <div style={{ marginTop: '12px' }}>
+                  <Link to="/worlds" className="btn btn-primary" style={{ display: 'inline-flex' }}>
+                    Khám phá sự kiện sắp tới
+                  </Link>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -796,6 +954,34 @@ export const MyWorldView: React.FC = () => {
                       </button>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Followed Worlds */}
+          <section aria-label="Danh sách thế giới đang theo dõi">
+            <h2 style={{ fontSize: 'var(--text-md)', fontWeight: '800', marginBottom: '14px' }}>
+              Thế giới đang theo dõi ({followedWorlds.length})
+            </h2>
+
+            {followedWorlds.length === 0 ? (
+              <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: '0 0 12px 0' }}>
+                  Bạn chưa theo dõi thế giới người hâm mộ nào.
+                </p>
+                <Link to="/worlds" className="btn btn-primary" style={{ display: 'inline-flex' }}>
+                  Khám phá Worlds
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {followedWorlds.map((w) => (
+                  <WorldCard
+                    key={w.id}
+                    world={w}
+                    viewMode="list"
+                  />
                 ))}
               </div>
             )}

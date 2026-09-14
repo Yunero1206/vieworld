@@ -4,9 +4,61 @@
 
 import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Question, SupportCase } from './types';
 import { createInitialState } from '../data/fixtures';
+import { ARTIST_NOTES } from '../world/fanWorld';
+import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
+import { validRoomDesign } from '../world/places';
+import { commerceReducer } from '../world/commerce';
+import { shippingReducer } from '../world/shipping';
+import { historyReducer } from '../world/history';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
+  const featureState=commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
+  if(featureState)return featureState;
   switch (action.type) {
+    case 'SAVE_ROOM_DESIGN': {
+      if(!validRoomDesign(action.design)) return {...state,lastError:{code:'ROOM_DESIGN_INVALID',message:'Bố cục phòng chưa hợp lệ. Chọn tối đa 8 món trong vùng sàn.'}};
+      return {...state,lastError:undefined,fanProfile:{...state.fanProfile,roomDesign:{...action.design,layers:{...action.design.layers},items:action.design.items.map(i=>({...i}))}}};
+    }
+    case 'SEND_HALL_MESSAGE': {
+      if (!canEnterHall(state, action.worldId)) return { ...state, lastError: { code: 'HALL_MEMBERSHIP_REQUIRED', message: 'Hall này dành cho hội viên đang hoạt động của đúng nhà nhạc.' } };
+      const messages = state.hallMessages?.[action.worldId] || [];
+      const value = action.text.trim();
+      if (messages.some(m => m.id === action.requestId)) return state;
+      if (!value || value.length > 280) return { ...state, lastError: { code: 'HALL_MESSAGE_INVALID', message: 'Lời nhắn cần từ 1 đến 280 ký tự.' } };
+      return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: `hall-${action.worldId}`, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime }].slice(-100) } };
+    }
+    case 'REPORT_HALL_MESSAGE': {
+      if (!canEnterHall(state, action.worldId)) return state;
+      return { ...state, hallMessages: { ...state.hallMessages, [action.worldId]: (state.hallMessages?.[action.worldId] || []).map(m => m.id === action.messageId ? { ...m, isReported: true, reportRef: `report-${m.id}` } : m) } };
+    }
+    case 'TOGGLE_SAVED_PRODUCT': {
+      if (!state.products[action.productId]) return state;
+      const ids = state.fanProfile.savedProductIds || [];
+      return { ...state, fanProfile: { ...state.fanProfile, savedProductIds: ids.includes(action.productId) ? ids.filter(id => id !== action.productId) : [...ids, action.productId] } };
+    }
+    case 'EQUIP_DIGITAL_PRODUCT': {
+      const product = state.products[action.productId];
+      if (!product?.digitalSlot || !ownsDigitalProduct(state, product)) return { ...state, lastError: { code: 'DIGITAL_NOT_OWNED', message: 'Chỉ mặc vật phẩm digital đã được bàn giao cho bạn. Thử trước không tạo quyền sở hữu.' } };
+      return { ...state, lastError: undefined, fanProfile: { ...state.fanProfile, digitalLook: { ...state.fanProfile.digitalLook, [product.digitalSlot]: product.digitalItemId } } };
+    }
+    case 'REMOVE_DIGITAL_SLOT': {
+      return { ...state, fanProfile: { ...state.fanProfile, digitalLook: { ...state.fanProfile.digitalLook, [action.slot]: undefined } } };
+    }
+    case 'VISIT_FAN_WORLD': {
+      if (!state.worlds[action.worldId]) return state;
+      const progress = state.fanProfile.worldJourney || { visitedWorldIds: [], readNoteIds: [] };
+      if (progress.lastWorldId === action.worldId && progress.visitedWorldIds.includes(action.worldId)) return state;
+      return { ...state, fanProfile: { ...state.fanProfile, worldJourney: { ...progress,
+        lastWorldId: action.worldId, visitedWorldIds: [...new Set([...progress.visitedWorldIds, action.worldId])] } } };
+    }
+    case 'READ_ARTIST_NOTE': {
+      const note = ARTIST_NOTES.find(n => n.id === action.noteId);
+      if (!note || !state.worlds[note.worldId]) return state;
+      const progress = state.fanProfile.worldJourney || { visitedWorldIds: [], readNoteIds: [] };
+      if (progress.readNoteIds.includes(note.id)) return state;
+      return { ...state, fanProfile: { ...state.fanProfile, worldJourney: { ...progress,
+        readNoteIds: [...progress.readNoteIds, note.id] } } };
+    }
     /**
      * Follow Guard:
      * - Toggles relationship status in followedWorldIds.
@@ -889,7 +941,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Invariant: Verifies inventory and required benefit qualification.
      */
     case 'CREATE_ORDER': {
+      if(Object.values(state.orders).some(o=>o.requestId===action.requestId && o.fanId===state.fanProfile.id))return state;
       const product = state.products[action.productId];
+      if (product?.previewOnly) return { ...state, lastError: { code: 'PREVIEW_ONLY', message: 'Mẫu này chưa mở bán. Xem luồng hội viên hoặc lịch sự kiện riêng.' } };
+      if (product?.sizes && !product.sizes.includes(action.optionLabel || '')) return { ...state, lastError: { code: 'SIZE_REQUIRED', message: 'Chọn đúng kích cỡ trước khi tạo đơn.' } };
       if (!product || !product.isAvailable || product.stockCount <= 0) {
         return {
           ...state,
@@ -920,7 +975,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         return state;
       }
 
-      const orderId = `order_${Date.now()}_${action.requestId.substring(0, 8)}`;
+      const orderId = `order_${Date.now()}_${encodeURIComponent(action.requestId)}`;
       const order: Order = {
         id: orderId,
         tenantId: state.activeTenantId,
@@ -930,8 +985,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         worldId: product.worldId,
         productId: product.id,
         status: 'pending',
+        createdAt: state.demoTime,
         sourceRef: 'VieSHOP-SIM',
         requestId: action.requestId,
+        optionLabel: action.optionLabel,
+        unitPriceVND: product.priceVND,
+        productTitle: product.title,
+        quantity: 1,
       };
 
       const updatedNotifs = { ...state.notifications };
@@ -972,11 +1032,20 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      */
     case 'SIMULATE_PAYMENT': {
       const order = state.orders[action.orderId];
+      if(order && (order.fanId!==state.fanProfile.id || order.tenantId!==state.activeTenantId))return {...state,lastError:{code:'ORDER_NOT_FOUND',message:'Không tìm thấy đơn hàng của bạn.'}};
+      if(order?.checkoutId){
+        if(order.fanId!==state.fanProfile.id || order.tenantId!==state.activeTenantId || order.requestId!==action.requestId)return {...state,lastError:{code:'INVALID_REQUEST_ID',message:'Yêu cầu thanh toán không khớp với đơn của bạn.'}};
+        return commerceReducer(state,{type:'PAY_CHECKOUT',checkoutId:order.checkoutId})!;
+      }
       if (!order) {
         return {
           ...state,
           lastError: { code: 'ORDER_NOT_FOUND', message: 'Không tìm thấy đơn hàng.' },
         };
+      }
+
+      if (order.status === 'cancelled' || order.status === 'refunded') {
+        return { ...state, lastError: { code: 'ORDER_CLOSED', message: 'Đơn đã hủy hoặc hoàn tiền không thể thanh toán lại. Vui lòng tạo đơn mới.' } };
       }
 
       // Idempotency: already paid is a no-op success
@@ -998,6 +1067,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [order.id]: {
             ...order,
             status: 'paid',
+            paidAt: state.demoTime,
             updatedAt: state.demoTime,
           },
         },
@@ -1011,6 +1081,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      */
     case 'SIMULATE_FULFILMENT': {
       const order = state.orders[action.orderId];
+      if(order && (order.fanId!==state.fanProfile.id || order.tenantId!==state.activeTenantId))return {...state,lastError:{code:'ORDER_NOT_FOUND',message:'Không tìm thấy đơn hàng của bạn.'}};
       if (!order) {
         return { ...state, lastError: { code: 'ORDER_NOT_FOUND', message: 'Không tìm thấy đơn hàng.' } };
       }
@@ -1052,6 +1123,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           [order.id]: {
             ...order,
             status: 'fulfilled',
+            fulfilledAt: state.demoTime,
             updatedAt: state.demoTime,
           },
         },
@@ -1479,6 +1551,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * Wardrobe Customization:
      * - Persists fan's accessory selection.
      */
+    case 'SET_AVATAR_PRESET': {
+      if (!['original', 'wave', 'bob', 'curl'].includes(action.preset)) return state;
+      return {...state, fanProfile: {...state.fanProfile, avatarPreset: action.preset}};
+    }
     case 'EQUIP_WARDROBE': {
       return {
         ...state,
@@ -1493,20 +1569,115 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
 
     /**
+     * Set Showcase Slot (§Job 07):
+     * - Places a saved capsule belonging to the current fan into slot 0, 1, or 2.
+     * - Invariant: "Một capsule tối đa một ô" (if capsule already in another slot, clear old slot).
+     * - Invariant: "Bỏ khỏi kệ không xóa capsule" (unslotting does not delete or unsave capsule).
+     * - Invariant: Only saved capsules belonging to fan can be slotted.
+     */
+    case 'SET_SHOWCASE_SLOT': {
+      const targetSlot = action.slotIndex;
+      if (targetSlot < 0 || targetSlot > 2) return state;
+
+      const currentSlots: [string | null, string | null, string | null] = [
+        state.fanProfile.showcaseSlots?.[0] ?? null,
+        state.fanProfile.showcaseSlots?.[1] ?? null,
+        state.fanProfile.showcaseSlots?.[2] ?? null,
+      ];
+
+      const newCapsuleId = action.capsuleId;
+
+      if (newCapsuleId) {
+        const capsule = state.capsules[newCapsuleId];
+        // Must exist, belong to current fan, and be saved
+        if (!capsule || capsule.fanId !== state.fanProfile.id || !capsule.isSaved) {
+          return state;
+        }
+      }
+
+      // "Một capsule tối đa một ô": clear if present in any other slot
+      const nextSlots = currentSlots.map((id, idx) => {
+        if (newCapsuleId && id === newCapsuleId && idx !== targetSlot) {
+          return null;
+        }
+        if (idx === targetSlot) {
+          return newCapsuleId;
+        }
+        return id;
+      }) as [string | null, string | null, string | null];
+
+      return {
+        ...state,
+        fanProfile: {
+          ...state.fanProfile,
+          showcaseSlots: nextSlots,
+          updatedAt: state.demoTime,
+        },
+      };
+    }
+
+    /**
+     * Clear Showcase Slot (§Job 07):
+     * - Removes capsule from the specified slot (0, 1, or 2) without deleting capsule.
+     */
+    case 'CLEAR_SHOWCASE_SLOT': {
+      const targetSlot = action.slotIndex;
+      if (targetSlot < 0 || targetSlot > 2) return state;
+
+      const currentSlots: [string | null, string | null, string | null] = [
+        state.fanProfile.showcaseSlots?.[0] ?? null,
+        state.fanProfile.showcaseSlots?.[1] ?? null,
+        state.fanProfile.showcaseSlots?.[2] ?? null,
+      ];
+
+      const nextSlots = [...currentSlots] as [string | null, string | null, string | null];
+      nextSlots[targetSlot] = null;
+
+      return {
+        ...state,
+        fanProfile: {
+          ...state.fanProfile,
+          showcaseSlots: nextSlots,
+          updatedAt: state.demoTime,
+        },
+      };
+    }
+
+    /**
      * Save Capsule Guard:
      * - Attaches optional private note.
+     * - If unsaved, removes from showcase shelf automatically.
      */
     case 'SAVE_CAPSULE': {
       const capsule = state.capsules[action.capsuleId];
       if (!capsule) return state;
 
+      const newIsSaved = action.isSaved !== undefined ? action.isSaved : true;
+      let nextSlots = state.fanProfile.showcaseSlots;
+
+      // If unsaved, remove from showcase shelf automatically
+      if (!newIsSaved && nextSlots) {
+        if (nextSlots.includes(capsule.id)) {
+          nextSlots = nextSlots.map((id) => (id === capsule.id ? null : id)) as [
+            string | null,
+            string | null,
+            string | null
+          ];
+        }
+      }
+
       return {
         ...state,
+        fanProfile: nextSlots !== state.fanProfile.showcaseSlots ? {
+          ...state.fanProfile,
+          showcaseSlots: nextSlots,
+          updatedAt: state.demoTime,
+        } : state.fanProfile,
         capsules: {
           ...state.capsules,
           [capsule.id]: {
             ...capsule,
-            isSaved: action.isSaved !== undefined ? action.isSaved : true,
+            isSaved: newIsSaved,
             privateNote: action.privateNote !== undefined ? action.privateNote : capsule.privateNote,
             updatedAt: state.demoTime,
           },

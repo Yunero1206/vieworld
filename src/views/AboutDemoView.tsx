@@ -50,7 +50,7 @@ export const AboutDemoView: React.FC = () => {
           <div style={{ padding: 'var(--space-3)', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>
             <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: '700', marginBottom: '4px' }}>Lưu trữ cục bộ</h3>
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-              Dữ liệu được lưu trữ trong trình duyệt qua adapter phiên bản (localStorage) và phân tách theo không gian tenant (VieWorld, MFan, FanMe).
+              Một danh tính fan được dùng xuyên suốt nhà nhạc, phòng riêng và VieSHOP. Dữ liệu được lưu trong trình duyệt; các bản lưu demo cũ được giữ để có thể phục hồi.
             </p>
           </div>
           <div style={{ padding: 'var(--space-3)', background: 'var(--bg)', borderRadius: 'var(--radius-md)' }}>

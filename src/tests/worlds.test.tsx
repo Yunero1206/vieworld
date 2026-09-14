@@ -10,6 +10,7 @@ import { DiscoverView } from '../views/DiscoverView';
 import { WorldsView } from '../views/WorldsView';
 import { WorldDetailView } from '../views/WorldDetailView';
 import { AppShell } from '../components/AppShell';
+import { createInitialState } from '../data/fixtures';
 
 describe('T03 Acceptance: Discover & World Destinations', () => {
   beforeEach(() => {
@@ -156,7 +157,9 @@ describe('T03 Acceptance: Discover & World Destinations', () => {
 
       expect(screen.getByText(/Huy hiệu kim loại kỷ niệm Star Drop-in/i)).toBeInTheDocument();
       expect(screen.getByText(/150.000 VND/i)).toBeInTheDocument();
-      expect(screen.getAllByRole('button', { name: /Mô phỏng đặt hàng/i })).toHaveLength(2);
+      expect(screen.getAllByRole('button', { name: /Mô phỏng đặt hàng/i })).toHaveLength(
+        Object.values(createInitialState('vieworld-demo').products).filter(p => p.worldId === 'artist-a').length
+      );
     });
   });
 

@@ -1,217 +1,27 @@
-import React from 'react';
-import { Order } from '../domain/types';
-import { ShoppingBag, CreditCard, PackageCheck, AlertCircle, XCircle } from 'lucide-react';
+import { useApp } from '../context/AppContext';
+import type { Order } from '../domain/types';
+import { SHIPPING_STEPS } from '../world/shipping';
+import { getTenantConfig } from '../domain/tenantConfig';
 
-interface OrderTimelineProps {
-  order: Order;
+const time=(value?:string)=>value?new Date(value).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}):'Đơn cũ chưa có thời điểm riêng';
+export function OrderTimeline({order}:{order:Order}){
+ const {state,dispatch}=useApp();
+ const tenantConfig = getTenantConfig(order.tenantId || state.activeTenantId);
+ const digital=state.products[order.productId]?.delivery==='digital';
+ const events=order.shipment?.events||[];const closed=['cancelled','refunded'].includes(order.status);
+ const current=events.length?SHIPPING_STEPS[events.length-1]:undefined;
+ const steps=[
+  {id:'pending',title:'Khởi tạo đơn hàng',detail:`${tenantConfig.labels.shopTitle} đã tiếp nhận yêu cầu mua hàng.`,done:true,at:order.createdAt},
+  {id:'paid',title:'Xác nhận thanh toán',detail:digital?'Chuẩn bị bàn giao digital vào tài khoản.':'Chờ shop xác nhận món và đóng gói sau thanh toán.',done:['paid','fulfilled'].includes(order.status)||!!order.paidAt,at:order.paidAt},
+  ...(!digital?SHIPPING_STEPS.map((step,i)=>({id:i===4?'fulfilled':`shipping-${i}`,title:step.title,detail:`${step.location} · ${step.detail}`,done:events.some(e=>e.stage===i)||(i===4&&order.status==='fulfilled'),at:events.find(e=>e.stage===i)?.at||(i===4?order.fulfilledAt:undefined)})):[{id:'fulfilled',title:'Bàn giao vật phẩm digital',detail:'Ghi nhận quyền sở hữu trên tài khoản. Không có kiện hàng hay đơn vị vận chuyển.',done:order.status==='fulfilled',at:order.fulfilledAt}])
+ ];
+ return <section className="v6-order-journey" aria-label="Tiến trình trạng thái đơn hàng" data-testid={`order-timeline-${order.id}`}>
+  <p className="fw-eyebrow">HÀNH TRÌNH ĐƠN HÀNG · MÔ PHỎNG</p>
+  <h2>{closed?(order.status==='cancelled'?'Đơn đã hủy':'Đơn đã hoàn tiền'):order.status==='fulfilled'?'Món đồ đã đến với bạn':digital?'Bàn giao vào tài khoản':current?.title||'Chuẩn bị hành trình của món đồ'}</h2>
+  {!digital&&!closed&&<div className="v6-shipment-summary"><div><small>Kiện đang ở đâu?</small><strong>{order.status==='fulfilled'?'Đã bàn giao · không có định vị trực tiếp':current?.location||'Chưa bàn giao cho vận chuyển'}</strong></div><div><small>Đơn vị vận chuyển</small><strong>{events.length>=2?'Vie Delivery Demo':'Chưa bàn giao'}</strong></div><div><small>Mã vận đơn mẫu</small><strong>{events.length>=2?`DEMO-${order.id}`:'Chưa phát hành'}</strong></div><div><small>Dự kiến giao</small><strong>{order.status==='fulfilled'?'Đã hoàn tất':order.shipment?time(order.shipment.estimatedAt):'Khoảng 3 ngày sau xác nhận shop (kịch bản mẫu)'}</strong></div></div>}
+  <p className="fw-muted">Không kết nối hãng vận chuyển thật. Địa điểm, vận đơn và ETA là kịch bản minh họa; thời gian ghi theo đồng hồ demo của app.</p>
+  <ol className="v6-order-steps">{steps.map(step=><li key={step.id} data-testid={`timeline-step-${step.id}`} className={step.done?'done':''}><i aria-label={step.done?'Đã hoàn thành':'Chưa ghi nhận'}>{step.done?'✓':'·'}</i><div><h3>{step.title}</h3><p>{step.detail}</p><small>{step.done?time(step.at):closed?'Không tiếp tục xử lý':order.status==='fulfilled'?'Đơn cũ không lưu mốc này':'Chưa ghi nhận'}</small></div></li>)}</ol>
+  {!digital&&order.status==='paid'&&<button className="fw-button" data-testid="advance-shipment-btn" onClick={()=>dispatch({type:'ADVANCE_SHIPMENT',orderId:order.id,expectedStage:events.length})}>Mô phỏng: {SHIPPING_STEPS[events.length]?.title}</button>}
+  <p className="fw-muted">Thanh toán không đồng nghĩa đã nhận đồ. Chỉ khi bàn giao thành công, vật phẩm mới được ghi nhận sở hữu.</p>
+ </section>;
 }
-
-export const OrderTimeline: React.FC<OrderTimelineProps> = ({ order }) => {
-  const formatVietnamTime = (isoString: string) => {
-    try {
-      return new Intl.DateTimeFormat('vi-VN', {
-        timeZone: 'Asia/Ho_Chi_Minh',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(isoString));
-    } catch {
-      return isoString;
-    }
-  };
-
-  const steps = [
-    {
-      id: 'pending',
-      title: '1. Khởi tạo đơn hàng (Mô phỏng)',
-      desc: 'Đơn hàng được tạo thành công với mã yêu cầu định danh duy nhất (requestId). Chưa ghi nhận thanh toán hay bàn giao.',
-      icon: ShoppingBag,
-      isCompleted: true, // Always completed if order exists
-      isActive: order.status === 'pending',
-    },
-    {
-      id: 'paid',
-      title: '2. Thanh toán mô phỏng',
-      desc: 'Xác nhận trạng thái thanh toán thử nghiệm. Đơn hàng đã thanh toán không đồng nghĩa với đã bàn giao vật phẩm.',
-      icon: CreditCard,
-      isCompleted: order.status === 'paid' || order.status === 'fulfilled',
-      isActive: order.status === 'paid',
-    },
-    {
-      id: 'fulfilled',
-      title: '3. Bàn giao & Ghi nhận sở hữu',
-      desc: 'Đơn vị phân phối hoàn tất giao vật phẩm. Chỉ sau bước này, vật phẩm mới chính thức được ghi nhận quyền sở hữu trong My World.',
-      icon: PackageCheck,
-      isCompleted: order.status === 'fulfilled',
-      isActive: order.status === 'fulfilled',
-    },
-  ];
-
-  const isAbnormal = order.status === 'cancelled' || order.status === 'refunded';
-
-  return (
-    <div
-      className="card"
-      style={{
-        padding: '24px',
-        backgroundColor: 'var(--surface)',
-        borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--border)',
-      }}
-      aria-label="Tiến trình trạng thái đơn hàng"
-      data-testid={`order-timeline-${order.id}`}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: 0 }}>
-          Tiến trình xử lý đơn hàng ({order.id})
-        </h3>
-        <span className="demo-badge">DEMO</span>
-      </div>
-
-      {isAbnormal ? (
-        <div
-          style={{
-            padding: '16px',
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FCA5A5',
-            borderRadius: 'var(--radius-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <XCircle size={24} color="var(--danger)" />
-          <div>
-            <strong style={{ color: 'var(--danger)', fontSize: 'var(--text-sm)', display: 'block' }}>
-              Đơn hàng ở trạng thái: {order.status.toUpperCase()}
-            </strong>
-            <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: '#7F1D1D' }}>
-              Đơn hàng này đã kết thúc xử lý hoặc được hoàn trả mô phỏng.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <ol style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {steps.map((step, idx) => {
-            const Icon = step.icon;
-            return (
-              <li
-                key={step.id}
-                style={{
-                  display: 'flex',
-                  gap: '16px',
-                  alignItems: 'flex-start',
-                  position: 'relative',
-                }}
-                data-testid={`timeline-step-${step.id}`}
-              >
-                {/* Step Connector Line */}
-                {idx < steps.length - 1 && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '36px',
-                      left: '18px',
-                      width: '2px',
-                      bottom: '-12px',
-                      backgroundColor: step.isCompleted ? 'var(--primary)' : 'var(--border)',
-                      zIndex: 0,
-                    }}
-                    aria-hidden="true"
-                  />
-                )}
-
-                {/* Step Icon */}
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    backgroundColor: step.isCompleted ? 'var(--primary)' : 'var(--bg)',
-                    color: step.isCompleted ? '#FFFFFF' : 'var(--muted)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    zIndex: 1,
-                    boxShadow: step.isActive ? '0 0 0 4px rgba(101, 81, 200, 0.2)' : 'none',
-                  }}
-                  aria-label={step.isCompleted ? 'Đã hoàn thành' : 'Chưa hoàn thành'}
-                >
-                  <Icon size={18} />
-                </div>
-
-                {/* Step Content */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                    <h4
-                      style={{
-                        fontSize: 'var(--text-sm)',
-                        fontWeight: '700',
-                        margin: 0,
-                        color: step.isCompleted ? 'var(--ink)' : 'var(--muted)',
-                      }}
-                    >
-                      {step.title}
-                    </h4>
-                    {step.isActive && (
-                      <span
-                        className="tag"
-                        style={{
-                          backgroundColor: '#EDE9FE',
-                          color: 'var(--primary)',
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          padding: '2px 8px',
-                        }}
-                      >
-                        Hiện tại
-                      </span>
-                    )}
-                  </div>
-                  <p
-                    style={{
-                      fontSize: 'var(--text-xs)',
-                      color: 'var(--muted)',
-                      margin: '0 0 4px 0',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {step.desc}
-                  </p>
-                  {step.isCompleted && (
-                    <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '600' }}>
-                      Cập nhật: {formatVietnamTime(order.updatedAt)}
-                    </span>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-      )}
-
-      {/* Constitutional Disclosure Callout */}
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '12px 16px',
-          backgroundColor: 'var(--bg)',
-          borderRadius: 'var(--radius-md)',
-          fontSize: 'var(--text-xs)',
-          color: 'var(--muted)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-        }}
-      >
-        <AlertCircle size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
-        <span>
-          <strong>Thanh toán khác với bàn giao:</strong> Thanh toán mô phỏng tạo trạng thái `paid`. Bàn giao vật phẩm là hành động độc lập (`fulfilled`). Quyền sở hữu chỉ xuất hiện trong My World khi đơn hàng đã bàn giao thành công.
-        </span>
-      </div>
-    </div>
-  );
-};

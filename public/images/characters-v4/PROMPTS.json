@@ -1,0 +1,25 @@
+{
+  "mode": "builtin imagegen",
+  "date": "2026-09-12",
+  "reference": "C:/Users/VTD/Desktop/DatVietVAC/Case Vieshop/11.png",
+  "referenceRole": "Style only; original fictional chibi characters, not edits of the case slide",
+  "assets": [
+    {
+      "role": "fan",
+      "png": "public/images/characters-v4/fan.png",
+      "webp": "public/images/characters-v4/fan.webp",
+      "original": "C:/Users/VTD/.codex/generated_images/01a086bb-5c47-71f1-b0e7-f34233a2a358/exec-1d15515b-0e9f-4293-895f-44816d91915a.png",
+      "initialOriginal": "C:/Users/VTD/.codex/generated_images/01a086bb-5c47-71f1-b0e7-f34233a2a358/exec-2629abdb-7a02-478e-a1da-2875e5d0da93.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent 2D cozy webgame character, single full-body fan avatar. Reference image 1 is STYLE reference only: focus on the cute chibi fan in the middle of the room in supplied My Space slide, not its room or UI. Create an original youthful adult chibi fan: fluffy short chestnut brown hair with hand-painted locks, large expressive dark brown eyes, soft peach skin, tiny smile and rosy cheeks. Oversized plain warm cream hoodie, charcoal trousers and cream sneakers. Cute two-and-a-half heads tall miniature, short body, rounded hands, refined soft illustrated edges, gentle warm cel shading with painted texture, NOT geometric circle SVG, NOT yellow plastic toy, NOT photorealistic. Front facing relaxed standing neutral pose, arms slightly away from torso, hands empty. Entire character including feet visible centered; hair starts around 8% canvas height, feet at 92%, character width around 62%. Portrait 4:5 composition. Genuine transparent background with alpha, no backdrop, no floor, no oval pedestal, no shadow plate, no letters, logos or extra props. Must remain recognizable at 80 pixels tall. This is an original fictional fan, not a real person.",
+      "finalEditPrompt": "Use case: background-extraction. Image 1 is edit target. Remove the entire gray checkerboard background and replace it with GENUINE transparent alpha. Keep exactly the same full-body chibi character, all colors, face, hair, clothing, proportions, edges, pose and framing unchanged. Do NOT draw any checkerboard, white, gray or black background. Transparent PNG cutout only."
+    },
+    {
+      "role": "artist",
+      "png": "public/images/characters-v4/artist.png",
+      "webp": "public/images/characters-v4/artist.webp",
+      "original": "C:/Users/VTD/.codex/generated_images/01a086bb-5c47-71f1-b0e7-f34233a2a358/exec-0ac583f0-a5f7-437d-a283-30830f6493d2.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent 2D cozy webgame character, single full-body fictional artist avatar. Reference image 1 is STYLE reference only: focus on the cute chibi Artist Look at upper right of supplied My Space slide, not its room or UI. Original youthful adult indie artist: fluffy tousled black hair, large expressive dark brown eyes, soft peach skin, tiny confident smile and rosy cheeks. Muted deep teal varsity jacket over ivory tee, light gray jeans and cream sneakers, tiny simple gold star pin on jacket. Cute two-and-a-half heads tall miniature, short body, rounded hands, refined soft illustrated edges, gentle warm cel shading with painted texture, NOT geometric circle SVG, NOT yellow plastic toy, NOT photorealistic, NOT pixelated. Front facing relaxed standing neutral pose, arms slightly away from torso, hands empty. Entire character including feet visible centered; hair starts around 8% canvas height, feet at 92%, character width around 62%. Portrait 4:5 composition. Genuine transparent background with alpha, no backdrop, no floor, no oval pedestal, no shadow plate, no letters, logos or extra props. Must remain recognizable at 80 pixels tall. This is an original fictional performer, not any real celebrity."
+    }
+  ],
+  "derivatives": "Mechanical delivery optimization with Sharp: character height 560px, WebP quality 88, alpha quality 100. Originals preserved. World-v4 WebP derives from world-v3 PNG, width 1440px for scenes and 320px for props, quality 86. No semantic image editing outside imagegen."
+}

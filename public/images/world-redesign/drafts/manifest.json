@@ -1,0 +1,125 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-09-10T21:46:00+07:00",
+  "job": "05",
+  "globalStatus": "APPROVED",
+  "approvedAt": "2026-09-10T21:55:56+07:00",
+  "approvedBy": "USER (explicit 'ĐỒNG Ý' prompt)",
+  "notes": "Original 2.5D matte-clay miniature style drafts reviewed and APPROVED by user. Ready as baseline references for character consistency (Job 06), shelf capsules (Job 07), and asset integration (Job 08).",
+  "assets": [
+    {
+      "id": "style-board-overview",
+      "role": "style_board",
+      "target": "global_design_system",
+      "fileName": "style-board-overview.png",
+      "path": "public/images/world-redesign/drafts/style-board-overview.png",
+      "aspectRatio": "16:9",
+      "camera": "Elevated 3/4 isometric perspective",
+      "lighting": "Soft diffuse warm upper-left lighting",
+      "palette": ["#F6F4EF", "#E8DEF8", "#D7CCC8", "#8D6E63", "#FBBF24"],
+      "materials": ["tactile matte clay", "birch wood", "lavender fabric", "cream ceramic", "gold accent"],
+      "prompt": "Original visual style board for VieWorld music neighbourhood. Soft matte-clay 2.5D miniature diorama world aesthetics. Elevated three-quarter isometric camera angle, soft diffuse upper-left warm lighting, simple clean readable silhouettes, youthful and cozy not infantile. Material swatches of tactile matte clay, smooth light birch wood, pastel lavender fabric, warm cream ceramics, subtle gold accents. Showing miniature architecture scale and stylized props (small acoustic stage, vinyl turntable, cozy wooden room, miniature acoustic guitar). Completely blank isolated background, absolutely no text, no words, no letters, no logos, no watermark, no UI elements, no people.",
+      "references": ["docs/CONSTITUTION.md", "VIEWORLD_WORLD_PLAN.md §6"],
+      "status": "approved",
+      "constitutionalChecks": {
+        "noText": true,
+        "noLogos": true,
+        "noBakedUI": true,
+        "noRealPeople": true,
+        "noWatermark": true
+      }
+    },
+    {
+      "id": "artist-a-character-sheet",
+      "role": "character_reference",
+      "target": "artist-a",
+      "characterName": "Artist A",
+      "fileName": "artist-a-character-sheet.png",
+      "path": "public/images/world-redesign/drafts/artist-a-character-sheet.png",
+      "aspectRatio": "16:9",
+      "camera": "Elevated 3/4 isometric perspective",
+      "lighting": "Soft diffuse warm upper-left lighting",
+      "palette": ["#DDD6FE", "#FDFBF7", "#C4B5FD", "#A78BFA", "#8B5CF6"],
+      "turnaroundViews": ["3/4 hero view with acoustic guitar", "front view standing", "relaxed profile view"],
+      "prompt": "Original character design sheet for Artist A in VieWorld, matching the attached style board. A stylized 2.5D matte-clay human miniature figurine, young indie acoustic music artist. Wearing a cozy soft lavender knit oversized sweater, cream trousers, casual sneakers. Friendly, gentle, warm artistic presence. Displaying multiple turn-around reference views of the same character on one clean sheet: three-quarter hero pose holding a small acoustic guitar, front view with hands in pockets, and relaxed profile view. Consistent elevated 3/4 perspective, soft upper-left warm lighting, simple clean readable clay silhouettes, matte tactile finish. Plain neutral background, absolutely no text, no names, no labels, no logos, no watermark, no UI, no crowd.",
+      "references": ["style-board-overview.png"],
+      "status": "approved",
+      "constitutionalChecks": {
+        "distinctHumanCharacter": true,
+        "noMascotAnimalConfusion": true,
+        "noRealCelebrityLikeness": true,
+        "noText": true,
+        "noWatermark": true
+      }
+    },
+    {
+      "id": "fan-character-sheet",
+      "role": "character_reference",
+      "target": "fan_avatar",
+      "characterName": "Fan Avatar",
+      "fileName": "fan-character-sheet.png",
+      "path": "public/images/world-redesign/drafts/fan-character-sheet.png",
+      "aspectRatio": "16:9",
+      "camera": "Elevated 3/4 isometric perspective",
+      "lighting": "Soft diffuse warm upper-left lighting",
+      "palette": ["#FEF3C7", "#312E81", "#F3F4F6", "#F59E0B"],
+      "turnaroundViews": ["3/4 hero view with star lightstick prop", "front view smiling", "profile view"],
+      "prompt": "Original character design sheet for the Fan avatar in VieWorld, matching the attached style board and artist reference. A distinct stylized 2.5D matte-clay human miniature figurine (clearly a different person from Artist A, youthful music enthusiast, not an animal). Wearing a cozy warm cream zip hoodie, dark indigo rolled-up jeans, stylish clay sneakers, and wearing a subtle star pin badge. Displaying multiple turn-around reference views of the same fan on one clean sheet: three-quarter hero pose holding a small stylized star lightstick prop, standing front view smiling, and profile view. Consistent elevated 3/4 perspective, soft upper-left warm lighting, simple clean readable clay silhouettes, matte tactile finish. Plain neutral background, absolutely no text, no names, no labels, no logos, no watermark, no UI, no crowd.",
+      "references": ["style-board-overview.png", "artist-a-character-sheet.png"],
+      "status": "approved",
+      "constitutionalChecks": {
+        "distinctHumanCharacter": true,
+        "separateIdentityFromArtist": true,
+        "noMascotAnimalConfusion": true,
+        "noText": true,
+        "noWatermark": true
+      }
+    },
+    {
+      "id": "artist-a-scene-sample",
+      "role": "scene_background",
+      "target": "artist-a",
+      "venueName": "Artist A Intimate Music House",
+      "fileName": "artist-a-scene-sample.png",
+      "path": "public/images/world-redesign/drafts/artist-a-scene-sample.png",
+      "aspectRatio": "16:9",
+      "camera": "Elevated 3/4 isometric perspective",
+      "lighting": "Soft diffuse warm upper-left lighting",
+      "palette": ["#FDFBF7", "#D7CCC8", "#E9D5FF", "#C89D66", "#4A3B69"],
+      "landmarks": ["wooden acoustic stage arch", "microphone stand", "acoustic guitar stand", "vinyl record turntable desk", "tour archive corkboard", "reception counter", "boutique shelf", "woven lavender rug"],
+      "prompt": "Original production background asset for Artist A intimate acoustic music house in VieWorld, matching the attached style board. Soft matte-clay 2.5D miniature diorama architecture. Elevated three-quarter isometric camera view, soft diffuse warm upper-left lighting, simple clean readable silhouettes, cozy youthful aesthetic. Architecture features a charming miniature wooden acoustic music venue: low polished birch wooden stage platform in the center with a soft pastel lavender backdrop arch, miniature clay microphone on stand, small acoustic guitar on a wooden stand. Visible surrounding empty stations: cozy vinyl record turntable on a low wooden counter, a blank corkboard on the wall, a small wooden reception desk, and a tiny boutique display shelf in the corner. Floor has warm tactile birch wood boards and a soft woven lavender circular rug. Clear open spaces for interactive hotspots. Absolutely no people, no artist, no crowd, no text, no words, no letters, no logos, no dates, no UI, no buttons, no watermarks, no baked live status. Output only the pure environment background artwork.",
+      "references": ["style-board-overview.png"],
+      "status": "approved",
+      "constitutionalChecks": {
+        "noPeopleOrCrowd": true,
+        "noBakedLiveStatus": true,
+        "noTextOrLabels": true,
+        "noWatermark": true,
+        "clearInteractiveSpaces": true
+      }
+    },
+    {
+      "id": "fan-room-scene-sample",
+      "role": "scene_background",
+      "target": "fan-room",
+      "venueName": "Fan Personal Diorama Room",
+      "fileName": "fan-room-scene-sample.png",
+      "path": "public/images/world-redesign/drafts/fan-room-scene-sample.png",
+      "aspectRatio": "16:9",
+      "camera": "Elevated 3/4 isometric perspective",
+      "lighting": "Soft diffuse warm upper-left lighting",
+      "palette": ["#F6F4EF", "#E8DEF8", "#D7CCC8", "#8D6E63", "#FBBF24"],
+      "landmarks": ["wooden calendar station wall", "3-slot showcase shelf", "wooden wardrobe cabinet", "circular lavender rug for avatar", "arched sunlight window"],
+      "prompt": "Original 2.5D matte-clay diorama miniature fan bedroom and personal sanctuary for VieWorld, perfectly matching the approved style-board-overview.png and fan-character-sheet.png aesthetic. Elevated three-quarter isometric camera angle looking into a cozy open-walled clay diorama room. Soft diffuse warm upper-left lighting, matte clay textures, birch wood floorboards, pastel lavender and warm cream walls. Architectural features: on the left wall, a designated area for a wooden pinboard calendar; on the back-center, an elevated wall-mounted 3-compartment wooden showcase cubby shelf for memory capsules; on the right side, a charming smooth wooden wardrobe closet cabinet; in the center floor, a cozy circular braided lavender rug where a fan miniature avatar can stand; an arched clay window on the side with soft morning sunlight casting gentle shadows. Clean background environment with empty designated spaces for UI overlays. Completely blank of people: NO people, NO characters, NO avatar, NO crowd. Completely blank of text: NO letters, NO words, NO numbers, NO labels, NO logos, NO watermark, NO UI buttons, NO baked status. High resolution, tactile clay miniature diorama aesthetic.",
+      "references": ["style-board-overview.png", "fan-character-sheet.png"],
+      "status": "approved",
+      "constitutionalChecks": {
+        "noPeopleOrCrowd": true,
+        "noBakedLiveStatus": true,
+        "noTextOrLabels": true,
+        "noWatermark": true,
+        "clearInteractiveSpaces": true
+      }
+    }
+  ]
+}

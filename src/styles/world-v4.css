@@ -1,0 +1,172 @@
+/* VieWorld type + interaction system. Self-hosted Vietnamese-first typography. */
+:root { --font-sans:'Be Vietnam Pro',system-ui,sans-serif; --font-display:'Nunito','Be Vietnam Pro',sans-serif; }
+.fan-shell { --primary:#3f665a; --primary-hover:#2e5047; --primary-light:#e9eee5; --accent:#b17b4c; --ink:#303f36; --muted:#657066; --border:#d6dccf; --surface:#fffdf6; font-family:var(--font-sans); line-height:1.65; }
+.fan-shell :is(button,input,select,textarea,p,a,span,small,strong,label,time,div) { font-family:var(--font-sans); }
+.fan-shell :is(h1,h2,h3,h4,.fw-brand,.vw-place-door strong,.vw-room-object strong) { font-family:var(--font-display)!important; font-weight:800; letter-spacing:-.025em; }
+.fan-shell button,.fan-shell a { -webkit-tap-highlight-color:transparent; }
+.fan-shell :is(button,a,input,select,textarea):focus-visible { outline:3px solid #bd8044; outline-offset:4px; }
+.fan-shell :is(button,input,select,textarea) { font-size:max(12px,1em); }
+.fan-shell .fw-text-button,.fan-shell .fw-button { font-size:13px; line-height:1.5; }
+.fan-shell .fw-eyebrow { font-size:10px; letter-spacing:.13em; color:#69766c; }
+.fan-shell .fw-muted { color:#657066; font-size:13px; line-height:1.85; }
+.fan-shell :is(.fw-world-caption,.vw-directory-caption) { font-family:var(--font-sans); font-style:normal; }
+.fan-shell .fw-scene-heading h1 { font-size:clamp(28px,3.1vw,42px); line-height:1.2; }
+.fan-shell .fw-scene-heading h1>span { font-family:var(--font-sans); font-size:13px; line-height:1.8; max-width:650px; margin-top:10px; }
+.fan-shell .fw-scene-heading { padding:14px 0 10px; gap:24px; align-items:flex-start; }
+.fan-shell .fw-follow { font-size:12px; flex-shrink:0; }
+.fw-header { height:82px; }
+.fw-brand { font-size:25px; letter-spacing:-.05em; }
+.fw-brand small { font-size:9px; letter-spacing:.02em; top:33px; }
+.fw-main-nav a { font-weight:500; font-size:13px; }
+.fw-main-nav a.selected { border-color:#3f665a; }
+.fw-menu { z-index:100; }
+.vx-loading { padding:80px 24px; text-align:center; color:#587465; }
+.vx-context-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:20px 0 4px; font-size:12px; color:#68776c; }
+.vx-context-bar label { display:flex; gap:12px; align-items:center; }
+.vx-context-bar select { padding:10px 25px 10px 12px; min-height:44px; background:#fffdf6; color:#3d594b; border:1px solid #d2dacb; border-radius:7px; max-width:250px; }
+.vw-room-breadcrumb { gap:18px; min-height:62px; border-top:0; margin:0 0 12px; }
+.vx-place-purpose { margin-right:auto; font-size:11px; color:#768172; }
+.vw-room-breadcrumb>.fw-button { margin-left:0; }
+.vw-plaza-heading { padding:32px 20px 8px; }
+.vw-plaza-heading h1 { font-size:clamp(28px,3vw,40px); margin:0 0 10px; }
+.vw-plaza-heading p:not(.fw-eyebrow) { color:#697367; font-size:13px; line-height:1.8; }
+/* Signs belong to facades, not floating app cards. Text stays accessible DOM. */
+.vw-place-door { width:174px; min-height:54px; padding:7px 10px; background:linear-gradient(100deg,#fff3dbe8,#eee0c5e8); border:1px solid #baa58380; border-radius:3px; box-shadow:0 3px 0 #9d82653b,0 6px 10px #67543b16; text-shadow:0 1px #fff7e1; }
+.vw-place-door::before,.vw-place-door::after { content:''; width:3px; height:3px; border-radius:50%; background:#a19076; position:absolute; top:9px; }
+.vw-place-door::before{left:7px}.vw-place-door::after{right:7px}
+.vw-place-door strong { font-size:20px; gap:3px; }
+.vw-place-door strong svg { display:none; }
+.vw-place-door small { font-size:10px; line-height:1.5; padding:0; background:none; color:#67593f; margin:3px 0 0; }
+.vw-place-door:hover { border-radius:3px; background:#fff3db; filter:brightness(1.03); }
+.vw-door-artist { transform:translate(-50%,-50%) rotate(-4deg); }
+.vw-door-myspace { transform:translate(-50%,-50%) rotate(4deg); }
+.vw-door-moments { transform:translate(-50%,-50%) rotate(-5deg); }
+.vw-door-archive { transform:translate(-50%,-50%) rotate(5deg); }
+.vw-door-shop { width:183px; }
+.vw-plaza-fan { top:56%; }
+.vw-plaza-fan .avatar-renderer { width:84px!important;height:110px!important; }
+.vw-plaza-fan strong { font-size:11px; }
+.vw-plaza-fan small { display:none; }
+.vw-plaza-hint { font-size:11px; color:#647261; margin-top:16px; }
+.vw-plaza-footer { font-size:12px; }
+.vw-room-object { min-width:106px; max-width:155px; padding:8px 12px; border:1px solid #ac947d66!important; border-radius:2px!important; background:linear-gradient(110deg,#fff0d9ed,#f1dfbfe8)!important; box-shadow:1px 3px 0 #9179574d; }
+.vw-room-object strong { font-size:14px; line-height:1.3; }
+.vw-room-object small { display:none; }
+.vw-object-news { transform:translate(-50%,-50%) rotate(6deg)!important; }
+.vw-object-livechat { transform:translate(-50%,-50%) rotate(-5deg)!important; }
+.vw-object-concerts { background:#765239!important; color:#fff0d5; text-shadow:0 1px #433624; }
+.vw-room-object:hover { filter:brightness(1.08); box-shadow:1px 4px 0 #91795755; }
+.vw-room-artist small { font-size:9px; }
+.vw-room-artist .avatar-renderer { width:95px!important;height:122px!important; }
+.vw-room-fan .avatar-renderer { width:80px!important;height:104px!important; }
+.vw-room-fan>span { font-size:10px; background:#fff7e4d9; }
+.vw-room-fan>span small { display:none; }
+.vw-room-hint { font-size:11px; color:#647261; }
+.vw-room-memories { top:32%; left:63%; }
+.vw-room-editor [role=tabpanel] { min-height:128px; }
+.vw-editor-tabs button { font-size:13px; }
+.vw-editor-settings>small { font-size:11px; }
+.vw-layer-toggles button { font-size:12px; }
+.vw-cozy-stage .fw-live-artist { width:14cqw!important;height:18cqw!important; }
+.vw-cozy-stage[data-scene=moments] .avatar-graphic { top:46%; }
+.vw-cozy-stage .vw-stage-caption { font-size:9px!important; }
+.vx-character-art { display:block; width:100%;height:100%;object-fit:contain;pointer-events:none; }
+.vw-cozy-stage .avatar-renderer--artist .vx-character-art { mix-blend-mode:multiply; }
+.avatar-stage-venue .vx-character-art { mix-blend-mode:normal; filter:drop-shadow(0 12px 24px rgba(0,0,0,0.65)); }
+.vx-character-layers { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
+.fan-shell .avatar-renderer--sm { overflow:hidden; }
+.fan-shell .avatar-renderer--sm :is(.vx-character-art,.vx-character-layers) { width:100%;height:145%;max-height:none;position:absolute;top:0;object-position:top; }
+/* A portrait gallery is the artist discovery surface, not another modal menu. */
+.vx-gallery { padding-top:14px; }
+.vx-gallery-stage { position:relative; max-height:330px; overflow:hidden; margin-top:6px; border-bottom:1px solid #d8ddcd; }
+.vx-gallery-stage>img { display:block;width:100%;height:400px;object-fit:cover;object-position:center 37%;mix-blend-mode:multiply; }
+.vx-gallery-invite { position:absolute;left:50%;bottom:25px;transform:translateX(-50%);text-align:center;background:#fff4def2;padding:12px 25px;box-shadow:0 3px #bbaa8650;border:1px solid #d5c7a8;min-width:240px; }
+.vx-gallery-invite>span { display:block;font-family:var(--font-display);font-size:22px;font-weight:800;color:#416251; }
+.vx-gallery-invite a { font-size:12px;color:#67775e; }
+.vx-directory-tools { display:flex;justify-content:space-between;gap:20px;align-items:center;margin:28px 0 16px; }
+.vx-directory-tools .fw-search { max-width:400px;flex:1; }
+.vx-filter-pair { display:flex;gap:10px; }
+.vx-filter-pair button { border:0;background:none;min-height:44px;padding:8px 14px;color:#667665;border-bottom:2px solid transparent;font-size:12px; }
+.vx-filter-pair button[aria-pressed=true] { color:#365c4c;border-color:#527b69; }
+.vx-portrait-list { display:grid;grid-template-columns:1fr 1fr;gap:40px; }
+.vx-portrait { display:grid;grid-template-columns:40% 1fr;gap:24px;border-bottom:1px solid #d7dccf;padding:20px 0 30px;min-width:0; }
+.vx-portrait-art { position:relative;display:flex;align-items:center;justify-content:center;min-height:275px;background:radial-gradient(ellipse at 50% 40%,#f9ecce,#d8e4ce);border-radius:100px 100px 4px 4px;overflow:hidden; }
+.vx-portrait-art .avatar-renderer { width:150px!important;height:210px!important; }
+.vx-portrait-label { position:absolute;bottom:12px;font-size:8px;letter-spacing:.1em; }
+.vx-portrait-ip .vx-portrait-art { background:radial-gradient(ellipse,#cedee1,#aaaac5); }
+.vx-ip-art { display:flex;flex-direction:column;align-items:center;gap:8px;color:#465568; }
+.vx-ip-art span { font-family:var(--font-display);font-size:20px;letter-spacing:.1em;text-align:center;font-weight:800;line-height:1.15; }
+.vx-portrait-story { min-width:0;padding:10px 0; }
+.vx-portrait-story h2 { font-size:25px;line-height:1.25;margin:8px 0 12px; }
+.vx-portrait-story h2 a { display:flex;align-items:center;gap:6px;color:#385848;font-family:inherit; }
+.vx-portrait-story>p:not(.fw-eyebrow) { font-size:12px;line-height:1.9;color:#6b7569; }
+.vx-note-link { font-size:12px;color:#687b59;display:block;margin:14px 0; }
+.vx-portrait-story .fw-follow { margin-top:18px;max-width:100%;white-space:normal; }
+.fan-shell .fw-panel { width:min(660px,94vw); }
+.fan-shell .fw-panel>header h2 { font-size:22px;line-height:1.35; }
+.fan-shell .fw-panel-body { font-size:14px; }
+.fan-shell .fw-event-row small { font-size:11px;line-height:1.7; }
+.fan-shell .fw-event-row h3 { font-size:20px;line-height:1.5; }
+.fan-shell .fw-note h3 { font-size:28px;line-height:1.4; }
+.fan-shell .fw-note p { font-size:14px;line-height:1.9; }
+.fan-shell .fw-product h2 { font-family:var(--font-sans)!important;font-size:14px;line-height:1.6; }
+@media(max-width:1050px) { .vx-portrait-list{grid-template-columns:1fr;gap:10px}.vx-portrait{grid-template-columns:180px 1fr}.vx-portrait-art{min-height:240px}.vx-portrait-story h2{font-size:28px} }
+@media(max-width:600px) {
+ .fw-header{height:72px;padding:0 18px;gap:10px}.fw-brand{font-size:22px}.fw-brand small{font-size:8px;top:30px}.fw-header-tools{gap:2px}.fw-header-tools .fw-profile{display:none}
+ .fw-main-nav{padding-bottom:env(safe-area-inset-bottom);gap:0}.fw-main-nav a{font-size:12px;line-height:1.4;min-height:64px}.fw-main{padding-bottom:80px}
+ .fan-shell .demo-banner{font-size:10px;line-height:1.5;padding:6px 14px}.fan-shell .fw-scene-heading{gap:15px;flex-wrap:wrap}.fan-shell .fw-scene-heading h1>span{max-width:none;font-size:12px}
+ .vw-plaza-heading{padding:24px 0 4px}.vw-plaza-heading p:not(.fw-eyebrow){font-size:12px}.vw-plaza-hint{font-size:11px;padding:0 5px}
+ .vw-place-door{width:145px;min-height:52px;padding:7px}.vw-place-door strong{font-size:17px}.vw-place-door small{font-size:9px}.vw-plaza-fan .avatar-renderer{width:64px!important;height:84px!important}
+ .vw-mobile-doors a{font-size:12px;min-height:46px}.vw-mobile-doors{gap:0 18px}.vw-plaza-footer{font-size:11px}
+ .vx-context-bar{padding-top:16px;font-size:11px}.vx-context-bar label{width:100%;justify-content:space-between}.vx-context-bar select{font-size:13px;max-width:210px}
+ .vw-room-breadcrumb{gap:8px;justify-content:space-between}.vx-place-purpose{display:none}.vw-room-breadcrumb .fw-text-button{font-size:11px}.vw-room-breadcrumb>.fw-button{font-size:12px}
+ .vw-room-object strong{font-size:13px}.vw-room-object{min-width:100px;max-width:140px}.vw-room-hint{font-size:11px;line-height:1.7;margin-top:12px}
+ .vw-room-artist .avatar-renderer{width:80px!important;height:104px!important}.vw-room-artist small{font-size:9px}.vw-room-memories{gap:9px}
+ .vx-gallery-stage{max-height:245px}.vx-gallery-stage>img{height:300px}.vx-gallery-invite{bottom:18px;min-width:230px}.vx-gallery-invite>span{font-size:20px}
+ .vx-directory-tools{flex-direction:column;align-items:stretch;gap:8px;margin-top:22px}.vx-directory-tools .fw-search{max-width:none}.vx-filter-pair{justify-content:flex-start}
+ .vx-portrait{grid-template-columns:115px 1fr;gap:16px;padding:18px 0 25px}.vx-portrait-art{min-height:205px}.vx-portrait-art .avatar-renderer{width:110px!important;height:160px!important}.vx-portrait-label{font-size:6px}.vx-portrait-story h2{font-size:24px}.vx-portrait-story .fw-eyebrow{font-size:8px}.vx-portrait-story>p:not(.fw-eyebrow){font-size:11px}.vx-portrait-story .fw-follow{font-size:10px;padding:8px 12px}.vx-ip-art svg{width:65px}.vx-ip-art span{font-size:15px}
+ .fan-shell .fw-panel{width:100vw;max-height:90dvh}.fan-shell .fw-panel>header h2{font-size:20px}.fan-shell .fw-panel-body{padding:18px}.fan-shell .fw-panel-body input,.fan-shell .fw-panel-body textarea{font-size:16px}
+ .vw-cozy-stage .vw-stage-caption{font-size:8px!important}.vw-editor-tabs button{font-size:12px}.vw-layer-toggles button{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.fan-shell *, .fan-shell *::before, .fan-shell *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+/* Text on the existing scene signboards, not a second floating sign. */
+.vw-plaza-scene{container-type:inline-size}
+.vw-plaza-scene .vw-place-door{display:flex;align-items:center;justify-content:center;width:18%;min-height:44px;background:none;border:0;box-shadow:none;padding:2px;color:#365b4d;text-shadow:0 1px #fff7e9}
+.vw-plaza-scene .vw-place-door::before,.vw-plaza-scene .vw-place-door::after{display:none}
+.vw-plaza-scene .vw-place-door strong{font-size:clamp(14px,1.7cqw,25px)}
+.vw-plaza-scene .vw-place-door small{display:none}
+.vw-plaza-scene .vw-place-door:hover{background:none;box-shadow:none;color:#243f34;filter:drop-shadow(0 1px 5px #e0b976)}
+.vw-plaza-scene .vw-door-artist{transform:translate(-50%,-50%) rotate(-10deg)}
+.vw-plaza-scene .vw-door-myspace{transform:translate(-50%,-50%) rotate(10deg)}
+.vw-plaza-scene :is(.vw-door-moments,.vw-door-archive){transform:translate(-50%,-50%)}
+.vw-plaza-fan{top:49%}
+.vw-room-object{background:none!important;border:0!important;box-shadow:none!important;padding:8px;min-width:110px;color:#514630;text-shadow:0 1px #fff4de}
+.vw-room-object strong{display:inline-block;padding:4px 7px;background:#f8e8cce3;border-radius:1px;box-shadow:0 2px #ad957345;font-size:13px}
+.vw-object-concerts strong{background:#785b40;color:#fff0d5;text-shadow:none}
+.vw-room-object:hover strong{background:#fff2d9;color:#3f523d}
+.vw-background{mask-image:linear-gradient(to bottom,transparent,#000 3%,#000 97%,transparent)}
+.vx-zoom-tools{display:none}
+@media(max-width:600px){
+ .fan-shell .demo-banner{display:block;padding:7px 14px}
+ .fan-shell .demo-banner-content{display:flex;flex-wrap:nowrap;align-items:flex-start;gap:7px}
+ .fan-shell .demo-banner-content strong{white-space:normal;overflow:visible;text-overflow:clip;width:auto;max-width:none;flex:1;font-size:10px;line-height:1.6}
+ .fan-shell .demo-banner-content svg{display:none}
+ .fan-shell .demo-banner-link{display:block;font-size:9px;margin:2px 0 0 48px}
+ .vx-zoom-tools{display:flex;justify-content:flex-end;margin-top:8px}
+ .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-scene{width:100%;min-width:0}
+ .vw-plaza-scroll:not(.vx-zoomed) .vw-place-door{width:22%;min-height:44px}
+ .vw-plaza-scroll:not(.vx-zoomed) .vw-place-door strong{font-size:10px;letter-spacing:-.04em}
+ .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-fan .avatar-renderer{width:40px!important;height:51px!important}
+ .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-fan strong{font-size:8px;padding:2px 5px}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-scene{width:100%;min-width:0}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-object{min-width:75px;min-height:44px;padding:1px}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-object strong{font-size:9px;padding:3px 4px}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-artist .avatar-renderer{width:38px!important;height:50px!important}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-artist small{display:none}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-fan .avatar-renderer{width:40px!important;height:52px!important}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-fan>span{font-size:8px;padding:2px 4px}
+ .vw-room-scroll:not(.vx-zoomed) .vw-furniture:has(.vw-prop-image){width:40px;height:50px}
+ .vw-room-scroll:not(.vx-zoomed) .vw-room-memories{display:none}
+ .vw-room-hint{margin:4px 0 20px}
+ .vw-plaza-hint{margin:4px 0 14px}
+}

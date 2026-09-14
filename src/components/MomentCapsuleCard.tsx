@@ -18,16 +18,22 @@ export interface MomentCapsuleCardProps {
   capsule: Capsule;
   session?: Session;
   world?: World;
+  currentSlotIndex?: 0 | 1 | 2;
   onSaveNote: (capsuleId: string, privateNote: string) => void;
   onToggleSaved: (capsuleId: string, isSaved: boolean) => void;
+  onAssignSlot?: (capsuleId: string, slotIndex: 0 | 1 | 2) => void;
+  onRemoveFromSlot?: (slotIndex: 0 | 1 | 2) => void;
 }
 
 export const MomentCapsuleCard: React.FC<MomentCapsuleCardProps> = ({
   capsule,
   session,
   world,
+  currentSlotIndex,
   onSaveNote,
   onToggleSaved,
+  onAssignSlot,
+  onRemoveFromSlot,
 }) => {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [noteText, setNoteText] = useState(capsule.privateNote || '');
@@ -92,6 +98,16 @@ export const MomentCapsuleCard: React.FC<MomentCapsuleCardProps> = ({
           </span>
 
           <span className="demo-badge">DEMO</span>
+
+          {currentSlotIndex !== undefined && (
+            <span
+              className="tag"
+              style={{ backgroundColor: '#EEF2FF', color: '#4338CA', fontWeight: '700' }}
+              data-testid={`capsule-slot-badge-${capsule.id}`}
+            >
+              ⭐ Đang ở Ô {currentSlotIndex + 1}
+            </span>
+          )}
         </div>
 
         {/* Bookmark / Save Toggle */}
@@ -110,6 +126,7 @@ export const MomentCapsuleCard: React.FC<MomentCapsuleCardProps> = ({
             fontWeight: '600',
           }}
           id={`toggle-capsule-save-${capsule.id}`}
+          data-testid={`toggle-capsule-save-${capsule.id}`}
           aria-label={capsule.isSaved ? 'Bỏ lưu kỷ niệm' : 'Lưu trữ kỷ niệm'}
         >
           {capsule.isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
@@ -232,6 +249,84 @@ export const MomentCapsuleCard: React.FC<MomentCapsuleCardProps> = ({
           <span style={{ fontSize: '11px', color: '#059669', fontWeight: '600' }}>
             ✓ Đã lưu ghi chú riêng tư thành công!
           </span>
+        )}
+      </div>
+
+      {/* Showcase Shelf Actions (§Job 07) */}
+      <div
+        style={{
+          padding: '10px 14px',
+          backgroundColor: capsule.isSaved ? '#F5F3FF' : '#F8FAFC',
+          borderRadius: 'var(--radius-md)',
+          border: `1px solid ${capsule.isSaved ? 'rgba(101, 81, 200, 0.25)' : 'var(--border)'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+        }}
+        data-testid={`capsule-shelf-action-bar-${capsule.id}`}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)' }}>
+          <Sparkles size={14} color="var(--primary)" />
+          <strong>Kệ phòng tôi:</strong>
+          {currentSlotIndex !== undefined ? (
+            <span style={{ color: 'var(--primary)', fontWeight: '700' }}>
+              Đang ở Ô {currentSlotIndex + 1}
+            </span>
+          ) : (
+            <span style={{ color: 'var(--muted)' }}>
+              {capsule.isSaved ? 'Chưa đặt lên kệ' : 'Cần lưu trữ để đặt lên kệ'}
+            </span>
+          )}
+        </div>
+
+        {capsule.isSaved && onAssignSlot && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            {currentSlotIndex !== undefined ? (
+              <>
+                {onRemoveFromSlot && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 8px', fontSize: '11px', color: '#DC2626' }}
+                    onClick={() => onRemoveFromSlot(currentSlotIndex)}
+                    data-testid={`slot-unassign-btn-${capsule.id}`}
+                  >
+                    Gỡ khỏi kệ
+                  </button>
+                )}
+                {([0, 1, 2] as const).filter((idx) => idx !== currentSlotIndex).map((idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 8px', fontSize: '11px' }}
+                    onClick={() => onAssignSlot(capsule.id, idx)}
+                    data-testid={`slot-assign-btn-${capsule.id}-${idx}`}
+                  >
+                    Chuyển sang Ô {idx + 1}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Đặt lên kệ:</span>
+                {([0, 1, 2] as const).map((idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ padding: '4px 8px', fontSize: '11px' }}
+                    onClick={() => onAssignSlot(capsule.id, idx)}
+                    data-testid={`slot-assign-btn-${capsule.id}-${idx}`}
+                  >
+                    + Ô {idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
