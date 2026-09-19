@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, Disc3, Heart, Music2, Sparkles, CalendarDays, BookOpen, Package, X } from 'lucide-react';
+import { ArrowRight, Check, Disc3, Heart, Music2, Sparkles, CalendarDays, BookOpen, Package, X, HelpCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { PersonalDisplayRoom } from '../components/DisplayRoom';
@@ -673,6 +673,43 @@ export function FanWorldView() {
         ))}
       </>}
       {panel === 'membership' && <><p className="fw-muted">Theo dõi là miễn phí. Hội viên và quyền lợi được quản lý riêng cho từng nghệ sĩ; mọi giao dịch ở đây đều là mô phỏng.</p>{Object.values(state.worlds).map(w => <MembershipCard key={w.id} world={w} membership={Object.values(state.memberships).find(m => m.fanId === state.fanProfile.id && m.worldId === w.id)} isFollowed={state.followedWorldIds.includes(w.id)} onToggleFollow={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: w.id })} onUpgrade={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId: w.id })} />)}{Object.values(state.benefits).filter(b => b.fanId === state.fanProfile.id).map(b => <BenefitCard key={b.id} benefit={b} onClaim={benefitId => dispatch({ type: 'CLAIM_BENEFIT', benefitId })} />)}</>}
+      {panel === 'support' && (
+        <div className="fw-support-content">
+          <p className="fw-muted">
+            VieWorld luôn đồng hành cùng bạn. Bất kỳ thắc mắc nào về quyền lợi hội viên, đơn hàng kỷ niệm hoặc tài khoản đều được hỗ trợ chu đáo.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '18px 0' }}>
+            {Object.values(state.supportCases).filter(c => c.fanId === state.fanProfile.id).length === 0 ? (
+              <div className="fw-empty">
+                <HelpCircle size={36} />
+                <h3>Bạn chưa có hồ sơ hỗ trợ nào đang mở.</h3>
+                <p>Nếu gặp vấn đề với đơn hàng lưu niệm hoặc quyền lợi hội viên, bạn có thể tạo yêu cầu đối soát trực tiếp từ trang chi tiết.</p>
+                <Link className="fw-button" to="/me?panel=bag">
+                  Xem đơn hàng của bạn <ArrowRight size={16} />
+                </Link>
+              </div>
+            ) : (
+              Object.values(state.supportCases)
+                .filter(c => c.fanId === state.fanProfile.id)
+                .map(c => (
+                  <Link className="fw-destination" key={c.id} to={`/support/${c.id}`}>
+                    <HelpCircle />
+                    <div>
+                      <strong>{c.subjectType === 'benefit' ? 'Hỗ trợ đối soát quyền lợi' : 'Hỗ trợ đơn hàng lưu niệm'} · #{c.id}</strong>
+                      <p>Trạng thái: {c.status === 'open' ? 'Đang chờ xử lý' : c.status === 'resolved' ? 'Đã giải quyết' : c.status}</p>
+                    </div>
+                    <ArrowRight size={18} />
+                  </Link>
+                ))
+            )}
+          </div>
+          <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px', marginTop: '14px' }}>
+            <p style={{ fontSize: '12.5px', color: '#64748B', lineHeight: '1.6', margin: 0 }}>
+              💡 <strong>Cần hỗ trợ trực tiếp?</strong> Đội ngũ chăm sóc fandom phản hồi các yêu cầu đối soát trong vòng 24 giờ. Bạn luôn có thể kiểm tra trạng thái tại đây bất cứ lúc nào.
+            </p>
+          </div>
+        </div>
+      )}
     </WorldPanel>}
 
     {isRoom && (

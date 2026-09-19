@@ -130,15 +130,7 @@ export function WorldPlazaView() {
 
   return (
     <div className="vw-plaza-page">
-      <header className="vw-plaza-heading">
-        <div>
-          <p className="fw-eyebrow">VIE WORLD · NHÀ CHUNG CỦA FAN</p>
-          <h1>Hôm nay, mình ghé đâu?</h1>
-          <p>Gặp người mình mến. Giữ điều mình yêu. Trở về một góc của riêng mình.</p>
-        </div>
-      </header>
-
-      {/* Visual Metaphor 4-Building Plaza Scene */}
+      {/* Visual Metaphor 4-Building Plaza Scene (Placed immediately under top nav) */}
       <div className="vw-plaza-scroll" tabIndex={0} aria-label="Quảng trường VieWorld với bốn toà nhà">
         <div className={`vw-plaza-scene ${failed ? 'vw-no-art' : ''}`}>
           {/* Layer 1: Base illustration artwork with blank physical signboards */}
@@ -238,10 +230,11 @@ export function WorldPlazaView() {
         </div>
       </div>
 
-      <p className="vw-plaza-hint">
-        <Compass size={14} />
-        Chạm vào toà nhà hoặc bảng tên để bước vào không gian bạn muốn ghé.
-      </p>
+      {/* Heading placed neatly beneath the plaza */}
+      <header className="vw-plaza-heading vw-plaza-heading-bottom">
+        <h1>Hôm nay, mình ghé đâu?</h1>
+        <p>Gặp người mình mến. Giữ điều mình yêu. Trở về một góc của riêng mình.</p>
+      </header>
 
       {/* Mobile World Event Announcement Banner */}
       {standeeEvent && (
@@ -275,7 +268,7 @@ export function WorldPlazaView() {
       </nav>
 
       <footer className="vw-plaza-footer">
-        <span>Khám phá → gặp gỡ → giữ kỷ niệm → trở về nhà.</span>
+        <span>Gặp gỡ người mình mến · Sẻ chia từng khoảnh khắc · Giữ trọn góc bình yên.</span>
         <Link to="/me?panel=support">Luôn có chỗ để hỏi giúp đỡ ↗</Link>
       </footer>
     </div>
