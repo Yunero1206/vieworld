@@ -3,3 +3,1335 @@
 @media(max-width:500px){.v8-item-grid{gap:24px 14px}.v8-collection-item>img,.v8-achievement-art{height:140px}.v8-collection-item h3{font-size:15px}.v8-collection-item p{font-size:12px}.v8-preset-grid{grid-template-columns:repeat(2,1fr)}.v8-tabs{gap:6px}.v8-tabs button{font-size:12px;padding:9px 12px}.v8-collection h2,.v8-avatar-editor h2,.v8-live h2{font-size:23px}}
 .v8-private-tools{border-bottom:1px solid #dce0d5;padding:8px 0;margin:0 0 16px;font-size:13px}.v8-private-tools summary{cursor:pointer;padding:8px 0}.v8-private-tools .v7-collection-tools{margin:10px 0;gap:16px}.v8-collection>.v5-section-heading{margin:18px 0}.v8-item-grid:has(>.v8-collection-item:only-child){grid-template-columns:minmax(0,360px)}.v8-avatar-editor .v8-tabs>.fw-button{background:#365749;color:#fff;border-color:#365749}.v8-avatar-editor button:disabled{opacity:.5;cursor:default}
 @media(max-width:600px){.v7-private-note{font-size:13px!important;line-height:1.7!important;margin:12px 0!important}.v8-collection>.v5-section-heading{gap:10px;margin:12px 0}.v8-collection>.v5-section-heading:has([role=status]){flex-direction:row;align-items:center}.v8-item-grid:has(>.v8-collection-item:only-child) .v8-collection-item>img{height:200px}.v8-live-layout{gap:16px}.v8-live .avatar-stage-venue .avatar-renderer{width:120px!important;height:150px!important}}
+
+/* ==========================================================================
+   V8 Digital Item Locker & Collection Redesign
+   ========================================================================== */
+.v8-search-bar-container {
+  margin: 16px 0 20px;
+  max-width: 600px;
+}
+
+.v8-search-bar-container .v8-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.v8-search-bar-container .v8-search-icon {
+  position: absolute;
+  left: 16px;
+  color: #64748B;
+  pointer-events: none;
+}
+
+.v8-search-bar-container .v8-search input {
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 44px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  color: #0F172A;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.v8-search-bar-container .v8-search input:focus {
+  border-color: #365749;
+  box-shadow: 0 4px 16px rgba(54, 87, 73, 0.12), 0 0 0 3px rgba(54, 87, 73, 0.08);
+}
+
+.v8-search-clear {
+  position: absolute;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #E2E8F0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.v8-search-clear:hover {
+  background: #CBD5E1;
+  color: #0F172A;
+}
+
+.v8-collection .v8-item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 22px;
+  margin-top: 20px;
+}
+
+.v8-collection-item {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.v8-collection-item:hover {
+  transform: translateY(-3px);
+  border-color: #CBD5E1;
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.1);
+}
+
+.v8-collection-item.is-displayed {
+  border-color: #10B981;
+  background: #F0FDF4;
+}
+
+.v8-card-media-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: 14px;
+  background: #F8FAFC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.v8-card-media-wrapper img {
+  max-width: 85%;
+  max-height: 85%;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.v8-collection-item:hover .v8-card-media-wrapper img {
+  transform: scale(1.05);
+}
+
+.v8-achievement-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #FEF3C7;
+}
+
+.v8-card-type-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+.v8-card-active-chip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #065F46;
+  background: #D1FAE5;
+  border: 1px solid #A7F3D0;
+  padding: 3px 9px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+}
+
+.v8-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.v8-card-artist {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.v8-card-title {
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.v8-card-detail {
+  font-size: 12.5px;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 2px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.v8-card-date {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-top: 4px;
+}
+
+.v8-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.v8-slot-replace-hint {
+  font-size: 11px;
+  color: #92400E;
+  background: #FEF3C7;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.v8-action-btn {
+  width: 100%;
+  height: 40px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.v8-action-btn.is-active {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #CBD5E1;
+}
+
+.v8-action-btn.is-active:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.v8-item-locked-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #94A3B8;
+  padding-top: 6px;
+}
+
+/* ==========================================================================
+   Plaza Ambient Signals & Subtle Badges
+   ========================================================================== */
+.vw-door-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: #2D4A3E;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 3px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-bottom: 4px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(186, 165, 131, 0.45);
+  text-shadow: none;
+  white-space: nowrap;
+}
+.vw-door-signal::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10B981;
+}
+.vw-door-pill {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #634C28;
+  background: rgba(255, 245, 225, 0.9);
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-top: 3px;
+  text-shadow: none;
+  border: 1px solid rgba(186, 165, 131, 0.3);
+}
+
+/* ==========================================================================
+   VieSHOP Full-Width Catalog & Digital Fitting Room Strip
+   ========================================================================== */
+.fw-fitting-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border: 1.5px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 12px 20px;
+  margin: 16px 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.fw-fitting-strip-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.fw-fitting-strip-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.fw-fitting-strip-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fw-fitting-strip-text strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E293B;
+  letter-spacing: 0.02em;
+}
+.fw-fitting-strip-text span {
+  font-size: 12px;
+  color: #64748B;
+}
+.fw-fitting-strip-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.fw-fitting-strip-btn {
+  background: #3B4D2F;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fw-fitting-strip-btn:hover {
+  background: #2D3C23;
+  transform: translateY(-1px);
+}
+
+.fw-shop-fullwidth {
+  display: block !important;
+}
+.fw-shop-fullwidth > section {
+  width: 100%;
+}
+.fw-shop-fullwidth .fw-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 18px;
+}
+@media (max-width: 1100px) {
+  .fw-shop-fullwidth .fw-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .fw-shop-fullwidth .fw-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fw-fitting-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .fw-fitting-strip-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 480px) {
+  .fw-shop-fullwidth .fw-product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fw-product-subline {
+  font-size: 11.5px;
+  color: #64748B;
+  font-weight: 500;
+}
+.fw-product-delivery-pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.75);
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+.fw-product-try {
+  font-size: 11.5px;
+  color: #3B4D2F;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #F1F5F9;
+}
+.fw-product-try:hover {
+  background: #E2E8F0;
+}
+
+.fw-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 9999px;
+  padding: 0 14px;
+  height: 42px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fw-filter-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+.fw-filter-btn.is-active {
+  border-color: #3B4D2F;
+  color: #3B4D2F;
+  background: #F0FDF4;
+}
+.fw-filter-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3B4D2F;
+}
+
+.fw-applied-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0 14px;
+  border-bottom: 1px solid #E2E8F0;
+  margin-bottom: 16px;
+}
+.fw-applied-label {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+}
+.fw-applied-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1E293B;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fw-applied-chip:hover {
+  background: #E2E8F0;
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+.fw-applied-clear-all {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #64748B;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.fw-applied-clear-all:hover {
+  color: #DC2626;
+}
+
+.fw-filter-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 6px 0;
+}
+.fw-filter-group h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 10px;
+}
+.fw-filter-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fw-filter-select-chip {
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #475569;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fw-filter-select-chip:hover {
+  border-color: #94A3B8;
+  color: #1E293B;
+}
+.fw-filter-select-chip.is-selected {
+  background: #3B4D2F;
+  color: #FFFFFF;
+  border-color: #3B4D2F;
+  font-weight: 700;
+}
+.fw-filter-drawer-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #E2E8F0;
+  margin-top: 10px;
+}
+
+.fw-fulfillment-badge {
+  margin: 10px 0 16px;
+}
+.fw-fulfillment-badge p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1E293B;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  margin: 0;
+}
+
+.fw-format-explainer-row {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0 20px;
+}
+.fw-format-explainer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3B4D2F;
+  background: #F8FAFC;
+  border: 1.5px dashed #CBD5E1;
+  padding: 10px 22px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.fw-format-explainer-link:hover {
+  background: #F1F5F9;
+  border-color: #3B4D2F;
+}
+.fw-format-explainer-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
+}
+.fw-format-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+}
+.fw-format-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.fw-format-icon {
+  color: #3B4D2F;
+  flex-shrink: 0;
+}
+.fw-format-card-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 0;
+}
+.fw-format-card-header small {
+  font-size: 11.5px;
+  color: #64748B;
+  display: block;
+}
+.fw-format-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+}
+.fw-fitting-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+.fw-fitting-modal-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.fw-dialog-tryon-box {
+  margin: 12px 0;
+}
+
+/* ==========================================================================
+   My Space Architecture Overhaul (IA, Progressive Disclosure, Room Hotspots)
+   ========================================================================== */
+
+/* Header Tools & Menu Button */
+.fw-profile-btn {
+  background: #EAE6DA;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.fw-profile-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+.fw-profile-btn.active {
+  box-shadow: 0 0 0 2px #4F46E5;
+}
+
+/* Mobile-only menu button: hidden on desktop, visible on mobile */
+.fw-mobile-menu-btn {
+  display: none !important;
+}
+@media (max-width: 768px) {
+  .fw-mobile-menu-btn {
+    display: inline-flex !important;
+  }
+}
+
+.fw-menu-divider {
+  height: 1px;
+  background: #E2E8F0;
+  margin: 6px 0;
+}
+
+.fw-menu-item-danger {
+  color: #DC2626 !important;
+}
+.fw-menu-item-danger .fw-menu-item-icon {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+}
+
+/* Header Contextual Membership Gem ◇ */
+.v7-member-subtle-gem-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6366F1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 6px;
+  line-height: 1;
+  vertical-align: middle;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.v7-member-subtle-gem-btn:hover {
+  transform: scale(1.25);
+  color: #4F46E5;
+}
+
+/* Room Customization & Hotspot Fixes */
+.v6-room-art {
+  pointer-events: none !important;
+}
+
+.v6-fixture {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  pointer-events: auto !important;
+  z-index: 10;
+}
+
+/* View Mode: Completely clean room */
+.v6-display-scene.is-view-mode .v6-fixture:not(.occupied) {
+  opacity: 0;
+  pointer-events: none !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.v6-display-scene.is-view-mode .v6-fixture.occupied {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.v6-display-scene.is-view-mode .v6-fixture.occupied:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Edit Mode: Clear interactive hotspots with 44px+ hit area */
+.v6-display-scene.is-edit-mode .v6-fixture:not(.occupied) {
+  border: 2px dashed #6366F1 !important;
+  background: rgba(99, 102, 241, 0.14) !important;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: hotspotPulse 2s infinite ease-in-out;
+}
+
+.v6-display-scene.is-edit-mode .v6-fixture.occupied {
+  border: 2px solid #6366F1 !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+@keyframes hotspotPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+}
+
+.v6-slot-empty {
+  font-size: 20px;
+  font-weight: 700;
+  color: #6366F1;
+  pointer-events: none;
+}
+
+.v7-fixture-edit-chip {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #6366F1;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  pointer-events: none;
+}
+
+/* Visitor Projection Banner */
+.v7-visitor-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(30, 27, 75, 0.2);
+}
+
+.v7-visitor-banner-info strong {
+  font-size: 13.5px;
+  display: block;
+  color: #C7D2FE;
+}
+
+.v7-visitor-banner-info p {
+  font-size: 12px;
+  color: #E0E7FF;
+  margin: 2px 0 0;
+  opacity: 0.9;
+}
+
+.v7-visitor-back-btn {
+  background: #FFFFFF;
+  color: #1E1B4B;
+  border: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.v7-visitor-back-btn:hover {
+  background: #EEF2FF;
+  transform: translateY(-1px);
+}
+
+.v7-room-privacy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid #E2E8F0;
+  color: #64748B;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.v7-room-privacy-btn:hover {
+  color: #0F172A;
+  border-color: #CBD5E1;
+  background: #F8FAFC;
+}
+
+.v7-room-preview-btn {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.v7-room-preview-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+/* Visitor Showcase Section */
+.v7-visitor-showcase-section {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 16px;
+}
+.v7-visitor-showcase-section h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 12px;
+}
+.v7-visitor-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.v7-visitor-item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+}
+.v7-visitor-item-card img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+.v7-visitor-item-card strong {
+  font-size: 13px;
+  color: #0F172A;
+  display: block;
+}
+.v7-visitor-item-card p {
+  font-size: 11.5px;
+  color: #64748B;
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
+/* Slot Picker Drawer Refinements */
+.v7-slot-current-section {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.v7-slot-current-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.v7-slot-active-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+.v7-slot-remove-btn {
+  margin-left: auto;
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.v7-slot-remove-btn:hover {
+  background: #FCA5A5;
+}
+
+.v7-slot-candidates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.v7-slot-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Polaroid Claims Grid */
+.v7-polaroid-claims-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+.v7-polaroid-claim-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  background: #F1F5F9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* ==========================================================================
+   VieWorld Plaza 4-Layer Architecture & Mobile 2x2 Navigation
+   ========================================================================== */
+.vw-plaza-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px 36px;
+}
+
+.vw-plaza-heading {
+  padding: 24px 0 16px;
+}
+
+.vw-plaza-heading h1 {
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 800;
+  color: #1E293B;
+  margin: 4px 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.vw-plaza-heading p:not(.fw-eyebrow) {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.vw-plaza-scroll {
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  outline: none;
+}
+
+.vw-plaza-scroll:focus-visible {
+  box-shadow: 0 0 0 3px rgba(54, 87, 73, 0.4);
+}
+
+.vw-plaza-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #F7F5EE;
+}
+
+.plaza-artwork {
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Layer 2: Hit Area & Destination Door */
+.vw-plaza-scene .vw-place-door {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  z-index: 10;
+  cursor: pointer;
+  padding: 8px 12px;
+  min-width: 170px;
+  min-height: 80px;
+  box-sizing: border-box;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
+}
+
+/* Expand hit footprint (>= 180x140px) around building entrance */
+.vw-plaza-scene .vw-place-door::after {
+  content: '';
+  position: absolute;
+  inset: -30px -25px;
+  z-index: -1;
+  border-radius: 20px;
+}
+
+/* Layer 3: Physical Signboard Label (Engraved directly into physical board) */
+.vw-plaza-scene .vw-door-board {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center center;
+}
+
+.vw-plaza-scene .vw-door-board strong {
+  font-family: var(--font-display, inherit);
+  font-size: 16.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #2D1B0E;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-shadow: 0 1px 0 rgba(255, 245, 225, 0.7), 0 -1px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.vw-door-arrow {
+  color: #4A3320;
+  opacity: 0.8;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.vw-plaza-scene .vw-place-door:hover .vw-door-board strong {
+  color: #1A0D05;
+  text-shadow: 0 0 10px rgba(245, 195, 95, 0.8), 0 1px 1px rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+.vw-plaza-scene .vw-place-door:hover .vw-door-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
+}
+
+/* Individual Building Engraved Textures */
+.vw-plaza-scene .vw-door-artist .vw-door-board strong,
+.vw-plaza-scene .vw-door-myspace .vw-door-board strong {
+  color: #341F0F;
+  text-shadow: 0 1px 0 rgba(255, 242, 220, 0.65), 0 -1px 0 rgba(20, 10, 5, 0.4);
+}
+
+.vw-plaza-scene .vw-door-moments .vw-door-board strong {
+  color: #2A1A0D;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7), 0 -1px 0 rgba(35, 15, 5, 0.3);
+}
+
+.vw-plaza-scene .vw-door-shop .vw-door-board strong {
+  color: #193123;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -1px 0 rgba(10, 30, 15, 0.3);
+}
+
+/* Layer 4: Ambient Notification Chip (Positioned UNDER signboard, pulsing animation) */
+.vw-door-signal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+  margin-bottom: 0;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  animation: vw-noti-pulse 2.2s ease-in-out infinite;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@keyframes vw-noti-pulse {
+  0%, 100% {
+    opacity: 0.94;
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.vw-door-signal.kind-live {
+  background: #FFF1F2;
+  color: #E11D48;
+  border: 1px solid #FECDD3;
+  animation: vw-noti-pulse 1.6s ease-in-out infinite;
+}
+
+.vw-door-signal.kind-recent {
+  background: #F5F3FF;
+  color: #6D28D9;
+  border: 1px solid #DDD6FE;
+}
+
+.vw-door-signal.kind-notification {
+  background: #FFFBEB;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+
+.vw-door-signal.kind-new {
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+}
+
+/* Center Avatar Anchor: Linh Nguyễn */
+.vw-plaza-scene .vw-plaza-fan {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 12;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 20px;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vw-plaza-scene .vw-plaza-fan:hover {
+  transform: translate(-50%, -55%);
+}
+
+.vw-plaza-fan-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1E293B;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 3px 12px;
+  border-radius: 9999px;
+  margin-top: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.vw-plaza-fan-pill {
+  font-size: 10px;
+  font-weight: 700;
+  color: #365749;
+  background: #EAF2EC;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-top: 3px;
+  border: 1px solid #C4D9CC;
+  transition: all 0.15s ease;
+}
+
+.vw-plaza-scene .vw-plaza-fan:hover .vw-plaza-fan-pill {
+  background: #365749;
+  color: #FFFFFF;
+  border-color: #365749;
+}
+
+/* Header Brand Styling with VieWorldLogo */
+.fw-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-decoration: none !important;
+  position: relative !important;
+}
+
+.fw-brand-logo {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 1px 3px rgba(36, 53, 42, 0.12));
+}
+
+.fw-brand:hover .fw-brand-logo {
+  transform: rotate(12deg) scale(1.08);
+}
+
+.fw-brand-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.15;
+}
+
+.fw-brand-title {
+  font-family: var(--font-display, inherit);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #24352A;
+}
+
+.fw-brand small {
+  position: static !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  color: #64748B !important;
+  letter-spacing: 0.2px !important;
+  margin-top: 1px !important;
+}
+
+.vw-plaza-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748B;
+  margin: 18px 0 24px;
+}
+
+/* Mobile 2x2 Doors Grid */
+.vw-mobile-doors {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .vw-mobile-doors {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 18px 0 24px;
+  }
+  .vw-mobile-door-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 14px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    transition: all 0.2s ease;
+  }
+  .vw-mobile-door-card:active {
+    transform: scale(0.98);
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+  }
+  .vw-mobile-door-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .vw-mobile-door-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1E293B;
+  }
+  .vw-mobile-door-sub {
+    font-size: 11.5px;
+    color: #64748B;
+    line-height: 1.4;
+  }
+}

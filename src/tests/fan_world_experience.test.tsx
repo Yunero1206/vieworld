@@ -27,7 +27,7 @@ describe('Unified fan world public experience', () => {
   it('has exactly four primary destinations and no public tenant switch', () => {
     mount();
     const nav = screen.getByRole('navigation', { name: 'Điều hướng chính' });
-    expect(within(nav).getAllByRole('link').map(a => a.textContent)).toEqual(['Artist Home', 'Moments', 'My Space', 'VieSHOP']);
+    expect(within(nav).getAllByRole('link').map(a => a.textContent)).toEqual(['Explore', 'Moments', 'My Space', 'VieSHOP']);
     expect(screen.queryByText('MFan')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mở menu' }));
     fireEvent.click(screen.getByRole('button', { name: 'Kịch bản thử nghiệm' }));

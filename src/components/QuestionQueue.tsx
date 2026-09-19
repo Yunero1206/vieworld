@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Question, Session } from '../domain/types';
 import { HelpCircle, Send, CheckCircle2, Star, MessageSquareCheck, Clock, ShieldAlert } from 'lucide-react';
 
@@ -21,6 +21,13 @@ export const QuestionQueue: React.FC<QuestionQueueProps> = ({
 }) => {
   const [content, setContent] = useState('');
   const [submitNotice, setSubmitNotice] = useState<string | null>(null);
+  const submitTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    };
+  }, []);
 
   const isRunning = session.status === 'running';
   const charCount = content.length;
@@ -36,7 +43,8 @@ export const QuestionQueue: React.FC<QuestionQueueProps> = ({
     onSubmitQuestion(content.trim(), requestId);
     setContent('');
     setSubmitNotice('Câu hỏi đã được gửi thành công vào hàng đợi kiểm duyệt.');
-    setTimeout(() => setSubmitNotice(null), 4000);
+    if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+    submitTimerRef.current = window.setTimeout(() => setSubmitNotice(null), 4000);
   };
 
   const getStatusBadge = (status: Question['status']) => {

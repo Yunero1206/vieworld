@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, Disc3, Heart, Mail, Music2, ShoppingBag, Sparkles, CalendarDays, BookOpen, Package, Gift } from 'lucide-react';
+import { ArrowRight, Check, Disc3, Heart, Music2, Sparkles, CalendarDays, BookOpen, Package, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { PersonalDisplayRoom } from '../components/DisplayRoom';
 import { ArtistCommunity } from '../components/ArtistCommunity';
 import { ArtistBroadcast } from '../components/ArtistBroadcast';
-import { PLACE_INFO, PlaceId, PANEL_HOME, panelRoute } from '../world/places';
+import { PlaceId, PANEL_HOME, panelRoute } from '../world/places';
 import { CollectionBrowser } from '../components/CollectionBrowser';
-import { PublicIdentity } from '../components/PublicIdentity';
 import { HallPanel } from '../components/HallPanel';
 import { DigitalCloset } from '../components/DigitalCloset';
 import { WorldPanel } from '../components/WorldPanel';
@@ -17,16 +16,33 @@ import { MembershipCard } from '../components/MembershipCard';
 import { BenefitCard } from '../components/BenefitCard';
 import { ARTIST_NOTES, momentTime, ORDER_LABELS } from '../world/fanWorld';
 import { getTenantConfig } from '../domain/tenantConfig';
+import { ARTIST_FANDOM_REGISTRY } from '../data/artistChatConfig';
+import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
+import { displayedItems } from '../world/display';
+import { ownedDigitalLook } from '../world/merchCatalog';
 
 const panelTitles: Record<string, string> = {
   hall: 'Hall · Gặp những người cùng yêu nhạc', concerts: 'Live Concert · Sân khấu chung', livechat: 'Live Chat · Lời nhắn từ artist',
-  worlds: 'Những nơi mình có thể ghé', news: 'Thư từ nhà nhạc', sessions: 'Hẹn nhau ở sân khấu',
-  listening: 'Góc nghe', archive: 'Những đêm đã qua', wardrobe: 'Diện mạo của bạn',
+  worlds: 'Những nơi bạn có thể ghé thăm', news: 'Bản tin từ nghệ sĩ', sessions: 'Lịch hẹn sân khấu',
+  listening: 'Góc nghe nhạc', archive: 'Những đêm nhạc đã qua', wardrobe: 'Diện mạo của bạn',
   capsules: 'Kệ kỷ niệm', calendar: 'Lịch hẹn của bạn', bag: 'Túi đồ của bạn',
-  membership: 'Gắn bó cùng nhà nhạc', support: 'Cần một chút giúp đỡ?', artist: 'Gặp chủ nhà', showcase: 'Trưng bày trong phòng',
+  membership: 'Đồng hành cùng nghệ sĩ', support: 'Hỗ trợ & Trợ giúp', artist: 'Gặp gỡ nghệ sĩ', showcase: 'Trưng bày trong phòng',
 };
 const aliases: Record<string, string> = { follows: 'calendar', history: 'archive', orders: 'bag', benefits: 'membership' };
 
+interface SpacePrivacySettings {
+  roomVisibility: 'everyone' | 'users' | 'private';
+  showVisitCount: boolean;
+  guestbookEnabled: boolean;
+  showMembershipSignal: boolean;
+}
+
+const DEFAULT_PRIVACY: SpacePrivacySettings = {
+  roomVisibility: 'everyone',
+  showVisitCount: true,
+  guestbookEnabled: true,
+  showMembershipSignal: true,
+};
 
 export function FanWorldView() {
   const { state, dispatch } = useApp();
@@ -35,14 +51,104 @@ export function FanWorldView() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const [isPassOpen, setIsPassOpen] = useState(false);
+  const [isEditIntroOpen, setIsEditIntroOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+
+  const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(() => {
+    try {
+      const saved = localStorage.getItem('vieworld_privacy_settings');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // fallback
+    }
+    return DEFAULT_PRIVACY;
+  });
+
+  const savePrivacySettings = (next: SpacePrivacySettings) => {
+    setPrivacySettings(next);
+    try {
+      localStorage.setItem('vieworld_privacy_settings', JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const p = params.get('panel');
+    if (p === 'pass') {
+      setIsPassOpen(true);
+    } else if (p === 'privacy') {
+      setIsPrivacyOpen(true);
+    }
+  }, [params]);
+
+  const handleClosePass = () => {
+    setIsPassOpen(false);
+    if (params.get('panel') === 'pass') {
+      const nextParams = new URLSearchParams(params);
+      nextParams.delete('panel');
+      setParams(nextParams, { replace: true });
+    }
+  };
+
+  const handleClosePrivacy = () => {
+    setIsPrivacyOpen(false);
+    if (params.get('panel') === 'privacy') {
+      const nextParams = new URLSearchParams(params);
+      nextParams.delete('panel');
+      setParams(nextParams, { replace: true });
+    }
+  };
+
   const isRoom = pathname === '/me' || pathname.endsWith('/archive');
-  const collection = isRoom && (params.get('section')==='collection' || !!params.get('custom') || pathname.endsWith('/archive'));
-  function selectSpace(section:string){const q=new URLSearchParams();if(section==='collection')q.set('section','collection');navigate(`/me${q.size?'?'+q:''}`);}
-  const place = (isRoom?'myspace':pathname.endsWith('/moments')?'moments':pathname.endsWith('/archive')?'archive':'moments') as PlaceId;
+  const rawSection = params.get('section');
+  const currentSection: 'room' | 'collection' | 'avatar' =
+    pathname.endsWith('/archive') || rawSection === 'collection' || !!params.get('custom')
+      ? 'collection'
+      : rawSection === 'avatar'
+      ? 'avatar'
+      : 'room';
+
+  function selectSpace(section: 'room' | 'collection' | 'avatar') {
+    const q = new URLSearchParams();
+    if (section === 'collection') q.set('section', 'collection');
+    else if (section === 'avatar') q.set('section', 'avatar');
+    navigate(`/me${q.size ? '?' + q : ''}`);
+  }
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, section: 'room' | 'collection' | 'avatar') => {
+    const tabs: ('room' | 'collection' | 'avatar')[] = ['room', 'collection', 'avatar'];
+    const idx = tabs.indexOf(section);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = tabs[(idx + 1) % tabs.length];
+      selectSpace(next);
+      document.getElementById(`tab-${next}`)?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+      selectSpace(prev);
+      document.getElementById(`tab-${prev}`)?.focus();
+    }
+  };
+
+  const place = (isRoom ? 'myspace' : pathname.endsWith('/moments') ? 'moments' : pathname.endsWith('/archive') ? 'archive' : 'moments') as PlaceId;
   const savedWorld = state.fanProfile.worldJourney?.lastWorldId;
+  const hasExplicitContext = Boolean(worldId || params.get('artist') || savedWorld);
   const selectedArtist = worldId || params.get('artist') || savedWorld || state.followedWorldIds[0] || Object.keys(state.worlds)[0];
   const isShared = isRoom || place === 'archive';
   const world = state.worlds[isShared ? (Object.keys(state.worlds)[0] || '') : selectedArtist];
+
+  const queryTab = params.get('tab') || (params.get('session') || params.get('panel') === 'concerts' || params.get('panel') === 'livechat' ? 'live' : params.get('panel') === 'hall' ? 'hall' : 'home');
+  const [momentsTab, setMomentsTab] = useState(queryTab);
+
+  useEffect(() => {
+    if (pathname.endsWith('/moments') && world?.id) {
+      dispatch({ type: 'VISIT_FAN_WORLD', worldId: world.id });
+    }
+  }, [pathname, world?.id, dispatch]);
+
   const rawPanel = params.get('panel') || params.get('zone') || params.get('drawer') || (pathname === '/worlds' ? 'worlds' : '');
   const panel = rawPanel === 'shop' ? 'bag' : (aliases[rawPanel] || rawPanel);
   const activePanel = panelTitles[panel] ? panel : '';
@@ -67,34 +173,453 @@ export function FanWorldView() {
   function open(name: string) {
     const target = PANEL_HOME[name];
     if (name === 'worlds') { navigate('/artists'); return; }
-    if (target && target !== place) { navigate(panelRoute(name,isShared?undefined:world?.id)); return; }
+    if (target && target !== place) { navigate(panelRoute(name, isShared ? undefined : world?.id)); return; }
     if (!activePanel) ownPanel.current = true;
-    const nextParams = new URLSearchParams(params);nextParams.set('panel',name);
+    const nextParams = new URLSearchParams(params); nextParams.set('panel', name);
     setParams(nextParams, { replace: !!activePanel });
   }
+
   function close() {
     if (ownPanel.current) { ownPanel.current = false; navigate(-1); }
     else if (pathname === '/worlds') navigate('/', { replace: true });
-    else { const nextParams=new URLSearchParams(params);['panel','zone','drawer'].forEach(k=>nextParams.delete(k));setParams(nextParams, { replace: true }); }
+    else { const nextParams = new URLSearchParams(params); ['panel', 'zone', 'drawer'].forEach(k => nextParams.delete(k)); setParams(nextParams, { replace: true }); }
   }
-  if (!world) return <section className="fw-empty"><h1>Chưa tìm thấy nhà nhạc này</h1><Link className="fw-button" to="/">Về thế giới</Link></section>;
+
+  if (!world) return <section className="fw-empty"><h1>Chưa tìm thấy nghệ sĩ này</h1><Link className="fw-button" to="/">Về thế giới</Link></section>;
   const ip = world.type === 'ip';
   const artistAsset = world.avatarAssetId ? state.avatarAssets[world.avatarAssetId] : undefined;
   const canShowArtist = artistAsset?.status === 'approved';
 
-  const list = (panel === 'calendar' ? sessions.filter(s => state.rsvpdSessionIds.includes(s.id) && (isShared || s.worldId===world.id))
-    : sessions.filter(s => (isShared || s.worldId === world.id) && (panel !== 'listening' || s.format === 'listening') && (panel !== 'concerts' || s.format === 'concert') && (panel === 'archive' ? s.replayStatus === 'available' : !['ended','cancelled'].includes(s.status)))).sort((a,b)=>a.scheduledStartTime.localeCompare(b.scheduledStartTime));
+  const list = (panel === 'calendar' ? sessions.filter(s => state.rsvpdSessionIds.includes(s.id) && (isShared || s.worldId === world.id))
+    : sessions.filter(s => (isShared || s.worldId === world.id) && (panel !== 'listening' || s.format === 'listening') && (panel !== 'concerts' || s.format === 'concert') && (panel === 'archive' ? s.replayStatus === 'available' : !['ended', 'cancelled'].includes(s.status)))).sort((a, b) => a.scheduledStartTime.localeCompare(b.scheduledStartTime));
+
+  const isMoments = place === 'moments' || place === 'artist';
+  const fandom = ARTIST_FANDOM_REGISTRY[world.id];
+  const isWorldLive = Object.values(state.sessions).some(
+    s => s.worldId === world.id && (s.status === 'running' || s.status === 'open')
+  );
+  const bannerGradient = fandom?.signatureLightstick?.gradient || 'linear-gradient(135deg, #1E1B4B 0%, #312E81 60%, #4338CA 100%)';
+  const coverBg = `linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%), ${bannerGradient}`;
+
+  const hasActiveMembership = Object.values(state.memberships).some(
+    m => m.fanId === state.fanProfile.id && m.status === 'active'
+  );
+
+  const fanMood = state.fanProfile.publicIdentity?.mood || 'Hôm nay, cứ là mình thôi.';
+  const fanBio = state.fanProfile.publicIdentity?.bio || 'Một góc nhỏ cho những điều mình yêu.';
 
   return <div className={`fw-experience vw-place-page vw-page-${place}`}>
-    {isRoom ? <div className="fw-world-topline"><span className="fw-location">Phòng & danh thiếp của bạn</span><span className="fw-world-caption">Diện mạo hôm nay, để bạn bè nhận ra mình.</span><button className="fw-text-button" onClick={() => open('bag')}><ShoppingBag size={16}/>Túi đồ ({orders.length})</button></div> : place==='artist' ? null : place==='moments' ? <div className="vx-context-bar"><Link className="fw-text-button" to="/artists">← Khám phá nghệ sĩ</Link><label>Nhà nghệ sĩ<select aria-label="Chọn nhà nghệ sĩ" value={world.id} onChange={e=>navigate(`/moments?artist=${e.target.value}`)}>{Object.values(state.worlds).map(w=><option key={w.id} value={w.id}>{w.name}</option>)}</select></label></div> : <div className="vx-context-bar">Bộ sưu tập cá nhân · từ mọi artist bạn yêu mến</div>}
-    <header className="fw-scene-heading">
-      <div><p className="fw-eyebrow">{isRoom ? 'MY LITTLE CORNER' : place!=='artist' ? 'CÙNG NGHỆ SĨ, GẦN HƠN MỖI NGÀY' : ip ? 'CHƯƠNG TRÌNH / IP · TEAM HOSTED' : 'A LITTLE CLOSER, TOGETHER'}</p>
-        <h1>{isRoom ? `My Space · ${state.fanProfile.displayName.split(' ')[0]}` : place==='artist'||place==='moments' ? `Moments · ${world.name}` : PLACE_INFO[place].title}<span>{PLACE_INFO[place].subtitle}</span></h1>
-      </div>
-      {(place==='artist'||place==='moments') && <button className={`fw-follow ${state.followedWorldIds.includes(world.id) ? 'following' : ''}`} onClick={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: world.id })} aria-pressed={state.followedWorldIds.includes(world.id)}><Heart size={16} />{state.followedWorldIds.includes(world.id) ? 'Đang theo dõi' : 'Theo dõi nhà nhạc'}</button>}
-    </header>
+    {isRoom ? (
+      <header className="v7-space-header-block">
+        <div className="v7-space-hero-row">
+          <div className="v7-space-hero-left">
+            <div className="v7-space-eyebrow-row">
+              <span className="v7-space-eyebrow">MY LITTLE CORNER</span>
+            </div>
 
-    {isRoom?<><nav className="v7-space-tabs" aria-label="Các phần My Space"><button aria-pressed={!collection} onClick={()=>selectSpace('room')}>Phòng trưng bày</button><button aria-pressed={collection} onClick={()=>selectSpace('collection')}>Bộ sưu tập riêng</button></nav>{collection?<><p className="v7-private-note">Chỉ mình bạn thấy toàn bộ bộ sưu tập và ghi chú. Trưng bày từng món trong phòng là một lựa chọn riêng.</p><details className="v8-private-tools"><summary>Nhật ký, phiên xem lại & đơn hàng</summary><div className="v7-collection-tools"><button className="fw-text-button" onClick={()=>open('capsules')}>Nhật ký & kỷ niệm →</button><button className="fw-text-button" onClick={()=>open('archive')}>Các phiên xem lại →</button><button className="fw-text-button" onClick={()=>open('bag')}>Đồ đã nhận & đơn hàng →</button></div></details><CollectionBrowser/></>:<><PersonalDisplayRoom onOpen={open}/><PublicIdentity/></>}</>:<ArtistCommunity key={world.id} worldId={world.id} onOpen={open}/>}
+            <div className="v7-space-identity-name-row">
+              <h1 className="v7-space-title">
+                <span className="sr-only">My Space · </span>{state.fanProfile.displayName}
+                {hasActiveMembership && privacySettings.showMembershipSignal && (
+                  <button
+                    type="button"
+                    className="v7-member-subtle-gem-btn"
+                    onClick={() => setIsPassOpen(true)}
+                    title="Pulse Crew Member · Xem Fandom Pass"
+                    aria-label="Pulse Crew Member · Xem Fandom Pass"
+                  >
+                    ◇
+                  </button>
+                )}
+              </h1>
+              <button
+                type="button"
+                className="v7-space-edit-intro-btn"
+                onClick={() => setIsEditIntroOpen(true)}
+                aria-label="Sửa giới thiệu"
+              >
+                Sửa giới thiệu
+              </button>
+            </div>
+
+            <p className="v7-space-mood">{fanMood}</p>
+            <p className="v7-space-bio">{fanBio}</p>
+          </div>
+
+          <div className="v7-space-hero-right">
+            <Link to="/" className="sr-only">Về quảng trường</Link>
+            {/* Primary 3-tab Navigation: Phòng của tôi | Bộ sưu tập | Avatar */}
+            <nav className="v7-space-tabs" aria-label="Các phần My Space">
+              <button
+                type="button"
+                id="tab-room"
+                aria-controls="panel-room"
+                className={`v7-tab-pill ${currentSection === 'room' ? 'active' : ''}`}
+                aria-selected={currentSection === 'room'}
+                aria-pressed={currentSection === 'room'}
+                aria-label="Phòng trưng bày"
+                onClick={() => selectSpace('room')}
+                onKeyDown={e => handleTabKeyDown(e, 'room')}
+              >
+                <span>Phòng của tôi</span>
+              </button>
+              <button
+                type="button"
+                id="tab-collection"
+                aria-controls="panel-collection"
+                className={`v7-tab-pill ${currentSection === 'collection' ? 'active' : ''}`}
+                aria-selected={currentSection === 'collection'}
+                aria-pressed={currentSection === 'collection'}
+                aria-label="Bộ sưu tập riêng"
+                onClick={() => selectSpace('collection')}
+                onKeyDown={e => handleTabKeyDown(e, 'collection')}
+              >
+                <span>Bộ sưu tập</span>
+              </button>
+              <button
+                type="button"
+                id="tab-avatar"
+                aria-controls="panel-avatar"
+                className={`v7-tab-pill ${currentSection === 'avatar' ? 'active' : ''}`}
+                aria-selected={currentSection === 'avatar'}
+                aria-pressed={currentSection === 'avatar'}
+                aria-label="Avatar"
+                onClick={() => selectSpace('avatar')}
+                onKeyDown={e => handleTabKeyDown(e, 'avatar')}
+              >
+                <span>Avatar</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </header>
+    ) : isMoments ? (
+      <div className={`v7-community-header-block moments-masthead ${momentsTab === 'home' ? 'expanded' : 'collapsed'}`}>
+        {!hasExplicitContext && (
+          <div className="v7-artist-picker-banner" role="region" aria-label="Bộ chọn nghệ sĩ">
+            <div className="v7-artist-picker-content">
+              <span className="v7-artist-picker-hint">Chọn nghệ sĩ để xem Moments:</span>
+              <div className="v7-artist-picker-chips">
+                {Object.values(state.worlds).filter(w => w.tenantId === state.activeTenantId).map(w => (
+                  <button
+                    key={w.id}
+                    type="button"
+                    className={`v7-picker-chip ${w.id === world.id ? 'active' : ''}`}
+                    onClick={() => navigate(`/moments?artist=${w.id}`)}
+                  >
+                    {w.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Link to="/explore" className="v7-picker-explore-link">
+              Khám phá thêm ở Explore →
+            </Link>
+          </div>
+        )}
+        <Link className="sr-only" to="/artists">← Khám phá nghệ sĩ</Link>
+        <select
+          aria-label="Chọn nhà nghệ sĩ"
+          value={world.id}
+          onChange={e => navigate(`/moments?artist=${e.target.value}`)}
+          className="sr-only"
+          tabIndex={-1}
+        >
+          {Object.values(state.worlds).map(w => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
+        </select>
+        {/* Weverse-Grade Cover Banner */}
+        <div className="v7-community-cover-banner moments-cover-banner" style={{ background: coverBg }}>
+          <div className="v7-community-cover-content moments-cover-content">
+            <span className="v7-cover-fandom-badge moments-cover-fandom-pill">
+              Fandom {fandom?.fandomName || 'VieWorld'}
+            </span>
+            {isWorldLive && (
+              <span className="v7-cover-live-badge moments-cover-live-indicator">
+                <span className="moments-live-pulse-dot" />
+                LIVE NOW
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Overlap Seam */}
+        <div className="v7-community-profile-seam moments-profile-seam">
+          <div className="v7-profile-left moments-profile-left">
+            <div className="v7-community-main-avatar moments-main-avatar">
+              {canShowArtist ? (
+                <AvatarRenderer testId="community-profile-avatar" role="artist" accessoryId={artistAsset?.parts.accessory} outfitId={artistAsset?.parts.outfit} size="preview" isFrozen displayName={world.name} />
+              ) : (
+                <Disc3 size={56} />
+              )}
+            </div>
+            <div className="v7-profile-meta moments-profile-meta">
+              <div className="v7-profile-title-row moments-profile-title-row">
+                <h1 className="moments-profile-name">
+                  <span className="sr-only">Moments · </span>{world.name}
+                </h1>
+                <span className="moments-fandom-tag">
+                  {fandom?.fandomName || 'VieWorld'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="v7-profile-actions moments-profile-actions">
+            <button
+              className={`v7-community-follow-btn moments-follow-btn ${state.followedWorldIds.includes(world.id) ? 'following' : ''}`}
+              onClick={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: world.id })}
+              aria-pressed={state.followedWorldIds.includes(world.id)}
+            >
+              <Heart
+                size={16}
+                fill={state.followedWorldIds.includes(world.id) ? '#EC4899' : 'none'}
+                color={state.followedWorldIds.includes(world.id) ? '#EC4899' : 'currentColor'}
+              />
+              <span>{state.followedWorldIds.includes(world.id) ? 'Đang theo dõi' : 'Theo dõi nghệ sĩ'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="vx-context-bar">Bộ sưu tập cá nhân · từ mọi artist bạn yêu mến</div>
+    )}
+
+    {isRoom ? (
+      currentSection === 'collection' ? (
+        <div id="panel-collection" role="tabpanel" aria-labelledby="tab-collection">
+          <p className="v7-private-note">
+            Chỉ mình bạn thấy toàn bộ bộ sưu tập và ghi chú. Trưng bày từng món trong phòng là một lựa chọn riêng.
+          </p>
+          <details className="v8-private-tools">
+            <summary>Nhật ký, phiên xem lại & đơn hàng</summary>
+            <div className="v7-collection-tools">
+              <button className="fw-text-button" onClick={() => open('capsules')}>
+                Nhật ký & kỷ niệm →
+              </button>
+              <button className="fw-text-button" onClick={() => open('archive')}>
+                Các phiên xem lại →
+              </button>
+              <button className="fw-text-button" onClick={() => open('bag')}>
+                Đồ đã nhận & đơn hàng →
+              </button>
+            </div>
+          </details>
+          <CollectionBrowser />
+        </div>
+      ) : currentSection === 'avatar' ? (
+        <div id="panel-avatar" role="tabpanel" aria-labelledby="tab-avatar" className="v7-avatar-tab-wrapper">
+          <FanAvatarCustomizer onBackToRoom={() => selectSpace('room')} />
+        </div>
+      ) : (
+        <div id="panel-room" role="tabpanel" aria-labelledby="tab-room">
+          <PersonalDisplayRoom onOpen={open} onOpenPrivacy={() => setIsPrivacyOpen(true)} />
+        </div>
+      )
+    ) : (
+      <ArtistCommunity
+        key={world.id}
+        worldId={world.id}
+        onOpen={open}
+        initialTab={momentsTab}
+        onTabChange={setMomentsTab}
+      />
+    )}
+
+    {/* Sửa giới thiệu Modal */}
+    {isEditIntroOpen && (
+      <div className="v7-modal-backdrop" onClick={() => setIsEditIntroOpen(false)}>
+        <div
+          className="v7-intro-modal"
+          onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Sửa lời giới thiệu"
+        >
+          <div className="v7-modal-header">
+            <div>
+              <span className="v7-modal-eyebrow">IDENTITY & EXPRESSION</span>
+              <h3>Sửa giới thiệu không gian</h3>
+            </div>
+            <button
+              type="button"
+              className="v7-modal-close-btn"
+              onClick={() => setIsEditIntroOpen(false)}
+              aria-label="Đóng"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              const form = new FormData(e.currentTarget);
+              const mood = String(form.get('mood') || '').trim();
+              const bio = String(form.get('bio') || '').trim();
+              dispatch({
+                type: 'SAVE_PUBLIC_IDENTITY',
+                mood: mood || 'Hôm nay, cứ là mình thôi.',
+                bio: bio || 'Một góc nhỏ cho những điều mình yêu.',
+                badge: state.fanProfile.publicIdentity?.badge,
+                productIds: state.fanProfile.publicIdentity?.productIds,
+              });
+              setIsEditIntroOpen(false);
+            }}
+          >
+            <div className="v7-form-group">
+              <label htmlFor="intro-mood-input">Hôm nay bạn thế nào? (Mood / Status)</label>
+              <input
+                id="intro-mood-input"
+                name="mood"
+                defaultValue={fanMood}
+                maxLength={60}
+                placeholder="Hôm nay, cứ là mình thôi."
+              />
+              <small>Tối đa 60 ký tự · Thể hiện tâm trạng hoặc lời chào khi người khác ghé phòng.</small>
+            </div>
+
+            <div className="v7-form-group">
+              <label htmlFor="intro-bio-input">Đôi dòng giới thiệu bản thân</label>
+              <textarea
+                id="intro-bio-input"
+                name="bio"
+                defaultValue={fanBio}
+                maxLength={160}
+                rows={3}
+                placeholder="Một góc nhỏ cho những điều mình yêu."
+              />
+              <small>Tối đa 160 ký tự · Lời giới thiệu xuất hiện dưới tên bạn.</small>
+            </div>
+
+            <div className="v7-modal-actions">
+              <button
+                type="button"
+                className="fw-text-button"
+                onClick={() => setIsEditIntroOpen(false)}
+              >
+                Hủy
+              </button>
+              <button type="submit" className="fw-button">
+                Lưu giới thiệu
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+
+    {/* Privacy Settings Modal */}
+    {isPrivacyOpen && (
+      <div className="v7-modal-backdrop" onClick={handleClosePrivacy}>
+        <div
+          className="v7-privacy-modal"
+          onClick={e => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Cài đặt quyền riêng tư không gian"
+        >
+          <div className="v7-modal-header">
+            <div>
+              <span className="v7-modal-eyebrow">DATA MINIMIZATION & PRIVACY</span>
+              <h3>Quyền riêng tư My Space</h3>
+            </div>
+            <button
+              type="button"
+              className="v7-modal-close-btn"
+              onClick={handleClosePrivacy}
+              aria-label="Đóng"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="v7-privacy-form">
+            <div className="v7-privacy-field">
+              <label><strong>Ai có thể ghé phòng</strong></label>
+              <select
+                value={privacySettings.roomVisibility}
+                onChange={e =>
+                  savePrivacySettings({
+                    ...privacySettings,
+                    roomVisibility: e.target.value as SpacePrivacySettings['roomVisibility'],
+                  })
+                }
+              >
+                <option value="everyone">Tất cả mọi người (Public)</option>
+                <option value="users">Chỉ thành viên VieWorld</option>
+                <option value="private">Chỉ mình tôi (Private)</option>
+              </select>
+              <small>Khách ghé thăm chỉ thấy đúng những món bạn chủ động đưa lên kệ phòng. Không bao giờ thấy toàn bộ kho đồ hay ghi chú riêng.</small>
+            </div>
+
+            <div className="v7-privacy-toggle-row">
+              <div>
+                <strong>Hiện số lượt ghé thăm</strong>
+                <p>Hiển thị số lượt ghé phòng (không dùng để xếp hạng hay đua top).</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={privacySettings.showVisitCount}
+                onChange={e =>
+                  savePrivacySettings({
+                    ...privacySettings,
+                    showVisitCount: e.target.checked,
+                  })
+                }
+              />
+            </div>
+
+            <div className="v7-privacy-toggle-row">
+              <div>
+                <strong>Cho phép dán giấy nhớ (Guestbook)</strong>
+                <p>Cho phép người ghé thăm để lại lời nhắn trên tường lưu bút.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={privacySettings.guestbookEnabled}
+                onChange={e =>
+                  savePrivacySettings({
+                    ...privacySettings,
+                    guestbookEnabled: e.target.checked,
+                  })
+                }
+              />
+            </div>
+
+            <div className="v7-privacy-toggle-row">
+              <div>
+                <strong>Hiện biểu tượng hội viên (◇)</strong>
+                <p>Biểu tượng nhỏ bên cạnh tên khi bạn có quyền lợi hội viên đang hoạt động.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={privacySettings.showMembershipSignal}
+                onChange={e =>
+                  savePrivacySettings({
+                    ...privacySettings,
+                    showMembershipSignal: e.target.checked,
+                  })
+                }
+              />
+            </div>
+
+            <div className="v7-modal-actions">
+              <button
+                type="button"
+                className="fw-button"
+                onClick={handleClosePrivacy}
+              >
+                Xong
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
 
     {activePanel && <WorldPanel title={panelTitles[activePanel]} onClose={close}>
       {panel === 'livechat' && <ArtistBroadcast worldId={world.id}/>}
@@ -109,7 +634,7 @@ export function FanWorldView() {
         {list.map(s => <article className="fw-event-row" key={s.id}><small>{state.worlds[s.worldId]?.name} · {momentTime(s.scheduledStartTime)}{s.status === 'running' ? ' · LIVE · DEMO' : s.status === 'cancelled' ? ' · Đã hủy' : s.status === 'ended' ? ' · Đã kết thúc' : ' · DEMO'}</small><h3>{s.title}</h3><div><Link className="fw-button" to={`/sessions/${s.id}`}>{s.replayStatus === 'available' && s.status === 'ended' ? 'Xem lại' : 'Ghé sân khấu'}<ArrowRight size={16} /></Link>{['scheduled', 'open', 'running'].includes(s.status) && <button className="fw-text-button" onClick={() => dispatch({ type: 'TOGGLE_RSVP', sessionId: s.id })}>{state.rsvpdSessionIds.includes(s.id) ? 'Hủy nhắc lịch' : 'Nhắc mình'}</button>}</div></article>)}
         {panel === 'sessions' && <button className="fw-text-button" onClick={() => open('archive')}>Xem những đêm đã qua <ArrowRight size={16} /></button>}
       </>}
-      {panel === 'wardrobe' && <><p className="fw-muted">Chọn một chi tiết của riêng mình. Diện mạo này theo bạn ở mọi nhà nhạc.</p><FanAvatarCustomizer/><DigitalCloset /></>}
+      {panel === 'wardrobe' && <><p className="fw-muted">Chọn một chi tiết của riêng mình. Diện mạo này đồng hành cùng bạn ở mọi không gian nghệ sĩ.</p><FanAvatarCustomizer/><DigitalCloset /></>}
       {panel === 'capsules' && <>
         <p className="fw-muted">Kỷ niệm từ những phiên bạn đã tham dự. Bỏ khỏi kệ vẫn giữ trong bộ sưu tập.</p>
         <Link className="fw-text-button" to="/me?section=collection&type=ticket">Chọn kỷ niệm công khai trong My Space ↗</Link>
@@ -124,9 +649,46 @@ export function FanWorldView() {
         {savedCapsules.map(c=><article className="fw-event-row" key={c.id}><small>{state.worlds[c.worldId]?.name}</small><h3>{state.sessions[c.sessionId]?.title||'Kỷ niệm của bạn'}</h3><button className="fw-button" onClick={()=>dispatch({type:'SET_SHOWCASE_SLOT',slotIndex:slot,capsuleId:c.id})}>{slots[slot]===c.id?'Đang ở ô này':`Đặt vào ô ${slot+1}`}</button></article>)}
         <Link className="fw-text-button" to="/me?section=collection&panel=capsules">Mở bộ sưu tập riêng →</Link>
       </>}
-      {panel === 'bag' && <><p className="fw-muted">Những món đồ đi cùng hành trình của {state.fanProfile.displayName}.</p>{!orders.length && <div className="fw-empty"><Package size={36} /><h3>Túi đồ đang nhẹ tênh.</h3><p>Ghé {tenantConfig.labels.shopTitle} tìm một món mình thích.</p><Link className="fw-button" to="/shop">Mở {tenantConfig.labels.shopTitle} <ArrowRight size={16} /></Link></div>}{orders.map(o => <Link className="fw-destination" key={o.id} to={`/orders/${o.id}`}><Package /><div><strong>{state.products[o.productId]?.title || 'Đơn hàng'}</strong><p>{ORDER_LABELS[o.status]}</p></div><ArrowRight size={18} /></Link>)}<button className="fw-destination" onClick={() => open('membership')}><Gift /><div><strong>Hội viên & quyền lợi</strong><p>Xem quyền lợi gắn với nhà nhạc.</p></div><ArrowRight size={18} /></button><button className="fw-destination" onClick={() => open('support')}><Mail /><div><strong>Cần hỗ trợ?</strong><p>Theo dõi yêu cầu hoặc mở từ đơn hàng.</p></div><ArrowRight size={18} /></button></>}
-      {panel === 'membership' && <><p className="fw-muted">Theo dõi là miễn phí. Hội viên và quyền lợi được quản lý riêng cho từng nhà nhạc; mọi giao dịch ở đây đều là mô phỏng.</p>{Object.values(state.worlds).map(w => <MembershipCard key={w.id} world={w} membership={Object.values(state.memberships).find(m => m.fanId === state.fanProfile.id && m.worldId === w.id)} isFollowed={state.followedWorldIds.includes(w.id)} onToggleFollow={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: w.id })} onUpgrade={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId: w.id })} />)}{Object.values(state.benefits).filter(b => b.fanId === state.fanProfile.id).map(b => <BenefitCard key={b.id} benefit={b} onClaim={benefitId => dispatch({ type: 'CLAIM_BENEFIT', benefitId })} />)}</>}
-      {panel === 'support' && <><p>Mở đơn hàng trong túi đồ rồi chọn hỗ trợ; thông tin món hàng sẽ được điền sẵn.</p><button className="fw-button" onClick={() => open('bag')}>Xem đơn hàng</button>{Object.values(state.supportCases).filter(c => c.fanId === state.fanProfile.id).map(c => <Link className="fw-destination" key={c.id} to={`/support/${c.id}`}><Mail /><div><strong>Yêu cầu về {c.subjectType === 'order' ? 'đơn hàng' : 'quyền lợi'}</strong><p>{c.nextAction}</p></div><ArrowRight /></Link>)}</>}
+      {panel === 'bag' && <>
+        <p className="fw-muted">Những món đồ và đơn hàng đi cùng hành trình của {state.fanProfile.displayName}.</p>
+        {!orders.length && (
+          <div className="fw-empty">
+            <Package size={36} />
+            <h3>Túi đồ đang trống.</h3>
+            <p>Ghé {tenantConfig.labels.shopTitle} tìm một món mình thích.</p>
+            <Link className="fw-button" to="/shop">
+              Khám phá {tenantConfig.labels.shopTitle} <ArrowRight size={16} />
+            </Link>
+          </div>
+        )}
+        {orders.map(o => (
+          <Link className="fw-destination" key={o.id} to={`/orders/${o.id}`}>
+            <Package />
+            <div>
+              <strong>{state.products[o.productId]?.title || 'Đơn hàng'}</strong>
+              <p>{ORDER_LABELS[o.status]}</p>
+            </div>
+            <ArrowRight size={18} />
+          </Link>
+        ))}
+      </>}
+      {panel === 'membership' && <><p className="fw-muted">Theo dõi là miễn phí. Hội viên và quyền lợi được quản lý riêng cho từng nghệ sĩ; mọi giao dịch ở đây đều là mô phỏng.</p>{Object.values(state.worlds).map(w => <MembershipCard key={w.id} world={w} membership={Object.values(state.memberships).find(m => m.fanId === state.fanProfile.id && m.worldId === w.id)} isFollowed={state.followedWorldIds.includes(w.id)} onToggleFollow={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: w.id })} onUpgrade={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId: w.id })} />)}{Object.values(state.benefits).filter(b => b.fanId === state.fanProfile.id).map(b => <BenefitCard key={b.id} benefit={b} onClaim={benefitId => dispatch({ type: 'CLAIM_BENEFIT', benefitId })} />)}</>}
     </WorldPanel>}
+
+    {isRoom && (
+      <FandomPolaroidPass
+        isOpen={isPassOpen}
+        onClose={handleClosePass}
+        fanName={state.fanProfile.displayName}
+        avatarPreset={state.fanProfile.avatarPreset}
+        digitalLook={ownedDigitalLook(state)}
+        accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
+        mood={state.fanProfile.publicIdentity?.mood}
+        badge={state.fanProfile.publicIdentity?.badge}
+        companionDays={128}
+        items={displayedItems(state)}
+        fanId={state.fanProfile.id}
+      />
+    )}
   </div>;
 }

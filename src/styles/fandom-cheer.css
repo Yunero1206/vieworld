@@ -1,0 +1,166 @@
+/* Fandom Cheer Engine — Authentic Lightstick & Heart Burst Animation */
+
+.fandom-cheer-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 25;
+  user-select: none;
+}
+
+/* Unified Single Fandom Cheer Card */
+.fandom-cheer-unified-box {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+  padding: 5px 6px 5px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.fandom-cheer-unified-box:hover {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32);
+}
+
+.fandom-cheer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fandom-cheer-headline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fandom-cheer-badge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.fandom-cheer-counter {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: inline-block;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.fandom-cheer-counter.bump {
+  transform: scale(1.2);
+  color: #FDE047;
+}
+
+.fandom-cheer-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fandom-milestone-bar-wrap {
+  width: 75px;
+  height: 4.5px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fandom-milestone-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fandom-cheer-target {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+/* Embedded Cheer Lightstick Button */
+.fandom-cheer-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.fandom-cheer-btn:hover {
+  transform: scale(1.1);
+}
+
+.fandom-cheer-btn:active {
+  transform: scale(0.9);
+}
+
+.fandom-lightstick-icon {
+  animation: lightstickGlowPulse 2s infinite ease-in-out;
+}
+
+@keyframes lightstickGlowPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.95; }
+  50% { transform: scale(1.12) rotate(6deg); opacity: 1; }
+}
+
+/* Floating Particles Stage */
+.fandom-particles-stage {
+  position: absolute;
+  bottom: 45px;
+  right: 14px;
+  width: 25px;
+  height: 200px;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 30;
+}
+
+.fandom-cheer-particle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  will-change: transform, opacity;
+  animation: cheerParticleFly 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes cheerParticleFly {
+  0% {
+    opacity: 1;
+    transform: translate3d(var(--fly-start-x, 0), 0, 0) scale(0.6) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate3d(calc(var(--fly-end-x, 20px) * 0.4), -60px, 0) scale(1.25) rotate(calc(var(--fly-rot, 20deg) * 0.4));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--fly-end-x, 20px), -180px, 0) scale(0.9) rotate(var(--fly-rot, 20deg));
+  }
+}

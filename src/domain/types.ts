@@ -165,6 +165,8 @@ export interface FanProfile extends BaseRecord {
   roomDesign?: import('../world/places').RoomDesign;
 }
 
+export type ProductKind = 'digital' | 'physical' | 'bundle';
+
 export interface Product extends BaseRecord {
   worldId: string;
   title: string;
@@ -175,6 +177,12 @@ export interface Product extends BaseRecord {
   familyId?: string;
   category?: 'merch' | 'album' | 'membership' | 'ticket';
   delivery?: 'physical' | 'digital' | 'bundle';
+  kind?: ProductKind;
+  digitalAssetReward?: {
+    accessoryId?: string;
+    outfitId?: string;
+    badgeTitle?: string;
+  };
   image?: string;
   digitalImage?: string;
   description?: string;

@@ -14,14 +14,18 @@ export interface DisplayItem {
   isDisplayCompatible?: boolean;
   wearableSlot?: string;
   category?: string;
+  sourceType?: 'event' | 'merchandise' | 'membership' | 'achievement' | 'moment';
+  eventName?: string;
+  deliveryKind?: 'physical' | 'digital' | 'bundle';
+  privateNote?: string;
 }
 
 export const DISPLAY_FIXTURES: { slot: DisplaySlot; label: string; x: number; y: number }[] = [
-  { slot: 'shirt', label: 'Áo của mình', x: 20, y: 43 },
-  { slot: 'ticket', label: 'Vé đáng nhớ', x: 36.5, y: 29 },
-  { slot: 'disc', label: 'Đĩa đang nghe', x: 85, y: 48 },
-  { slot: 'lightstick', label: 'Ánh sáng fandom', x: 68.5, y: 35 },
-  { slot: 'achievement', label: 'Dấu mốc của mình', x: 55.5, y: 26 },
+  { slot: 'shirt', label: 'Áo kỷ niệm', x: 20, y: 41 },
+  { slot: 'ticket', label: 'Vé sự kiện', x: 36.5, y: 28 },
+  { slot: 'disc', label: 'Đĩa đang nghe', x: 84.5, y: 48 },
+  { slot: 'lightstick', label: 'Ánh sáng fandom', x: 68.5, y: 35.5 },
+  { slot: 'achievement', label: 'Cột mốc & Kỷ vật', x: 55.5, y: 27 },
 ];
 
 /**
@@ -52,6 +56,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
       isDisplayCompatible: Boolean(slot),
       wearableSlot: p.digitalSlot,
       category: p.category || 'merch',
+      sourceType: 'merchandise' as const,
+      deliveryKind: (p.delivery || (p.kind === 'digital' ? 'digital' : 'physical')) as 'physical' | 'digital' | 'bundle',
       detail: slot
         ? 'Món được chủ phòng chọn trưng bày. Không công khai thông tin đơn hàng.'
         : 'Vật phẩm sở hữu cá nhân trong bộ sưu tập (chưa có vị trí cố định trên diorama phòng).',
@@ -68,6 +74,10 @@ export function ownedCollection(s: AppState): DisplayItem[] {
       image: 'ticket-digital',
       isDisplayCompatible: true,
       category: 'memory',
+      sourceType: 'event' as const,
+      eventName: s.sessions[c.sessionId]?.title,
+      collectedAt: c.updatedAt,
+      deliveryKind: 'digital' as const,
       detail: 'Một kỷ niệm được chủ phòng chọn. Ghi chú riêng không được chia sẻ.',
     }));
 
@@ -80,6 +90,9 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     image: 'ticket-digital',
     isDisplayCompatible: true,
     category: 'ticket',
+    sourceType: 'event' as const,
+    eventName: c.eventTitle,
+    deliveryKind: 'physical' as const,
     detail: 'Thẻ kỷ niệm mẫu trong bộ sưu tập. Không phải vé vào cửa.',
   }));
 
@@ -89,6 +102,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     title: `Người giữ ký ức · ${n}`,
     isDisplayCompatible: true,
     category: 'achievement',
+    sourceType: 'achievement' as const,
+    deliveryKind: 'digital' as const,
     detail: 'Huy hiệu ghi nhận việc trao lại thẻ kỷ niệm; không cấp quyền vào sự kiện.',
   }));
 

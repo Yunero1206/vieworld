@@ -10,6 +10,7 @@
 import { AppState, TenantId } from '../domain/types';
 import { createInitialState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
 import { withMerchCatalog } from '../world/merchCatalog';
+import { idbGet, idbSet, idbDelete, clearTenantAsync, STORE_TENANT_STATE } from './indexedDbAdapter';
 
 export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY_PREFIX = 'vieworld_v1';
@@ -56,6 +57,13 @@ export function saveState(state: AppState): boolean {
     savedAt: new Date().toISOString(),
     state,
   });
+
+  // Asynchronously back up state to IndexedDB in the background
+  try {
+    idbSet(STORE_TENANT_STATE, key, state).catch(() => {});
+  } catch {
+    // Ignore IndexedDB errors
+  }
 
   if (!isLocalStorageAvailable() || memoryFallbackActive) {
     memoryFallbackStore[key] = payload;
@@ -169,6 +177,29 @@ export function loadState(
 }
 
 /**
+ * Asynchronously loads state from IndexedDB if available,
+ * gracefully falling back to synchronous loadState (localStorage / Memory).
+ */
+export async function loadStateAsync(
+  tenantId: TenantId = 'vieworld-demo',
+  fanId: string = 'fan-linh'
+): Promise<StorageLoadResult> {
+  const key = buildStorageKey(tenantId, fanId);
+  try {
+    const idbData = await idbGet<AppState>(STORE_TENANT_STATE, key);
+    if (idbData && idbData.activeTenantId === tenantId) {
+      return {
+        state: withMerchCatalog(idbData),
+        isMemoryFallback: false,
+      };
+    }
+  } catch {
+    // Fall back to localStorage / memory
+  }
+  return loadState(tenantId, fanId);
+}
+
+/**
  * Resets storage for a designated tenant only.
  * Invariant: NEVER calls localStorage.clear()! Preserves all other tenants and browser data.
  */
@@ -181,6 +212,14 @@ export function resetTenantStorage(tenantId: TenantId): void {
       delete memoryFallbackStore[key];
     }
   });
+
+  // Also delete tenant state from IndexedDB
+  try {
+    idbDelete(STORE_TENANT_STATE, `${prefix}_fan-linh`).catch(() => {});
+    clearTenantAsync(tenantId).catch(() => {});
+  } catch {
+    // Ignore access denial
+  }
 
   if (!isLocalStorageAvailable()) {
     return;

@@ -1,0 +1,127 @@
+/* VieWorld Ola-Style Virtual Playground & Mobile Nav Styles */
+
+/* 1. Speech Bubble (Bong bóng chat phong cách Ola / Avatar) */
+.speech-bubble-container {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  pointer-events: none;
+  animation: speechBubblePop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  max-width: 180px;
+  min-width: 60px;
+}
+
+.speech-bubble {
+  background: #FFFFFF;
+  color: #1F2937;
+  border: 2px solid #4F46E5;
+  border-radius: 14px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  position: relative;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* Triangle tail pointing down to avatar */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid #4F46E5;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid #FFFFFF;
+  z-index: 1;
+}
+
+@keyframes speechBubblePop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* 2. Mobile Bottom Navigation (Thanh điều hướng chạm dưới màn hình) */
+.fw-mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .fw-mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #FFFFFF;
+    border-top: 1px solid #E5E7EB;
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .fw-mobile-bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #6B7280;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: color 0.15s;
+    min-width: 54px;
+  }
+
+  .fw-mobile-bottom-nav a.active,
+  .fw-mobile-bottom-nav a[aria-current="page"] {
+    color: #4F46E5;
+    font-weight: 700;
+  }
+
+  .fw-mobile-bottom-nav a svg {
+    transition: transform 0.15s;
+  }
+
+  .fw-mobile-bottom-nav a.active svg {
+    transform: scale(1.1);
+  }
+
+  /* Ensure page content is not hidden behind the mobile bottom nav */
+  .fan-shell .fw-main {
+    padding-bottom: 76px !important;
+  }
+}

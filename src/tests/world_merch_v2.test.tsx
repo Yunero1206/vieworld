@@ -105,4 +105,23 @@ describe('World v2: ownership and access contracts',()=>{
     fireEvent.click(within(dialog).getByRole('button',{name:'Bỏ thử'}));
     expect(within(dialog).queryByTestId('digital-shirt')).not.toBeInTheDocument();
   });
+  it('dual-commerce: fulfilled digital item activates in wardrobe and persists look', () => {
+    let state = fulfilled('product-star-shirt-digital');
+    expect(ownsDigitalProduct(state, state.products['product-star-shirt-digital'])).toBe(true);
+    state = appReducer(state, { type: 'EQUIP_DIGITAL_PRODUCT', productId: 'product-star-shirt-digital' });
+    expect(ownedDigitalLook(state).shirt).toBe('star-shirt');
+    saveState(state);
+    const loaded = loadState(state.activeTenantId, state.fanProfile.id).state;
+    expect(ownedDigitalLook(loaded).shirt).toBe('star-shirt');
+  });
+  it('dual-commerce: physical purchase preserves delivery tracking and leaves digital look intact', () => {
+    let state = appReducer(initial(), { type: 'CREATE_ORDER', productId: 'product-cd-real', requestId: 'req-cd' });
+    const order = Object.values(state.orders).find(o => o.productId === 'product-cd-real')!;
+    expect(order.deliveryType || state.products[order.productId].delivery).toBe('physical');
+    state = appReducer(state, { type: 'SIMULATE_PAYMENT', orderId: order.id, requestId: order.requestId });
+    expect(state.orders[order.id].status).toBe('paid');
+    expect(state.fanProfile.digitalLook?.shirt).toBeUndefined();
+    expect(ownsDigitalProduct(state, state.products[order.productId])).toBe(false);
+  });
 });
+

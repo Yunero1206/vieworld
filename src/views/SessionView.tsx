@@ -242,22 +242,31 @@ export const SessionView: React.FC = () => {
 
   return (
     <div className="live-stream-page">
-      {/* Breadcrumb Navigation */}
+      {/* Breadcrumb Navigation / Moments Deep-Link Continuity */}
       <nav aria-label="Đường dẫn điều hướng" className="session-breadcrumb" style={{ marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--text-xs)' }}>
-          <Link to="/artists" style={{ color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <ArrowLeft size={13} />
-            <span>Artist Home</span>
-          </Link>
-          <span style={{ color: 'var(--muted)' }}>/</span>
-          {world && (
-            <>
-              <Link to={`/moments?artist=${world.id}`} style={{ color: 'var(--muted)' }}>
-                {world.name}
-              </Link>
-              <span style={{ color: 'var(--muted)' }}>/</span>
-            </>
+          {world ? (
+            <Link
+              to={`/moments?artist=${world.id}&tab=live&session=${session.id}`}
+              style={{
+                color: 'var(--primary, #5B46E8)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: '700',
+              }}
+              title="Trở về không gian Moments trực tiếp của nghệ sĩ"
+            >
+              <ArrowLeft size={13} />
+              <span>← Nhà {world.name} · Live & Concert</span>
+            </Link>
+          ) : (
+            <Link to="/explore" style={{ color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <ArrowLeft size={13} />
+              <span>Khám phá thế giới</span>
+            </Link>
           )}
+          <span style={{ color: 'var(--muted)' }}>/</span>
           <span style={{ fontWeight: '700', color: 'var(--text)' }}>{session.title}</span>
         </div>
       </nav>

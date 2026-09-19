@@ -1,8 +1,8 @@
-import { AppState, Product } from '../domain/types';
+import { AppState, Product, ProductKind } from '../domain/types';
 
 export const MERCH_IMAGE_ROOT = '/images/merch-v2';
 export const DELIVERY_LABELS = { physical: 'Hàng thật', digital: 'Digital', bundle: 'Hàng thật + Digital' };
-const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30 };
+const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30, kind: 'physical' as ProductKind };
 export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-star-shirt-real', familyId: 'star-shirt', title: 'Áo Star Club', priceVND: 390000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', digitalImage: 'shirt-digital', description: 'Áo cotton màu kem, cổ olive và ngôi sao thêu nhỏ. Bản mẫu thiết kế, không phải ảnh hàng đã sản xuất.', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', 'Không kèm trang phục avatar'] },
   { id: 'product-star-shirt-digital', familyId: 'star-shirt', title: 'Áo Star Club · Digital', priceVND: 45000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'shirt-digital', digitalImage: 'shirt-digital', digitalSlot: 'shirt', digitalItemId: 'star-shirt', includes: ['1 trang phục cho avatar VieWorld', 'Không giao áo ngoài đời'] },
@@ -34,7 +34,7 @@ export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-kai-lightstick-real', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker', priceVND: 720000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Official Lightstick', image: 'kai-lightstick-physical', digitalImage: 'kai-lightstick-digital', description: 'Gậy cổ vũ chính thức KAI Wave Shaker phong cách cyberpunk góc cạnh. Cụm đèn LED neon equalizer phát sáng nhấp nháy đồng bộ theo nhịp bass.', includes: ['1 lightstick KAI Wave Shaker đa chế độ đèn', 'Dây đeo tay dệt công nghệ cao'] },
   { id: 'product-kai-lightstick-digital', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker · Digital', priceVND: 59000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'kai-lightstick-digital', digitalImage: 'kai-lightstick-digital', digitalSlot: 'lightstick', digitalItemId: 'kai-lightstick', includes: ['1 lightstick neon cyan cho avatar', 'Hiệu ứng ánh sáng rực rỡ tại concert'] },
   { id: 'product-kai-cassette-real', familyId: 'kai-cassette', worldId: 'artist-kai', title: 'Băng Cassette KAI "City Pulse Beats" Boxset', priceVND: 350000, category: 'album', delivery: 'physical', releaseType: 'in_stock', estimatedShipping: 'Sẵn hàng · Giao trong 3-5 ngày làm việc', batchLabel: 'Cassette Tape', image: 'kai-cassette-physical', description: 'Băng cassette vỏ nhựa trong suốt màu xanh neon cyan độc đáo chứa tuyển tập các bản synth-wave và future beats. Kèm hộp slipcase dập kim tuyến.', includes: ['1 băng cassette trong suốt màu cyan', 'Hộp đựng slipcase kèm bộ 5 sticker hologram KAI'] },
-].map(p => [p.id, { ...base, ...p } as Product]));
+].map(p => [p.id, { ...base, kind: (p.delivery || 'physical') as ProductKind, ...p } as Product]));
 
 /** Additive catalogue migration: preserve stock, orders, custom products and other tenants. */
 export function withMerchCatalog(state: AppState): AppState {
@@ -51,6 +51,8 @@ export function ownsDigitalProduct(state: AppState, product: Product) {
 export function canEnterHall(state: AppState, worldId: string) {
   return Object.values(state.memberships).some(m => m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
 }
+
+export const hasActiveMembership = canEnterHall;
 
 /** Never render a revoked item simply because an old appearance was saved. */
 export function ownedDigitalLook(state: AppState) {

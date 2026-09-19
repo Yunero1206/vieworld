@@ -1,0 +1,67 @@
+/* VieWorld Shop, Cart and Payment Block Styles */
+
+.v5-payment-block {
+  background: var(--surface, #FFFFFF);
+  border: 1px solid var(--border, #E5E7EB);
+  border-radius: var(--radius-md, 10px);
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.v5-payment-methods {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.v5-payment-method-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #D1D5DB);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms ease);
+}
+
+.v5-payment-method-btn.selected {
+  border-color: var(--primary, #5B46E8);
+  background: var(--primary-light, #EEF2FF);
+  font-weight: 700;
+  color: var(--primary, #5B46E8);
+}
+
+.v5-qr-container {
+  text-align: center;
+  padding: 16px;
+  background: #F9FAFB;
+  border-radius: var(--radius-md, 10px);
+  border: 1px dashed #9CA3AF;
+  margin-bottom: 14px;
+}
+
+.v5-qr-container svg {
+  background: #FFFFFF;
+  padding: 8px;
+  border-radius: 8px;
+  margin: 0 auto 8px;
+  display: block;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.03));
+}
+
+.v5-paid-actions {
+  margin: 16px 0;
+  padding: 16px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: var(--radius-md, 10px);
+}
+
+.v5-paid-actions p[role="status"] {
+  font-weight: 700;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}

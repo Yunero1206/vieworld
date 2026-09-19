@@ -30,6 +30,7 @@ export const App: React.FC = () => {
             <Route path="worlds/:worldId/moments" element={<FanWorldView />} />
             <Route path="worlds/:worldId/archive" element={<FanWorldView />} />
             <Route path="artists" element={<ArtistGalleryView />} />
+            <Route path="explore" element={<ArtistGalleryView />} />
             <Route path="moments" element={<FanWorldView />} />
             <Route path="archive" element={<FanWorldView />} />
             <Route path="cart" element={<CartView />} /><Route path="checkout/:checkoutId" element={<CartView />} /><Route path="members/:fanId" element={<MemberSpaceView />} />

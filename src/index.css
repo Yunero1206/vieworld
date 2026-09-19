@@ -1,3 +1,8 @@
+@import './styles/tokens.css';
+@import './styles/shell.css';
+@import './styles/playground.css';
+@import './styles/shop.css';
+
 /* VieWorld Design System Tokens — Clean Weverse-Grade System */
 :root {
   /* Color tokens */

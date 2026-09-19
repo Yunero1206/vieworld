@@ -1,4 +1,5 @@
 import React, { useId, useState } from 'react';
+import { SpeechBubble } from './SpeechBubble';
 import {
   CharacterRole,
   getAccessoryById,
@@ -17,6 +18,7 @@ export interface AvatarRendererProps {
   displayName?: string;
   reducedMotion?: boolean;
   isFrozen?: boolean;
+  speechText?: string;
   className?: string;
   testId?: string;
   ariaLabel?: string;
@@ -40,6 +42,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
   displayName = 'Avatar',
   reducedMotion = false,
   isFrozen = false,
+  speechText,
   className = '',
   testId,
   ariaLabel,
@@ -95,6 +98,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
       aria-label={ariaLabel || defaultLabel}
       role="img"
     >
+      {speechText && <SpeechBubble text={speechText} />}
       {!imageFailed ? <>
         <img className="vx-character-art" src={characterSrc} alt="" draggable={false} decoding="async" onError={()=>setImageFailed(true)}/>
         <svg className="vx-character-layers" viewBox="0 0 200 250" fill="none" aria-hidden="true">

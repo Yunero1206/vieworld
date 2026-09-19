@@ -1,0 +1,1751 @@
+/* ==========================================================================
+   VieWorld Moments (Artist World) — Consolidated Design System
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Artist World Shell & Dynamic Collapsible Masthead
+   -------------------------------------------------------------------------- */
+
+.moments-world-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.moments-masthead {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  background: var(--bg-surface, #FFFFFF);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Expanded Masthead (Home Tab: Nhà [Artist]) */
+.moments-masthead.expanded .moments-cover-banner {
+  height: 220px;
+  min-height: 200px;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px 28px;
+  position: relative;
+  transition: height 0.3s ease, padding 0.3s ease;
+}
+
+/* Collapsed Masthead (Live, Hall, Merch Tabs) */
+.moments-masthead.collapsed .moments-cover-banner {
+  height: 0px;
+  min-height: 0px;
+  padding: 0px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.moments-cover-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.moments-cover-fandom-pill {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #FFFFFF;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.2px;
+}
+
+.moments-cover-live-indicator {
+  background: #E11D48;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
+}
+
+.moments-live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  animation: momentsPulse 1.8s infinite;
+}
+
+@keyframes momentsPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* Profile Seam */
+.moments-profile-seam {
+  position: relative;
+  padding: 0 28px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  z-index: 4;
+  transition: all 0.3s ease;
+}
+
+.moments-masthead.expanded .moments-profile-seam {
+  margin-top: -42px;
+}
+
+.moments-masthead.collapsed .moments-profile-seam {
+  margin-top: 0;
+  padding: 16px 24px;
+  align-items: center;
+  min-height: 90px;
+}
+
+.moments-profile-left {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.moments-masthead.collapsed .moments-profile-left {
+  align-items: center;
+  gap: 16px;
+}
+
+.moments-main-avatar {
+  border-radius: 50%;
+  border: 4px solid #FFFFFF;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  background: #F8FAFC;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.moments-masthead.expanded .moments-main-avatar {
+  width: 84px;
+  height: 84px;
+}
+
+.moments-masthead.collapsed .moments-main-avatar {
+  width: 52px;
+  height: 52px;
+  border-width: 2px;
+}
+
+.moments-profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.moments-profile-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.moments-profile-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.moments-masthead.collapsed .moments-profile-name {
+  font-size: 20px;
+}
+
+.moments-fandom-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.moments-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.moments-masthead.collapsed .moments-profile-actions {
+  padding-bottom: 0;
+}
+
+.moments-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: #FFFFFF;
+  color: #0F172A;
+  border: 1.5px solid #CBD5E1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.moments-follow-btn:hover {
+  border-color: #EC4899;
+  color: #BE185D;
+  background: #FDF2F8;
+}
+
+.moments-follow-btn.following {
+  background: #FDF2F8;
+  border-color: #FBCFE8;
+  color: #BE185D;
+}
+
+/* --------------------------------------------------------------------------
+   2. Main 4 Navigation Tabs
+   -------------------------------------------------------------------------- */
+
+.moments-nav-tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 2px solid #E2E8F0;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.moments-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.moments-tab-item {
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: 14px 4px;
+  color: #64748B;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -2px;
+  transition: all 0.15s ease;
+}
+
+.moments-tab-item:hover {
+  color: #0F172A;
+}
+
+.moments-tab-item[aria-pressed="true"],
+.moments-tab-item.active {
+  color: #0F172A;
+  border-bottom-color: #0F172A;
+  font-weight: 700;
+}
+
+.moments-tab-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #E11D48;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Task 1: Nhà [Artist] 68/32 Grid
+   -------------------------------------------------------------------------- */
+
+.moments-home-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 68fr) minmax(300px, 32fr);
+  gap: 32px;
+  align-items: start;
+}
+
+/* Left: Official Artist Feed */
+.moments-feed-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.moments-feed-header {
+  padding-bottom: 8px;
+}
+
+.moments-feed-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #64748B;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+
+.moments-feed-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.moments-posts-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Unified Artist Post Card */
+.moments-post-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.moments-post-card:hover {
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.moments-post-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.moments-post-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.moments-post-avatar-fallback {
+  font-weight: 700;
+  color: #475569;
+}
+
+.moments-post-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.moments-post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moments-post-author-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.moments-verified-icon {
+  display: inline-flex;
+  color: #2563EB;
+}
+
+.moments-post-time {
+  font-size: 12.5px;
+  color: #64748B;
+}
+
+.moments-post-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.moments-post-body {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0;
+}
+
+/* Post Embedded Event Card */
+.moments-post-event-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.moments-post-event-card:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.moments-event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moments-event-info strong {
+  font-size: 14px;
+  color: #0F172A;
+}
+
+.moments-event-info span {
+  font-size: 12px;
+  color: #64748B;
+}
+
+.moments-event-arrow {
+  color: #64748B;
+}
+
+/* Post Action Buttons */
+.moments-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.moments-cheer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moments-cheer-btn:hover {
+  background: #FFF1F2;
+  border-color: #FECDD3;
+  color: #E11D48;
+}
+
+.moments-cheer-btn.active {
+  background: #FFF1F2;
+  border-color: #FDA4AF;
+  color: #E11D48;
+}
+
+.moments-keepsake-btn {
+  background: none;
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  cursor: pointer;
+  padding: 7px 4px;
+  transition: color 0.15s ease;
+}
+
+.moments-keepsake-btn:hover:not(:disabled) {
+  color: #0F172A;
+}
+
+.moments-keepsake-btn:disabled {
+  color: #10B981;
+  cursor: default;
+}
+
+/* Right: Sidebar */
+.moments-sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.moments-sidebar-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+}
+
+.moments-sidebar-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #64748B;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.moments-appointment-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.moments-appointment-artist {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.moments-appointment-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.moments-appointment-time {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0284C7;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moments-appointment-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: background 0.2s ease;
+}
+
+.moments-appointment-cta:hover {
+  background: #334155;
+}
+
+.moments-appointment-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.moments-schedule-trigger-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: color 0.15s ease;
+}
+
+.moments-schedule-trigger-btn:hover {
+  color: #0F172A;
+}
+
+/* Fandom Connect Widget */
+.moments-connect-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0 0 16px;
+}
+
+.moments-connect-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #4F46E5;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.moments-connect-btn:hover {
+  text-decoration: underline;
+}
+
+/* Mobile compact appointment banner */
+.moments-mobile-appointment-bar {
+  display: none;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.moments-mobile-app-text {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1E40AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moments-mobile-app-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1D4ED8;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. Task 2: Live & Concert Refactor
+   -------------------------------------------------------------------------- */
+
+.moments-live-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* First-Class Artist Presence Banner */
+.moments-presence-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  flex-wrap: wrap;
+}
+
+.moments-presence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.moments-presence-live {
+  color: #059669;
+}
+
+.moments-presence-live .moments-presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  animation: momentsPulse 1.8s infinite;
+}
+
+.moments-presence-replay {
+  color: #475569;
+}
+
+.moments-presence-replay .moments-presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94A3B8;
+}
+
+/* Scheduled Stage Card */
+.moments-scheduled-stage {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+}
+
+.moments-scheduled-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.moments-scheduled-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  max-width: 600px;
+}
+
+.moments-scheduled-time {
+  font-size: 16px;
+  color: #38BDF8;
+  font-weight: 600;
+}
+
+.moments-scheduled-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.moments-rsvp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #38BDF8;
+  color: #0F172A;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.moments-rsvp-btn:hover {
+  background: #7DD3FC;
+}
+
+.moments-rsvp-btn.rsvpd {
+  background: #1E293B;
+  color: #E2E8F0;
+  border: 1px solid #475569;
+}
+
+/* Past Sessions List under Stage */
+.moments-past-sessions-section {
+  padding-top: 24px;
+  border-top: 1px solid #E2E8F0;
+}
+
+.moments-past-sessions-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 16px;
+}
+
+.moments-past-sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.moments-past-session-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.moments-past-session-card:hover {
+  border-color: #94A3B8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.moments-past-session-card.selected {
+  border-color: #0F172A;
+  background: #F8FAFC;
+}
+
+/* --------------------------------------------------------------------------
+   5. Task 3: Hall Hội Viên Enhancements
+   -------------------------------------------------------------------------- */
+
+.moments-hall-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+/* Compact Now Playing Bar */
+.moments-now-playing-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.moments-now-playing-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.moments-now-playing-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #38BDF8;
+  text-transform: uppercase;
+}
+
+.moments-now-playing-track {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.moments-now-playing-listeners {
+  font-size: 12px;
+  color: #94A3B8;
+}
+
+/* Pinned Topic Banner (Compact!) */
+.moments-pinned-topic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.moments-pinned-topic-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4F46E5;
+  background: #EEF2FF;
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Membership Gating Bar */
+.moments-chat-gated-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  flex-wrap: wrap;
+}
+
+.moments-gated-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.moments-gated-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.moments-gated-sub {
+  font-size: 12px;
+  color: #64748B;
+}
+
+.moments-gated-btn {
+  padding: 8px 18px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.moments-gated-btn:hover {
+  background: #334155;
+}
+
+/* --------------------------------------------------------------------------
+   6. Task 4: Merchandise Scoped Storefront
+   -------------------------------------------------------------------------- */
+
+.moments-merch-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.moments-merch-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.moments-merch-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.moments-filter-chip {
+  padding: 6px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moments-filter-chip:hover {
+  border-color: #94A3B8;
+  color: #0F172A;
+}
+
+.moments-filter-chip.active {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+}
+
+/* Product Families Grid */
+.moments-family-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+/* Product Family Card */
+.moments-family-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+.moments-family-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.moments-family-card-img-wrapper {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: #F8FAFC;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moments-family-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.moments-family-card:hover .moments-family-card-img {
+  transform: scale(1.04);
+}
+
+.moments-family-variants-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.moments-family-card-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.moments-family-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.moments-family-types-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748B;
+}
+
+.moments-family-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   7. Quick-View Drawer / Bottom Sheet
+   -------------------------------------------------------------------------- */
+
+.moments-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: momentsFadeIn 0.2s ease;
+}
+
+@keyframes momentsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.moments-drawer-panel {
+  width: 480px;
+  max-width: 90vw;
+  height: 100%;
+  background: #FFFFFF;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: momentsSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes momentsSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.moments-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.moments-drawer-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moments-drawer-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.moments-drawer-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.moments-drawer-close-btn {
+  background: #F1F5F9;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.15s ease;
+}
+
+.moments-drawer-close-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.moments-drawer-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+.moments-drawer-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #F8FAFC;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moments-drawer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.moments-delivery-tag {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #FFFFFF;
+  color: #0F172A;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.moments-drawer-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
+}
+
+.moments-field-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 8px;
+}
+
+.moments-variant-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.moments-variant-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.moments-variant-option:hover {
+  border-color: #94A3B8;
+}
+
+.moments-variant-option.selected {
+  background: #F8FAFC;
+  border-color: #0F172A;
+}
+
+.moments-variant-radio-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.moments-variant-option.selected .moments-variant-radio-dot {
+  border-color: #0F172A;
+}
+
+.moments-radio-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0F172A;
+}
+
+.moments-variant-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.moments-variant-text strong {
+  font-size: 13.5px;
+  color: #0F172A;
+}
+
+.moments-batch-sub {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.moments-variant-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.moments-size-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.moments-size-pill {
+  width: 44px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moments-size-pill:hover {
+  border-color: #94A3B8;
+}
+
+.moments-size-pill.selected {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+}
+
+.moments-drawer-note {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.moments-note-digital {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #15803D;
+}
+
+.moments-note-bundle {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1D4ED8;
+}
+
+.moments-quantity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.moments-quantity-stepper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.moments-qty-btn {
+  width: 36px;
+  height: 36px;
+  background: #F8FAFC;
+  border: 0;
+  font-size: 16px;
+  cursor: pointer;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moments-qty-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.moments-qty-value {
+  width: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.moments-drawer-footer {
+  padding: 20px 24px;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #FFFFFF;
+}
+
+.moments-drawer-total {
+  display: flex;
+  flex-direction: column;
+}
+
+.moments-total-label {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.moments-total-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.moments-drawer-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.moments-drawer-add-btn:hover:not(:disabled) {
+  background: #334155;
+}
+
+/* --------------------------------------------------------------------------
+   8. Direct Add-to-Cart Toast
+   -------------------------------------------------------------------------- */
+
+.moments-cart-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-radius: 12px;
+  padding: 14px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 10000;
+  animation: momentsToastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes momentsToastIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.moments-toast-message {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.moments-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.moments-toast-cart-link {
+  color: #38BDF8;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.moments-toast-cart-link:hover {
+  text-decoration: underline;
+}
+
+.moments-toast-close {
+  background: none;
+  border: 0;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Schedule Drawer Specifics
+   -------------------------------------------------------------------------- */
+
+.moments-schedule-filter-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.moments-schedule-filter-btn {
+  padding: 7px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.moments-schedule-filter-btn.active {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+}
+
+.moments-schedule-hint {
+  font-size: 12.5px;
+  color: #64748B;
+  margin: 0;
+}
+
+.moments-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.moments-schedule-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.moments-schedule-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.moments-schedule-format-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4338CA;
+  background: #EEF2FF;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.moments-schedule-time {
+  font-size: 12px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+.moments-schedule-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.moments-schedule-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #E2E8F0;
+}
+
+.moments-schedule-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0F172A;
+  text-decoration: none;
+}
+
+.moments-schedule-rsvp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+  cursor: pointer;
+}
+
+.moments-schedule-rsvp-btn.rsvpd {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1D4ED8;
+}
+
+.moments-schedule-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94A3B8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.moments-schedule-archive-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+}
+
+.moments-schedule-archive-link:hover {
+  color: #0F172A;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   10. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .moments-home-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .moments-family-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .moments-world-shell {
+    padding: 0 16px 48px;
+  }
+
+  /* Mobile: compact masthead always */
+  .moments-masthead .moments-cover-banner {
+    height: 0px !important;
+    min-height: 0px !important;
+    padding: 0px !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .moments-masthead .moments-profile-seam {
+    margin-top: 0 !important;
+    padding: 14px 16px !important;
+    align-items: center;
+    min-height: 72px;
+  }
+
+  .moments-main-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .moments-profile-name {
+    font-size: 18px !important;
+  }
+
+  .moments-mobile-appointment-bar {
+    display: flex;
+  }
+
+  .moments-family-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .moments-drawer-panel {
+    width: 100%;
+    max-width: 100vw;
+    height: 85vh;
+    border-radius: 20px 20px 0 0;
+    margin-top: auto;
+    animation: momentsSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes momentsSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moments-masthead,
+  .moments-family-card,
+  .moments-drawer-panel,
+  .moments-live-pulse-dot {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Refined Moments Room State, Member Diamonds & Guarantee
+   -------------------------------------------------------------------------- */
+.moments-current-room-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #F8FAFC;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  margin-bottom: 12px;
+  font-size: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-member-gem,
+.v7-chat-badge-gem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary, #5B46E8);
+  font-weight: 700;
+  font-size: 12px;
+  user-select: none;
+}
+
+.moments-active-hall-card {
+  transition: all 0.2s ease;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.moments-active-hall-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+.moments-ai-guarantee-note {
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: #F8FAFC;
+}

@@ -10,6 +10,9 @@ import './styles/world-v5.css';
 import './styles/world-v6.css';
 import './styles/world-v7.css';
 import './styles/world-v8.css';
+import './styles/fandom-cheer.css';
+import './styles/explore.css';
+import './styles/moments.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

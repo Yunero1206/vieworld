@@ -1,0 +1,153 @@
+import React from 'react';
+
+interface VieWorldLogoProps {
+  size?: number;
+  className?: string;
+  showText?: boolean;
+  tagline?: string;
+  brandName?: string;
+}
+
+export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
+  size = 32,
+  className = '',
+  showText = false,
+  tagline,
+  brandName = 'VieWorld',
+}) => {
+  return (
+    <div className={`vieworld-brandmark ${className}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="vieworld-logo-icon"
+        aria-hidden="true"
+        style={{ flexShrink: 0, display: 'block' }}
+      >
+        <defs>
+          {/* Main "V" Gradient */}
+          <linearGradient id="vwVGrad" x1="50" y1="20" x2="50" y2="85" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#559972" />
+            <stop offset="35%" stopColor="#3C7B57" />
+            <stop offset="100%" stopColor="#224834" />
+          </linearGradient>
+
+          {/* Celestial Orbit Ring Gradient */}
+          <linearGradient id="vwOrbitGrad" x1="20" y1="35" x2="85" y2="60" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#75A88E" />
+            <stop offset="50%" stopColor="#A4CBB7" />
+            <stop offset="100%" stopColor="#709E86" />
+          </linearGradient>
+
+          {/* Golden Fandom Star Gradient */}
+          <linearGradient id="vwStarGold" x1="50" y1="22" x2="50" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFE082" />
+            <stop offset="100%" stopColor="#E2A638" />
+          </linearGradient>
+
+          {/* Subtle Glow Filter */}
+          <filter id="vwSoftGlow" x="35" y="15" width="30" height="36" filterUnits="userSpaceOnUse">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        {/* 1. Orbit Ring - Back Segment */}
+        <path
+          d="M 24 57 C 22 50 30 38 48 34 C 66 30 80 34 83 40"
+          stroke="url(#vwOrbitGrad)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          opacity="0.85"
+        />
+
+        {/* 2. Left Sparkle Star (Small) */}
+        <path
+          d="M 23 37 Q 24.5 39 26.5 39 Q 24.5 39 23 41 Q 21.5 39 19.5 39 Q 21.5 39 23 37 Z"
+          fill="#3C7B57"
+        />
+
+        {/* 3. The Iconic "V" Character */}
+        {/* Left Arm of V */}
+        <path
+          d="M 33 24
+             C 38 24 41 28 43 33
+             L 51 68
+             C 53 77 47 84 41 84
+             C 35 84 31 79 28 72
+             L 21 39
+             C 19 31 24 24 33 24 Z"
+          fill="url(#vwVGrad)"
+        />
+
+        {/* Right Arm of V (Overlapping at bottom apex) */}
+        <path
+          d="M 68 24
+             C 77 24 81 31 79 39
+             L 59 74
+             C 56 80 52 84 46 84
+             C 41 84 38 80 41 74
+             L 59 33
+             C 61 28 64 24 68 24 Z"
+          fill="url(#vwVGrad)"
+        />
+
+        {/* Bottom V Rounded Apex Blend */}
+        <path
+          d="M 40 76
+             C 44 86 54 85 58 75
+             C 52 82 46 82 40 76 Z"
+          fill="#1C3D2B"
+        />
+
+        {/* 4. Orbit Ring - Front Segment */}
+        <path
+          d="M 83 40 C 86 46 78 57 58 63 C 39 68 25 65 24 57"
+          stroke="url(#vwOrbitGrad)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
+
+        {/* 5. Orbit Planet Bead */}
+        <circle cx="82" cy="33" r="4.5" fill="#4B8664" />
+        <circle cx="80.8" cy="31.8" r="1.5" fill="#C2E2D1" />
+
+        {/* 6. Golden Fandom Star Inside V Crook */}
+        {/* Radiance Rays */}
+        <line x1="50" y1="18" x2="50" y2="22" stroke="#E2A638" strokeWidth="2" strokeLinecap="round" />
+        <line x1="43" y1="22" x2="45" y2="25" stroke="#E2A638" strokeWidth="1.8" strokeLinecap="round" />
+        <line x1="57" y1="22" x2="55" y2="25" stroke="#E2A638" strokeWidth="1.8" strokeLinecap="round" />
+
+        {/* Central 4-pointed Star */}
+        <path
+          d="M 50 25
+             Q 50.8 33 58 34
+             Q 50.8 35 50 43
+             Q 49.2 35 42 34
+             Q 49.2 33 50 25 Z"
+          fill="url(#vwStarGold)"
+          filter="url(#vwSoftGlow)"
+        />
+        <circle cx="50" cy="34" r="1.2" fill="#FFFBE6" />
+
+        {/* 7. Right Sparkle Star (Small) */}
+        <path
+          d="M 70 51 Q 71.5 53 73.5 53 Q 71.5 53 70 55 Q 68.5 53 66.5 53 Q 68.5 53 70 51 Z"
+          fill="#3C7B57"
+        />
+      </svg>
+
+      {showText && (
+        <div className="fw-brand-text">
+          <span className="fw-brand-name">
+            {brandName}
+          </span>
+          {tagline && <small className="fw-brand-tagline">{tagline}</small>}
+        </div>
+      )}
+    </div>
+  );
+};

@@ -1,9 +1,9 @@
 export type PlaceId = 'artist' | 'moments' | 'archive' | 'myspace';
 export const PLACE_INFO = {
-  artist: {title:'Artist Home', subtitle:'Tìm nghệ sĩ mới và chọn nhà mình muốn ghé.', image:'artist', tone:'sage'},
-  moments: {title:'Moments', subtitle:'Nhà nghệ sĩ · lời nhắn, sân khấu và những người cùng yêu.', image:'moments', tone:'amber'},
-  archive: {title:'Archive', subtitle:'Có những khoảnh khắc, mình muốn giữ thật lâu.', image:'archive', tone:'blue'},
-  myspace: {title:'My Space', subtitle:'Một căn phòng, rất nhiều điều là mình.', image:'myspace', tone:'sage'},
+  artist: {title:'Artist Home', subtitle:'Khám phá nghệ sĩ và bước vào không gian âm nhạc yêu thích.', image:'artist', tone:'sage'},
+  moments: {title:'Moments', subtitle:'Không gian nghệ sĩ · Lời nhắn, sân khấu và cộng đồng người hâm mộ.', image:'moments', tone:'amber'},
+  archive: {title:'Archive', subtitle:'Lưu giữ trọn vẹn những khoảnh khắc và kỷ niệm đồng hành.', image:'archive', tone:'blue'},
+  myspace: {title:'My Space', subtitle:'Căn phòng lưu giữ kỷ niệm và dấu ấn cá nhân của bạn.', image:'myspace', tone:'sage'},
 };
 export const SCENE_ROOT='/images/world-v4';
 export function placeRoute(place:PlaceId, _worldId?:string){return {artist:'/artists',moments:'/moments',archive:'/me?section=collection',myspace:'/me'}[place];}

@@ -1,0 +1,871 @@
+/* VieWorld Explore Design System (§ Explore Discovery Experience) */
+/* Modern, fandom-first, identity-led discovery styles synchronized with app design tokens */
+
+.explore-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  color: var(--ink, #111827);
+}
+
+/* ==========================================================================
+   Section A: Explore Header & Search
+   Compact discovery header (~140-160px) without giant billboard or AI clutter
+   ========================================================================== */
+.explore-header-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 10px;
+}
+
+.explore-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.explore-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--primary, #5B46E8);
+  margin: 0;
+}
+
+.explore-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ink, #111827);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.explore-subtitle {
+  font-size: 14px;
+  color: var(--muted, #6B7280);
+  margin: 0;
+}
+
+.explore-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 2px;
+}
+
+.explore-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.explore-search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px 0 46px;
+  font-size: 14.5px;
+  font-family: inherit;
+  background: var(--surface, #FFFFFF);
+  border: 1.5px solid #E2E8F0;
+  border-radius: 9999px;
+  color: var(--ink, #111827);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.explore-search-input:hover {
+  border-color: #CBD5E1;
+}
+
+.explore-search-input:focus {
+  outline: none;
+  border-color: var(--primary, #5B46E8);
+  box-shadow: 0 0 0 3px rgba(91, 70, 232, 0.12);
+  background: #FFFFFF;
+}
+
+.explore-search-clear {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #F1F5F9;
+  border: none;
+  color: #64748B;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.explore-search-clear:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+/* ==========================================================================
+   Section B: Quick Filters
+   Lightweight filter row directly below search
+   ========================================================================== */
+.explore-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.explore-filter-chip {
+  height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid #E2E8F0;
+  background: var(--surface, #FFFFFF);
+  color: #4B5563;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.explore-filter-chip:hover {
+  border-color: #CBD5E1;
+  background: #F8FAFC;
+  color: #111827;
+}
+
+.explore-filter-chip[aria-pressed="true"],
+.explore-filter-chip.active {
+  background: #111827;
+  color: #FFFFFF;
+  border-color: #111827;
+  font-weight: 600;
+}
+
+.explore-filter-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #DC2626;
+}
+
+/* ==========================================================================
+   Section Shared Styles: Section Headers
+   ========================================================================== */
+.explore-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.explore-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.explore-section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.explore-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink, #111827);
+  margin: 0;
+}
+
+.explore-section-desc {
+  font-size: 13px;
+  color: var(--muted, #6B7280);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Section C: Your Worlds (Followed Worlds Rail)
+   Shrinks tightly to content, no empty white abyss
+   ========================================================================== */
+.explore-your-worlds-rail {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  margin: 0;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.explore-your-worlds-rail::-webkit-scrollbar {
+  height: 4px;
+}
+
+.explore-your-worlds-rail::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 4px;
+}
+
+.explore-avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  width: 86px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.explore-avatar-item:hover {
+  transform: translateY(-2px);
+}
+
+.explore-avatar-disc {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.explore-avatar-item:hover .explore-avatar-disc {
+  box-shadow: 0 6px 16px rgba(91, 70, 232, 0.16);
+  border-color: var(--primary, #5B46E8);
+}
+
+.explore-avatar-disc img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.explore-avatar-status-pill {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.explore-avatar-status-pill.live {
+  background: #DC2626;
+  color: #FFFFFF;
+}
+
+.explore-avatar-status-pill.new {
+  background: var(--primary, #5B46E8);
+  color: #FFFFFF;
+}
+
+.explore-avatar-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #111827);
+  margin-top: 6px;
+  line-height: 1.2;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explore-avatar-fandom {
+  font-size: 11px;
+  color: var(--muted, #6B7280);
+  margin-top: 2px;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.explore-avatar-companion {
+  font-size: 10px;
+  color: #94A3B8;
+  margin-top: 1px;
+}
+
+/* Add / Discover More button item in followed rail */
+.explore-avatar-add-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 86px;
+  flex-shrink: 0;
+  padding: 0;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.explore-avatar-add-item:hover {
+  transform: translateY(-2px);
+}
+
+.explore-avatar-add-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #F8FAFC;
+  border: 1.5px dashed #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: all 0.2s ease;
+}
+
+.explore-avatar-add-item:hover .explore-avatar-add-circle {
+  border-color: var(--primary, #5B46E8);
+  color: var(--primary, #5B46E8);
+  background: #F1F5F9;
+}
+
+.explore-avatar-add-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 6px;
+}
+
+.explore-empty-followed-inline {
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: #64748B;
+}
+
+.explore-empty-followed-btn {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 9999px;
+  color: var(--ink, #111827);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.explore-empty-followed-btn:hover {
+  border-color: var(--primary, #5B46E8);
+  color: var(--primary, #5B46E8);
+}
+
+/* ==========================================================================
+   Section D: Có gì mới (Happening Now)
+   Single state indicator, no redundant duplicate metadata sentences
+   ========================================================================== */
+.explore-happening-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+@media (min-width: 1024px) {
+  .explore-happening-rail {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.explore-activity-card {
+  background: var(--surface, #FFFFFF);
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+.explore-activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  border-color: #CBD5E1;
+}
+
+.explore-activity-artist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explore-activity-artist-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #E2E8F0;
+  flex-shrink: 0;
+}
+
+.explore-activity-artist-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #6B7280);
+}
+
+.explore-activity-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink, #111827);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.explore-activity-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+.explore-activity-state.live {
+  color: #DC2626;
+  font-weight: 600;
+}
+
+.explore-activity-state.upcoming {
+  color: #2563EB;
+}
+
+.explore-activity-state.update {
+  color: #7C3AED;
+}
+
+.explore-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #DC2626;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   Section E: Khám phá thế giới (Discover Worlds)
+   Artist: Circular avatar overlapping cover
+   Program: Clean landscape artwork card, no fake individual avatar
+   ========================================================================== */
+.explore-discover-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 1080px) {
+  .explore-discover-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .explore-discover-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.explore-world-card {
+  background: var(--surface, #FFFFFF);
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  position: relative;
+}
+
+.explore-world-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.07);
+  border-color: #CBD5E1;
+}
+
+/* Cover Art Area */
+.explore-card-cover-wrap {
+  width: 100%;
+  height: 125px;
+  position: relative;
+  background: #0F172A;
+  overflow: hidden;
+}
+
+.explore-card-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.explore-world-card:hover .explore-card-cover-img {
+  transform: scale(1.03);
+}
+
+.explore-card-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.45) 100%);
+}
+
+.explore-card-live-indicator {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+}
+
+.explore-card-program-badge-tag {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Body Area */
+.explore-card-body {
+  padding: 0 18px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Artist Identity seam with circular avatar */
+.explore-card-identity-seam {
+  margin-top: -34px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.explore-card-avatar-circle {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.explore-card-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Program variation: no avatar overlap, clean header row inside body */
+.explore-card-program-header {
+  margin-top: 14px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.explore-card-follow-btn {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid #CBD5E1;
+  background: var(--surface, #FFFFFF);
+  color: var(--ink, #111827);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.explore-card-follow-btn:hover {
+  border-color: #94A3B8;
+  background: #F8FAFC;
+}
+
+.explore-card-follow-btn.following {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+  color: #475569;
+}
+
+.explore-card-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.explore-card-artist-name {
+  font-size: 16.5px;
+  font-weight: 800;
+  color: var(--ink, #111827);
+  margin: 0;
+}
+
+.explore-card-fandom-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary, #5B46E8);
+  margin: 0;
+}
+
+.explore-card-context-line {
+  font-size: 12px;
+  color: var(--muted, #6B7280);
+  margin: 0;
+}
+
+/* Bottom Explore Link instead of heavy ERP table */
+.explore-browse-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.explore-browse-more-link {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary, #5B46E8);
+  background: rgba(91, 70, 232, 0.06);
+  border: 1px solid rgba(91, 70, 232, 0.15);
+  padding: 10px 24px;
+  border-radius: 9999px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.explore-browse-more-link:hover {
+  background: rgba(91, 70, 232, 0.12);
+  border-color: var(--primary, #5B46E8);
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+.explore-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--surface, #FFFFFF);
+  border: 1px dashed #CBD5E1;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.explore-empty-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--ink, #111827);
+  margin: 0;
+}
+
+.explore-empty-desc {
+  font-size: 13px;
+  color: var(--muted, #6B7280);
+  max-width: 360px;
+  margin: 0;
+}
+
+.explore-empty-reset-btn {
+  margin-top: 4px;
+  padding: 7px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--primary, #5B46E8);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.explore-empty-reset-btn:hover {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   Accessibility & Mobile Breakpoints
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .explore-world-card,
+  .explore-avatar-item,
+  .explore-activity-card,
+  .explore-card-cover-img {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .explore-container {
+    padding: 16px 16px 50px;
+    gap: 24px;
+  }
+  .explore-title {
+    font-size: 22px;
+  }
+  .explore-search-input {
+    height: 44px;
+    font-size: 14px;
+  }
+  .explore-avatar-disc {
+    width: 64px;
+    height: 64px;
+  }
+  .explore-avatar-item {
+    width: 74px;
+  }
+  .explore-happening-rail {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   Moments Context: Lightweight Artist Picker Banner
+   ========================================================================== */
+.v7-artist-picker-banner {
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.v7-artist-picker-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.v7-artist-picker-hint {
+  font-weight: 500;
+  color: #64748B;
+}
+
+.v7-artist-picker-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.v7-picker-chip {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  color: #1E293B;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.v7-picker-chip:hover {
+  border-color: #94A3B8;
+  background: #F1F5F9;
+}
+
+.v7-picker-chip.active {
+  background: #111827;
+  color: #FFFFFF;
+  border-color: #111827;
+  font-weight: 600;
+}
+
+.v7-picker-explore-link {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary, #5B46E8);
+  text-decoration: none;
+}
+
+.v7-picker-explore-link:hover {
+  text-decoration: underline;
+}
