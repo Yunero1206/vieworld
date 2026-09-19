@@ -17,10 +17,68 @@ interface PlazaDestination {
     y: number;
     rotate?: number;
   };
-  status?: {
-    text: string;
-    kind: 'live' | 'new' | 'recent' | 'notification';
-  } | null;
+}
+
+interface StandeeEvent {
+  kind: 'live' | 'upcoming' | 'drop';
+  eyebrow: string;
+  title: string;
+  actionLabel: string;
+  to: string;
+}
+
+// Derive the single active world-level event (Priority: Live now > Starting soon > Merch drop)
+function resolveWorldEvent(
+  state: ReturnType<typeof useApp>['state'],
+  override?: string | null
+): StandeeEvent | null {
+  if (override === 'none') return null;
+
+  // 1. Priority 1: LIVE NOW (running or open broadcast session)
+  const liveSessions = Object.values(state.sessions || {}).filter(
+    s => s.status === 'running' || s.status === 'open'
+  );
+  if (override === 'live' || (override !== 'upcoming' && override !== 'drop' && liveSessions.length > 0)) {
+    const s = liveSessions[0];
+    const artist = s?.worldId ? state.worlds[s.worldId] : undefined;
+    const artistName = artist?.name || 'Artist A';
+    return {
+      kind: 'live',
+      eyebrow: 'LIVE NOW',
+      title: `${artistName} đang trò chuyện trực tiếp`,
+      actionLabel: 'Vào Explore ↗',
+      to: '/artists',
+    };
+  }
+
+  // 2. Priority 2: STARTING SOON / UPCOMING (scheduled session)
+  const scheduledSessions = Object.values(state.sessions || {}).filter(
+    s => s.status === 'scheduled'
+  );
+  if (override === 'upcoming' || (override !== 'drop' && scheduledSessions.length > 0)) {
+    const s = scheduledSessions[0];
+    const titleClean = s?.title ? s.title.replace(/^[^:]+:\s*/, '') : 'KAI Live Beat Lab · 20:00';
+    return {
+      kind: 'upcoming',
+      eyebrow: 'SẮP BẮT ĐẦU',
+      title: titleClean,
+      actionLabel: 'Xem lịch hẹn ↗',
+      to: '/moments',
+    };
+  }
+
+  // 3. Priority 3: NEW DROP (merch release)
+  if (override === 'drop' || !override) {
+    return {
+      kind: 'drop',
+      eyebrow: 'NEW DROP',
+      title: 'Pulse Crew vừa mở bộ sưu tập mới',
+      actionLabel: 'Ghé VieSHOP ↗',
+      to: '/shop',
+    };
+  }
+
+  return null;
 }
 
 export function WorldPlazaView() {
@@ -31,62 +89,44 @@ export function WorldPlazaView() {
   // Keep historical panel deep-links working without making a room the entry point.
   if (params.get('panel') || params.get('zone') || params.get('drawer')) return <FanWorldView />;
 
-  // 1. Explore ambient status: live session or new world
-  const liveSessions = Object.values(state.sessions || {}).filter(
-    s => s.status === 'running' || s.status === 'open'
-  );
-  const exploreStatus = liveSessions.length > 0
-    ? { text: `${liveSessions.length} artist đang Live`, kind: 'live' as const }
-    : { text: 'Khám phá thế giới', kind: 'new' as const };
-
-  // 2. Moments ambient status & contextual re-entry
   const lastWorldId = state.fanProfile?.worldJourney?.lastWorldId;
   const lastArtistWorld = (lastWorldId ? state.worlds[lastWorldId] : undefined) || Object.values(state.worlds || {}).find(w => w.type === 'artist');
   const lastArtistName = lastArtistWorld?.name || 'KAI';
-  const momentsStatus = lastArtistName
-    ? { text: `${lastArtistName} · gần đây`, kind: 'recent' as const }
-    : null;
 
-  // 3. My Space ambient status: unread notes or new item
-  const mySpaceStatus = { text: '2 giấy nhớ mới', kind: 'notification' as const };
-
-  // 4. VieSHOP ambient status: new drop
-  const shopStatus = { text: 'New drop', kind: 'new' as const };
-
+  // 4 Core Destinations: exactly matching the physical cream signboards of the restored base diorama
   const destinations: PlazaDestination[] = [
     {
       id: 'artist',
       name: 'Explore',
       sub: 'Khám phá nghệ sĩ & các world',
       to: '/artists',
-      anchor: { x: 25.1, y: 13.0, rotate: 0 },
-      status: exploreStatus,
+      anchor: { x: 25.0, y: 11.0, rotate: -7 },
     },
     {
       id: 'myspace',
       name: 'My Space',
       sub: 'Một góc rất riêng mình',
       to: '/me',
-      anchor: { x: 75.0, y: 15.9, rotate: 0 },
-      status: mySpaceStatus,
+      anchor: { x: 74.5, y: 13.8, rotate: 6 },
     },
     {
       id: 'moments',
       name: 'Moments',
       sub: lastArtistName ? `Trở lại world của ${lastArtistName}` : 'Cuộc hẹn & cộng đồng',
       to: '/moments',
-      anchor: { x: 19.0, y: 58.9, rotate: 0 },
-      status: momentsStatus,
+      anchor: { x: 19.2, y: 51.8, rotate: -7 },
     },
     {
       id: 'shop',
       name: 'VieSHOP',
       sub: 'Mua khi mình muốn',
       to: '/shop',
-      anchor: { x: 81.0, y: 58.6, rotate: 0 },
-      status: shopStatus,
+      anchor: { x: 80.8, y: 52.6, rotate: 6 },
     },
   ];
+
+  // Derive the single active world announcement for the shared standee
+  const standeeEvent = resolveWorldEvent(state, params.get('event'));
 
   return (
     <div className="vw-plaza-page">
@@ -114,7 +154,7 @@ export function WorldPlazaView() {
             />
           )}
 
-          {/* Layer 2, 3, 4: Navigation hit areas, DOM destination labels & single ambient status */}
+          {/* Layer 2: Clean Architectural Destination Doors (No attached badges) */}
           <nav aria-label="Các nơi của VieWorld">
             {destinations.map(p => (
               <Link
@@ -128,11 +168,11 @@ export function WorldPlazaView() {
                 title={p.sub}
                 aria-label={
                   p.id === 'artist'
-                    ? `Explore · Artist Home: ${p.sub}${p.status ? ` (${p.status.text})` : ''}`
-                    : `${p.name}: ${p.sub}${p.status ? ` (${p.status.text})` : ''}`
+                    ? `Explore · Artist Home: ${p.sub}`
+                    : `${p.name}: ${p.sub}`
                 }
               >
-                {/* Layer 3: Physical Signboard Label (Engraved into the physical signboard) */}
+                {/* Physical Signboard Label: Engraved cleanly into the architectural cream signboard */}
                 <span
                   className="vw-door-board"
                   style={{
@@ -147,21 +187,43 @@ export function WorldPlazaView() {
                     ) : (
                       p.name
                     )}
-                    <ArrowUpRight size={13} className="vw-door-arrow" />
+                    <ArrowUpRight size={13} className="vw-door-arrow" aria-hidden="true" />
                   </strong>
                 </span>
-
-                {/* Layer 4: Ambient Notification Chip (Positioned UNDER the signboard, no dot) */}
-                {p.status && (
-                  <span className={`vw-door-signal kind-${p.status.kind}`}>
-                    {p.status.text}
-                  </span>
-                )}
               </Link>
             ))}
           </nav>
 
-          {/* Center: Fan Character Identity Anchor (Clicking returns to My Space) */}
+          {/* Layer 3: Shared World Event Standee (Freestanding announcement board in central courtyard) */}
+          {standeeEvent && (
+            <aside className="vw-plaza-standee-container" aria-label="Bảng thông báo sự kiện quảng trường">
+              <Link
+                to={standeeEvent.to}
+                className={`vw-plaza-standee kind-${standeeEvent.kind}`}
+                aria-label={`${standeeEvent.eyebrow}: ${standeeEvent.title}. ${standeeEvent.actionLabel}`}
+                title={`${standeeEvent.eyebrow}: ${standeeEvent.title}`}
+              >
+                <div className="vw-standee-board">
+                  <div className="vw-standee-pin" aria-hidden="true" />
+                  <span className={`vw-standee-tag kind-${standeeEvent.kind}`}>
+                    {standeeEvent.kind === 'live' && <span className="vw-standee-dot" aria-hidden="true" />}
+                    {standeeEvent.eyebrow}
+                  </span>
+                  <strong className="vw-standee-title">{standeeEvent.title}</strong>
+                  <span className="vw-standee-cta">
+                    {standeeEvent.actionLabel}
+                  </span>
+                </div>
+                <div className="vw-standee-legs" aria-hidden="true">
+                  <div className="vw-standee-leg-left" />
+                  <div className="vw-standee-leg-right" />
+                  <div className="vw-standee-shadow" />
+                </div>
+              </Link>
+            </aside>
+          )}
+
+          {/* Layer 4: Center Fan Character Identity Anchor (Clicking returns to My Space) */}
           <Link
             className="vw-plaza-fan"
             to="/me"
@@ -187,17 +249,31 @@ export function WorldPlazaView() {
         Chạm vào toà nhà hoặc bảng tên để bước vào không gian bạn muốn ghé.
       </p>
 
+      {/* Mobile World Event Announcement Banner */}
+      {standeeEvent && (
+        <Link
+          to={standeeEvent.to}
+          className={`vw-mobile-standee-banner kind-${standeeEvent.kind}`}
+          aria-label={`${standeeEvent.eyebrow}: ${standeeEvent.title}`}
+        >
+          <span className={`vw-standee-tag kind-${standeeEvent.kind}`}>
+            {standeeEvent.kind === 'live' && <span className="vw-standee-dot" aria-hidden="true" />}
+            {standeeEvent.eyebrow}
+          </span>
+          <div className="vw-mobile-standee-body">
+            <strong>{standeeEvent.title}</strong>
+            <span className="vw-mobile-standee-cta">{standeeEvent.actionLabel}</span>
+          </div>
+        </Link>
+      )}
+
       {/* Mobile 2x2 Navigation Cards for Fast, Comfortable Tap Targets */}
       <nav className="vw-mobile-doors" aria-label="Đi nhanh trong VieWorld">
         {destinations.map(p => (
           <Link key={p.id} to={p.to} className="vw-mobile-door-card">
             <div className="vw-mobile-door-header">
               <span className="vw-mobile-door-title">{p.id === 'artist' ? 'Explore' : p.name}</span>
-              {p.status && (
-                <span className={`vw-door-signal kind-${p.status.kind}`}>
-                  {p.status.text}
-                </span>
-              )}
+              <ArrowUpRight size={14} className="vw-mobile-door-arrow" aria-hidden="true" />
             </div>
             <small className="vw-mobile-door-sub">{p.sub}</small>
           </Link>
