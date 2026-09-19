@@ -100,28 +100,28 @@ export function WorldPlazaView() {
       name: 'Explore',
       sub: 'Khám phá nghệ sĩ & các world',
       to: '/artists',
-      anchor: { x: 25.0, y: 11.0, rotate: -7 },
+      anchor: { x: 25.4, y: 10.6, rotate: 0 },
     },
     {
       id: 'myspace',
       name: 'My Space',
       sub: 'Một góc rất riêng mình',
       to: '/me',
-      anchor: { x: 74.5, y: 13.8, rotate: 6 },
+      anchor: { x: 74.0, y: 13.5, rotate: 0 },
     },
     {
       id: 'moments',
       name: 'Moments',
       sub: lastArtistName ? `Trở lại world của ${lastArtistName}` : 'Cuộc hẹn & cộng đồng',
       to: '/moments',
-      anchor: { x: 19.2, y: 51.8, rotate: -7 },
+      anchor: { x: 21.0, y: 53.6, rotate: 0 },
     },
     {
       id: 'shop',
       name: 'VieSHOP',
       sub: 'Mua khi mình muốn',
       to: '/shop',
-      anchor: { x: 80.8, y: 52.6, rotate: 6 },
+      anchor: { x: 79.5, y: 53.6, rotate: 0 },
     },
   ];
 
@@ -154,7 +154,7 @@ export function WorldPlazaView() {
             />
           )}
 
-          {/* Layer 2: Clean Architectural Destination Doors (No attached badges) */}
+          {/* Layer 2: Clean Architectural Destination Doors (No attached badges, unified typography) */}
           <nav aria-label="Các nơi của VieWorld">
             {destinations.map(p => (
               <Link
@@ -172,13 +172,8 @@ export function WorldPlazaView() {
                     : `${p.name}: ${p.sub}`
                 }
               >
-                {/* Physical Signboard Label: Engraved cleanly into the architectural cream signboard */}
-                <span
-                  className="vw-door-board"
-                  style={{
-                    transform: `rotate(${p.anchor.rotate || 0}deg)`,
-                  }}
-                >
+                {/* Physical Signboard Label: Centered and engraved into the architectural cream signboard */}
+                <span className="vw-door-board">
                   <strong>
                     {p.id === 'artist' ? (
                       <>
@@ -187,7 +182,6 @@ export function WorldPlazaView() {
                     ) : (
                       p.name
                     )}
-                    <ArrowUpRight size={13} className="vw-door-arrow" aria-hidden="true" />
                   </strong>
                 </span>
               </Link>

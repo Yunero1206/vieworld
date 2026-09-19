@@ -1069,77 +1069,48 @@
   border-radius: 20px;
 }
 
-/* Layer 3: Physical Signboard Label (Engraved directly into physical board) */
+/* Layer 3: Physical Signboard Label (Unified font, color, and size across all 4 buildings) */
 .vw-plaza-scene .vw-door-board {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 12px;
+  padding: 0;
   background: transparent;
   border: none;
   box-shadow: none;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center center;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .vw-plaza-scene .vw-door-board strong {
-  font-family: var(--font-display, inherit);
-  font-size: 16.5px;
+  font-family: var(--font-display, var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif));
+  font-size: 15.5px;
   font-weight: 800;
   letter-spacing: -0.015em;
-  color: #2D1B0E;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  text-shadow: 0 1px 0 rgba(255, 245, 225, 0.7), 0 -1px 0 rgba(0, 0, 0, 0.3);
+  color: #2D251E;
+  display: inline-block;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
   transition: all 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
 }
 
-.vw-door-arrow {
-  color: #4A3320;
-  opacity: 0.8;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
 .vw-plaza-scene .vw-place-door:hover .vw-door-board strong {
-  color: #1A0D05;
-  text-shadow: 0 0 10px rgba(245, 195, 95, 0.8), 0 1px 1px rgba(255, 255, 255, 0.9);
+  color: #150E07;
+  text-shadow: 0 0 10px rgba(245, 195, 95, 0.75), 0 1px 1px rgba(255, 255, 255, 0.95);
   transform: scale(1.05);
 }
 
-.vw-plaza-scene .vw-place-door:hover .vw-door-arrow {
-  opacity: 1;
-  transform: translate(2px, -2px);
-}
-
-/* Individual Building Engraved Textures */
-.vw-plaza-scene .vw-door-artist .vw-door-board strong,
-.vw-plaza-scene .vw-door-myspace .vw-door-board strong {
-  color: #341F0F;
-  text-shadow: 0 1px 0 rgba(255, 242, 220, 0.65), 0 -1px 0 rgba(20, 10, 5, 0.4);
-}
-
-.vw-plaza-scene .vw-door-moments .vw-door-board strong {
-  color: #2A1A0D;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7), 0 -1px 0 rgba(35, 15, 5, 0.3);
-}
-
-.vw-plaza-scene .vw-door-shop .vw-door-board strong {
-  color: #193123;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75), 0 -1px 0 rgba(10, 30, 15, 0.3);
-}
-
 /* ==========================================================================
-   Shared World Event Standee (One event board in central plaza courtyard)
+   Shared World Event Standee (Very compact card, placed right next to fan avatar)
    ========================================================================== */
 .vw-plaza-standee-container {
   position: absolute;
-  left: 36.5%;
-  top: 60.5%;
+  left: 37.8%;
+  top: 58.0%;
   transform: translate(-50%, -50%);
   z-index: 11;
   pointer-events: auto;
@@ -1161,48 +1132,42 @@
 
 .vw-standee-board {
   position: relative;
-  width: 154px;
-  background: linear-gradient(180deg, #FFFDF8 0%, #F4EEDF 100%);
-  border: 2px solid #BA9A73;
+  width: 112px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
   border-radius: 12px;
-  padding: 8px 10px 9px;
+  padding: 7px 8px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 3px;
-  box-shadow: 0 4px 14px rgba(45, 30, 15, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.22s ease;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
   z-index: 2;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .vw-standee-pin {
-  width: 7px;
-  height: 7px;
-  background: radial-gradient(circle at 35% 35%, #F5DE98, #9A7738);
-  border-radius: 50%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  margin-bottom: 2px;
+  display: none;
 }
 
 .vw-standee-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 9999px;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
 }
 
 .vw-standee-tag.kind-live {
   background: #FFE4E6;
-  color: #BE123C;
-  border: 1px solid #FDA4AF;
+  color: #E11D48;
+  border: 1px solid #FECDD3;
 }
 
 .vw-standee-dot {
@@ -1234,32 +1199,36 @@
   font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
-  color: #2D2217;
-  margin: 1px 0 2px;
+  color: #1E293B;
+  margin: 3px 0 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-align: center;
 }
 
 .vw-standee-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   font-size: 9.5px;
   font-weight: 700;
   color: #365749;
   background: #EAF2EC;
   border: 1px solid #C4D9CC;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 6px;
-  transition: all 0.18s ease;
+  transition: all 0.16s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Standee Wooden Tripod Legs & Floor Shadow */
 .vw-standee-legs {
   position: relative;
   width: 100%;
-  height: 16px;
+  height: 12px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -1268,20 +1237,20 @@
 
 .vw-standee-leg-left,
 .vw-standee-leg-right {
-  width: 3.5px;
-  height: 15px;
+  width: 2.5px;
+  height: 11px;
   background: linear-gradient(180deg, #A87D54 0%, #7C5533 100%);
   border-radius: 2px;
 }
 
 .vw-standee-leg-left {
-  transform: rotate(16deg);
-  margin-right: 28px;
+  transform: rotate(14deg);
+  margin-right: 20px;
 }
 
 .vw-standee-leg-right {
-  transform: rotate(-16deg);
-  margin-left: 28px;
+  transform: rotate(-14deg);
+  margin-left: 20px;
 }
 
 .vw-standee-shadow {
@@ -1289,18 +1258,18 @@
   bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 70px;
-  height: 6px;
-  background: radial-gradient(ellipse, rgba(40, 25, 10, 0.28) 0%, transparent 75%);
+  width: 52px;
+  height: 5px;
+  background: radial-gradient(ellipse, rgba(40, 25, 10, 0.25) 0%, transparent 75%);
   border-radius: 50%;
   pointer-events: none;
 }
 
 /* Hover Interaction on Standee */
 .vw-plaza-standee:hover .vw-standee-board {
-  transform: translateY(-3px);
-  border-color: #8C6239;
-  box-shadow: 0 8px 22px rgba(45, 30, 15, 0.22), 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .vw-plaza-standee:hover .vw-standee-cta {
