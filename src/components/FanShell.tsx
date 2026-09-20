@@ -1,7 +1,7 @@
 import { ownedDigitalLook } from '../world/merchCatalog';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Compass, ShoppingBag, House, Mail, Menu, X, Music2, CalendarDays, Package, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, LogOut } from 'lucide-react';
+import { Compass, ShoppingBag, House, Mail, Menu, X, Music2, CalendarDays, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight } from 'lucide-react';
 import { StatusNotice } from './StatusNotice';
 import { ResetDrawer } from './ResetDrawer';
 import { WorldGuidePanel } from './WorldGuidePanel';
@@ -77,7 +77,7 @@ export const FanShell = () => {
   return (
     <div className="fan-shell" data-testid="app-container" data-tenant={state.activeTenantId}>
       <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">Chuyển đến nội dung chính</a>
-      <header className="fw-header">
+      <header className={`fw-header ${pathname === '/' ? 'fw-header-plaza' : ''}`}>
         <NavLink to="/" className="fw-brand" aria-label={`${tenantConfig.labels.brandName} — về thế giới`}>
           <VieWorldLogo size={32} className="fw-brand-logo" />
           <div className="fw-brand-info">
@@ -158,7 +158,12 @@ export const FanShell = () => {
               if (e.key === 'Escape') setAccountMenu(false);
             }}
           >
-            <div className="fw-menu-profile-card">
+            <NavLink
+              to="/me"
+              className="fw-menu-profile-card fw-menu-profile-link"
+              aria-label={`Mở My Space của ${state.fanProfile.displayName}`}
+              onClick={() => setAccountMenu(false)}
+            >
               <div className="fw-menu-avatar-wrap">
                 <AvatarRenderer
                   role="fan"
@@ -171,18 +176,20 @@ export const FanShell = () => {
               </div>
               <div className="fw-menu-profile-meta">
                 <strong className="fw-menu-profile-name">{state.fanProfile.displayName}</strong>
-                <span className="fw-menu-profile-sub">My Space cá nhân</span>
+                <span className="fw-menu-profile-sub">Hồ sơ fan</span>
               </div>
-              <NavLink
-                to="/me"
-                className="fw-menu-space-btn"
-                onClick={() => setAccountMenu(false)}
-              >
-                My Space ↗
-              </NavLink>
-            </div>
+              <ChevronRight className="fw-menu-profile-arrow" size={18} aria-hidden="true" />
+            </NavLink>
 
             <div className="fw-menu-group">
+              <span className="fw-menu-group-title">Dành cho fan</span>
+              <NavLink to="/explore#your-worlds-heading" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+                <span className="fw-menu-item-icon">
+                  <Heart size={16} />
+                </span>
+                <span className="fw-menu-item-label">Đang theo dõi</span>
+                <span className="fw-menu-count-badge fw-menu-count-neutral">{state.followedWorldIds.length}</span>
+              </NavLink>
               <NavLink to="/me?panel=pass" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
                 <span className="fw-menu-item-icon">
                   <Ticket size={16} />
@@ -193,25 +200,20 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <ShoppingBag size={16} />
                 </span>
-                <span className="fw-menu-item-label">Túi đồ</span>
-              </NavLink>
-              <NavLink to="/me?panel=bag" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Package size={16} />
-                </span>
-                <span className="fw-menu-item-label">Đơn hàng</span>
-              </NavLink>
-              <NavLink to="/me?panel=privacy" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Shield size={16} />
-                </span>
-                <span className="fw-menu-item-label">Quyền riêng tư</span>
+                <span className="fw-menu-item-label">Túi đồ &amp; đơn hàng</span>
               </NavLink>
             </div>
 
             <div className="fw-menu-divider" />
 
             <div className="fw-menu-group">
+              <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
+              <NavLink to="/me?panel=privacy" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+                <span className="fw-menu-item-icon">
+                  <Shield size={16} />
+                </span>
+                <span className="fw-menu-item-label">Quyền riêng tư</span>
+              </NavLink>
               <button
                 type="button"
                 className="fw-menu-item fw-menu-btn"
@@ -225,37 +227,24 @@ export const FanShell = () => {
                 </span>
                 <span className="fw-menu-item-label">Trợ giúp</span>
               </button>
-              <NavLink to="/studio" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <LayoutDashboard size={16} />
-                </span>
-                <span className="fw-menu-item-label">Studio người tổ chức</span>
+            </div>
+
+            <div className="fw-menu-divider" />
+
+            <div className="fw-menu-utility-row" aria-label="Công cụ bản thử nghiệm">
+              <NavLink to="/studio" onClick={() => setAccountMenu(false)}>
+                <LayoutDashboard size={14} />
+                <span>Studio</span>
               </NavLink>
               <button
                 type="button"
-                className="fw-menu-item fw-menu-btn"
                 onClick={() => {
                   setReview(true);
                   setAccountMenu(false);
                 }}
               >
-                <span className="fw-menu-item-icon">
-                  <FlaskConical size={16} />
-                </span>
-                <span className="fw-menu-item-label">Kịch bản thử nghiệm</span>
-              </button>
-              <button
-                type="button"
-                className="fw-menu-item fw-menu-btn fw-menu-item-danger"
-                onClick={() => {
-                  resetActiveTenant();
-                  setAccountMenu(false);
-                }}
-              >
-                <span className="fw-menu-item-icon">
-                  <LogOut size={16} />
-                </span>
-                <span className="fw-menu-item-label">Đăng xuất (Khôi phục dữ liệu)</span>
+                <FlaskConical size={14} />
+                <span>Kịch bản demo</span>
               </button>
             </div>
           </nav>
@@ -303,6 +292,12 @@ export const FanShell = () => {
 
             <div className="fw-menu-group">
               <span className="fw-menu-group-title">Hệ thống & Hỗ trợ</span>
+              <NavLink to="/studio" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
+                <span className="fw-menu-item-icon">
+                  <LayoutDashboard size={16} />
+                </span>
+                <span className="fw-menu-item-label">Studio người tổ chức</span>
+              </NavLink>
               <button
                 type="button"
                 className="fw-menu-item fw-menu-btn"

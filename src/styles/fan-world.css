@@ -82,6 +82,17 @@
   margin-bottom: 6px;
 }
 
+.fw-menu-profile-link {
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.fw-menu-profile-link:hover {
+  background: #F4F7F2;
+  border-color: #CBD8C8;
+}
+
 .fw-menu-avatar-wrap {
   width: 38px;
   height: 38px;
@@ -116,6 +127,18 @@
   text-overflow: ellipsis;
 }
 
+.fw-menu-profile-sub {
+  margin-top: 1px;
+  color: #6B756B;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.fw-menu-profile-arrow {
+  flex-shrink: 0;
+  color: #71806F;
+}
+
 .fw-menu-profile-badge {
   font-size: 11px;
   font-weight: 600;
@@ -146,7 +169,7 @@
   flex-direction: column;
   gap: 2px;
   padding: 6px 0;
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 0;
 }
 
 .fw-menu-group:last-child {
@@ -184,7 +207,6 @@
 .fw-menu-item:hover {
   background: #F8FAFC;
   color: #0F172A;
-  transform: translateX(3px);
 }
 
 .fw-menu-item-icon {
@@ -218,11 +240,56 @@
   border-radius: 999px;
 }
 
+.fw-menu-count-neutral {
+  min-width: 24px;
+  text-align: center;
+  background: #E7EEE5;
+  color: #45624E;
+}
+
+.fw-menu-utility-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 0;
+}
+
+.fw-menu-utility-row > a,
+.fw-menu-utility-row > button {
+  min-height: 36px;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 0;
+  background: transparent;
+  color: #7A8479;
+  font-size: 10.5px !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fw-menu-utility-row > :is(a, button):hover {
+  background: #F4F6F2;
+  color: #425647;
+}
+
+@media (max-width: 768px) {
+  .fw-menu-utility-row {
+    display: none;
+  }
+}
+
 .fw-menu a,.fw-menu button {
   text-align: left;
   font-size: 13px;
   border-radius: 8px;
   cursor: pointer;
+}
+.fw-menu a.fw-menu-profile-card {
+  border-radius: 14px;
 }
 .fw-main { max-width:1600px; margin:auto; }
 .fw-experience { max-width:1380px; margin:auto; padding:0 4.2vw 20px; }
@@ -867,4 +934,3 @@
 .live-disclosures-drawer { border:1px solid var(--border); border-radius:var(--radius-md); background-color:var(--surface); padding:14px 18px; font-size:12px; color:var(--muted); }
 .live-disclosures-drawer summary { cursor:pointer; font-weight:700; color:var(--ink); list-style:none; display:flex; align-items:center; justify-content:space-between; }
 .live-disclosures-drawer summary::-webkit-details-marker { display:none; }
-

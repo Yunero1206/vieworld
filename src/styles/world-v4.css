@@ -30,19 +30,7 @@
 .vw-plaza-heading { padding:32px 20px 8px; }
 .vw-plaza-heading h1 { font-size:clamp(28px,3vw,40px); margin:0 0 10px; }
 .vw-plaza-heading p:not(.fw-eyebrow) { color:#697367; font-size:13px; line-height:1.8; }
-/* Signs belong to facades, not floating app cards. Text stays accessible DOM. */
-.vw-place-door { width:174px; min-height:54px; padding:7px 10px; background:linear-gradient(100deg,#fff3dbe8,#eee0c5e8); border:1px solid #baa58380; border-radius:3px; box-shadow:0 3px 0 #9d82653b,0 6px 10px #67543b16; text-shadow:0 1px #fff7e1; }
-.vw-place-door::before,.vw-place-door::after { content:''; width:3px; height:3px; border-radius:50%; background:#a19076; position:absolute; top:9px; }
-.vw-place-door::before{left:7px}.vw-place-door::after{right:7px}
-.vw-place-door strong { font-size:20px; gap:3px; }
-.vw-place-door strong svg { display:none; }
-.vw-place-door small { font-size:10px; line-height:1.5; padding:0; background:none; color:#67593f; margin:3px 0 0; }
-.vw-place-door:hover { border-radius:3px; background:#fff3db; filter:brightness(1.03); }
-.vw-door-artist { transform:translate(-50%,-50%) rotate(-4deg); }
-.vw-door-myspace { transform:translate(-50%,-50%) rotate(4deg); }
-.vw-door-moments { transform:translate(-50%,-50%) rotate(-5deg); }
-.vw-door-archive { transform:translate(-50%,-50%) rotate(5deg); }
-.vw-door-shop { width:183px; }
+/* Plaza signboards are managed canonically in world-v8.css */
 .vw-plaza-fan { top:56%; }
 .vw-plaza-fan .avatar-renderer { width:84px!important;height:110px!important; }
 .vw-plaza-fan strong { font-size:11px; }
@@ -129,17 +117,7 @@
  .vw-cozy-stage .vw-stage-caption{font-size:8px!important}.vw-editor-tabs button{font-size:12px}.vw-layer-toggles button{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.fan-shell *, .fan-shell *::before, .fan-shell *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-/* Text on the existing scene signboards, not a second floating sign. */
-.vw-plaza-scene{container-type:inline-size}
-.vw-plaza-scene .vw-place-door{display:flex;align-items:center;justify-content:center;width:18%;min-height:44px;background:none;border:0;box-shadow:none;padding:2px;color:#365b4d;text-shadow:0 1px #fff7e9}
-.vw-plaza-scene .vw-place-door::before,.vw-plaza-scene .vw-place-door::after{display:none}
-.vw-plaza-scene .vw-place-door strong{font-size:clamp(14px,1.7cqw,25px)}
-.vw-plaza-scene .vw-place-door small{display:none}
-.vw-plaza-scene .vw-place-door:hover{background:none;box-shadow:none;color:#243f34;filter:drop-shadow(0 1px 5px #e0b976)}
-.vw-plaza-scene .vw-door-artist{transform:translate(-50%,-50%) rotate(-10deg)}
-.vw-plaza-scene .vw-door-myspace{transform:translate(-50%,-50%) rotate(10deg)}
-.vw-plaza-scene :is(.vw-door-moments,.vw-door-archive){transform:translate(-50%,-50%)}
-.vw-plaza-fan{top:49%}
+/* Text on the scene signboards is managed canonical in world-v8.css */
 .vw-room-object{background:none!important;border:0!important;box-shadow:none!important;padding:8px;min-width:110px;color:#514630;text-shadow:0 1px #fff4de}
 .vw-room-object strong{display:inline-block;padding:4px 7px;background:#f8e8cce3;border-radius:1px;box-shadow:0 2px #ad957345;font-size:13px}
 .vw-object-concerts strong{background:#785b40;color:#fff0d5;text-shadow:none}
@@ -153,11 +131,6 @@
  .fan-shell .demo-banner-content svg{display:none}
  .fan-shell .demo-banner-link{display:block;font-size:9px;margin:2px 0 0 48px}
  .vx-zoom-tools{display:flex;justify-content:flex-end;margin-top:8px}
- .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-scene{width:100%;min-width:0}
- .vw-plaza-scroll:not(.vx-zoomed) .vw-place-door{width:22%;min-height:44px}
- .vw-plaza-scroll:not(.vx-zoomed) .vw-place-door strong{font-size:10px;letter-spacing:-.04em}
- .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-fan .avatar-renderer{width:40px!important;height:51px!important}
- .vw-plaza-scroll:not(.vx-zoomed) .vw-plaza-fan strong{font-size:8px;padding:2px 5px}
  .vw-room-scroll:not(.vx-zoomed) .vw-room-scene{width:100%;min-width:0}
  .vw-room-scroll:not(.vx-zoomed) .vw-room-object{min-width:75px;min-height:44px;padding:1px}
  .vw-room-scroll:not(.vx-zoomed) .vw-room-object strong{font-size:9px;padding:3px 4px}
