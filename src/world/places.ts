@@ -6,15 +6,16 @@ export const PLACE_INFO = {
   myspace: {title:'My Space', subtitle:'Căn phòng lưu giữ kỷ niệm và dấu ấn cá nhân của bạn.', image:'myspace', tone:'sage'},
 };
 export const SCENE_ROOT='/images/world-v4';
-export function placeRoute(place:PlaceId, _worldId?:string){return {artist:'/artists',moments:'/moments',archive:'/me?section=collection',myspace:'/me'}[place];}
+export function placeRoute(place:PlaceId, worldId?:string){return {artist:worldId?`/artist/${worldId}`:'/explore',moments:worldId?`/artist/${worldId}`:'/explore',archive:'/me?section=collection',myspace:'/me'}[place];}
 /** Each feature has one home. Cross-place entry points are links, not copies. */
 export const PANEL_HOME:Record<string,PlaceId>={news:'moments',artist:'moments',livechat:'moments',worlds:'artist',listening:'moments',concerts:'moments',sessions:'moments',calendar:'moments',hall:'moments',membership:'moments',archive:'myspace',capsules:'myspace',wardrobe:'myspace',showcase:'myspace',bag:'myspace',support:'myspace'};
 export function panelRoute(panel:string,worldId?:string){
   const home=PANEL_HOME[panel]||'artist';
-  const route=home==='artist'&&worldId?`/worlds/${worldId}`:placeRoute(home);
+  if (home === 'moments') return worldId ? `/artist/${worldId}${panel === 'hall' ? '/hall' : ''}` : '/explore';
+  if (home === 'artist') return placeRoute('artist', worldId);
+  const route=placeRoute(home, worldId);
   const query=new URLSearchParams({panel});
   if(['archive','capsules'].includes(panel))query.set('section','collection');
-  if(home==='moments'&&worldId)query.set('artist',worldId);
   return `${route}?${query}`;
 }
 export interface RoomItem { id:string; kind:'chair'|'table'|'plant'|'lamp'; x:number; y:number; rotation:number }

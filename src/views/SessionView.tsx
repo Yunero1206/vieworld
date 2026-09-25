@@ -10,6 +10,7 @@ import { FanChatPanel } from '../components/FanChatPanel';
 import { StatusNotice } from '../components/StatusNotice';
 import { TrackNotesPanel } from '../components/TrackNotesPanel';
 import { SetlistPanel } from '../components/SetlistPanel';
+import { getArtistAvatar } from '../data/artistChatConfig';
 import {
   Calendar,
   Clock,
@@ -247,7 +248,7 @@ export const SessionView: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--text-xs)' }}>
           {world ? (
             <Link
-              to={`/moments?artist=${world.id}&tab=live&session=${session.id}`}
+              to={world.type === 'artist' ? `/artist/${world.id}?context=session:${session.id}` : world.linkedWorldIds.length ? `/artist/${world.linkedWorldIds[0]}?context=session:${session.id}` : '/explore'}
               style={{
                 color: 'var(--primary, #5B46E8)',
                 display: 'inline-flex',
@@ -255,7 +256,7 @@ export const SessionView: React.FC = () => {
                 gap: '6px',
                 fontWeight: '700',
               }}
-              title="Trở về không gian Moments trực tiếp của nghệ sĩ"
+              title="Trở về Artist World"
             >
               <ArrowLeft size={13} />
               <span>← Nhà {world.name} · Live & Concert</span>
@@ -391,13 +392,7 @@ export const SessionView: React.FC = () => {
             <div className="live-channel-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
               <div className="live-channel-author" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img
-                  src={
-                    world?.id === 'artist-mira'
-                      ? '/images/characters-v4/artist-mira.webp'
-                      : world?.id === 'artist-kai'
-                      ? '/images/characters-v4/artist-kai.webp'
-                      : '/images/characters-v4/artist-a.webp'
-                  }
+                  src={getArtistAvatar(world?.id)}
                   alt={world?.name || 'Artist'}
                   className="live-channel-avatar"
                   style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover' }}
@@ -416,7 +411,7 @@ export const SessionView: React.FC = () => {
                   </div>
                 </div>
                 <Link
-                  to={world ? `/moments?artist=${world.id}` : '/artists'}
+                  to={world ? `/artist/${world.type === 'artist' ? world.id : world.linkedWorldIds.find(id => state.worlds[id]?.type === 'artist') || world.id}` : '/explore'}
                   className="btn btn-secondary"
                   style={{ padding: '4px 12px', fontSize: '11px', borderRadius: '20px', marginLeft: '6px' }}
                 >

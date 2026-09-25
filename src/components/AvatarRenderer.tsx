@@ -60,9 +60,10 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
 
   const getArtistAvatarSrc = () => {
     const key = `${displayName || ''} ${artistId || ''}`.toLowerCase();
-    if (key.includes('mira')) return '/images/characters-v4/artist-mira.webp';
-    if (key.includes('kai')) return '/images/characters-v4/artist-kai.webp';
-    return '/images/characters-v4/artist-a.webp';
+    if (key.includes('mira')) return '/images/characters-v4/avatar-artist-mira.webp';
+    if (key.includes('kai')) return '/images/characters-v4/avatar-artist-kai.webp';
+    if (key.includes('neon')) return '/images/characters-v4/avatar-neon-sessions.webp';
+    return '/images/characters-v4/avatar-artist-a.webp';
   };
 
   const characterSrc =
@@ -88,7 +89,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
         userSelect: 'none',
         filter: isFrozen ? 'grayscale(25%)' : 'none',
         opacity: isFrozen ? 0.75 : 1,
-        transition: 'all 200ms ease',
+        transition: 'filter 200ms ease, opacity 200ms ease',
       }}
       data-testid={testId || `avatar-renderer-${role}`}
       data-role={role}

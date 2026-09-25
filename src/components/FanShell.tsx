@@ -1,7 +1,7 @@
 import { ownedDigitalLook } from '../world/merchCatalog';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Compass, ShoppingBag, House, Mail, Menu, X, Music2, CalendarDays, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight } from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Compass, ShoppingBag, ShoppingCart, UserRound, Menu, X, Music2, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight, BellRing, Search } from 'lucide-react';
 import { StatusNotice } from './StatusNotice';
 import { ResetDrawer } from './ResetDrawer';
 import { WorldGuidePanel } from './WorldGuidePanel';
@@ -10,6 +10,13 @@ import { AvatarRenderer } from './AvatarRenderer';
 import { useApp } from '../context/AppContext';
 import { getTenantConfig } from '../domain/tenantConfig';
 import { VieWorldLogo } from './VieWorldLogo';
+import { NotificationBell } from './notifications/NotificationBell';
+import { NotificationOverlay } from './notifications/NotificationOverlay';
+import { NotificationPreferencesModal } from './notifications/NotificationPreferencesModal';
+import { mapDomainToDisplay } from './notifications/notificationHelper';
+import { DisplayNotification } from './notifications/notification.types';
+import { ArtistNavAvatar, GlobalNavigation } from './GlobalNavigation';
+import { artistIdFromPath, getCurrentArtistId, setCurrentArtistId } from '../world/currentArtist';
 
 export const FanShell = () => {
   const { state, dispatch, storageNotice, dismissNotice, resetActiveTenant } = useApp();
@@ -18,20 +25,48 @@ export const FanShell = () => {
   const [accountMenu, setAccountMenu] = useState(false);
   const [guide, setGuide] = useState(false);
   const [review, setReview] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const mobileMenuRef = useRef<HTMLElement>(null);
   const mobileMenuBtnRef = useRef<HTMLButtonElement>(null);
   const accountRef = useRef<HTMLElement>(null);
   const accountBtnRef = useRef<HTMLButtonElement>(null);
+  const bellBtnRef = useRef<HTMLButtonElement>(null);
 
-  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const cartCount = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
+
+  const { pathname, search } = useLocation();
   const unread = Object.values(state.notifications || {}).filter(n => !n.isRead).length;
+
+  const notificationsList: DisplayNotification[] = Object.values(state.notifications || {})
+    .sort((a, b) => new Date(b.createdAt || b.updatedAt).getTime() - new Date(a.createdAt || a.updatedAt).getTime())
+    .map(mapDomainToDisplay);
+
+  const handleSelectNotification = (item: DisplayNotification) => {
+    if (!item.read) {
+      dispatch({ type: 'MARK_NOTIFICATION_READ', notificationId: item.id });
+    }
+    setNotifOpen(false);
+    if (item.targetRoute) {
+      navigate(item.targetRoute);
+    }
+  };
+
+  const handleMarkAllNotificationsRead = () => {
+    dispatch({ type: 'MARK_ALL_NOTIFICATIONS_READ' });
+  };
 
   useEffect(() => {
     setMobileMenu(false);
     setAccountMenu(false);
     window.scrollTo?.(0, 0);
   }, [pathname]);
+  useEffect(() => {
+    if (pathname === '/explore' || pathname === '/artists') setSearchQuery(new URLSearchParams(search).get('q') || '');
+  }, [pathname, search]);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -69,13 +104,17 @@ export const FanShell = () => {
     };
   }, [mobileMenu, accountMenu]);
 
-  const inShop = pathname === '/shop' || pathname.endsWith('/shop') || pathname === '/cart' || pathname.startsWith('/checkout/') || pathname.startsWith('/orders/');
-  const inMoments = (pathname.startsWith('/worlds/') && !inShop && !pathname.endsWith('/archive')) || pathname.endsWith('/moments') || pathname.startsWith('/sessions/') || pathname.startsWith('/benefits/');
-  const inHome = pathname === '/me' || pathname.startsWith('/members/') || pathname.endsWith('/archive');
-  const inExplore = pathname === '/artists' || pathname === '/explore';
+  const routeArtistId = artistIdFromPath(pathname);
+  const currentArtistId = routeArtistId && state.worlds[routeArtistId]?.type === 'artist' ? routeArtistId : getCurrentArtistId(state);
+  const artistContext = currentArtistId ? state.worlds[currentArtistId] : undefined;
+  const inArtistWorld = Boolean(routeArtistId && state.worlds[routeArtistId]?.type === 'artist');
+  useEffect(() => {
+    if (inArtistWorld && currentArtistId) setCurrentArtistId(state, currentArtistId);
+  }, [inArtistWorld, currentArtistId, state.activeTenantId]);
+  const navArtist = artistContext?.type === 'artist' ? { id: artistContext.id, name: artistContext.name } : undefined;
 
   return (
-    <div className="fan-shell" data-testid="app-container" data-tenant={state.activeTenantId}>
+    <div className="fan-shell" data-testid="app-container" data-tenant={state.activeTenantId} data-artist-world={inArtistWorld ? 'true' : undefined}>
       <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">Chuyển đến nội dung chính</a>
       <header className={`fw-header ${pathname === '/' ? 'fw-header-plaza' : ''}`}>
         <NavLink to="/" className="fw-brand" aria-label={`${tenantConfig.labels.brandName} — về thế giới`}>
@@ -86,28 +125,34 @@ export const FanShell = () => {
           </div>
         </NavLink>
 
-        <nav className="fw-main-nav" aria-label="Điều hướng chính">
-          {[
-            [Music2, '/explore', 'Explore', inExplore],
-            [CalendarDays, '/moments', 'Moments', inMoments],
-            [House, '/me', 'My Space', inHome],
-            [ShoppingBag, '/shop', tenantConfig.labels.shopTitle || 'VieSHOP', inShop],
-          ].map(([Icon, to, label, active]) => {
-            const NavIcon = Icon as typeof Compass;
-            return (
-              <Link key={String(to)} to={String(to)} aria-current={active ? 'page' : undefined} className={active ? 'selected' : ''}>
-                <NavIcon size={19} />
-                <span>{String(label)}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <form className="fw-global-search" role="search" onSubmit={event => {
+          event.preventDefault();
+          const query = searchQuery.trim();
+          navigate(query ? `/explore?q=${encodeURIComponent(query)}` : '/explore');
+        }}>
+          <Search size={19} aria-hidden="true" />
+          <input value={searchQuery} onChange={event => setSearchQuery(event.target.value)} aria-label="Tìm nghệ sĩ, world, sự kiện, capsule" placeholder="Tìm nghệ sĩ, world, sự kiện, capsule…" />
+          <button type="submit" aria-label="Tìm kiếm"><Search size={18} aria-hidden="true" /></button>
+        </form>
+        <span className="fw-header-phrase" aria-hidden="true">For the moments that stay</span>
 
         <div className="fw-header-tools">
-          <NavLink to="/inbox" className="fw-icon" aria-label={`Hộp thư${unread ? `, ${unread} chưa đọc` : ''}`}>
-            <Mail size={19} />
-            {unread > 0 && <i>{unread}</i>}
+          {/* Permanent Cart Access */}
+          <NavLink
+            to="/cart"
+            className="fw-icon fw-cart-btn"
+            aria-label={`Giỏ hàng${cartCount > 0 ? `, ${cartCount} món` : ''}`}
+          >
+            <ShoppingCart size={19} />
+            {cartCount > 0 && <i>{cartCount}</i>}
           </NavLink>
+
+          <NotificationBell
+            ref={bellBtnRef}
+            unreadCount={unread}
+            isOpen={notifOpen}
+            onClick={() => setNotifOpen(!notifOpen)}
+          />
 
           {/* Desktop & Mobile Avatar Menu Button */}
           <button
@@ -183,7 +228,7 @@ export const FanShell = () => {
 
             <div className="fw-menu-group">
               <span className="fw-menu-group-title">Dành cho fan</span>
-              <NavLink to="/explore#your-worlds-heading" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+              <NavLink to="/explore?scope=following" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
                 <span className="fw-menu-item-icon">
                   <Heart size={16} />
                 </span>
@@ -208,6 +253,19 @@ export const FanShell = () => {
 
             <div className="fw-menu-group">
               <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
+              <button
+                type="button"
+                className="fw-menu-item fw-menu-btn"
+                onClick={() => {
+                  setNotifPrefsOpen(true);
+                  setAccountMenu(false);
+                }}
+              >
+                <span className="fw-menu-item-icon">
+                  <BellRing size={16} />
+                </span>
+                <span className="fw-menu-item-label">Cài đặt thông báo</span>
+              </button>
               <NavLink to="/me?panel=privacy" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
                 <span className="fw-menu-item-icon">
                   <Shield size={16} />
@@ -266,7 +324,7 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <Compass size={16} />
                 </span>
-                <span className="fw-menu-item-label">Quảng trường · Thế giới</span>
+                <span className="fw-menu-item-label">Home</span>
               </NavLink>
               <NavLink to="/explore" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
                 <span className="fw-menu-item-icon">
@@ -274,17 +332,25 @@ export const FanShell = () => {
                 </span>
                 <span className="fw-menu-item-label">Explore</span>
               </NavLink>
-              <NavLink to="/moments" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <CalendarDays size={16} />
-                </span>
-                <span className="fw-menu-item-label">Moments</span>
+              {artistContext && <NavLink to={`/artist/${artistContext.id}`} className="fw-menu-item" onClick={() => setMobileMenu(false)}>
+                <span className="fw-menu-item-icon"><ArtistNavAvatar artist={{ id: artistContext.id, name: artistContext.name }} /></span>
+                <span className="fw-menu-item-label">{artistContext.name}</span>
+              </NavLink>}
+              <NavLink to="/me" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
+                <span className="fw-menu-item-icon"><UserRound size={16} /></span>
+                <span className="fw-menu-item-label">My Space</span>
               </NavLink>
               <NavLink to="/shop" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
                 <span className="fw-menu-item-icon">
                   <ShoppingBag size={16} />
                 </span>
                 <span className="fw-menu-item-label">VieSHOP</span>
+              </NavLink>
+              <NavLink to="/cart" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
+                <span className="fw-menu-item-icon">
+                  <ShoppingCart size={16} />
+                </span>
+                <span className="fw-menu-item-label">Giỏ hàng ({cartCount})</span>
               </NavLink>
             </div>
 
@@ -328,35 +394,28 @@ export const FanShell = () => {
           </nav>
         )}
       </header>
-      <main id="main-content" className="fw-main">
-        {storageNotice && <StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice} />}
-        {state.lastError && <StatusNotice message={state.lastError.message} type="error" onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })} />}
-        <ErrorBoundary onResetDemoData={resetActiveTenant} onReset={resetActiveTenant}><Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Outlet /></Suspense></ErrorBoundary>
-      </main>
-      <nav className="fw-mobile-bottom-nav" aria-label="Điều hướng di động">
-        <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
-          <Compass size={18} />
-          <span>Quảng trường</span>
-        </NavLink>
-        <NavLink to="/explore" className={({ isActive }) => (isActive || pathname === '/artists' ? 'active' : '')}>
-          <Music2 size={18} />
-          <span>Explore</span>
-        </NavLink>
-        <NavLink to="/moments" className={({ isActive }) => (isActive ? 'active' : '')}>
-          <CalendarDays size={18} />
-          <span>Moments</span>
-        </NavLink>
-        <NavLink to="/shop" className={({ isActive }) => (isActive ? 'active' : '')}>
-          <ShoppingBag size={18} />
-          <span>Shop</span>
-        </NavLink>
-        <NavLink to="/me" className={({ isActive }) => (isActive ? 'active' : '')}>
-          <House size={18} />
-          <span>Của tôi</span>
-        </NavLink>
-      </nav>
+      <div className="fw-site-frame">
+        <GlobalNavigation pathname={pathname} artist={navArtist} shopLabel={tenantConfig.labels.shopTitle || 'VieSHOP'} />
+        <main id="main-content" className="fw-main">
+          {storageNotice && <StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice} />}
+          {state.lastError && <StatusNotice message={state.lastError.message} type="error" onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })} />}
+          <ErrorBoundary onResetDemoData={resetActiveTenant} onReset={resetActiveTenant}><Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Outlet /></Suspense></ErrorBoundary>
+        </main>
+      </div>
       <ResetDrawer isOpen={review} onClose={() => setReview(false)} allowTenantSwitch={false} />
       <WorldGuidePanel isOpen={guide} onClose={() => setGuide(false)} />
+      <NotificationOverlay
+        isOpen={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        notifications={notificationsList}
+        onSelectNotification={handleSelectNotification}
+        onMarkAllAsRead={handleMarkAllNotificationsRead}
+        returnFocusRef={bellBtnRef}
+      />
+      <NotificationPreferencesModal
+        isOpen={notifPrefsOpen}
+        onClose={() => setNotifPrefsOpen(false)}
+      />
     </div>
   );
 };

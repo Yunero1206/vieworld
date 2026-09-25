@@ -1,0 +1,127 @@
+.vw-home-editorial {
+  --home-ink: #1d2637;
+  --home-muted: #7b8497;
+  min-height: calc(100dvh - 76px);
+  background: #fbfcff;
+  color: var(--home-ink);
+  padding: 22px clamp(20px, 3.2vw, 46px) 42px;
+}
+.fan-shell .vw-home-editorial :is(h1, h2, h3) {
+  font-family: var(--font-sans) !important;
+}
+.vw-home-layout { max-width: 1120px; margin: 0 auto; }
+.vw-home-search { display: flex; align-items: center; gap: 15px; width: min(100%, 930px); min-height: 50px; padding: 5px 8px 5px 20px; border-radius: 999px; background: #f0f3f8; color: #32425d; }
+.vw-home-search:focus-within { outline: 2px solid #6077a7; outline-offset: 3px; }
+.vw-home-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--home-ink); font: 400 14px var(--font-sans); }
+.vw-home-search input::placeholder { color: #7c8799; opacity: 1; }
+.vw-home-search button { display: flex; align-items: center; gap: 7px; min-height: 38px; border: 0; border-radius: 999px; padding: 0 14px; background: #e0e6f0; color: #283a5d; font: 700 12px var(--font-sans); cursor: pointer; }
+.vw-home-search button:hover { background: #d3ddef; }
+.vw-home-intro { margin: 30px 0 22px; }
+.vw-home-intro h1 { font-size: clamp(32px, 3.5vw, 46px); font-weight: 600; line-height: 1.25; letter-spacing: -.045em; margin: 0 0 5px; }
+.vw-home-intro p { font-size: 14px; color: var(--home-muted); }
+.vw-home-intro p span { display: inline-block; margin-left: 10px; color: #8b95a7; font-size: 11px; white-space: nowrap; }
+.vw-home-now { display: flex; align-items: center; gap: 12px; min-height: 46px; margin: 0 0 24px; padding: 10px 15px; border-left: 3px solid #477b6a; border-radius: 0 8px 8px 0; background: #eff5f1; color: #30473e; text-decoration: none; }
+.vw-home-now-label { flex: none; color: #456e60; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.vw-home-now strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 650; }
+.vw-home-now-world { color: #72837b; font-size: 11px; white-space: nowrap; }
+.vw-home-now svg { flex: none; margin-left: auto; }
+.vw-home-now:hover { background: #e5efe8; }
+.vw-home-section-title { display: inline-flex; align-items: center; gap: 18px; min-width: 0; }
+.vw-home-section-title h2 { font-size: clamp(22px, 2.2vw, 27px); font-weight: 600; line-height: 1.35; letter-spacing: -.035em; color: var(--home-ink); }
+.vw-home-section-title > svg { color: #8e99ad; flex: none; }
+.vw-home-feature-card { display: grid; grid-template-columns: 1.08fr .92fr; margin-top: 12px; min-height: 230px; border: 1px solid #d9e0ec; border-radius: 12px; overflow: hidden; background: #fff; color: var(--home-ink); text-decoration: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.vw-home-feature-card:hover { border-color: #a7b8d7; box-shadow: 0 16px 34px rgba(31,48,77,.1); }
+.vw-home-feature-image { position: relative; min-height: 230px; background: #202b3e; overflow: hidden; }
+.vw-home-feature-image img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .35s ease; }
+.vw-home-feature-card:hover img { transform: scale(1.025); }
+.vw-home-feature-image::after { content: ''; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(9,15,28,.55)); }
+.vw-home-feature-image span { position: absolute; left: 22px; bottom: 20px; z-index: 1; color: #f5f7fc; font: 700 10px var(--font-sans); letter-spacing: .17em; }
+.vw-home-feature-copy { display: flex; flex-direction: column; align-items: flex-start; padding: clamp(22px, 2.6vw, 32px); }
+.vw-home-feature-kicker { color: #80899a; font-size: 13px; }
+.vw-home-feature-copy h3 { font-size: clamp(23px, 2.6vw, 32px); font-weight: 600; line-height: 1.28; letter-spacing: -.035em; margin: 3px 0 8px; }
+.vw-home-feature-copy p { color: #677389; font-size: 14px; line-height: 1.65; max-width: 36ch; }
+.vw-home-feature-note { display: block; color: #8b94a4; font-size: 12px; margin-top: 10px; }
+.vw-home-feature-action { display: inline-flex; align-items: center; gap: 14px; min-height: 41px; padding: 0 18px; margin: auto 0 0 auto; border-radius: 999px; background: #1f293b; color: white; font-size: 13px; font-weight: 600; }
+.vw-home-section-row { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 16px; }
+.vw-home-recent { margin-top: 36px; }
+.vw-home-filters { display: flex; gap: clamp(10px,1.3vw,18px); flex-wrap: wrap; justify-content: flex-end; }
+.vw-home-filters button { min-height: 38px; padding: 5px 4px 8px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #7e8799; font: 500 13px var(--font-sans); cursor: pointer; white-space: nowrap; }
+.vw-home-filters button:hover { color: #273856; }
+.vw-home-filters button[aria-pressed='true'] { color: #1e2a3d; border-bottom-color: #1e2a3d; font-weight: 700; }
+.vw-home-recent-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,215px),1fr)); gap: 14px; }
+.vw-home-recent-card { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 190px; border-radius: 9px; overflow: hidden; background: #27344d; color: #fff; text-decoration: none; isolation: isolate; }
+.vw-home-recent-card img, .vw-home-upcoming-card img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.vw-home-recent-card:hover img, .vw-home-upcoming-card:hover img { transform: scale(1.045); }
+.vw-home-card-shade { position: absolute; inset: 20% 0 0; z-index: -1; background: linear-gradient(transparent 12%,rgba(15,23,38,.2) 40%,rgba(15,23,38,.93)); }
+.vw-home-recent-copy { padding: 16px 54px 17px 17px; }
+.vw-home-recent-copy small { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 650; margin-bottom: 6px; color: #eef1f7; }
+.vw-home-recent-copy strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 15px; line-height: 1.42; font-weight: 600; }
+.vw-home-card-arrow { position: absolute; right: 13px; bottom: 18px; display: grid; place-items: center; width: 35px; height: 35px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; background: rgba(255,255,255,.13); color: #fff; }
+.vw-home-empty { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 30px; border: 1px solid #dce3ee; border-radius: 10px; background: #fff; color: #6f7b90; font-size: 14px; }
+.vw-home-empty a { display: inline-flex; align-items: center; gap: 8px; color: #233c67; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.vw-home-upcoming { margin-top: 40px; }
+.vw-home-see-all { display: inline-flex; align-items: center; gap: 7px; color: #51627d; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.vw-home-upcoming-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.vw-home-upcoming-card { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; min-height: 150px; overflow: hidden; border-radius: 9px; background: #26364d; color: #fff; text-decoration: none; isolation: isolate; }
+.vw-home-upcoming-card .vw-home-card-shade { inset: 0; background: linear-gradient(90deg,rgba(14,23,37,.22),rgba(14,23,37,.46)), linear-gradient(transparent 5%,rgba(14,23,37,.88)); }
+.vw-home-upcoming-context { position: absolute; top: 15px; left: 18px; color: #e3eaf8; font-size: 10px; font-weight: 700; letter-spacing: .09em; }
+.vw-home-upcoming-copy { padding: 32px 55px 18px 18px; display: flex; flex-direction: column; gap: 4px; }
+.vw-home-upcoming-copy small { font-size: 12px; color: #d6e2f1; }
+.vw-home-upcoming-copy strong { font-size: 16px; line-height: 1.35; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.vw-home-upcoming-copy span { font-size: 12px; color: #e6ebf3; }
+.vw-home-footer { display: flex; align-items: center; gap: 24px; margin-top: 38px; color: #8d96a8; }
+.vw-home-footer span { font-size: 18px; font-weight: 600; letter-spacing: -.05em; }
+.vw-home-footer i { flex: 1; height: 1px; background: #dce3ec; }
+.vw-home-footer small { font-size: 10px; letter-spacing: .12em; white-space: nowrap; }
+.vw-home-editorial a:focus-visible, .vw-home-editorial button:focus-visible { outline: 3px solid #597db5; outline-offset: 3px; }
+
+@media (max-width: 850px) {
+  .vw-home-editorial { padding: 22px 22px 90px; }
+  .vw-home-intro { margin: 29px 0 22px; }
+  .vw-home-feature-card { grid-template-columns: 1fr; }
+  .vw-home-feature-image { min-height: 235px; }
+  .vw-home-feature-copy { min-height: 190px; }
+  .vw-home-feature-action { margin-top: 18px; }
+  .vw-home-section-row { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .vw-home-filters { justify-content: flex-start; }
+  .vw-home-upcoming-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 600px) {
+  .vw-home-editorial { padding: 18px 16px 90px; }
+  .vw-home-search { min-height: 46px; padding-left: 15px; gap: 10px; }
+  .vw-home-search input { font-size: 12px; }
+  .vw-home-search button { font-size: 0; width: 39px; padding: 0; justify-content: center; }
+  .vw-home-search button svg { width: 17px; }
+  .vw-home-intro { margin: 27px 0 22px; }
+  .vw-home-intro p span { margin: 3px 0 0; }
+  .vw-home-now { align-items: flex-start; flex-wrap: wrap; gap: 2px 10px; margin-bottom: 20px; }
+  .vw-home-now-label { width: 100%; }
+  .vw-home-now strong { flex: 1; }
+  .vw-home-now-world { display: none; }
+  .vw-home-feature-image { min-height: 185px; }
+  .vw-home-feature-copy { min-height: 190px; padding: 20px; }
+  .vw-home-recent, .vw-home-upcoming { margin-top: 32px; }
+  .vw-home-filters { width: 100%; gap: 9px 16px; }
+  .vw-home-filters button { font-size: 12px; }
+  .vw-home-recent-grid, .vw-home-upcoming-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .vw-home-recent-card { min-height: 175px; }
+  .vw-home-upcoming-card { min-height: 160px; }
+  .vw-home-recent-copy { padding: 14px 37px 15px 13px; }
+  .vw-home-recent-copy strong { font-size: 13px; }
+  .vw-home-upcoming-copy { padding: 36px 35px 16px 14px; }
+  .vw-home-upcoming-copy strong { font-size: 14px; }
+  .vw-home-upcoming-context { left: 14px; font-size: 9px; }
+  .vw-home-card-arrow { right: 8px; bottom: 12px; width: 27px; height: 27px; }
+  .vw-home-card-arrow svg { width: 15px; }
+  .vw-home-empty { align-items: flex-start; flex-direction: column; padding: 22px; }
+  .vw-home-footer { gap: 12px; margin-top: 48px; }
+  .vw-home-footer small { font-size: 8px; }
+}
+@media (max-width: 400px) {
+  .vw-home-recent-grid, .vw-home-upcoming-grid { grid-template-columns: 1fr; }
+  .vw-home-recent-card { min-height: 205px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vw-home-editorial a, .vw-home-editorial img { transition: none; }
+  .vw-home-editorial a:hover img { transform: none; }
+}

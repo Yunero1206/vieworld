@@ -207,7 +207,7 @@ export function HallPanel({ worldId }: { worldId: string }) {
             <div className="v7-chat-content">
               <div className="v7-chat-meta">
                 <Link
-                  to={msg.isArtist ? `/moments?artist=${worldId}` : `/members/${msg.authorId}`}
+                  to={msg.isArtist ? `/artist/${worldId}` : `/members/${msg.authorId}`}
                   className="v7-chat-author-name"
                   title={msg.isArtist ? `Thế giới của ${msg.authorName}` : `Ghé thăm ${msg.authorName}`}
                 >

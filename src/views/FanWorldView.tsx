@@ -16,10 +16,12 @@ import { MembershipCard } from '../components/MembershipCard';
 import { BenefitCard } from '../components/BenefitCard';
 import { ARTIST_NOTES, momentTime, ORDER_LABELS } from '../world/fanWorld';
 import { getTenantConfig } from '../domain/tenantConfig';
-import { ARTIST_FANDOM_REGISTRY } from '../data/artistChatConfig';
+import { ARTIST_FANDOM_REGISTRY, getArtistAvatar } from '../data/artistChatConfig';
 import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { displayedItems } from '../world/display';
 import { ownedDigitalLook } from '../world/merchCatalog';
+import { loadPrivacySettings, savePrivacySettings as persistPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 const panelTitles: Record<string, string> = {
   hall: 'Hall · Gặp những người cùng yêu nhạc', concerts: 'Live Concert · Sân khấu chung', livechat: 'Live Chat · Lời nhắn từ artist',
@@ -30,18 +32,43 @@ const panelTitles: Record<string, string> = {
 };
 const aliases: Record<string, string> = { follows: 'calendar', history: 'archive', orders: 'bag', benefits: 'membership' };
 
-interface SpacePrivacySettings {
-  roomVisibility: 'everyone' | 'users' | 'private';
-  showVisitCount: boolean;
-  guestbookEnabled: boolean;
-  showMembershipSignal: boolean;
+interface ArtistPromoBanner {
+  title: string;
+  subtitle: string;
+  targetRoute?: string;
+  bgImage: string;
+  gradientOverlay: string;
 }
 
-const DEFAULT_PRIVACY: SpacePrivacySettings = {
-  roomVisibility: 'everyone',
-  showVisitCount: true,
-  guestbookEnabled: true,
-  showMembershipSignal: true,
+const ARTIST_PROMO_BANNERS: Record<string, ArtistPromoBanner> = {
+  'artist-a': {
+    title: 'Đêm Nhạc Trực Tuyến & Merch Drop Exclusive',
+    subtitle: 'Bộ sưu tập áo khoác Varsity, lightstick sao xanh và các sự kiện giao lưu trực tiếp đặc biệt.',
+    targetRoute: '/shop',
+    bgImage: '/images/banner-artist-a.jpg',
+    gradientOverlay: 'linear-gradient(90deg, rgba(16, 24, 32, 0.92) 0%, rgba(16, 24, 32, 0.7) 55%, rgba(16, 24, 32, 0.25) 100%)',
+  },
+  'artist-mira': {
+    title: 'Bộ Sưu Tập Hoodie & Đĩa Than Vinyl MIRA',
+    subtitle: 'Đắm chìm trong không gian âm nhạc Lofi Dream Pop và quà tặng độc quyền dành riêng cho Moonies.',
+    targetRoute: '/shop',
+    bgImage: '/images/banner-artist-mira.jpg',
+    gradientOverlay: 'linear-gradient(90deg, rgba(35, 18, 55, 0.92) 0%, rgba(35, 18, 55, 0.7) 55%, rgba(35, 18, 55, 0.25) 100%)',
+  },
+  'artist-kai': {
+    title: 'Áo Bomber Phản Quang & Cyber Pulse Lightstick',
+    subtitle: 'Trang bị phụ kiện bùng nổ cho các đêm nhạc EDM và phiên thử nghiệm âm thanh sống động.',
+    targetRoute: '/shop',
+    bgImage: '/images/banner-artist-kai.jpg',
+    gradientOverlay: 'linear-gradient(90deg, rgba(12, 22, 36, 0.92) 0%, rgba(12, 22, 36, 0.7) 55%, rgba(12, 22, 36, 0.25) 100%)',
+  },
+  'neon-sessions': {
+    title: 'Tuyển Tập Đĩa Than & Kỷ Vật Neon Prelude',
+    subtitle: 'Lắng nghe những bản thu mộc mạc và lưu giữ kỷ vật âm nhạc đặc sắc từ các nghệ sĩ.',
+    targetRoute: '/shop',
+    bgImage: '/images/banner-neon-sessions.jpg',
+    gradientOverlay: 'linear-gradient(90deg, rgba(30, 20, 12, 0.92) 0%, rgba(30, 20, 12, 0.7) 55%, rgba(30, 20, 12, 0.25) 100%)',
+  },
 };
 
 export function FanWorldView() {
@@ -55,23 +82,14 @@ export function FanWorldView() {
   const [isEditIntroOpen, setIsEditIntroOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(() => {
-    try {
-      const saved = localStorage.getItem('vieworld_privacy_settings');
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
-    return DEFAULT_PRIVACY;
-  });
+  const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(loadPrivacySettings);
+
+  const introModalRef = useRef<HTMLDivElement>(null);
+  const privacyModalRef = useRef<HTMLDivElement>(null);
 
   const savePrivacySettings = (next: SpacePrivacySettings) => {
     setPrivacySettings(next);
-    try {
-      localStorage.setItem('vieworld_privacy_settings', JSON.stringify(next));
-    } catch {
-      // ignore
-    }
+    persistPrivacySettings(next);
   };
 
   useEffect(() => {
@@ -100,6 +118,9 @@ export function FanWorldView() {
       setParams(nextParams, { replace: true });
     }
   };
+
+  useDialogA11y(isEditIntroOpen, () => setIsEditIntroOpen(false), introModalRef);
+  useDialogA11y(isPrivacyOpen, handleClosePrivacy, privacyModalRef);
 
   const isRoom = pathname === '/me' || pathname.endsWith('/archive');
   const rawSection = params.get('section');
@@ -144,10 +165,38 @@ export function FanWorldView() {
   const [momentsTab, setMomentsTab] = useState(queryTab);
 
   useEffect(() => {
+    if (queryTab && queryTab !== momentsTab) {
+      setMomentsTab(queryTab);
+    }
+  }, [queryTab]);
+
+  const handleMomentsTabChange = (nextTab: string) => {
+    setMomentsTab(nextTab);
+    const nextParams = new URLSearchParams(params);
+    nextParams.set('tab', nextTab);
+    setParams(nextParams, { replace: false });
+  };
+
+  useEffect(() => {
     if (pathname.endsWith('/moments') && world?.id) {
       dispatch({ type: 'VISIT_FAN_WORLD', worldId: world.id });
     }
   }, [pathname, world?.id, dispatch]);
+
+  useEffect(() => {
+    if (isRoom) {
+      document.title = `My Space · ${state.fanProfile.displayName} — VieWorld`;
+    } else if (pathname.endsWith('/moments') || world) {
+      const tabNames: Record<string, string> = {
+        home: `Nhà ${world?.name || 'nghệ sĩ'}`,
+        live: 'Live & Concert',
+        hall: 'Hall hội viên',
+        merch: 'Merchandise',
+      };
+      const t = tabNames[momentsTab] || 'Moments';
+      document.title = `${t} · ${world?.name || 'Cộng đồng'} — VieWorld`;
+    }
+  }, [isRoom, pathname, world?.name, momentsTab, state.fanProfile.displayName]);
 
   const rawPanel = params.get('panel') || params.get('zone') || params.get('drawer') || (pathname === '/worlds' ? 'worlds' : '');
   const panel = rawPanel === 'shop' ? 'bag' : (aliases[rawPanel] || rawPanel);
@@ -191,15 +240,10 @@ export function FanWorldView() {
   const canShowArtist = artistAsset?.status === 'approved';
 
   const list = (panel === 'calendar' ? sessions.filter(s => state.rsvpdSessionIds.includes(s.id) && (isShared || s.worldId === world.id))
-    : sessions.filter(s => (isShared || s.worldId === world.id) && (panel !== 'listening' || s.format === 'listening') && (panel !== 'concerts' || s.format === 'concert') && (panel === 'archive' ? s.replayStatus === 'available' : !['ended', 'cancelled'].includes(s.status)))).sort((a, b) => a.scheduledStartTime.localeCompare(b.scheduledStartTime));
+    : sessions.filter(s => (isShared || s.worldId === world.id) && (panel !== 'listening' || s.format === 'listening') && (panel !== 'concerts' || s.format === 'concert') && (panel === 'archive' ? s.replayStatus === 'available' : !['ended', 'cancelled'].includes(s.status)))).sort((a, b) => (a.scheduledStartTime || '').localeCompare(b.scheduledStartTime || ''));
 
   const isMoments = place === 'moments' || place === 'artist';
   const fandom = ARTIST_FANDOM_REGISTRY[world.id];
-  const isWorldLive = Object.values(state.sessions).some(
-    s => s.worldId === world.id && (s.status === 'running' || s.status === 'open')
-  );
-  const bannerGradient = fandom?.signatureLightstick?.gradient || 'linear-gradient(135deg, #1E1B4B 0%, #312E81 60%, #4338CA 100%)';
-  const coverBg = `linear-gradient(180deg, rgba(15, 23, 42, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%), ${bannerGradient}`;
 
   const hasActiveMembership = Object.values(state.memberships).some(
     m => m.fanId === state.fanProfile.id && m.status === 'active'
@@ -305,7 +349,7 @@ export function FanWorldView() {
                     key={w.id}
                     type="button"
                     className={`v7-picker-chip ${w.id === world.id ? 'active' : ''}`}
-                    onClick={() => navigate(`/moments?artist=${w.id}`)}
+                    onClick={() => navigate(w.type === 'artist' ? `/artist/${w.id}` : '/explore')}
                   >
                     {w.name}
                   </button>
@@ -321,7 +365,7 @@ export function FanWorldView() {
         <select
           aria-label="Chọn nhà nghệ sĩ"
           value={world.id}
-          onChange={e => navigate(`/moments?artist=${e.target.value}`)}
+          onChange={e => navigate(state.worlds[e.target.value]?.type === 'artist' ? `/artist/${e.target.value}` : '/explore')}
           className="sr-only"
           tabIndex={-1}
         >
@@ -331,30 +375,62 @@ export function FanWorldView() {
             </option>
           ))}
         </select>
-        {/* Weverse-Grade Cover Banner */}
-        <div className="v7-community-cover-banner moments-cover-banner" style={{ background: coverBg }}>
-          <div className="v7-community-cover-content moments-cover-content">
-            <span className="v7-cover-fandom-badge moments-cover-fandom-pill">
-              Fandom {fandom?.fandomName || 'VieWorld'}
-            </span>
-            {isWorldLive && (
-              <span className="v7-cover-live-badge moments-cover-live-indicator">
-                <span className="moments-live-pulse-dot" />
-                LIVE NOW
-              </span>
-            )}
-          </div>
-        </div>
+        {/* Promotional / Event / Merch Cover Banner */}
+        {(() => {
+          const promoBanner = ARTIST_PROMO_BANNERS[world.id] || {
+            title: `Không Gian Âm Nhạc & Kỷ Vật · ${world.name}`,
+            subtitle: 'Đồng hành cùng nghệ sĩ, tham gia sự kiện và lưu giữ những kỷ niệm đáng nhớ.',
+            targetRoute: '/shop',
+            bgImage: '/images/banner-artist-a.jpg',
+            gradientOverlay: 'linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.75) 55%, rgba(15, 23, 42, 0.3) 100%)',
+          };
+
+          const bannerContent = (
+            <div className="moments-cover-promo-content">
+              <h2 className="moments-cover-promo-title">{promoBanner.title}</h2>
+              <p className="moments-cover-promo-subtitle">{promoBanner.subtitle}</p>
+            </div>
+          );
+
+          const bannerStyle = {
+            backgroundImage: `${promoBanner.gradientOverlay}, url(${promoBanner.bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center right',
+          };
+
+          if (promoBanner.targetRoute) {
+            return (
+              <Link
+                to={promoBanner.targetRoute}
+                className="v7-community-cover-banner moments-cover-banner is-clickable"
+                style={bannerStyle}
+                aria-label={`${promoBanner.title} - ${promoBanner.subtitle}`}
+              >
+                {bannerContent}
+              </Link>
+            );
+          }
+
+          return (
+            <div
+              className="v7-community-cover-banner moments-cover-banner"
+              style={bannerStyle}
+            >
+              {bannerContent}
+            </div>
+          );
+        })()}
 
         {/* Profile Overlap Seam */}
         <div className="v7-community-profile-seam moments-profile-seam">
           <div className="v7-profile-left moments-profile-left">
             <div className="v7-community-main-avatar moments-main-avatar">
-              {canShowArtist ? (
-                <AvatarRenderer testId="community-profile-avatar" role="artist" accessoryId={artistAsset?.parts.accessory} outfitId={artistAsset?.parts.outfit} size="preview" isFrozen displayName={world.name} />
-              ) : (
-                <Disc3 size={56} />
-              )}
+              <img
+                src={getArtistAvatar(world.id)}
+                alt={world.name}
+                className="moments-profile-avatar-img"
+                data-testid="community-profile-avatar"
+              />
             </div>
             <div className="v7-profile-meta moments-profile-meta">
               <div className="v7-profile-title-row moments-profile-title-row">
@@ -391,11 +467,9 @@ export function FanWorldView() {
     {isRoom ? (
       currentSection === 'collection' ? (
         <div id="panel-collection" role="tabpanel" aria-labelledby="tab-collection">
-          <p className="v7-private-note">
-            Chỉ mình bạn thấy toàn bộ bộ sưu tập và ghi chú. Trưng bày từng món trong phòng là một lựa chọn riêng.
-          </p>
+          <CollectionBrowser />
           <details className="v8-private-tools">
-            <summary>Nhật ký, phiên xem lại & đơn hàng</summary>
+            <summary>Nhật ký, phiên xem lại & đơn hàng khác</summary>
             <div className="v7-collection-tools">
               <button className="fw-text-button" onClick={() => open('capsules')}>
                 Nhật ký & kỷ niệm →
@@ -408,7 +482,6 @@ export function FanWorldView() {
               </button>
             </div>
           </details>
-          <CollectionBrowser />
         </div>
       ) : currentSection === 'avatar' ? (
         <div id="panel-avatar" role="tabpanel" aria-labelledby="tab-avatar" className="v7-avatar-tab-wrapper">
@@ -416,7 +489,11 @@ export function FanWorldView() {
         </div>
       ) : (
         <div id="panel-room" role="tabpanel" aria-labelledby="tab-room">
-          <PersonalDisplayRoom onOpen={open} onOpenPrivacy={() => setIsPrivacyOpen(true)} />
+          <PersonalDisplayRoom
+            onOpen={open}
+            privacySettings={privacySettings}
+            onOpenPrivacy={() => setIsPrivacyOpen(true)}
+          />
         </div>
       )
     ) : (
@@ -425,7 +502,7 @@ export function FanWorldView() {
         worldId={world.id}
         onOpen={open}
         initialTab={momentsTab}
-        onTabChange={setMomentsTab}
+        onTabChange={handleMomentsTabChange}
       />
     )}
 
@@ -433,11 +510,13 @@ export function FanWorldView() {
     {isEditIntroOpen && (
       <div className="v7-modal-backdrop" onClick={() => setIsEditIntroOpen(false)}>
         <div
+          ref={introModalRef}
           className="v7-intro-modal"
           onClick={e => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label="Sửa lời giới thiệu"
+          tabIndex={-1}
         >
           <div className="v7-modal-header">
             <div>
@@ -516,16 +595,18 @@ export function FanWorldView() {
     {isPrivacyOpen && (
       <div className="v7-modal-backdrop" onClick={handleClosePrivacy}>
         <div
+          ref={privacyModalRef}
           className="v7-privacy-modal"
           onClick={e => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label="Cài đặt quyền riêng tư không gian"
+          tabIndex={-1}
         >
           <div className="v7-modal-header">
             <div>
-              <span className="v7-modal-eyebrow">DATA MINIMIZATION & PRIVACY</span>
-              <h3>Quyền riêng tư My Space</h3>
+              <span className="v7-modal-eyebrow">PRIVACY & CONTROL</span>
+              <h3>Quyền riêng tư không gian</h3>
             </div>
             <button
               type="button"
@@ -539,8 +620,11 @@ export function FanWorldView() {
 
           <div className="v7-privacy-form">
             <div className="v7-privacy-field">
-              <label><strong>Ai có thể ghé phòng</strong></label>
+              <label htmlFor="privacy-room-visibility">
+                <strong>Ai có thể ghé phòng</strong>
+              </label>
               <select
+                id="privacy-room-visibility"
                 value={privacySettings.roomVisibility}
                 onChange={e =>
                   savePrivacySettings({
@@ -553,15 +637,18 @@ export function FanWorldView() {
                 <option value="users">Chỉ thành viên VieWorld</option>
                 <option value="private">Chỉ mình tôi (Private)</option>
               </select>
-              <small>Khách ghé thăm chỉ thấy đúng những món bạn chủ động đưa lên kệ phòng. Không bao giờ thấy toàn bộ kho đồ hay ghi chú riêng.</small>
+              <small>
+                Khách ghé thăm chỉ thấy đúng những món bạn chủ động đưa lên kệ phòng. Không bao giờ thấy toàn bộ kho đồ hay ghi chú riêng.
+              </small>
             </div>
 
             <div className="v7-privacy-toggle-row">
-              <div>
+              <label htmlFor="privacy-show-visit-count" style={{ cursor: 'pointer', flex: 1 }}>
                 <strong>Hiện số lượt ghé thăm</strong>
                 <p>Hiển thị số lượt ghé phòng (không dùng để xếp hạng hay đua top).</p>
-              </div>
+              </label>
               <input
+                id="privacy-show-visit-count"
                 type="checkbox"
                 checked={privacySettings.showVisitCount}
                 onChange={e =>
@@ -574,11 +661,12 @@ export function FanWorldView() {
             </div>
 
             <div className="v7-privacy-toggle-row">
-              <div>
+              <label htmlFor="privacy-guestbook-enabled" style={{ cursor: 'pointer', flex: 1 }}>
                 <strong>Cho phép dán giấy nhớ (Guestbook)</strong>
                 <p>Cho phép người ghé thăm để lại lời nhắn trên tường lưu bút.</p>
-              </div>
+              </label>
               <input
+                id="privacy-guestbook-enabled"
                 type="checkbox"
                 checked={privacySettings.guestbookEnabled}
                 onChange={e =>
@@ -591,11 +679,12 @@ export function FanWorldView() {
             </div>
 
             <div className="v7-privacy-toggle-row">
-              <div>
+              <label htmlFor="privacy-membership-signal" style={{ cursor: 'pointer', flex: 1 }}>
                 <strong>Hiện biểu tượng hội viên (◇)</strong>
                 <p>Biểu tượng nhỏ bên cạnh tên khi bạn có quyền lợi hội viên đang hoạt động.</p>
-              </div>
+              </label>
               <input
+                id="privacy-membership-signal"
                 type="checkbox"
                 checked={privacySettings.showMembershipSignal}
                 onChange={e =>
@@ -624,7 +713,7 @@ export function FanWorldView() {
     {activePanel && <WorldPanel title={panelTitles[activePanel]} onClose={close}>
       {panel === 'livechat' && <ArtistBroadcast worldId={world.id}/>}
       {panel === 'concerts' && !isShared && <ArtistBroadcast worldId={world.id} format="concert"/>}
-      {panel === 'hall' && (isShared ? <><p>Chọn hội của artist bạn muốn ghé. Theo dõi không tự cấp membership.</p>{Object.values(state.worlds).map(w=><Link className="fw-destination" key={w.id} to={`/moments?artist=${w.id}&panel=hall`}><Heart/><div><strong>{w.name}</strong><p>Kiểm tra membership và ghé Hall</p></div><ArrowRight/></Link>)}</> : <HallPanel worldId={world.id} />)}
+      {panel === 'hall' && (isShared ? <><p>Chọn hội của artist bạn muốn ghé. Theo dõi không tự cấp membership.</p>{Object.values(state.worlds).filter(w => w.type === 'artist').map(w=><Link className="fw-destination" key={w.id} to={`/artist/${w.id}/hall`}><Heart/><div><strong>{w.name}</strong><p>Kiểm tra membership và ghé Hall</p></div><ArrowRight/></Link>)}</> : <HallPanel worldId={world.id} />)}
       {panel === 'worlds' && <><p className="fw-muted">Mỗi nhà nhạc là một thế giới. Bạn vẫn là bạn ở mọi nơi.</p>{Object.values(state.worlds).map(w => <Link className="fw-destination" key={w.id} to={`/worlds/${w.id}`}><span className={w.type === 'ip' ? 'neon' : ''}>{w.type === 'ip' ? <Disc3 /> : <Music2 />}</span><div><strong>{w.name}</strong><p>{w.type === 'artist' ? 'Ghé chơi, nghe nhạc, gặp artist.' : 'Những âm thanh và cuộc gặp mới.'}</p></div><ArrowRight size={19} /></Link>)}<Link className="fw-destination" to="/me"><span><BookOpen /></span><div><strong>Phòng của bạn</strong><p>Về với những kỷ niệm đã giữ.</p></div><ArrowRight size={19} /></Link></>}
       {panel === 'artist' && <div className="fw-artist-story">{canShowArtist && <AvatarRenderer role="artist" accessoryId={artistAsset?.parts.accessory} outfitId={artistAsset?.parts.outfit} size="preview" isFrozen displayName={world.name} />}<p className="fw-eyebrow">{ip ? 'CHƯƠNG TRÌNH ĐẶC BIỆT' : 'NGHỆ SĨ ĐỒNG HÀNH'} · DEMO</p><h3>{world.name}</h3><p>{world.description}</p><button className="fw-button" onClick={() => open('news')}>Đọc lời nhắn từ nhà nhạc <ArrowRight size={16} /></button></div>}
       {panel === 'news' && (note ? <article className="fw-note"><p className="fw-eyebrow">{note.author} · Bài đăng mẫu</p><time>{momentTime(note.publishedAt)}</time><h3>{note.title}</h3><p>{note.body}</p><div className="fw-note-signature">Hẹn gặp ở nhà nhạc,<br /><strong>{note.author}</strong></div><button className="fw-button" onClick={() => dispatch({ type: 'READ_ARTIST_NOTE', noteId: note.id })} disabled={noteRead}>{noteRead ? <><Check size={17} /> Đã giữ lời nhắn</> : <><Heart size={17} /> Giữ lời nhắn này</>}</button>{note.sessionId && state.sessions[note.sessionId] && <Link className="fw-destination" to={`/sessions/${note.sessionId}`}><CalendarDays /><div><strong>{state.sessions[note.sessionId].title}</strong><p>{momentTime(state.sessions[note.sessionId].scheduledStartTime)}</p></div><ArrowRight /></Link>}</article> : <p>Nhà nhạc chưa có lời nhắn mới.</p>)}
@@ -638,7 +727,7 @@ export function FanWorldView() {
       {panel === 'capsules' && <>
         <p className="fw-muted">Kỷ niệm từ những phiên bạn đã tham dự. Bỏ khỏi kệ vẫn giữ trong bộ sưu tập.</p>
         <Link className="fw-text-button" to="/me?section=collection&type=ticket">Chọn kỷ niệm công khai trong My Space ↗</Link>
-        {!capsules.length && <div className="fw-empty"><Sparkles size={35} /><h3>Để dành một chỗ cho đêm đầu tiên.</h3><p>Tham dự một phiên đủ điều kiện để nhận kỷ niệm của riêng bạn.</p><Link className="fw-button" to="/moments?panel=sessions">Tìm một cuộc hẹn <ArrowRight size={16} /></Link></div>}
+        {!capsules.length && <div className="fw-empty"><Sparkles size={35} /><h3>Để dành một chỗ cho đêm đầu tiên.</h3><p>Tham dự một phiên đủ điều kiện để nhận kỷ niệm của riêng bạn.</p><Link className="fw-button" to="/explore">Tìm một cuộc hẹn <ArrowRight size={16} /></Link></div>}
         {capsules.map(c => <article key={c.id} className="fw-event-row"><small>{state.worlds[c.worldId]?.name}</small><h3>{state.sessions[c.sessionId]?.title || 'Kỷ niệm của bạn'}</h3><form className="fw-keepsake-note" onSubmit={e => { e.preventDefault(); const data = new FormData(e.currentTarget); dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, privateNote: String(data.get('note') || ''), isSaved: c.isSaved }); setSavedNoteId(c.id); }}><label htmlFor={`note-${c.id}`}>Ghi chú riêng</label><textarea id={`note-${c.id}`} name="note" onChange={() => setSavedNoteId(null)} defaultValue={c.privateNote || ''} maxLength={1000} rows={2} /><button className="fw-text-button" type="submit">Giữ ghi chú</button>{savedNoteId === c.id && <small role="status">Đã giữ ghi chú riêng.</small>}</form><div><button className="fw-text-button" onClick={() => dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, isSaved: !c.isSaved })}>{c.isSaved ? 'Bỏ lưu' : 'Lưu kỷ niệm'}</button></div></article>)}
       </>}
       {panel === 'showcase' && <>

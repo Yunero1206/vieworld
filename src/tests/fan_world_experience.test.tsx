@@ -24,10 +24,11 @@ function mount(path = '/') {
 describe('Unified fan world public experience', () => {
   beforeEach(() => localStorage.clear());
 
-  it('has exactly four primary destinations and no public tenant switch', () => {
+  it('has Home plus the four product destinations and no public tenant switch', () => {
     mount();
     const nav = screen.getByRole('navigation', { name: 'Điều hướng chính' });
-    expect(within(nav).getAllByRole('link').map(a => a.textContent)).toEqual(['Explore', 'Moments', 'My Space', 'VieSHOP']);
+    expect(nav).toHaveClass('fw-side-nav');
+    expect(within(nav).getAllByRole('link').map(a => a.textContent)).toEqual(['Home', 'Explore', 'Artist A', 'My Space', 'VieSHOP']);
     expect(screen.queryByText('MFan')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mở menu' }));
     fireEvent.click(screen.getByRole('button', { name: 'Kịch bản thử nghiệm' }));

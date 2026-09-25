@@ -1,439 +1,119 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, X, Check, Award, Lock } from 'lucide-react';
+import { Award, MoreHorizontal, Search, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { DISPLAY_FIXTURES, ownedCollection, displayedItems, type DisplaySlot, type DisplayItem } from '../world/display';
-import { filterDisplayItems, formatCollectionDate } from '../world/displayFilter';
-import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { displayAssetUrl, ownedCollection, type DisplayItem, type DisplaySlot } from '../world/display';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSelection } from '../world/displaySurfaces';
 import { ArchiveCollection } from './ArchiveCollection';
-import { getTenantConfig } from '../domain/tenantConfig';
+import { matchesVietnameseQuery } from '../utils/textSearch';
+
+type Mode = 'objects' | 'memories';
+const objectCategories = [['all', 'Tất cả'], ['shirt', 'Áo'], ['ticket', 'Vé'], ['disc', 'Đĩa'], ['lightstick', 'Lightstick'], ['other', 'Khác']];
+const memoryCategories = [['all', 'Tất cả'], ['concert', 'Concert'], ['fan-project', 'Fan project'], ['capsule', 'Capsule'], ['moment', 'Khoảnh khắc'], ['milestone', 'Dấu mốc']];
 
 export function CollectionBrowser() {
   const { state, dispatch } = useApp();
-  const tenantConfig = getTenantConfig(state.activeTenantId);
   const [params, setParams] = useSearchParams();
-  const type = params.get('type') || params.get('custom');
-  const slot: DisplaySlot | 'all' = DISPLAY_FIXTURES.some(f => f.slot === type) ? (type as DisplaySlot) : 'all';
-  const [journey, setJourney] = useState(false);
+  const [mode, setMode] = useState<Mode>('objects');
   const [query, setQuery] = useState('');
   const [artist, setArtist] = useState('all');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  const [eventName, setEventName] = useState('all');
+  const [year, setYear] = useState('all');
+  const [menuId, setMenuId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<DisplayItem | null>(null);
+  const [placing, setPlacing] = useState<DisplayItem | null>(null);
   const [notice, setNotice] = useState('');
-  const [selectedItemDetail, setSelectedItemDetail] = useState<DisplayItem | null>(null);
+  const category = params.get('type') || params.get('custom') || 'all';
+  const owned = useMemo(() => ownedCollection(state), [state]);
+  const surfaces = useMemo(() => readDisplaySurfaces(state.fanProfile, owned), [state.fanProfile, owned]);
+  const categories = mode === 'objects' ? objectCategories : memoryCategories;
+  const selectedCategory = categories.some(([id]) => id === category) ? category : 'all';
+  const years = [...new Set(owned.map(item => item.collectedAt?.slice(0, 4)).filter((value): value is string => Boolean(value)))].sort().reverse();
+  const events = [...new Set(owned.map(item => item.eventName).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'vi'));
 
-  const items = displayedItems(state);
-  const options = ownedCollection(state);
-  const filtered = filterDisplayItems(options, { slot, query, artist, from, to });
-
-  // Close drawer on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedItemDetail(null);
-    };
-    if (selectedItemDetail) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+  const filtered = owned.filter(item => {
+    const memory = ['event', 'achievement', 'moment'].includes(item.sourceType || '');
+    if ((mode === 'memories') !== memory) return false;
+    if (selectedCategory !== 'all') {
+      if (mode === 'objects' && (selectedCategory === 'other' ? ['shirt', 'ticket', 'disc', 'lightstick'].includes(item.slot || '') : item.slot !== selectedCategory)) return false;
+      if (mode === 'memories' && (selectedCategory === 'milestone' ? item.sourceType !== 'achievement' : selectedCategory === 'capsule' ? item.category !== 'memory' : selectedCategory === 'concert' ? item.sourceType !== 'event' || item.category === 'memory' : selectedCategory === 'moment' ? item.sourceType !== 'moment' : item.category !== 'fan-project')) return false;
     }
-  }, [selectedItemDetail]);
+    if (artist !== 'all' && item.worldId !== artist) return false;
+    if (eventName !== 'all' && item.eventName !== eventName) return false;
+    if (year !== 'all' && item.collectedAt?.slice(0, 4) !== year) return false;
+    return matchesVietnameseQuery(`${item.title} ${item.eventName || ''} ${state.worlds[item.worldId || '']?.name || ''}`, query);
+  });
 
-  const setType = (value: string) => {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenuId(null); setDetail(null); setPlacing(null); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  function setCategory(value: string) {
     const next = new URLSearchParams(params);
     next.set('section', 'collection');
     next.delete('custom');
-    if (value === 'all') next.delete('type');
-    else next.set('type', value);
+    if (value === 'all') next.delete('type'); else next.set('type', value);
     setParams(next, { replace: true });
-  };
+  }
+  function displayedAt(itemId: string): DisplaySlot | undefined {
+    return DISPLAY_SURFACES.find(surface => surfaces[surface.id].itemIds.includes(itemId))?.id;
+  }
+  function remove(item: DisplayItem) {
+    const id = displayedAt(item.id);
+    if (!id) return;
+    const selection = surfaces[id];
+    const itemIds = selection.itemIds.filter(value => value !== item.id);
+    dispatch({ type: 'SET_DISPLAY_SURFACE', surfaceId: id, selection: { ...selection, itemIds, focalItemId: selection.focalItemId === item.id ? itemIds[0] : selection.focalItemId } });
+    setMenuId(null);
+    setNotice(`Đã cất ${item.title}. Món vẫn ở trong Bộ sưu tập.`);
+  }
+  function place(id: DisplaySlot, item: DisplayItem) {
+    const oldId = displayedAt(item.id);
+    if (oldId === id) { setPlacing(null); return; }
+    const selection = { ...surfaces[id], itemIds: [...surfaces[id].itemIds, item.id], focalItemId: surfaces[id].focalItemId || item.id };
+    const profile = oldId ? { ...state.fanProfile, displaySurfaces: { ...surfaces, [oldId]: { ...surfaces[oldId], itemIds: surfaces[oldId].itemIds.filter(value => value !== item.id) } } } : state.fanProfile;
+    const problem = validateSurfaceSelection(profile, id, selection, owned);
+    if (problem) { setNotice(problem); return; }
+    if (oldId) remove(item);
+    dispatch({ type: 'SET_DISPLAY_SURFACE', surfaceId: id, selection });
+    setPlacing(null); setMenuId(null);
+    setNotice(`Đã trưng ${item.title} ở ${DISPLAY_SURFACES.find(surface => surface.id === id)?.label}.`);
+  }
 
-  const clear = () => {
-    setType('all');
-    setQuery('');
-    setArtist('all');
-    setFrom('');
-    setTo('');
-  };
-
-  const fanFirstName = state.fanProfile.displayName.split(' ').pop() || state.fanProfile.displayName;
-
-  return (
-    <section className="v8-collection">
-      {/* 2 Inner Tabs: Vật phẩm | Kỷ niệm & thành tựu */}
-      <nav className="v8-tabs" aria-label="Nội dung bộ sưu tập">
-        <button aria-pressed={!journey} onClick={() => setJourney(false)}>
-          Vật phẩm
-        </button>
-        <button aria-pressed={journey} onClick={() => setJourney(true)}>
-          Kỷ niệm & thành tựu
-        </button>
-      </nav>
-
-      {journey ? (
-        <ArchiveCollection />
-      ) : (
-        <>
-          <header className="v5-section-heading v7-collection-heading">
-            <div>
-              <h2>Bộ sưu tập của {fanFirstName}</h2>
-              <p>Những món và kỷ niệm bạn đã giữ lại qua các world.</p>
-            </div>
-            <Link className="fw-text-button" to="/me">
-              Xem Phòng của tôi ↗
-            </Link>
-          </header>
-
-          <div className="v8-search-bar-container">
-            <label className="v8-search" aria-label="Tìm trong bộ sưu tập">
-              <Search size={16} className="v8-search-icon" />
-              <input
-                type="search"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Tìm món đồ hoặc kỷ niệm theo tên…"
-                aria-label="Tìm trong bộ sưu tập"
-              />
-              {query && (
-                <button
-                  type="button"
-                  className="v8-search-clear"
-                  onClick={() => setQuery('')}
-                  aria-label="Xóa từ khóa"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </label>
-          </div>
-
-          <nav className="v8-tabs" aria-label="Loại vật phẩm">
-            {[
-              ['all', 'Tất cả'],
-              ['shirt', 'Áo'],
-              ['ticket', 'Vé & kỷ niệm'],
-              ['disc', 'Đĩa'],
-              ['lightstick', 'Lightstick'],
-              ['achievement', 'Thành tựu'],
-            ].map(([id, label]) => (
-              <button key={id} aria-pressed={slot === id} onClick={() => setType(id)}>
-                {label}
-              </button>
-            ))}
-          </nav>
-
-          <details className="v8-filters">
-            <summary>
-              Nghệ sĩ & thời gian{artist !== 'all' || from || to ? ' · Có bộ lọc đang dùng' : ''}
-            </summary>
-            <div>
-              <label>
-                Nghệ sĩ
-                <select value={artist} onChange={e => setArtist(e.target.value)}>
-                  <option value="all">Tất cả nghệ sĩ</option>
-                  {Object.values(state.worlds).map(w => (
-                    <option key={w.id} value={w.id}>
-                      {w.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Từ ngày
-                <input type="date" value={from} onChange={e => setFrom(e.target.value)} />
-              </label>
-              <label>
-                Đến ngày
-                <input
-                  type="date"
-                  min={from || undefined}
-                  value={to}
-                  onChange={e => setTo(e.target.value)}
-                />
-              </label>
-            </div>
-            <small>Món chưa có ngày nhận không hiện khi lọc thời gian.</small>
-          </details>
-
-          <div className="v5-section-heading">
-            <span role="status">
-              {filtered.length} món
-              {artist !== 'all' ? ` · ${state.worlds[artist]?.name || artist}` : ''}
-              {from ? ` · từ ${from}` : ''}
-              {to ? ` · đến ${to}` : ''}
-            </span>
-            <button className="fw-text-button" onClick={clear}>
-              Xóa bộ lọc
-            </button>
-          </div>
-
-          <p className="v8-saved" role="status">
-            {notice}
-          </p>
-
-          <div className="v8-item-grid">
-            {filtered.map(item => {
-              const current = item.slot ? items.find(i => i.slot === item.slot) : undefined;
-              const selected = Boolean(item.slot && current?.id === item.id);
-              const fixture = item.slot ? DISPLAY_FIXTURES.find(f => f.slot === item.slot) : undefined;
-
-              return (
-                <article
-                  key={item.id}
-                  className={`v8-collection-item ${selected ? 'is-displayed' : ''}`}
-                  onClick={() => setSelectedItemDetail(item)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="v8-card-media-wrapper">
-                    {item.image ? (
-                      <img
-                        src={
-                          item.image.startsWith('shirt')
-                            ? '/images/world-v6/shirt-cutout.webp'
-                            : `${MERCH_IMAGE_ROOT}/${item.image}.png`
-                        }
-                        alt=""
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="v8-achievement-art">
-                        <Award size={48} color="#D97706" />
-                      </div>
-                    )}
-                    {fixture && <span className="v8-card-type-chip">{fixture.label}</span>}
-                    {selected && (
-                      <span className="v8-card-active-chip">
-                        <Check size={12} /> Đang trưng bày
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="v8-card-body">
-                    <small className="v8-card-artist">
-                      {state.worlds[item.worldId || '']?.name || 'Vật phẩm kỷ niệm'}
-                    </small>
-                    <h3 className="v8-card-title">{item.title}</h3>
-                    <p className="v8-card-detail">{item.detail}</p>
-                    {item.collectedAt && (
-                      <time className="v8-card-date">{formatCollectionDate(item.collectedAt)}</time>
-                    )}
-                  </div>
-
-                  <div className="v8-card-actions" onClick={e => e.stopPropagation()}>
-                    {item.isDisplayCompatible && item.slot ? (
-                      <>
-                        {current && !selected && (
-                          <small className="v8-slot-replace-hint">
-                            Sẽ thay “{current.title}” trên kệ
-                          </small>
-                        )}
-                        <button
-                          className={`fw-button v8-action-btn ${selected ? 'is-active' : ''}`}
-                          onClick={() => {
-                            dispatch({
-                              type: 'SET_DISPLAY_SLOT',
-                              slot: item.slot!,
-                              itemId: selected ? undefined : item.id,
-                            });
-                            setNotice(
-                              selected
-                                ? 'Đã cất món khỏi phòng. Bộ sưu tập vẫn được giữ nguyên.'
-                                : `Đã trưng ${item.title} trong phòng.`
-                            );
-                          }}
-                        >
-                          {selected ? 'Cất khỏi phòng' : 'Trưng trong phòng'}
-                        </button>
-                        {selected && (
-                          <strong className="v8-public-label">✓ Đang trưng tại {fixture?.label || 'phòng'}</strong>
-                        )}
-                      </>
-                    ) : (
-                      <div className="v8-item-locked-note">
-                        <small style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
-                          Vật phẩm sưu tập cá nhân · Không có vị trí trên diorama phòng
-                        </small>
-                        {item.wearableSlot && (
-                          <Link className="fw-text-button" to="/me?panel=wardrobe" style={{ fontSize: '13px' }}>
-                            Mặc trong Tủ đồ →
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          {!filtered.length && (
-            <div className="v8-empty">
-              <h3>Chưa có món phù hợp</h3>
-              <p>
-                Thử bỏ bớt bộ lọc. Vé kỷ niệm và mốc thành tựu nằm trong Kỷ niệm & thành tựu; đồ mua xuất hiện sau khi đã nhận.
-              </p>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '12px' }}>
-                <button className="fw-button" onClick={clear}>
-                  Xem tất cả vật phẩm
-                </button>
-                <button className="fw-text-button" onClick={() => setJourney(true)}>
-                  Xem kỷ niệm & thành tựu →
-                </button>
-                <Link className="fw-text-button" to="/shop">
-                  Ghé {tenantConfig.labels.shopTitle} →
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Item Provenance & Memory Archive Detail Drawer */}
-          {selectedItemDetail && (
-            <div className="v7-drawer-backdrop" onClick={() => setSelectedItemDetail(null)}>
-              <div
-                className="v7-slot-picker-drawer v7-collection-item-drawer"
-                onClick={e => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-label={`Chi tiết ${selectedItemDetail.title}`}
-              >
-                <div className="v7-drawer-header">
-                  <div>
-                    <span className="v7-drawer-eyebrow">MEMORY ARCHIVE · CHI TIẾT VẬT PHẨM</span>
-                    <h3>{selectedItemDetail.title}</h3>
-                  </div>
-                  <button
-                    className="v7-drawer-close-btn"
-                    onClick={() => setSelectedItemDetail(null)}
-                    aria-label="Đóng"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                <div className="v7-drawer-body">
-                  <div className="v7-archive-media">
-                    {selectedItemDetail.image ? (
-                      <img
-                        src={
-                          selectedItemDetail.image.startsWith('shirt')
-                            ? '/images/world-v6/shirt-cutout.webp'
-                            : `${MERCH_IMAGE_ROOT}/${selectedItemDetail.image}.png`
-                        }
-                        alt={selectedItemDetail.title}
-                      />
-                    ) : (
-                      <div className="v7-archive-trophy">
-                        <Award size={48} color="#D97706" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Provenance breakdown */}
-                  <div className="v7-provenance-meta-card">
-                    <h4>Nguồn gốc & Lịch sử kỷ niệm</h4>
-                    <dl className="v7-provenance-list">
-                      <div className="v7-provenance-row">
-                        <dt>Nghệ sĩ / World:</dt>
-                        <dd>{state.worlds[selectedItemDetail.worldId || '']?.name || 'VieWorld Universe'}</dd>
-                      </div>
-
-                      <div className="v7-provenance-row">
-                        <dt>Hình thức:</dt>
-                        <dd>
-                          {selectedItemDetail.deliveryKind === 'digital'
-                            ? 'Kỹ thuật số (Digital)'
-                            : selectedItemDetail.deliveryKind === 'physical'
-                            ? 'Hiện vật (Physical)'
-                            : 'Gói kết hợp (Bundle)'}
-                        </dd>
-                      </div>
-
-                      <div className="v7-provenance-row">
-                        <dt>Xuất xứ nhận:</dt>
-                        <dd>
-                          {selectedItemDetail.sourceType === 'event'
-                            ? `Sự kiện: ${selectedItemDetail.eventName || selectedItemDetail.title}`
-                            : selectedItemDetail.sourceType === 'achievement'
-                            ? 'Cột mốc & thành tựu fandom'
-                            : 'Đặt mua từ VieSHOP'}
-                        </dd>
-                      </div>
-
-                      {selectedItemDetail.collectedAt && (
-                        <div className="v7-provenance-row">
-                          <dt>Thời gian lưu:</dt>
-                          <dd>{formatCollectionDate(selectedItemDetail.collectedAt)}</dd>
-                        </div>
-                      )}
-
-                      <div className="v7-provenance-row">
-                        <dt>Trạng thái phòng:</dt>
-                        <dd>
-                          {selectedItemDetail.slot && items.some(i => i.id === selectedItemDetail.id) ? (
-                            <span className="v7-status-active-pill">
-                              <Check size={12} /> Đang trưng bày tại {DISPLAY_FIXTURES.find(f => f.slot === selectedItemDetail.slot)?.label}
-                            </span>
-                          ) : (
-                            <span className="v7-status-stored-pill">
-                              Lưu trữ trong bộ sưu tập (chưa đưa lên phòng)
-                            </span>
-                          )}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-
-                  {/* Private note section */}
-                  <div className="v7-private-note-box">
-                    <div className="v7-private-note-title">
-                      <Lock size={13} />
-                      <strong>Ghi chú riêng tư (Chỉ mình bạn thấy)</strong>
-                    </div>
-                    <p className="v7-private-note-text">
-                      {selectedItemDetail.privateNote ||
-                        'Chưa có ghi chú riêng cho món này. Ghi chú cá nhân luôn được giữ bí mật và không bao giờ xuất bản cho khách ghé thăm.'}
-                    </p>
-                  </div>
-
-                  <div className="v7-drawer-actions">
-                    {selectedItemDetail.isDisplayCompatible && selectedItemDetail.slot && (
-                      <button
-                        className="fw-button"
-                        onClick={() => {
-                          const isCurrentlyDisplayed = items.some(i => i.id === selectedItemDetail.id);
-                          dispatch({
-                            type: 'SET_DISPLAY_SLOT',
-                            slot: selectedItemDetail.slot!,
-                            itemId: isCurrentlyDisplayed ? undefined : selectedItemDetail.id,
-                          });
-                          setNotice(
-                            isCurrentlyDisplayed
-                              ? 'Đã cất món. Bộ sưu tập vẫn được giữ nguyên.'
-                              : `Đã đặt ${selectedItemDetail.title} vào Phòng trưng bày.`
-                          );
-                          setSelectedItemDetail(null);
-                        }}
-                      >
-                        {items.some(i => i.id === selectedItemDetail.id)
-                          ? 'Cất khỏi Phòng trưng bày'
-                          : 'Đặt vào Phòng trưng bày'}
-                      </button>
-                    )}
-
-                    {selectedItemDetail.wearableSlot && (
-                      <Link
-                        to="/me?section=avatar"
-                        className="fw-text-button"
-                        onClick={() => setSelectedItemDetail(null)}
-                      >
-                        Mặc thử trên Avatar ↗
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </section>
-  );
+  return <section className="myspace-collection" aria-label="Bộ sưu tập riêng">
+    <nav className="myspace-mode-tabs" aria-label="Loại bộ sưu tập">
+      <button type="button" aria-pressed={mode === 'objects'} onClick={() => { setMode('objects'); setCategory('all'); }}>Vật phẩm</button>
+      <button type="button" aria-pressed={mode === 'memories'} onClick={() => { setMode('memories'); setCategory('all'); }}>Kỷ niệm & dấu mốc</button>
+      <Link to="/me" className="myspace-room-link">Xem Phòng của tôi ↗</Link>
+    </nav>
+    <div className="myspace-collection-tools">
+      <label className="myspace-collection-search"><Search size={18}/><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={mode === 'objects' ? 'Tìm vật phẩm trong bộ sưu tập…' : 'Tìm một kỷ niệm…'} aria-label="Tìm trong bộ sưu tập" /></label>
+      <div className="myspace-collection-filter-row">
+        <nav className="myspace-category-chips" aria-label="Danh mục">{categories.map(([id, label]) => <button key={id} type="button" aria-pressed={selectedCategory === id} onClick={() => setCategory(id)}>{label}</button>)}</nav>
+        <details className="myspace-advanced-filters"><summary>Bộ lọc{artist !== 'all' || eventName !== 'all' || year !== 'all' ? ' · đang dùng' : ''}</summary><div>
+          <label>Nghệ sĩ / World<select value={artist} onChange={event => setArtist(event.target.value)}><option value="all">Tất cả</option>{Object.values(state.worlds).filter(world => world.tenantId === state.activeTenantId).map(world => <option key={world.id} value={world.id}>{world.name}</option>)}</select></label>
+          <label>Sự kiện<select value={eventName} onChange={event => setEventName(event.target.value)}><option value="all">Tất cả</option>{events.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label>Thời gian / năm<select value={year} onChange={event => setYear(event.target.value)}><option value="all">Tất cả</option>{years.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <button type="button" onClick={() => { setArtist('all'); setEventName('all'); setYear('all'); setQuery(''); setCategory('all'); }}>Xóa bộ lọc</button>
+        </div></details>
+      </div>
+    </div>
+    <p className="myspace-collection-count" role="status">{filtered.length} {mode === 'objects' ? 'vật phẩm' : 'kỷ niệm & dấu mốc'}{notice ? ` · ${notice}` : ''}</p>
+    <div className={`myspace-collection-grid ${mode === 'memories' ? 'is-memories' : ''}`}>
+      {filtered.map(item => <article className={`myspace-object-card ${item.sourceType === 'achievement' ? 'is-milestone' : ''}`} key={item.id}>
+        <div className="myspace-object-image">
+          {displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" loading="lazy"/> : <div className="myspace-keepsake-emblem"><Award size={36}/><span>Dấu mốc</span></div>}
+          <button className="myspace-object-menu-trigger" type="button" aria-label={`Tùy chọn ${item.title}`} aria-expanded={menuId === item.id} onClick={() => setMenuId(menuId === item.id ? null : item.id)}><MoreHorizontal size={19}/></button>
+          {menuId === item.id && <div className="myspace-object-menu" role="menu"><button type="button" role="menuitem" onClick={() => { setDetail(item); setMenuId(null); }}>Xem chi tiết</button>{item.isDisplayCompatible && <button type="button" role="menuitem" onClick={() => { setPlacing(item); setMenuId(null); }}>{displayedAt(item.id) ? 'Đổi vị trí' : 'Trưng trong phòng'}</button>}{displayedAt(item.id) && <><Link to="/me" role="menuitem" onClick={() => setMenuId(null)}>Xem trong phòng</Link><button type="button" role="menuitem" onClick={() => remove(item)}>Gỡ khỏi phòng</button></>}</div>}
+        </div>
+        <div className="myspace-object-caption"><h3>{item.title}</h3><p>{[state.worlds[item.worldId || '']?.name, item.eventName && item.eventName !== item.title ? item.eventName : undefined, item.collectedAt?.slice(0, 4)].filter(Boolean).join(' · ') || (item.sourceType === 'achievement' ? 'Một dấu mốc của bạn' : 'Bộ sưu tập của bạn')}</p></div>
+      </article>)}
+    </div>
+    {!filtered.length && <div className="myspace-collection-empty"><p>Chưa có món nào phù hợp với lựa chọn này.</p><button type="button" onClick={() => { setQuery(''); setArtist('all'); setEventName('all'); setYear('all'); setCategory('all'); }}>Xem tất cả</button></div>}
+    {mode === 'memories' && <details className="myspace-history-details"><summary>Xem lịch sử thẻ & dấu mốc đã ghi nhận</summary><ArchiveCollection/></details>}
+    {detail && <div className="myspace-modal-backdrop" onClick={() => setDetail(null)}><div className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chi tiết ${detail.title}`} onClick={event => event.stopPropagation()}><button className="myspace-modal-close" type="button" onClick={() => setDetail(null)} aria-label="Đóng"><X size={18}/></button><div className="myspace-modal-image">{displayAssetUrl(detail) ? <img src={displayAssetUrl(detail)} alt=""/> : <Award size={54}/>}</div><h2>{detail.title}</h2><p>{state.worlds[detail.worldId || '']?.name || 'Bộ sưu tập của bạn'}{detail.collectedAt ? ` · ${detail.collectedAt.slice(0, 10)}` : ''}</p><p>{detail.detail}</p>{detail.isDisplayCompatible && <button type="button" className="myspace-primary-action" onClick={() => { setPlacing(detail); setDetail(null); }}>{displayedAt(detail.id) ? 'Đổi vị trí trong phòng' : 'Trưng trong phòng'}</button>}</div></div>}
+    {placing && <div className="myspace-modal-backdrop" onClick={() => setPlacing(null)}><div className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chọn chỗ trưng ${placing.title}`} onClick={event => event.stopPropagation()}><button className="myspace-modal-close" type="button" onClick={() => setPlacing(null)} aria-label="Đóng"><X size={18}/></button><h2>Chọn một góc cho {placing.title}</h2><p>Bạn chọn món; phòng tự sắp xếp. Món trong Bộ sưu tập vẫn luôn được giữ.</p><div className="myspace-surface-choices">{DISPLAY_SURFACES.filter(surface => placing.slot && surface.allowedItemTypes.includes(placing.slot)).map(surface => { const count = surfaces[surface.id].itemIds.length; const units = surfaces[surface.id].itemIds.reduce((sum, id) => sum + itemFootprint(owned.find(item => item.id === id) || placing), 0); const full = count >= surface.maxItems || (units + itemFootprint(placing) > surface.capacityUnits && displayedAt(placing.id) !== surface.id); return <button key={surface.id} type="button" disabled={full} onClick={() => place(surface.id, placing)}><strong>{surface.label}</strong><small>{displayedAt(placing.id) === surface.id ? 'Đang ở đây' : full ? 'Khu vực này đã đầy' : `${count}/${surface.maxItems} món`}</small></button>; })}</div>{notice && <p role="status">{notice}</p>}</div></div>}
+  </section>;
 }

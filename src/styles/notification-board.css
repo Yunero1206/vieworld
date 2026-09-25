@@ -1,0 +1,990 @@
+/* ==========================================================================
+   VieWorld Community Notice Board & Notifications Experience
+   Desktop: Wide Community Notice Board (2x2 Pinned Paper Notices + Polaroids)
+   Mobile: Lightweight Popover Dropdown
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Backdrop & Dialog Container
+   -------------------------------------------------------------------------- */
+.vw-notif-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: vw-notif-fade 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.vw-notif-backdrop.is-desktop-backdrop {
+  background: rgba(18, 22, 18, 0.38);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
+}
+
+.vw-notif-backdrop.is-mobile-backdrop {
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 74px 16px 16px;
+}
+
+@keyframes vw-notif-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Dialog container */
+.vw-notif-dialog {
+  position: relative;
+  outline: none;
+  animation: vw-notif-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes vw-notif-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Desktop Dialog Dimensions */
+.vw-notif-dialog.is-desktop-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  position: relative;
+}
+
+.vw-notif-dialog.is-desktop-dialog:not(.is-all-mode) {
+  --board-max-h: min(84vh, 720px);
+  --board-max-w: min(88vw, 940px);
+  height: min(var(--board-max-h), calc(var(--board-max-w) * 731 / 876));
+  width: calc(min(var(--board-max-h), calc(var(--board-max-w) * 731 / 876)) * 876 / 731);
+}
+
+.vw-notif-dialog.is-desktop-dialog.is-all-mode {
+  width: min(580px, 92vw);
+  max-height: 82vh;
+}
+
+/* Mobile Dialog Dimensions */
+.vw-notif-dialog.is-mobile-dialog {
+  width: min(92vw, 380px);
+  max-height: 74vh;
+}
+
+/* Quick Close Button (Top right on frame of Desktop Board) */
+.vw-notif-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  z-index: 25;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #374151;
+  border: 1.5px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vw-notif-close-btn:hover {
+  background: #F8FAFC;
+  color: #0F172A;
+  transform: scale(1.08);
+}
+
+.vw-notif-close-btn:focus-visible {
+  outline: 2.5px solid var(--primary, #5B46E8);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Desktop Wide Board Card & Visual Frame
+   -------------------------------------------------------------------------- */
+.vw-wide-board-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* Artwork Background Image (876x731 tightly cropped with transparent alpha) */
+.vw-wide-board-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 20px 48px rgba(15, 23, 42, 0.36));
+}
+
+/* 2x2 Pinned Notices Safe Board Surface Area */
+/* Strictly calibrated to the blank beige surface inside the gold frame */
+.vw-wide-board-surface {
+  position: absolute;
+  top: 29.5%;
+  left: 8.5%;
+  right: 8.5%;
+  bottom: 15.5%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: visible;
+  user-select: text;
+}
+
+.vw-wide-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Empty state on wide board */
+.vw-wide-empty-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1.5px dashed rgba(180, 165, 140, 0.6);
+  border-radius: 12px;
+  padding: 24px;
+  color: #64748B;
+  font-size: 13.5px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Pinned Paper Notice Cards (Vintage Pinned Paper Style)
+   -------------------------------------------------------------------------- */
+.vw-paper-notice {
+  position: relative;
+  background: #FCFAF6;
+  background-image: linear-gradient(180deg, #FFFFFF 0%, #F9F6EE 100%);
+  border: 1px solid rgba(215, 203, 180, 0.85);
+  border-radius: 10px;
+  padding: 9px 10px 8px 9px;
+  box-shadow: 0 4px 10px rgba(45, 30, 15, 0.08), 0 1px 3px rgba(45, 30, 15, 0.05);
+  cursor: pointer;
+  transform: rotate(var(--notice-rotate, 0deg));
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.vw-paper-notice:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(45, 30, 15, 0.15), 0 2px 6px rgba(45, 30, 15, 0.08);
+  border-color: #365749;
+  z-index: 5;
+}
+
+.vw-paper-notice:focus-visible {
+  outline: 2px solid #2F6650;
+  outline-offset: 1px;
+}
+
+.vw-paper-notice.is-read {
+  opacity: 0.78;
+  background: #F6F3EB;
+}
+
+.vw-paper-notice.is-read:hover {
+  opacity: 1;
+}
+
+/* Pinned Washi Tape Strip at top */
+.vw-notice-tape {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 9px;
+  background: rgba(235, 225, 200, 0.9);
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+  border-left: 1px dashed rgba(180, 160, 130, 0.4);
+  border-right: 1px dashed rgba(180, 160, 130, 0.4);
+}
+
+.vw-notice-layout {
+  display: flex;
+  gap: 9px;
+  align-items: stretch;
+  height: 100%;
+}
+
+/* Polaroid Photo Thumbnail Frame */
+.vw-polaroid-frame {
+  flex-shrink: 0;
+  width: 60px;
+  height: 100%;
+  max-height: 80px;
+  background: #FFFFFF;
+  padding: 3px 3px 9px 3px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-1.5deg);
+  transition: transform 0.18s ease;
+}
+
+.vw-paper-notice:hover .vw-polaroid-frame {
+  transform: rotate(0deg) scale(1.03);
+}
+
+.vw-polaroid-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+/* Notice Content Body */
+.vw-notice-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.vw-notice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.vw-notice-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vw-notice-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.vw-notice-category-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2F6650;
+  white-space: nowrap;
+}
+
+.vw-notice-time {
+  font-size: 12px;
+  color: #8C827A;
+  white-space: nowrap;
+}
+
+.vw-notice-title {
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+  margin: 2px 0 1px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vw-notice-desc {
+  font-size: 12px;
+  color: #5B6471;
+  line-height: 1.3;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vw-notice-cta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1px;
+}
+
+.vw-notice-cta-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2F6650;
+  transition: transform 0.15s ease;
+}
+
+.vw-paper-notice:hover .vw-notice-cta-link {
+  transform: translateX(2px);
+  color: #1B4534;
+}
+
+/* --------------------------------------------------------------------------
+   4. Desktop Board Footer Action: "Xem tất cả thông báo →"
+   -------------------------------------------------------------------------- */
+.vw-wide-board-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 5px;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.vw-wide-view-all-btn {
+  background: rgba(255, 255, 255, 0.84);
+  color: #2F6650;
+  border: 1px solid rgba(180, 160, 130, 0.6);
+  border-radius: 9999px;
+  padding: 4px 18px;
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(45, 30, 15, 0.08);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.16s ease;
+}
+
+.vw-wide-view-all-btn:hover {
+  background: #FFFFFF;
+  color: #1A4031;
+  border-color: #2F6650;
+  box-shadow: 0 3px 8px rgba(45, 30, 15, 0.14);
+  transform: translateY(-1px);
+}
+
+.vw-wide-view-all-btn:focus-visible {
+  outline: 2px solid #2F6650;
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Mobile Notification Dropdown Popover
+   -------------------------------------------------------------------------- */
+.vw-mobile-notif-popover {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 74vh;
+}
+
+.vw-mobile-notif-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+  background: #F8FAFC;
+}
+
+.vw-mobile-notif-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vw-mobile-notif-title {
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.vw-mobile-notif-badge {
+  background: #10B981;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 9999px;
+}
+
+.vw-mobile-mark-read-btn {
+  background: transparent;
+  border: none;
+  color: #64748B;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vw-mobile-mark-read-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.vw-mobile-notif-list {
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vw-mobile-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #64748B;
+  font-size: 13px;
+}
+
+.vw-mobile-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  outline: none;
+}
+
+.vw-mobile-item:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.vw-mobile-item:focus-visible {
+  outline: 2px solid var(--primary, #5B46E8);
+}
+
+.vw-mobile-item.is-read {
+  opacity: 0.72;
+  background: #FFFFFF;
+}
+
+.vw-mobile-item-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.vw-mobile-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.vw-mobile-category {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.vw-mobile-time {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-left: auto;
+}
+
+.vw-mobile-item-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.vw-mobile-item-desc {
+  font-size: 12px;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vw-mobile-notif-footer {
+  padding: 10px 14px;
+  border-top: 1px solid #F1F5F9;
+  background: #F8FAFC;
+  display: flex;
+  justify-content: center;
+}
+
+.vw-mobile-view-all-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2F6650;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.vw-mobile-view-all-btn:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   6. All Notifications Secondary Drawer Panel
+   -------------------------------------------------------------------------- */
+.vw-all-notif-panel {
+  width: 100%;
+  background: #FCFAF6;
+  border: 1px solid #E5E0D4;
+  border-radius: 20px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 80vh;
+}
+
+.vw-all-notif-header {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #EDE7DB;
+  background: #F5F1E6;
+}
+
+.vw-all-back-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2F6650;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.vw-all-back-btn:hover {
+  background: rgba(47, 102, 80, 0.1);
+}
+
+.vw-all-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vw-all-mark-read-btn {
+  background: transparent;
+  border: 1px solid #D8CFBD;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4B5563;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vw-all-mark-read-btn:hover {
+  background: #FFFFFF;
+  color: #1F2937;
+  border-color: #2F6650;
+}
+
+.vw-all-close-btn {
+  background: transparent;
+  border: none;
+  color: #6B7280;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.vw-all-close-btn:hover {
+  background: #EAE3D2;
+  color: #111827;
+}
+
+.vw-all-title-bar {
+  padding: 12px 20px 8px;
+}
+
+.vw-all-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0;
+}
+
+.vw-all-list {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vw-all-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: #6B7280;
+  font-size: 13.5px;
+}
+
+.vw-all-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E7E0D2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  outline: none;
+}
+
+.vw-all-item:hover {
+  border-color: #2F6650;
+  box-shadow: 0 4px 12px rgba(45, 30, 15, 0.08);
+  transform: translateY(-1px);
+}
+
+.vw-all-item.is-read {
+  opacity: 0.75;
+  background: #FAF8F3;
+}
+
+.vw-all-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #EDE7DB;
+}
+
+.vw-all-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vw-all-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.vw-all-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.vw-all-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.vw-all-category {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2F6650;
+}
+
+.vw-all-time {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-left: auto;
+}
+
+.vw-all-item-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px;
+  line-height: 1.3;
+}
+
+.vw-all-item-desc {
+  font-size: 12px;
+  color: #4B5563;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.vw-all-item-cta {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2F6650;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   7. Notification Preferences Modal
+   -------------------------------------------------------------------------- */
+.vw-prefs-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: vw-notif-fade 0.18s ease forwards;
+}
+
+.vw-prefs-modal {
+  width: min(520px, 94vw);
+  max-height: 85vh;
+  background: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: vw-notif-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.vw-prefs-header {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.vw-prefs-header-info {
+  flex: 1;
+  padding-right: 12px;
+}
+
+.vw-prefs-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 4px;
+}
+
+.vw-prefs-subtitle {
+  font-size: 12px;
+  color: #64748B;
+  margin: 0;
+}
+
+.vw-prefs-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748B;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vw-prefs-close-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+.vw-prefs-list {
+  padding: 14px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vw-prefs-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  transition: background 0.15s ease;
+}
+
+.vw-prefs-item:hover {
+  background: #F1F5F9;
+}
+
+.vw-prefs-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vw-prefs-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.vw-prefs-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.vw-prefs-item-desc {
+  font-size: 12px;
+  color: #64748B;
+  margin: 2px 0 0;
+  line-height: 1.35;
+}
+
+/* Accessible Switch toggle */
+.vw-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.vw-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.vw-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #CBD5E1;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+
+.vw-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.vw-switch input:checked + .vw-slider {
+  background-color: #2F6650;
+}
+
+.vw-switch input:focus-visible + .vw-slider {
+  outline: 2px solid #2F6650;
+  outline-offset: 2px;
+}
+
+.vw-switch input:checked + .vw-slider:before {
+  transform: translateX(20px);
+}
+
+.vw-prefs-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vw-prefs-done-btn {
+  background: #2F6650;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 24px;
+  font-family: var(--font-sans, 'Be Vietnam Pro', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.vw-prefs-done-btn:hover {
+  background: #234E3D;
+}

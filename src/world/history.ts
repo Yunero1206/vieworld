@@ -1,5 +1,6 @@
 import { displayOptions, DISPLAY_FIXTURES } from './display';
 import type { AppAction, AppState } from '../domain/types';
+import { readDisplaySurfaces, validateSurfaceSelection } from './displaySurfaces';
 
 export interface HistoryCard { id:string; fanId:string; tenantId:string; eventTitle:string; worldId:string; collectedAt:string; physicalStatus:'owned'|'returned'; returnedAt?:string; source:'demo-serialized-card' }
 export const historyCards=(s:AppState)=>(s.ticketArchive || []).filter(c=>c.fanId===s.fanProfile.id && c.tenantId===s.activeTenantId);
@@ -10,7 +11,18 @@ export function historyReducer(s:AppState,a:AppAction):AppState|undefined {
   switch(a.type){
     case 'SET_DISPLAY_SLOT': {
       if(!DISPLAY_FIXTURES.some(f=>f.slot===a.slot) || (a.itemId && !displayOptions(s).some(i=>i.slot===a.slot && i.id===a.itemId)))return {...s,lastError:{code:'DISPLAY_NOT_OWNED',message:'Chọn đúng loại món đã nhận hoặc huy hiệu đã đạt.'}};
-      return {...s,lastError:undefined,fanProfile:{...s.fanProfile,displaySlots:{...s.fanProfile.displaySlots,[a.slot]:a.itemId}}};
+      const previous = readDisplaySurfaces(s.fanProfile, displayOptions(s));
+      const selection = { itemIds: a.itemId ? [a.itemId] : [], focalItemId: a.itemId, layoutPreset: previous[a.slot].layoutPreset };
+      return {...s,lastError:undefined,fanProfile:{...s.fanProfile,displaySlots:{...s.fanProfile.displaySlots,[a.slot]:a.itemId},displaySurfaces:{...previous,[a.slot]:selection}}};
+    }
+    case 'SET_DISPLAY_SURFACE': {
+      const problem = validateSurfaceSelection(s.fanProfile, a.surfaceId, a.selection, displayOptions(s));
+      if (problem) return {...s,lastError:{code:'DISPLAY_SURFACE_INVALID',message:problem}};
+      const previous = readDisplaySurfaces(s.fanProfile, displayOptions(s));
+      return {...s,lastError:undefined,fanProfile:{...s.fanProfile,
+        displaySlots:{...s.fanProfile.displaySlots,[a.surfaceId]:a.selection.itemIds[0] || ''},
+        displaySurfaces:{...previous,[a.surfaceId]:a.selection},
+      }};
     }
     case 'IMPORT_DEMO_CARDS': {
       // Explicit opt-in fixture. This creates collection history, NEVER attendance or access.

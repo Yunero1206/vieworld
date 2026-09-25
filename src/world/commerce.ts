@@ -24,14 +24,41 @@ export function cartProblem(s:AppState, lines:CartLine[]=s.cart || []):string|un
   }
 }
 
+export function checkProductEligibility(
+  s: AppState,
+  p?: import('../domain/types').Product,
+  optionLabel?: string,
+  addQuantity: number = 1
+): { eligible: boolean; reason?: string } {
+  if (!p) return { eligible: false, reason: 'Không tìm thấy sản phẩm.' };
+  if (p.tenantId !== s.activeTenantId || !p.isAvailable || p.previewOnly) {
+    return { eligible: false, reason: 'Sản phẩm hiện không mở bán.' };
+  }
+  if (p.sizes && (!optionLabel || !p.sizes.includes(optionLabel))) {
+    return { eligible: false, reason: 'Vui lòng chọn kích cỡ phù hợp.' };
+  }
+  if (p.requiredBenefitId) {
+    const benefit = s.benefits[p.requiredBenefitId];
+    if (!benefit || benefit.fanId !== s.fanProfile.id || benefit.worldId !== p.worldId || !['eligible', 'claimed'].includes(benefit.status)) {
+      return { eligible: false, reason: `${p.title} cần quyền lợi hội viên còn hợp lệ.` };
+    }
+  }
+  const currentQty = (s.cart || []).filter(l => l.productId === p.id).reduce((sum, l) => sum + l.quantity, 0);
+  if (currentQty + addQuantity > p.stockCount) {
+    return { eligible: false, reason: `${p.title} không đủ tồn kho (chỉ còn ${p.stockCount} món).` };
+  }
+  return { eligible: true };
+}
+
 /** One receipt per cart line preserves the existing fulfilment and digital-entitlement contract.
  * A checkout groups these receipts; validation/payment are atomic across the entire group. */
 export function commerceReducer(s:AppState,a:AppAction):AppState|undefined {
   switch(a.type){
     case 'ADD_TO_CART': {
       const key=cartKey(a.productId,a.optionLabel);const cart=s.cart || [];const p=s.products[a.productId];
+      const addQty = typeof a.quantity === 'number' && a.quantity > 0 ? a.quantity : 1;
       const old=cart.find(l=>l.key===key);
-      const quantity=p?.delivery==='digital'?1:(old?.quantity || 0)+1;
+      const quantity=p?.delivery==='digital'?1:(old?.quantity || 0)+addQty;
       const next=old?cart.map(l=>l.key===key?{...l,quantity}:l):[...cart,{key,productId:a.productId,optionLabel:a.optionLabel,quantity}];
       const problem=cartProblem(s,next);return problem?fail(s,problem):{...s,cart:next,lastError:undefined};
     }

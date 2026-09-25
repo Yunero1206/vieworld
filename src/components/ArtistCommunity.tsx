@@ -1,23 +1,40 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Heart, ArrowRight, Calendar, X, Check } from 'lucide-react';
+import { Heart, ArrowRight, Calendar, X, Check, AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ARTIST_NOTES, momentTime } from '../world/fanWorld';
 import { MERCH_IMAGE_ROOT, DELIVERY_LABELS } from '../world/merchCatalog';
 import { HallPanel } from './HallPanel';
 import { ArtistBroadcast } from './ArtistBroadcast';
-import { AvatarRenderer } from './AvatarRenderer';
-import { getArtistChatMeta } from '../data/artistChatConfig';
+import { getArtistChatMeta, ARTIST_FANDOM_REGISTRY, getArtistAvatar } from '../data/artistChatConfig';
 import { getProductFamilies, ProductFamily } from '../world/moments';
 import { ProductFamilyQuickView } from './ProductFamilyQuickView';
-import { ArtistScheduleDrawer } from './ArtistScheduleDrawer';
 import { Product } from '../domain/types';
+import { checkProductEligibility } from '../world/commerce';
 
 interface ArtistCommunityProps {
   worldId: string;
   onOpen?: (panel: string) => void;
   initialTab?: string;
   onTabChange?: (tab: string) => void;
+}
+
+function parseAppointmentDate(isoString: string) {
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) {
+    return { day: '--', month: '---', time: '--:--', compactDate: 'Lịch đang cập nhật' };
+  }
+  const day = d.getDate().toString().padStart(2, '0');
+  const enMonthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const month = enMonthNames[d.getMonth()];
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return {
+    day,
+    month,
+    time: `${hours}:${minutes}`,
+    compactDate: `${day} ${month}`,
+  };
 }
 
 export function ArtistCommunity({
@@ -39,7 +56,6 @@ export function ArtistCommunity({
   const querySession = searchParams.get('session');
   const [tab, setTab] = useState(resolvedInitialTab);
   const [selectedLive, setSelectedLive] = useState<string>(querySession || '');
-  const [isScheduleDrawerOpen, setIsScheduleDrawerOpen] = useState(queryPanel === 'calendar');
 
   useEffect(() => {
     const s = searchParams.get('session');
@@ -54,7 +70,7 @@ export function ArtistCommunity({
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<'all' | 'physical' | 'digital' | 'bundle'>('all');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'apparel' | 'lightstick' | 'album'>('all');
-  const [cartToast, setCartToast] = useState<{ message: string; visible: boolean } | null>(null);
+  const [cartToast, setCartToast] = useState<{ message: string; visible: boolean; isError?: boolean } | null>(null);
 
   // Cheers state
   const [cheers, setCheers] = useState<Record<string, number>>({
@@ -66,10 +82,9 @@ export function ArtistCommunity({
   const [userCheered, setUserCheered] = useState<Record<string, boolean>>({});
 
   const world = state.worlds[worldId];
-  const artistAsset = world?.avatarAssetId ? state.avatarAssets[world.avatarAssetId] : undefined;
-  const canShowArtist = artistAsset?.status === 'approved';
+  const artistColor = ARTIST_FANDOM_REGISTRY[worldId]?.signatureLightstick.color || '#A855F7';
 
-  // Synchronize tab changes with parent
+  // Synchronize tab changes with parent and URL
   const handleSelectTab = (nextTab: string) => {
     setTab(nextTab);
     onTabChange?.(nextTab);
@@ -80,6 +95,13 @@ export function ArtistCommunity({
       setTab(initialTab);
     }
   }, [initialTab]);
+
+  useEffect(() => {
+    const qTab = searchParams.get('tab');
+    if (qTab && qTab !== tab) {
+      setTab(qTab);
+    }
+  }, [searchParams]);
 
   const toggleCheer = (noteId: string) => {
     setCheers(prev => ({
@@ -98,7 +120,7 @@ export function ArtistCommunity({
     .sort((a, b) => a.scheduledStartTime.localeCompare(b.scheduledStartTime));
 
   const nearestSession = sessions[0];
-  const otherSessionsCount = Math.max(0, sessions.length - 1);
+
 
   const broadcasts = sessions.filter(s => s.format === 'dropin' || s.format === 'concert');
   const pastSessions = Object.values(state.sessions)
@@ -137,22 +159,37 @@ export function ArtistCommunity({
     ['merch', 'Merchandise'],
   ];
 
-  const handleAddToCart = (product: Product, size?: string, quantity: number = 1) => {
-    for (let i = 0; i < quantity; i++) {
-      dispatch({
-        type: 'ADD_TO_CART',
-        productId: product.id,
-        optionLabel: size || undefined,
+  const handleAddToCart = (product: Product, size?: string, quantity: number = 1): boolean => {
+    const eligibility = checkProductEligibility(state, product, size || undefined, quantity);
+    if (!eligibility.eligible) {
+      setCartToast({
+        message: eligibility.reason || 'Không thể thêm sản phẩm vào giỏ hàng',
+        visible: true,
+        isError: true,
       });
+      setTimeout(() => {
+        setCartToast(prev => (prev ? { ...prev, visible: false } : null));
+      }, 4000);
+      return false;
     }
+
+    dispatch({
+      type: 'ADD_TO_CART',
+      productId: product.id,
+      optionLabel: size || undefined,
+      quantity,
+    });
+
     const label = DELIVERY_LABELS[product.delivery || 'physical'] || 'Hàng thật';
     setCartToast({
-      message: `Đã thêm ${product.title} (${label}) vào giỏ hàng`,
+      message: `Đã thêm ${quantity > 1 ? `${quantity}x ` : ''}${product.title} (${label}) vào giỏ hàng`,
       visible: true,
+      isError: false,
     });
     setTimeout(() => {
       setCartToast(prev => (prev ? { ...prev, visible: false } : null));
     }, 4000);
+    return true;
   };
 
   return (
@@ -216,21 +253,12 @@ export function ArtistCommunity({
                 <article className="v6-artist-post v7-artist-post-card moments-post-card" key={n.id}>
                   <header className="v7-post-header moments-post-header">
                     <div className="v7-post-avatar moments-post-avatar">
-                      {canShowArtist ? (
-                        <AvatarRenderer
-                          testId="community-post-avatar"
-                          role="artist"
-                          accessoryId={artistAsset?.parts.accessory}
-                          outfitId={artistAsset?.parts.outfit}
-                          size="preview"
-                          isFrozen
-                          displayName={world?.name}
-                        />
-                      ) : (
-                        <span className="moments-post-avatar-fallback">
-                          {world?.name.slice(0, 1) || 'A'}
-                        </span>
-                      )}
+                      <img
+                        src={getArtistAvatar(world?.id)}
+                        alt={world?.name || 'Artist'}
+                        className="moments-post-avatar-img"
+                        data-testid="community-post-avatar"
+                      />
                     </div>
                     <div className="v7-post-header-meta moments-post-meta">
                       <div className="v7-post-author-row moments-post-author-row">
@@ -243,8 +271,10 @@ export function ArtistCommunity({
                     </div>
                   </header>
 
-                  <h3 className="v7-post-title moments-post-title">{n.title}</h3>
-                  <p className="v7-post-body moments-post-body">{n.body}</p>
+                  <div className="moments-post-content">
+                    <h3 className="v7-post-title moments-post-title">{n.title}</h3>
+                    <p className="v7-post-body moments-post-body">{n.body}</p>
+                  </div>
 
                   {/* Attached Session preview if applicable */}
                   {n.sessionId && state.sessions[n.sessionId] && (
@@ -292,70 +322,145 @@ export function ArtistCommunity({
             </div>
           </div>
 
-          {/* Right Column (32%): Sidebar with Next Appointment & Fandom Connect */}
-          <aside className="v7-community-sidebar moments-sidebar-column">
-            {/* Card: Hẹn gần nhất */}
-            <div className="moments-sidebar-card moments-appointment-card">
-              <p className="moments-sidebar-eyebrow">HẸN GẦN NHẤT</p>
-              {nearestSession ? (
-                <div className="moments-appointment-box">
-                  <span className="moments-appointment-artist">{world?.name}</span>
-                  <h3 className="moments-appointment-title">{nearestSession.title}</h3>
-                  <div className="moments-appointment-time">
-                    <Calendar size={14} />
-                    <span>{momentTime(nearestSession.scheduledStartTime)}</span>
-                  </div>
-                  <Link
-                    className="moments-appointment-cta"
-                    to={`/sessions/${nearestSession.id}`}
-                  >
-                    <span>Xem buổi hẹn</span>
-                    <ArrowRight size={14} />
-                  </Link>
+          {/* Right Column (32%): Lịch hẹn cùng nghệ sĩ */}
+          <aside className="v7-community-sidebar moments-sidebar-column" aria-label={`Lịch hẹn cùng ${world?.name}`}>
+            <div
+              className="moments-sidebar-card moments-appointment-card"
+              style={{ '--artist-accent': artistColor } as React.CSSProperties}
+            >
+              <div className="moments-schedule-card-header">
+                <div className="moments-schedule-header-title">
+                  <Calendar size={16} className="moments-schedule-calendar-icon" style={{ color: artistColor }} />
+                  <h3 className="moments-schedule-title">Lịch hẹn cùng {world?.name || 'nghệ sĩ'}</h3>
+                </div>
+                {sessions.length > 0 && (
+                  <span className="moments-schedule-badge">
+                    {sessions.length}
+                  </span>
+                )}
+              </div>
 
-                  <div className="moments-appointment-links">
-                    {otherSessionsCount > 0 && (
-                      <button
-                        type="button"
-                        className="moments-schedule-trigger-btn"
-                        onClick={() => setIsScheduleDrawerOpen(true)}
-                      >
-                        <span>{otherSessionsCount} lịch tiếp theo →</span>
-                      </button>
-                    )}
+              {sessions.length === 0 ? (
+                <div className="moments-schedule-empty">
+                  <p>Hiện chưa có lịch hẹn mới được công bố từ nghệ sĩ.</p>
+                </div>
+              ) : (
+                <div className="moments-appointment-content">
+                  {/* Primary Appointment */}
+                  {(() => {
+                    const primary = sessions[0];
+                    const isLive = primary.status === 'running';
+                    const dateInfo = parseAppointmentDate(primary.scheduledStartTime);
+                    const formatText =
+                      primary.format === 'listening'
+                        ? 'LISTENING PARTY'
+                        : primary.format === 'concert'
+                        ? 'CONCERT LIVE'
+                        : 'DROP-IN TRÒ CHUYỆN';
+                    const desc =
+                      (primary as any).description ||
+                      (primary.format === 'listening'
+                        ? 'Phiên nghe nhạc và thưởng thức tác phẩm mới cùng nghệ sĩ và cộng đồng fan.'
+                        : primary.format === 'concert'
+                        ? 'Sân khấu trực tiếp với setlist âm nhạc sống động và tương tác fanchant.'
+                        : 'Phiên giao lưu trực tiếp thân mật, chia sẻ hậu trường và giải đáp câu hỏi của fan.');
+                    const isRsvpd = state.rsvpdSessionIds.includes(primary.id);
+
+                    return (
+                      <div className="moments-primary-appointment">
+                        <div className="moments-appointment-datetime-row">
+                          <div className="moments-appointment-date-block">
+                            <span className="moments-date-day">{dateInfo.day}</span>
+                            <span className="moments-date-month">{dateInfo.month}</span>
+                          </div>
+                          <span className="moments-date-separator">·</span>
+                          <time className="moments-date-time">{dateInfo.time}</time>
+                          {isLive && (
+                            <span className="moments-live-pulse-badge">
+                              <span className="moments-live-pulse-dot" />
+                              ĐANG DIỄN RA
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="moments-appointment-format-label">
+                          {formatText}
+                        </div>
+
+                        <h4 className="moments-appointment-title">{primary.title}</h4>
+
+                        <p className="moments-appointment-desc">{desc}</p>
+
+                        {isRsvpd && (
+                          <div className="moments-appointment-rsvp-state">
+                            <span className="moments-rsvp-dot" />
+                            <span>Bạn đã giữ chỗ</span>
+                          </div>
+                        )}
+
+                        <div className="moments-appointment-cta-row">
+                          <Link
+                            to={`/sessions/${primary.id}`}
+                            className={`moments-appointment-cta-link ${isLive ? 'is-live' : ''}`}
+                          >
+                            <span>{isLive ? 'Vào xem ngay' : 'Xem buổi hẹn'}</span>
+                            <ArrowRight size={13} />
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Secondary Appointments (If 2 or 3 upcoming) */}
+                  {sessions.slice(1, 3).map(s => {
+                    const sDate = parseAppointmentDate(s.scheduledStartTime);
+                    const sFormat =
+                      s.format === 'listening'
+                        ? 'Listening Room'
+                        : s.format === 'concert'
+                        ? 'Concert Live'
+                        : 'Drop-in Trò chuyện';
+                    const sRsvpd = state.rsvpdSessionIds.includes(s.id);
+
+                    return (
+                      <div key={s.id} className="moments-appointment-secondary-row">
+                        <div className="moments-secondary-date">
+                          <span className="moments-secondary-day">{sDate.day}</span>
+                          <span className="moments-secondary-month">{sDate.month}</span>
+                        </div>
+                        <div className="moments-secondary-body">
+                          <Link to={`/sessions/${s.id}`} className="moments-secondary-title">
+                            {s.title}
+                          </Link>
+                          <div className="moments-secondary-meta">
+                            <span>{sFormat}</span>
+                            <span>·</span>
+                            <span>{sDate.time}</span>
+                            {sRsvpd && (
+                              <span className="moments-secondary-rsvp-tag">● Đã giữ chỗ</span>
+                            )}
+                          </div>
+                        </div>
+                        <Link to={`/sessions/${s.id}`} className="moments-secondary-arrow" aria-label={`Xem ${s.title}`}>
+                          <ArrowRight size={13} />
+                        </Link>
+                      </div>
+                    );
+                  })}
+
+                  {/* Card Footer: Xem lịch của [Artist] → */}
+                  <div className="moments-appointment-footer-row">
                     <button
                       type="button"
-                      className="moments-schedule-trigger-btn"
-                      onClick={() => setIsScheduleDrawerOpen(true)}
+                      className="moments-appointment-all-link"
+                      onClick={() => handleSelectTab('live')}
                     >
-                      <span>Xem toàn bộ lịch →</span>
+                      <span>Xem lịch của {world?.name || 'nghệ sĩ'}</span>
+                      <ArrowRight size={13} />
                     </button>
                   </div>
                 </div>
-              ) : (
-                <p className="fw-muted" style={{ margin: 0, fontSize: '13px' }}>
-                  Chưa có lịch mới được công bố.
-                </p>
               )}
-            </div>
-
-            {/* Real-Time Hall Activity (Only rendered when there is notable active presence/listening) */}
-            <div
-              className="moments-sidebar-card moments-active-hall-card"
-              onClick={() => handleSelectTab('hall')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSelectTab('hall')}
-              style={{ cursor: 'pointer', border: '1px solid rgba(16, 185, 129, 0.25)', background: 'linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%)' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <span className="moments-live-pulse-dot" style={{ backgroundColor: '#10B981', width: '8px', height: '8px' }} />
-                <strong style={{ fontSize: '12px', color: '#065F46' }}>Listening Party đang diễn ra</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', color: '#475569' }}>
-                <span>128 người đang nghe cùng</span>
-                <span style={{ color: '#059669', fontWeight: '700' }}>Vào nghe →</span>
-              </div>
             </div>
           </aside>
         </div>
@@ -567,23 +672,26 @@ export function ArtistCommunity({
         onAddToCart={handleAddToCart}
       />
 
-      {/* Schedule Drawer (Full Calendar Overlay) */}
-      <ArtistScheduleDrawer
-        worldId={worldId}
-        artistName={world?.name || ''}
-        isOpen={isScheduleDrawerOpen}
-        onClose={() => setIsScheduleDrawerOpen(false)}
-      />
-
       {/* In-World Add-to-Cart Toast */}
       {cartToast && cartToast.visible && (
-        <aside className="moments-cart-toast" role="status" aria-live="polite">
-          <Check size={16} style={{ color: '#34D399', flexShrink: 0 }} />
+        <aside
+          className="moments-cart-toast"
+          role="status"
+          aria-live="polite"
+          style={cartToast.isError ? { borderLeft: '4px solid #EF4444' } : undefined}
+        >
+          {cartToast.isError ? (
+            <AlertCircle size={16} style={{ color: '#EF4444', flexShrink: 0 }} />
+          ) : (
+            <Check size={16} style={{ color: '#34D399', flexShrink: 0 }} />
+          )}
           <span className="moments-toast-message">{cartToast.message}</span>
           <div className="moments-toast-actions">
-            <Link to="/cart" className="moments-toast-cart-link">
-              Xem giỏ hàng →
-            </Link>
+            {!cartToast.isError && (
+              <Link to="/cart" className="moments-toast-cart-link">
+                Xem giỏ hàng →
+              </Link>
+            )}
             <button
               type="button"
               className="moments-toast-close"

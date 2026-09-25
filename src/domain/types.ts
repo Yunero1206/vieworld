@@ -149,6 +149,7 @@ export type FanRole = 'fan' | 'artist' | 'operator';
 export interface FanProfile extends BaseRecord {
   avatarPreset?: 'original' | 'wave' | 'bob' | 'curl';
   displaySlots?: Partial<Record<'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement', string>>;
+  displaySurfaces?: Partial<Record<import('../world/display').DisplaySlot, import('../world/displaySurfaces').SurfaceSelection>>;
   publicIdentity?: { bio: string; mood: string; badge?: 10 | 20; productIds?: string[] };
   username: string;
   displayName: string;
@@ -171,6 +172,7 @@ export interface Product extends BaseRecord {
   worldId: string;
   title: string;
   priceVND: number;
+  compareAtPriceVND?: number;
   stockCount: number;
   isAvailable: boolean;
   requiredBenefitId?: string;
@@ -190,6 +192,10 @@ export interface Product extends BaseRecord {
   sizes?: string[];
   digitalSlot?: 'shirt' | 'hat' | 'lightstick';
   digitalItemId?: string;
+  previewCapabilities?: { avatar?: boolean; room?: boolean };
+  roomAsset?: string;
+  roomSurface?: import('../world/display').DisplaySlot;
+  roomFootprint?: 1 | 2 | 3;
   previewOnly?: boolean;
   releaseType?: 'in_stock' | 'pre_order';
   estimatedShipping?: string;
@@ -217,6 +223,10 @@ export interface ChatMessage {
   reportRef?: string;
   isVip?: boolean;
   badgeLabel?: string;
+  /** Explicit author opt-in plus moderation required before a voice can leave its world. */
+  explorePreviewConsent?: boolean;
+  explorePreviewStatus?: 'pending' | 'approved' | 'rejected';
+  exploreSelectedBy?: 'artist' | 'community';
 }
 
 export interface PollOption {
@@ -240,6 +250,8 @@ export interface Capsule extends BaseRecord {
   participationId: string;
   isSaved: boolean;
   privateNote?: string;
+  /** Explicit owner opt-in; private unless affirmatively enabled. */
+  explorePublic?: boolean;
 }
 
 export interface Notification extends BaseRecord {
@@ -326,8 +338,9 @@ export interface AppState {
  */
 export type AppAction =
   | { type: 'SET_DISPLAY_SLOT'; slot: 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement'; itemId?: string }
+  | { type: 'SET_DISPLAY_SURFACE'; surfaceId: import('../world/display').DisplaySlot; selection: import('../world/displaySurfaces').SurfaceSelection }
   | { type: 'ADVANCE_SHIPMENT'; orderId: string; expectedStage: number }
-  | { type: 'ADD_TO_CART'; productId: string; optionLabel?: string }
+  | { type: 'ADD_TO_CART'; productId: string; optionLabel?: string; quantity?: number }
   | { type: 'SET_CART_QUANTITY'; key: string; quantity: number }
   | { type: 'CHECKOUT_CART'; requestId: string; fingerprint: string }
   | { type: 'PAY_CHECKOUT'; checkoutId: string }
@@ -336,7 +349,7 @@ export type AppAction =
   | { type: 'RETURN_HISTORY_CARDS'; cardIds: string[] }
   | { type: 'SAVE_PUBLIC_IDENTITY'; bio: string; mood: string; badge?: 10 | 20; productIds?: string[] }
   | { type: 'SAVE_ROOM_DESIGN'; design: import('../world/places').RoomDesign }
-  | { type: 'SEND_HALL_MESSAGE'; worldId: string; text: string; requestId: string }
+  | { type: 'SEND_HALL_MESSAGE'; worldId: string; text: string; requestId: string; roomId?: string }
   | { type: 'REPORT_HALL_MESSAGE'; worldId: string; messageId: string }
   | { type: 'TOGGLE_SAVED_PRODUCT'; productId: string }
   | { type: 'EQUIP_DIGITAL_PRODUCT'; productId: string }

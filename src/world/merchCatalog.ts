@@ -4,9 +4,9 @@ export const MERCH_IMAGE_ROOT = '/images/merch-v2';
 export const DELIVERY_LABELS = { physical: 'Hàng thật', digital: 'Digital', bundle: 'Hàng thật + Digital' };
 const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30, kind: 'physical' as ProductKind };
 export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
-  { id: 'product-star-shirt-real', familyId: 'star-shirt', title: 'Áo Star Club', priceVND: 390000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', digitalImage: 'shirt-digital', description: 'Áo cotton màu kem, cổ olive và ngôi sao thêu nhỏ. Bản mẫu thiết kế, không phải ảnh hàng đã sản xuất.', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', 'Không kèm trang phục avatar'] },
+  { id: 'product-star-shirt-real', familyId: 'star-shirt', title: 'Áo Star Club', priceVND: 390000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', roomAsset: '/images/world-v6/shirt-cutout.webp', digitalImage: 'shirt-digital', description: 'Áo cotton màu kem, cổ olive và ngôi sao thêu nhỏ. Bản mẫu thiết kế, không phải ảnh hàng đã sản xuất.', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', 'Không kèm trang phục avatar'] },
   { id: 'product-star-shirt-digital', familyId: 'star-shirt', title: 'Áo Star Club · Digital', priceVND: 45000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'shirt-digital', digitalImage: 'shirt-digital', digitalSlot: 'shirt', digitalItemId: 'star-shirt', includes: ['1 trang phục cho avatar VieWorld', 'Không giao áo ngoài đời'] },
-  { id: 'product-star-shirt-bundle', familyId: 'star-shirt', title: 'Áo Star Club · Duo', priceVND: 420000, category: 'merch', delivery: 'bundle', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', digitalImage: 'shirt-digital', digitalSlot: 'shirt', digitalItemId: 'star-shirt', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', '1 trang phục avatar sau bàn giao mô phỏng'] },
+  { id: 'product-star-shirt-bundle', familyId: 'star-shirt', title: 'Áo Star Club · Duo', priceVND: 420000, category: 'merch', delivery: 'bundle', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', roomAsset: '/images/world-v6/shirt-cutout.webp', digitalImage: 'shirt-digital', digitalSlot: 'shirt', digitalItemId: 'star-shirt', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', '1 trang phục avatar sau bàn giao mô phỏng'] },
   { id: 'product-cap-real', familyId: 'star-cap', title: 'Nón Everyday Star', priceVND: 250000, category: 'merch', delivery: 'physical', releaseType: 'in_stock', estimatedShipping: 'Sẵn hàng · Giao trong 3-5 ngày làm việc', batchLabel: 'Sẵn hàng', image: 'cap-physical', digitalImage: 'cap-digital', includes: ['1 nón cotton có khóa điều chỉnh', 'Không kèm nón avatar'] },
   { id: 'product-cap-digital', familyId: 'star-cap', title: 'Nón Everyday Star · Digital', priceVND: 30000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'cap-digital', digitalImage: 'cap-digital', digitalSlot: 'hat', digitalItemId: 'star-cap', includes: ['1 nón cho avatar VieWorld', 'Không có sản phẩm vật lý'] },
   { id: 'product-cd-real', familyId: 'first-notes', title: 'First Notes · CD Album', priceVND: 320000, category: 'album', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến phát hành: Tháng 11/2026', batchLabel: 'Pre-order', image: 'cd-physical', description: 'Album mẫu của Artist A. Minh họa bao bì; không chứa bản ghi thương mại hoặc quyền phát nhạc.', includes: ['1 CD và bìa giấy mẫu', 'Không kèm album số hoặc quyền streaming'] },
@@ -36,12 +36,21 @@ export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-kai-cassette-real', familyId: 'kai-cassette', worldId: 'artist-kai', title: 'Băng Cassette KAI "City Pulse Beats" Boxset', priceVND: 350000, category: 'album', delivery: 'physical', releaseType: 'in_stock', estimatedShipping: 'Sẵn hàng · Giao trong 3-5 ngày làm việc', batchLabel: 'Cassette Tape', image: 'kai-cassette-physical', description: 'Băng cassette vỏ nhựa trong suốt màu xanh neon cyan độc đáo chứa tuyển tập các bản synth-wave và future beats. Kèm hộp slipcase dập kim tuyến.', includes: ['1 băng cassette trong suốt màu cyan', 'Hộp đựng slipcase kèm bộ 5 sticker hologram KAI'] },
 ].map(p => [p.id, { ...base, kind: (p.delivery || 'physical') as ProductKind, ...p } as Product]));
 
+import { EXPANDED_PRODUCTS } from '../data/expandedUniverse';
+
 /** Additive catalogue migration: preserve stock, orders, custom products and other tenants. */
 export function withMerchCatalog(state: AppState): AppState {
   if (state.activeTenantId !== 'vieworld-demo' || !state.worlds['artist-a']) return state;
-  const missing = Object.values(NEW_MERCH).filter(p => !state.products[p.id]);
+  const allMerch = { ...NEW_MERCH, ...EXPANDED_PRODUCTS };
+  const missing = Object.values(allMerch).filter(p => !state.products[p.id]);
   if (!missing.length) return state;
-  return { ...state, products: { ...state.products, ...Object.fromEntries(missing.map(p => [p.id, { ...p }])) } };
+  return {
+    ...state,
+    products: {
+      ...state.products,
+      ...Object.fromEntries(missing.map(p => [p.id, { ...p }])),
+    },
+  };
 }
 
 export function ownsDigitalProduct(state: AppState, product: Product) {

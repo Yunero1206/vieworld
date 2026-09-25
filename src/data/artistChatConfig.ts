@@ -20,6 +20,7 @@ export interface ArtistFandomMeta {
   };
   signatureFanchant: string;
   defaultViewerCount: string;
+  avatar: string;
 }
 
 export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
@@ -27,6 +28,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-a',
     artistName: 'Artist A',
     fandomName: 'V-Stars',
+    avatar: '/images/characters-v4/avatar-artist-a.webp',
     companionDays: 128,
     companionDate: 'tháng 5/2026',
     fandomMilestones: [
@@ -46,6 +48,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-mira',
     artistName: 'MIRA',
     fandomName: 'Moonies',
+    avatar: '/images/characters-v4/avatar-artist-mira.webp',
     companionDays: 210,
     companionDate: 'tháng 2/2026',
     fandomMilestones: [
@@ -65,6 +68,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-kai',
     artistName: 'KAI',
     fandomName: 'Pulse Crew',
+    avatar: '/images/characters-v4/avatar-artist-kai.webp',
     companionDays: 85,
     companionDate: 'tháng 6/2026',
     fandomMilestones: [
@@ -84,6 +88,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'neon-sessions',
     artistName: 'Neon Sessions',
     fandomName: 'Night Owls',
+    avatar: '/images/characters-v4/avatar-neon-sessions.webp',
     companionDays: 64,
     companionDate: 'tháng 7/2026',
     fandomMilestones: [
@@ -103,6 +108,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'world-mfan-artist-m',
     artistName: 'Artist M',
     fandomName: 'MFan Club',
+    avatar: '/images/characters-v4/avatar-artist-a.webp',
     companionDays: 52,
     companionDate: 'tháng 8/2026',
     fandomMilestones: [
@@ -119,6 +125,22 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     defaultViewerCount: '1.2K',
   },
 };
+
+import bTriptych from '../assets/explore-demo/artist-b-triptych.jpg';
+import cTriptych from '../assets/explore-demo/artist-c-triptych.jpg';
+import dTriptych from '../assets/explore-demo/artist-d-triptych.jpg';
+import eTriptych from '../assets/explore-demo/artist-e-triptych.jpg';
+
+export function getArtistAvatar(worldId?: string | null): string {
+  if (!worldId) return '/images/characters-v4/avatar-artist-a.webp';
+  const id = worldId.toLowerCase();
+  const demoPortraits: Record<string, string> = { 'artist-b': bTriptych, 'artist-c': cTriptych, 'artist-d': dTriptych, 'artist-e': eTriptych };
+  if (demoPortraits[id]) return demoPortraits[id];
+  if (id.includes('mira')) return '/images/characters-v4/avatar-artist-mira.webp';
+  if (id.includes('kai')) return '/images/characters-v4/avatar-artist-kai.webp';
+  if (id.includes('neon')) return '/images/characters-v4/avatar-neon-sessions.webp';
+  return ARTIST_FANDOM_REGISTRY[worldId]?.avatar || '/images/characters-v4/avatar-artist-a.webp';
+}
 
 export const SESSION_TO_ARTIST: Record<string, string> = {
   'session-dropin-01': 'artist-a',

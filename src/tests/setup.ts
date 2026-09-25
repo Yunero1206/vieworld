@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 /**
  * Polyfill / mock for localStorage in test environments (e.g. Node 26+ jsdom)
@@ -30,7 +31,6 @@ class LocalStorageMock implements Storage {
     this.store[key] = String(value);
   }
 }
-
 if (typeof window !== 'undefined') {
   if (!window.localStorage || typeof window.localStorage.clear !== 'function') {
     const mock = new LocalStorageMock();
@@ -44,5 +44,10 @@ if (typeof window !== 'undefined') {
       writable: true,
       configurable: true,
     });
+  }
+
+  window.scrollTo = vi.fn();
+  if (typeof Element !== 'undefined') {
+    Element.prototype.scrollIntoView = vi.fn();
   }
 }

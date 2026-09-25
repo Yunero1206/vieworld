@@ -21,14 +21,17 @@ export function CartView(){
   const total=checkoutId?group.reduce((n,o)=>n+orderAmount(o,state),0):cart.reduce((n,l)=>n+(state.products[l.productId]?.priceVND || 0)*l.quantity,0);
   const problem=cartProblem(state);
   const paid=group.length>0&&group.every(o=>['paid','fulfilled'].includes(o.status));
+  const allFulfilled=group.length>0&&group.every(o=>o.status==='fulfilled');
   const cancelled=group.length>0&&group.every(o=>o.status==='cancelled');
   const pendingGroup=group.length>0&&group.every(o=>o.status==='pending');
   const physical=checkoutId?group.some(o=>state.products[o.productId]?.delivery!=='digital'):cart.some(l=>state.products[l.productId]?.delivery!=='digital');
   function checkout(){if(pending.current || !consent)return;const id=crypto.randomUUID();pending.current=id;setBusy(true);dispatch({type:'CHECKOUT_CART',requestId:id,fingerprint});}
+  const stepLabels=['Giỏ đồ','Kiểm tra',paid&&!allFulfilled?'Đã thanh toán · Đang chuẩn bị':'Thanh toán','Nhận đồ'];
+  const activeStepIndex=checkoutId?(allFulfilled?3:2):(review?1:0);
   return <div className="fw-experience v5-commerce">
     <Link className="fw-text-button" to="/shop"><ArrowLeft size={16}/>Tiếp tục chọn đồ</Link>
-    <header className="fw-scene-heading"><h1>{checkoutId?paid?'Đã thanh toán mô phỏng':cancelled?'Đã hủy lần chốt đơn':'Thanh toán mô phỏng':review?'Kiểm tra trước khi chốt':'Giỏ đồ của mình'}<span>Chọn đúng phiên bản. Biết rõ điều mình nhận.</span></h1></header>
-    <ol className="v5-checkout-steps" aria-label="Tiến trình mua hàng">{['Giỏ đồ','Kiểm tra','Thanh toán','Nhận đồ'].map((v,i)=><li key={v} aria-current={i===(checkoutId?paid?3:2:review?1:0)?'step':undefined}><span>{i+1}</span>{v}</li>)}</ol>
+    <header className="fw-scene-heading"><h1>{checkoutId?allFulfilled?'Đã nhận đủ vật phẩm':paid?'Đã thanh toán mô phỏng · Đang chuẩn bị':cancelled?'Đã hủy lần chốt đơn':'Thanh toán mô phỏng':review?'Kiểm tra trước khi chốt':'Giỏ đồ của mình'}<span>Chọn đúng phiên bản. Biết rõ điều mình nhận.</span></h1></header>
+    <ol className="v5-checkout-steps" aria-label="Tiến trình mua hàng">{stepLabels.map((v,i)=><li key={i} aria-current={i===activeStepIndex?'step':undefined}><span>{i+1}</span>{v}</li>)}</ol>
     {checkoutId && !group.length ? <div className="fw-empty"><h2>Không tìm thấy lần chốt đơn này.</h2><Link to="/cart" className="fw-button">Về giỏ đồ</Link></div> : !checkoutId&&!cart.length?<div className="fw-empty"><ShoppingBag size={36}/><h2>Giỏ đồ đang nhẹ tênh.</h2><p>Thử đồ ở VieSHOP rồi thêm đúng phiên bản mình thích.</p><Link to="/shop" className="fw-button">Ghé VieSHOP</Link><Link to="/me?panel=bag" className="fw-text-button">Xem đơn đã chốt →</Link></div>:<div className="v5-checkout-layout"><section aria-label="Món đã chọn">
       {(checkoutId?group.map(o=>({key:o.id,productId:o.productId,quantity:o.quantity || 1,optionLabel:o.optionLabel,order:o})):cart.map(l=>({...l,order:undefined}))).map(l=>{const p=state.products[l.productId];return <article className="v5-cart-line" key={l.key}>
         {p?.image?<img src={`${MERCH_IMAGE_ROOT}/${p.image}.png`} alt={p.title} width="100" height="100"/>:<Package size={40}/>}
@@ -39,7 +42,7 @@ export function CartView(){
       </article>;})}
       <p className="fw-muted">{physical?'Đơn gồm vật phẩm vật lý: bạn có thể theo dõi quy trình đóng gói và vận chuyển mô phỏng mà không cần cung cấp địa chỉ thật.':'Đơn chỉ gồm vật phẩm digital: trang phục và phụ kiện sẽ được chuyển thẳng vào tủ đồ avatar của bạn.'}</p>
       {review&&<button className="fw-text-button" onClick={()=>setReview(false)}>← Sửa lại giỏ đồ</button>}
-    </section><aside className="v5-order-summary"><p className="fw-eyebrow">VIESHOP · TRẢI NGHIỆM THỬ NGHIỆM</p><h2>{paid?'Đồ của bạn đang được chuẩn bị':'Tóm tắt lần mua'}</h2><p><span>Tiền sản phẩm</span><strong>{money(total)}</strong></p><p><span>Giao nhận demo</span><span>0 ₫</span></p><p className="v5-total"><span>Tổng mô phỏng</span><strong>{money(total)}</strong></p>
+    </section><aside className="v5-order-summary"><p className="fw-eyebrow">VIESHOP · TRẢI NGHIỆM THỬ NGHIỆM</p><h2>{allFulfilled?'Đồ đã vào Bộ sưu tập':paid?'Đơn đang được chuẩn bị':'Tóm tắt lần mua'}</h2><p><span>Tiền sản phẩm</span><strong>{money(total)}</strong></p><p><span>Giao nhận demo</span><span>0 ₫</span></p><p className="v5-total"><span>Tổng mô phỏng</span><strong>{money(total)}</strong></p>
       {!checkoutId&&problem&&<p role="alert">{problem}</p>}
       {!checkoutId&&!review&&<button className="fw-button" disabled={!!problem} onClick={()=>setReview(true)}>Kiểm tra đơn →</button>}
       {!checkoutId&&review&&<><label className="v5-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Tui đã kiểm tra size, số lượng và bản hàng thật / digital. Đây là giao dịch mô phỏng.</label><button className="fw-button" disabled={!consent||!!problem||busy} onClick={checkout}>{busy?'Đang chốt…':'Chốt đơn · sang thanh toán'}</button><small>Chốt đơn chưa trừ tiền, chưa giữ tồn kho và chưa cấp vật phẩm.</small></>}
@@ -50,6 +53,9 @@ export function CartView(){
           <button type="button" className={`fw-text-button ${payMethod==='qr'?'selected':''}`} style={{padding: '5px 10px', fontSize: '12px', borderRadius: '6px', border: payMethod==='qr'?'2px solid #4F46E5':'1px solid #D1D5DB', background: payMethod==='qr'?'#EEF2FF':'transparent', fontWeight: payMethod==='qr'?700:500}} onClick={()=>setPayMethod('qr')}>📱 Quét MoMo / VNPay QR</button>
         </div>
         {payMethod==='qr' && <div style={{textAlign: 'center', padding: '10px', background: '#F9FAFB', borderRadius: '8px', border: '1px dashed #9CA3AF', marginBottom: '10px'}}>
+          <div style={{display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#FEF3C7', color: '#92400E', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600, marginBottom: '8px'}}>
+            Mã QR thanh toán mô phỏng (Demo Sandbox)
+          </div>
           <svg width="100" height="100" viewBox="0 0 100 100" fill="none" style={{background: 'white', padding: '6px', borderRadius: '6px', margin: '0 auto 6px', display: 'block'}}>
             <rect width="100" height="100" fill="white"/>
             <rect x="8" y="8" width="28" height="28" fill="#111827"/><rect x="12" y="12" width="20" height="20" fill="white"/><rect x="16" y="16" width="12" height="12" fill="#111827"/>
@@ -60,16 +66,17 @@ export function CartView(){
           </svg>
           <small style={{display: 'block', color: '#6B7280', fontSize: '11px'}}>Nội dung: <strong>VIE-{checkoutId?.slice(0, 8).toUpperCase()}</strong></small>
         </div>}
-        <button className="fw-button" onClick={()=>dispatch({type:'PAY_CHECKOUT',checkoutId:checkoutId!})}>{payMethod==='qr'?'Xác nhận đã quét mã xong':`Thanh toán mô phỏng ${money(total)}`}</button>
+        <button className="fw-button" onClick={()=>dispatch({type:'PAY_CHECKOUT',checkoutId:checkoutId!})}>{payMethod==='qr'?'Xác nhận thanh toán thử nghiệm (Demo) · Không trừ tiền thật':`Thanh toán mô phỏng ${money(total)}`}</button>
         {cancel?<div><p>Hủy toàn bộ món chưa thanh toán trong lần này?</p><button className="fw-text-button" onClick={()=>{dispatch({type:'CANCEL_CHECKOUT',checkoutId:checkoutId!});setCancel(false);}}>Xác nhận hủy</button><button className="fw-text-button" onClick={()=>setCancel(false)}>Giữ đơn</button></div>:<button className="fw-text-button" onClick={()=>setCancel(true)}>Hủy lần chốt đơn này</button>}
       </div>}
       {paid&&<div className="v5-paid-actions">
         <p role="status"><Check size={17}/>Thanh toán trải nghiệm thành công!</p>
-        <p>{physical ? 'Đơn hàng thật đã được ghi nhận vào quy trình đóng gói & vận chuyển mô phỏng.' : 'Vật phẩm digital đã sẵn sàng để trang bị cho avatar của bạn.'}</p>
+        <p>{allFulfilled ? 'Đã thêm vào Bộ sưu tập của bạn.' : physical ? 'Đơn đã được ghi nhận; theo dõi bàn giao mô phỏng trong chi tiết đơn. Vật phẩm sẽ vào Bộ sưu tập sau bước này.' : 'Vật phẩm digital sẽ vào Bộ sưu tập và có thể trang bị sau khi đơn được bàn giao mô phỏng.'}</p>
         <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px', marginBottom: '8px'}}>
           <Link to="/me?panel=bag" className="fw-button">Túi đồ & Đơn hàng của tôi</Link>
-          {group.some(o => state.products[o.productId]?.delivery === 'digital' || state.products[o.productId]?.kind === 'digital') && (
-            <Link to="/me?panel=wardrobe" className="fw-text-button" style={{textDecoration: 'underline'}}>Tủ đồ Chibi (Mặc ngay) →</Link>
+          {allFulfilled && <Link to="/me?section=collection" className="fw-text-button">Xem trong Bộ sưu tập →</Link>}
+          {allFulfilled && group.some(o => state.products[o.productId]?.digitalSlot) && (
+            <Link to="/me?section=avatar" className="fw-text-button" style={{textDecoration: 'underline'}}>Thử trên Avatar →</Link>
           )}
           {group.find(o => state.products[o.productId]?.delivery !== 'digital') && (
             <Link to={`/orders/${group.find(o => state.products[o.productId]?.delivery !== 'digital')!.id}`} className="fw-text-button" style={{textDecoration: 'underline'}}>Vận đơn hàng thật ↗</Link>

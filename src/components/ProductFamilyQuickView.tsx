@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Check } from 'lucide-react';
 import { Product } from '../domain/types';
 import { ProductFamily } from '../world/moments';
 import { MERCH_IMAGE_ROOT, DELIVERY_LABELS } from '../world/merchCatalog';
+import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useApp } from '../context/AppContext';
+import { checkProductEligibility } from '../world/commerce';
 
 interface ProductFamilyQuickViewProps {
   family: ProductFamily | null;
   isOpen: boolean;
   onClose: () => void;
-  onAddToCart: (product: Product, size?: string, quantity?: number) => void;
+  onAddToCart: (product: Product, size?: string, quantity?: number) => boolean | void;
 }
 
 export function ProductFamilyQuickView({
@@ -17,6 +20,10 @@ export function ProductFamilyQuickView({
   onClose,
   onAddToCart,
 }: ProductFamilyQuickViewProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useDialogA11y(isOpen, onClose, panelRef);
+
+  const { state } = useApp();
   const [selectedVariantId, setSelectedVariantId] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -33,18 +40,6 @@ export function ProductFamilyQuickView({
     }
   }, [family]);
 
-  // Handle escape key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
   if (!isOpen || !family) return null;
 
   const currentVariant = family.variants.find(v => v.id === selectedVariantId) || family.variants[0];
@@ -52,6 +47,7 @@ export function ProductFamilyQuickView({
   const isBundle = currentVariant?.delivery === 'bundle';
   const hasSizes = (currentVariant?.sizes?.length ?? 0) > 0;
   const totalPrice = (currentVariant?.priceVND || 0) * quantity;
+  const eligibility = checkProductEligibility(state, currentVariant, selectedSize || undefined, quantity);
 
   const handleVariantSelect = (variant: Product) => {
     setSelectedVariantId(variant.id);
@@ -67,21 +63,26 @@ export function ProductFamilyQuickView({
   };
 
   const handleAdd = () => {
-    if (!currentVariant) return;
-    onAddToCart(currentVariant, selectedSize || undefined, quantity);
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 2500);
+    if (!currentVariant || !eligibility.eligible) return;
+    const result = onAddToCart(currentVariant, selectedSize || undefined, quantity);
+    if (result !== false) {
+      setAddedNotice(true);
+      setTimeout(() => setAddedNotice(false), 2500);
+    }
   };
+
 
   const displayImage = currentVariant?.image || family.image;
 
   return (
     <div className="moments-drawer-backdrop" onClick={onClose}>
       <div
+        ref={panelRef}
         className="moments-drawer-panel"
         role="dialog"
         aria-modal="true"
         aria-label={`Chi tiết ${family.title}`}
+        tabIndex={-1}
         onClick={e => e.stopPropagation()}
       >
         <header className="moments-drawer-header">
@@ -222,21 +223,35 @@ export function ProductFamilyQuickView({
               {totalPrice.toLocaleString('vi-VN')} ₫
             </strong>
           </div>
-          <button
-            type="button"
-            className="moments-drawer-add-btn"
-            onClick={handleAdd}
-            disabled={!currentVariant}
-          >
-            {addedNotice ? (
-              <>
-                <Check size={16} />
-                <span>Đã thêm vào giỏ</span>
-              </>
-            ) : (
-              <span>Thêm vào giỏ</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+            <button
+              type="button"
+              className="moments-drawer-add-btn"
+              onClick={handleAdd}
+              disabled={!currentVariant || !eligibility.eligible}
+              title={!eligibility.eligible ? eligibility.reason : undefined}
+            >
+              {addedNotice ? (
+                <>
+                  <Check size={16} />
+                  <span>Đã thêm vào giỏ</span>
+                </>
+              ) : (currentVariant?.stockCount ?? 0) <= 0 ? (
+                <span>Hết hàng</span>
+              ) : hasSizes && !selectedSize ? (
+                <span>Chọn kích cỡ</span>
+              ) : !eligibility.eligible ? (
+                <span>Chưa đủ điều kiện</span>
+              ) : (
+                <span>Thêm vào giỏ</span>
+              )}
+            </button>
+            {!eligibility.eligible && eligibility.reason && (
+              <span style={{ fontSize: '11px', color: '#DC2626', maxWidth: '220px', textAlign: 'right' }}>
+                {eligibility.reason}
+              </span>
             )}
-          </button>
+          </div>
         </footer>
       </div>
     </div>

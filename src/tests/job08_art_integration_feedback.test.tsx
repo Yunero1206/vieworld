@@ -281,7 +281,7 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
   /* -------------------------------------------------------------------------- */
   describe('Asset Manifest & Bundle Size Audit', () => {
     it('verifies all integrated scene assets are registered in manifest.json with status approved', () => {
-      const manifestPath = path.resolve(__dirname, '../../public/images/world-redesign/drafts/manifest.json');
+      const manifestPath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/manifest.json');
       expect(fs.existsSync(manifestPath)).toBe(true);
 
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
@@ -304,8 +304,8 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
     });
 
     it('verifies actual file sizes of integrated assets are well below 1.5 MB', () => {
-      const artistScenePath = path.resolve(__dirname, '../../public/images/world-redesign/drafts/artist-a-scene-sample.png');
-      const fanRoomPath = path.resolve(__dirname, '../../public/images/world-redesign/drafts/fan-room-scene-sample.png');
+      const artistScenePath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/artist-a-scene-sample.png');
+      const fanRoomPath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/fan-room-scene-sample.png');
 
       expect(fs.existsSync(artistScenePath)).toBe(true);
       expect(fs.existsSync(fanRoomPath)).toBe(true);

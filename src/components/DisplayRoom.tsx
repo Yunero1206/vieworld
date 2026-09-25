@@ -4,13 +4,17 @@ import { Heart, X, Plus, Check, SlidersHorizontal, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from './AvatarRenderer';
 import { ownedDigitalLook, MERCH_IMAGE_ROOT } from '../world/merchCatalog';
-import { DISPLAY_FIXTURES, displayedItems, displayOptions, type DisplayItem, type DisplaySlot } from '../world/display';
+import { DISPLAY_FIXTURES, displayedItems, displayOptions, displayAssetUrl, displayRoomAssetUrl, type DisplayItem, type DisplaySlot } from '../world/display';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSelection, type SurfaceSelection, type SurfacePreset } from '../world/displaySurfaces';
+import { composeRoomSurface } from '../world/roomComposition';
 import type { PublicFan } from '../world/community';
 import { RoomGuestbook } from './RoomGuestbook';
+import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
 
 interface DisplayRoomSceneProps {
   fan: Pick<PublicFan, 'name' | 'look' | 'accessory' | 'appearance'> & { id?: string };
   items: DisplayItem[];
+  surfaces?: Record<DisplaySlot, SurfaceSelection>;
   onSelect: (slot: DisplaySlot) => void;
   isVinylPlaying?: boolean;
   isLightstickActive?: boolean;
@@ -31,6 +35,7 @@ interface DisplayRoomSceneProps {
 export function DisplayRoomScene({
   fan,
   items,
+  surfaces,
   onSelect,
   isVinylPlaying = false,
   isLightstickActive = true,
@@ -67,7 +72,7 @@ export function DisplayRoomScene({
         onToggleLightstick();
         triggerFeedback(!isLightstickActive ? 'Đã bật ánh sáng fandom' : 'Đã tắt ánh sáng fandom');
       } else {
-        const it = items.find(i => i.slot === slot);
+        const it = surfaces ? items.find(i => surfaces[slot].itemIds.includes(i.id)) : items.find(i => i.slot === slot);
         if (it) {
           triggerFeedback(`Đang trưng: ${it.title}`);
         }
@@ -173,9 +178,9 @@ export function DisplayRoomScene({
       <div className={`v6-display-scene ${isEditMode ? 'is-edit-mode' : 'is-view-mode'}`}>
         <img
           className="v6-room-art"
-          src="/images/world-v6/myspace.webp"
-          width="1672"
-          height="941"
+          src="/images/myspace-room-v2.png"
+          width="1536"
+          height="864"
           style={{ pointerEvents: 'none' }}
           onError={e => {
             e.currentTarget.style.visibility = 'hidden';
@@ -184,7 +189,13 @@ export function DisplayRoomScene({
         />
 
         {DISPLAY_FIXTURES.map(f => {
-          const item = items.find(i => i.slot === f.slot);
+          const surface = DISPLAY_SURFACES.find(candidate => candidate.id === f.slot)!;
+          const selection = surfaces?.[f.slot];
+          const surfaceObjects = selection
+            ? selection.itemIds.map(id => items.find(item => item.id === id)).filter((item): item is DisplayItem => Boolean(item))
+            : items.filter(item => item.slot === f.slot);
+          const item = surfaceObjects[0];
+          const composition = composeRoomSurface(surface, surfaceObjects, selection);
           const isVinylSlot = f.slot === 'disc';
           const isLightSlot = f.slot === 'lightstick';
           const spinningClass = isVinylSlot && isVinylPlaying ? 'v7-vinyl-spinning' : '';
@@ -205,7 +216,7 @@ export function DisplayRoomScene({
                 pointerEvents: 'auto',
               }}
               onClick={() => handleFixtureClick(f.slot)}
-              aria-label={`${f.label}: ${item?.title || 'chưa trưng bày'}`}
+              aria-label={`${DISPLAY_SURFACES.find(surface => surface.id === f.slot)?.label}: ${surfaceObjects.length ? surfaceObjects.map(object => object.title).join(', ') : 'chưa trưng bày'}`}
               title={
                 !isEditMode && isVinylSlot
                   ? isVinylPlaying ? 'Mâm đĩa: Nhấn để dừng nhạc' : 'Mâm đĩa: Nhấn để phát nhạc'
@@ -216,17 +227,19 @@ export function DisplayRoomScene({
                   : undefined
               }
             >
-              {item?.image ? (
-                <img
-                  src={
-                    item.image.startsWith('shirt')
-                      ? '/images/world-v6/shirt-cutout.webp'
-                      : `${MERCH_IMAGE_ROOT}/${item.image}.png`
-                  }
-                  alt=""
-                />
-              ) : item ? (
-                <span className="v6-trophy">✦</span>
+              {surfaceObjects.length ? (
+                <span className="myspace-surface-composition">
+                  {composition.map(({ item: object, anchor, focal }) => {
+                    const roomAsset = displayRoomAssetUrl(object);
+                    const sourceAsset = displayAssetUrl(object);
+                    return <span key={object.id} className={`myspace-room-prop ${roomAsset ? 'is-cutout' : `is-${surface.type}`} ${focal ? 'is-focal' : ''}`}
+                      style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, width: `${anchor.width}%`, height: `${anchor.height}%`, zIndex: anchor.z, transform: `translate(-50%, -50%) rotate(${anchor.rotate}deg)` }}>
+                      {roomAsset ? <img src={roomAsset} alt="" loading="lazy" /> : <span className="myspace-room-prop-matte">
+                        {sourceAsset ? <img src={sourceAsset} alt="" loading="lazy" /> : <span className="myspace-room-prop-symbol">✦</span>}
+                      </span>}
+                    </span>;
+                  })}
+                </span>
               ) : isEditMode ? (
                 <span className="v6-slot-empty">＋</span>
               ) : null}
@@ -235,7 +248,7 @@ export function DisplayRoomScene({
                 <span className="v7-fixture-edit-chip">Sửa</span>
               )}
 
-              <span className="v6-fixture-label">{f.label}</span>
+              <span className="v6-fixture-label">{DISPLAY_SURFACES.find(surface => surface.id === f.slot)?.label || f.label}</span>
             </button>
           );
         })}
@@ -258,10 +271,11 @@ export function DisplayRoomScene({
         <h3 className="sr-only">Danh sách vật phẩm đang trưng bày trong phòng</h3>
         <ul className="sr-only">
           {DISPLAY_FIXTURES.map(f => {
-            const item = items.find(i => i.slot === f.slot);
+            const names = surfaces?.[f.slot].itemIds.map(id => items.find(item => item.id === id)?.title).filter(Boolean)
+              || items.filter(item => item.slot === f.slot).map(item => item.title);
             return (
               <li key={f.slot}>
-                <strong>{f.label}:</strong> {item ? item.title : 'Chưa trưng bày vật phẩm'}
+                <strong>{f.label}:</strong> {names.length ? names.join(', ') : 'Chưa trưng bày vật phẩm'}
               </li>
             );
           })}
@@ -274,11 +288,14 @@ export function DisplayRoomScene({
 export function PersonalDisplayRoom({
   onOpen: _onOpen,
   onOpenPrivacy,
+  privacySettings: propPrivacy,
 }: {
   onOpen: (panel: string) => void;
   onOpenPrivacy?: () => void;
+  privacySettings?: SpacePrivacySettings;
 }) {
   const { state, dispatch } = useApp();
+  const privacy = propPrivacy || loadPrivacySettings();
 
   const [roomMode, setRoomMode] = useState<'view' | 'edit' | 'visitor'>('view');
   const [activeDrawerSlot, setActiveDrawerSlot] = useState<DisplaySlot | null>(null);
@@ -291,14 +308,19 @@ export function PersonalDisplayRoom({
 
   const displayed = useMemo(() => displayedItems(state), [state]);
   const allSlotOptions = useMemo(() => displayOptions(state), [state]);
+  const selections = useMemo(() => readDisplaySurfaces(state.fanProfile, allSlotOptions), [state.fanProfile, allSlotOptions]);
+  const [drawerNotice, setDrawerNotice] = useState('');
 
   const slotEligibleItems = useMemo(() => {
     if (!activeDrawerSlot) return [];
-    return allSlotOptions.filter(i => i.slot === activeDrawerSlot);
+    const surface = DISPLAY_SURFACES.find(item => item.id === activeDrawerSlot);
+    return allSlotOptions.filter(item => item.slot && surface?.allowedItemTypes.includes(item.slot));
   }, [allSlotOptions, activeDrawerSlot]);
 
-  const activeFixtureConfig = DISPLAY_FIXTURES.find(f => f.slot === activeDrawerSlot);
-  const currentSlotItem = displayed.find(i => i.slot === activeDrawerSlot);
+  const activeFixtureConfig = DISPLAY_SURFACES.find(f => f.id === activeDrawerSlot);
+  const currentSelection = activeDrawerSlot ? selections[activeDrawerSlot] : undefined;
+  const currentSurfaceItems = currentSelection?.itemIds.map(id => displayed.find(item => item.id === id)).filter((item): item is (typeof displayed)[number] => Boolean(item)) || [];
+  const currentUnits = currentSurfaceItems.reduce((total, item) => total + itemFootprint(item), 0);
 
   // Close drawer on Escape and return focus
   useEffect(() => {
@@ -316,6 +338,7 @@ export function PersonalDisplayRoom({
 
   const handleSelectSlot = (slot: DisplaySlot) => {
     if (roomMode !== 'edit') return;
+    setDrawerNotice('');
     lastTriggerButtonRef.current = document.getElementById(`fixture-${slot}`);
     setActiveDrawerSlot(slot);
   };
@@ -325,16 +348,23 @@ export function PersonalDisplayRoom({
     lastTriggerButtonRef.current?.focus();
   };
 
-  const handleApplyItem = (itemId: string) => {
+  const applySelection = (selection: SurfaceSelection, success: string) => {
     if (!activeDrawerSlot) return;
-    dispatch({ type: 'SET_DISPLAY_SLOT', slot: activeDrawerSlot, itemId });
-    handleCloseDrawer();
+    const problem = validateSurfaceSelection(state.fanProfile, activeDrawerSlot, selection, allSlotOptions);
+    if (problem) { setDrawerNotice(`${problem} Đổi món hoặc chọn chỗ khác.`); return; }
+    dispatch({ type: 'SET_DISPLAY_SURFACE', surfaceId: activeDrawerSlot, selection });
+    setDrawerNotice(success);
   };
 
-  const handleClearSlot = () => {
-    if (!activeDrawerSlot) return;
-    dispatch({ type: 'SET_DISPLAY_SLOT', slot: activeDrawerSlot, itemId: '' });
-    handleCloseDrawer();
+  const handleApplyItem = (itemId: string) => {
+    if (!currentSelection) return;
+    applySelection({ ...currentSelection, itemIds: [...currentSelection.itemIds, itemId], focalItemId: currentSelection.focalItemId || itemId }, 'Đã đặt món vào phòng.');
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    if (!currentSelection) return;
+    const itemIds = currentSelection.itemIds.filter(id => id !== itemId);
+    applySelection({ ...currentSelection, itemIds, focalItemId: currentSelection.focalItemId === itemId ? itemIds[0] : currentSelection.focalItemId }, 'Đã cất món. Bộ sưu tập vẫn còn nguyên.');
   };
 
   const handleLikeRoom = () => {
@@ -358,6 +388,7 @@ export function PersonalDisplayRoom({
           appearance: state.fanProfile.avatarPreset,
         }}
         items={displayed}
+        surfaces={selections}
         onSelect={handleSelectSlot}
         isVinylPlaying={isVinylPlaying}
         isLightstickActive={isLightstickActive}
@@ -369,18 +400,42 @@ export function PersonalDisplayRoom({
         isEditMode={isEditMode}
         onToggleEditMode={() => setRoomMode(m => (m === 'edit' ? 'view' : 'edit'))}
         isOwner={!isVisitorMode}
+        showVisitCount={privacy.showVisitCount}
         isVisitorMode={isVisitorMode}
         onToggleVisitorMode={() => setRoomMode(m => (m === 'visitor' ? 'view' : 'visitor'))}
         onOpenPrivacy={onOpenPrivacy}
       />
 
+      {isEditMode && <nav className="myspace-mobile-surfaces" aria-label="Chọn khu vực trưng bày">
+        {DISPLAY_SURFACES.map(surface => <button key={surface.id} type="button" onClick={() => handleSelectSlot(surface.id)}>
+          <strong>{surface.label}</strong><small>{selections[surface.id].itemIds.length}/{surface.maxItems} món</small>
+        </button>)}
+      </nav>}
+
       <p className="vw-room-hint">
         {isEditMode
-          ? 'Chọn một vị trí để thay đổi vật phẩm trưng bày.'
+          ? 'Chọn một khu vực, chọn món bạn muốn giữ gần mình — phòng sẽ tự sắp xếp.'
           : isVisitorMode
           ? 'Đang xem phòng ở góc nhìn của khách ghé thăm.'
-          : 'Không gian mang đậm dấu ấn riêng của bạn. Nhấn "Chỉnh phòng" để sắp đặt các món đồ.'}
+          : 'Một góc nhỏ cho những điều mình yêu.'}
       </p>
+
+      {/* Visitor Projection: Warning if room is set to private */}
+      {isVisitorMode && privacy.roomVisibility === 'private' && (
+        <div
+          className="v7-visitor-banner"
+          style={{ background: '#FEF2F2', borderLeft: '4px solid #DC2626', margin: '12px 0' }}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="v7-visitor-banner-info">
+            <strong style={{ color: '#991B1B' }}>Phòng đang ở chế độ Riêng tư (Chỉ mình tôi)</strong>
+            <p style={{ color: '#B91C1C' }}>
+              Khách ghé thăm ngoài đời/trên mạng sẽ không nhìn thấy phòng và vật phẩm trưng bày này.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Visitor Projection: Public displayed items showcase */}
       {isVisitorMode && displayed.length > 0 && (
@@ -434,70 +489,61 @@ export function PersonalDisplayRoom({
               </button>
             </div>
 
-            {/* Current Item in slot */}
-            {currentSlotItem && (
-              <div className="v7-slot-current-section">
-                <div className="v7-slot-current-card">
-                  <div className="v7-drawer-item-media">
-                    {currentSlotItem.image ? (
-                      <img
-                        src={
-                          currentSlotItem.image.startsWith('shirt')
-                            ? '/images/world-v6/shirt-cutout.webp'
-                            : `${MERCH_IMAGE_ROOT}/${currentSlotItem.image}.png`
-                        }
-                        alt={currentSlotItem.title}
-                      />
-                    ) : (
-                      <span className="v6-trophy">✦</span>
-                    )}
-                  </div>
-                  <div className="v7-drawer-item-info">
-                    <span className="v7-slot-active-label">Đang trưng bày</span>
-                    <strong>{currentSlotItem.title}</strong>
-                  </div>
-                  <button
-                    type="button"
-                    className="v7-slot-remove-btn"
-                    onClick={handleClearSlot}
-                  >
-                    Gỡ khỏi phòng
-                  </button>
+            <p className="myspace-surface-capacity">
+              {currentSurfaceItems.length}/{activeFixtureConfig?.maxItems || 5} món · {currentUnits}/{activeFixtureConfig?.capacityUnits || 0} sức chứa
+            </p>
+            <div className="myspace-layout-presets" aria-label="Kiểu tự sắp xếp">
+              {([['balanced', 'Cân đối'], ['focus', 'Tập trung'], ['natural', 'Tự nhiên']] as [SurfacePreset, string][]).map(([preset, label]) => (
+                <button key={preset} type="button" aria-pressed={currentSelection?.layoutPreset === preset}
+                  onClick={() => currentSelection && applySelection({ ...currentSelection, layoutPreset: preset }, 'Đã sắp lại khu vực.')}>
+                  {label}
+                </button>
+              ))}
+              <button type="button" onClick={() => currentSelection && applySelection({
+                ...currentSelection,
+                itemIds: currentSelection.itemIds.length > 1 ? [...currentSelection.itemIds.slice(1), currentSelection.itemIds[0]] : currentSelection.itemIds,
+              }, 'Đã sắp lại các món.')}>Sắp lại ↻</button>
+            </div>
+            {currentSurfaceItems.length > 0 && <div className="v7-slot-current-section">
+              <span className="v7-slot-section-title">Đang trưng bày</span>
+              {currentSurfaceItems.map(item => <div className="v7-slot-current-card" key={item.id}>
+                <div className="v7-drawer-item-media">{displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" /> : <span className="v6-trophy">✦</span>}</div>
+                <div className="v7-drawer-item-info"><strong>{item.title}</strong><small>{itemFootprint(item)} sức chứa</small></div>
+                <div className="myspace-surface-item-actions">
+                  <button type="button" aria-pressed={currentSelection?.focalItemId === item.id}
+                    onClick={() => currentSelection && applySelection({ ...currentSelection, focalItemId: item.id }, 'Đã đặt làm điểm nhấn.')}>Đặt làm điểm nhấn</button>
+                  <button type="button" onClick={() => handleRemoveItem(item.id)}>Gỡ khỏi phòng</button>
                 </div>
-              </div>
-            )}
+              </div>)}
+            </div>}
+            {drawerNotice && <p className="myspace-drawer-notice" role="status">{drawerNotice}</p>}
+            {currentSurfaceItems.length >= (activeFixtureConfig?.maxItems || 5) && <p className="myspace-drawer-notice" role="status">Khu vực này đã đầy. Đổi món bằng cách gỡ một món, hoặc chọn chỗ khác.</p>}
 
             <div className="v7-slot-candidates-section">
               <span className="v7-slot-section-title">
-                Các món phù hợp ({slotEligibleItems.length})
+                Món phù hợp trong Bộ sưu tập ({slotEligibleItems.length})
               </span>
 
               <div className="v7-drawer-items-list">
                 {slotEligibleItems.map(item => {
-                  const isCurrent = currentSlotItem?.id === item.id;
+                  const isCurrent = currentSelection?.itemIds.includes(item.id);
+                  const isElsewhere = Object.entries(selections).some(([id, surface]) => id !== activeDrawerSlot && surface.itemIds.includes(item.id));
+                  const canFit = currentSurfaceItems.length < (activeFixtureConfig?.maxItems || 0) && currentUnits + itemFootprint(item) <= (activeFixtureConfig?.capacityUnits || 0);
                   return (
                     <div
                       key={item.id}
                       className={`v7-drawer-item-card ${isCurrent ? 'selected' : ''}`}
-                      onClick={() => handleApplyItem(item.id)}
                     >
                       <div className="v7-drawer-item-media">
-                        {item.image ? (
-                          <img
-                            src={
-                              item.image.startsWith('shirt')
-                                ? '/images/world-v6/shirt-cutout.webp'
-                                : `${MERCH_IMAGE_ROOT}/${item.image}.png`
-                            }
-                            alt={item.title}
-                          />
+                        {displayAssetUrl(item) ? (
+                          <img src={displayAssetUrl(item)} alt={item.title} />
                         ) : (
                           <div className="v7-item-placeholder">✦</div>
                         )}
                       </div>
                       <div className="v7-drawer-item-info">
                         <strong>{item.title}</strong>
-                        <small>{item.detail}</small>
+                        <small>{itemFootprint(item)} sức chứa{isElsewhere ? ' · Đang ở chỗ khác' : ''}</small>
                       </div>
                       <div className="v7-drawer-item-action">
                         {isCurrent ? (
@@ -505,8 +551,8 @@ export function PersonalDisplayRoom({
                             <Check size={14} /> Đang trưng
                           </span>
                         ) : (
-                          <button type="button" className="v7-item-select-btn">
-                            <Plus size={14} /> Chọn món
+                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || !canFit} onClick={() => handleApplyItem(item.id)}>
+                            <Plus size={14} /> {canFit ? 'Đặt vào phòng' : 'Khu vực đã đầy'}
                           </button>
                         )}
                       </div>
@@ -526,6 +572,9 @@ export function PersonalDisplayRoom({
             </div>
 
             <div className="v7-drawer-footer">
+              <div className="myspace-other-surfaces" aria-label="Chọn chỗ khác">
+                {DISPLAY_SURFACES.filter(surface => surface.id !== activeDrawerSlot).map(surface => <button key={surface.id} type="button" onClick={() => { setDrawerNotice(''); setActiveDrawerSlot(surface.id); }}>{surface.label}</button>)}
+              </div>
               <Link
                 to={`/me?section=collection&type=${activeDrawerSlot}`}
                 className="v7-drawer-collection-link"
@@ -539,7 +588,25 @@ export function PersonalDisplayRoom({
       )}
 
       {/* Guestbook Section */}
-      <RoomGuestbook fanId={state.fanProfile.id} isOwner={!isVisitorMode} />
+      {privacy.guestbookEnabled ? (
+        <RoomGuestbook fanId={state.fanProfile.id} isOwner={!isVisitorMode} />
+      ) : (
+        <div
+          className="v7-guestbook-disabled-note"
+          style={{
+            padding: '24px',
+            textAlign: 'center',
+            color: 'var(--muted)',
+            fontSize: '13px',
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-lg)',
+            margin: '20px 0',
+            border: '1px dashed var(--border)',
+          }}
+        >
+          <p>Chủ phòng đã tạm ẩn sổ lưu bút.</p>
+        </div>
+      )}
     </section>
   );
 }

@@ -4,6 +4,14 @@
 
 import { NEW_MERCH } from '../world/merchCatalog';
 import {
+  CANONICAL_INITIAL_DEMO_TIME,
+  EXPANDED_WORLDS,
+  EXPANDED_SESSIONS,
+  EXPANDED_PRODUCTS,
+  EXPANDED_HALL_MESSAGES,
+  applyPersonaToState,
+} from './expandedUniverse';
+import {
   AppState,
   TenantId,
   World,
@@ -19,7 +27,7 @@ import {
   NotificationPreferences,
 } from '../domain/types';
 
-export const INITIAL_DEMO_TIME = '2026-09-09T13:00:00.000Z'; // 20:00 Asia/Ho_Chi_Minh
+export const INITIAL_DEMO_TIME = CANONICAL_INITIAL_DEMO_TIME; // 20:00 Asia/Ho_Chi_Minh
 
 export const DEFAULT_FAN_PROFILE: FanProfile = {
   id: 'fan-linh',
@@ -84,6 +92,31 @@ export const CANONICAL_WORLDS: Record<string, World> = {
     description: 'Sân khấu âm nhạc và chuỗi chương trình nghệ thuật ban đêm hư cấu.',
     linkedWorldIds: ['artist-a'],
     bannerAssetId: 'asset-world-neon-banner',
+  },
+  // Fictional demo artists for Explore density. No real-person identity is implied.
+  'artist-b': {
+    id: 'artist-b', tenantId: 'vieworld-demo', version: 1, updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist', name: 'Artist B',
+    description: 'Một nghệ sĩ indie-pop hư cấu với những buổi diễn gần gũi.',
+    linkedWorldIds: [],
+  },
+  'artist-c': {
+    id: 'artist-c', tenantId: 'vieworld-demo', version: 1, updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist', name: 'Artist C',
+    description: 'Một nghệ sĩ alt-pop hư cấu với sân khấu nhiều sắc tím.',
+    linkedWorldIds: [],
+  },
+  'artist-d': {
+    id: 'artist-d', tenantId: 'vieworld-demo', version: 1, updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist', name: 'Artist D',
+    description: 'Một nghệ sĩ acoustic hư cấu, thích những buổi diễn ấm cúng.',
+    linkedWorldIds: [],
+  },
+  'artist-e': {
+    id: 'artist-e', tenantId: 'vieworld-demo', version: 1, updatedAt: INITIAL_DEMO_TIME,
+    type: 'artist', name: 'Artist E',
+    description: 'Một nghệ sĩ electronic-pop hư cấu với những bản phối đêm khuya.',
+    linkedWorldIds: [],
   },
 };
 
@@ -402,6 +435,7 @@ export const CANONICAL_PRODUCTS: Record<string, Product> = {
     priceVND: 150000,
     stockCount: 50,
     isAvailable: true,
+    previewCapabilities: { avatar: false, room: true },
   },
   'product-shirt-01': {
     id: 'product-shirt-01',
@@ -414,6 +448,7 @@ export const CANONICAL_PRODUCTS: Record<string, Product> = {
     stockCount: 25,
     isAvailable: true,
     requiredBenefitId: 'benefit-early-access-01',
+    previewCapabilities: { avatar: true, room: true },
   },
 };
 
@@ -457,21 +492,6 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 };
 
 export const INITIAL_NOTIFICATIONS: Record<string, Notification> = {
-  'notif-welcome': {
-    id: 'notif-welcome',
-    tenantId: 'vieworld-demo',
-    version: 1,
-    fanId: 'fan-linh',
-    type: 'session_reminder',
-    category: 'session',
-    sourceAttribution: 'platform',
-    title: 'Chào mừng bạn đến với Không gian Nghệ sĩ VieWorld',
-    body: 'Khám phá các thế giới nghệ sĩ ảo, đăng ký giữ chỗ (RSVP) và nhận kỷ vật Moment Capsule sau mỗi phiên giao lưu.',
-    isRead: false,
-    targetRoute: '/worlds',
-    createdAt: '2026-09-09T08:00:00Z',
-    updatedAt: '2026-09-09T08:00:00Z',
-  },
   'notif-rsvp-dropin': {
     id: 'notif-rsvp-dropin',
     tenantId: 'vieworld-demo',
@@ -480,12 +500,57 @@ export const INITIAL_NOTIFICATIONS: Record<string, Notification> = {
     type: 'session_reminder',
     category: 'session',
     sourceAttribution: 'session_system',
-    title: 'Nhắc nhở: Phiên giao lưu nghệ sĩ ảo sắp diễn ra',
-    body: 'Bạn đã đăng ký giữ chỗ (RSVP) cho "Đêm Nhạc Trực Tuyến: Giao Lưu & Thử Nghiệm". Sảnh chờ sẽ mở trước giờ diễn.',
+    title: 'Nhắc nhở: Phiên giao lưu nghệ sĩ ảo sắp diễn ra!',
+    body: 'Bạn đã đăng ký giữ chỗ (RSVP) cho "Đêm Nhạc Cùng VieWorld". Sảnh chờ sẽ mở trước 15 phút.',
     isRead: false,
     targetRoute: '/sessions/session-dropin-01',
-    createdAt: '2026-09-09T12:00:00Z',
-    updatedAt: '2026-09-09T12:00:00Z',
+    createdAt: '2026-09-09T18:00:00Z',
+    updatedAt: '2026-09-09T18:00:00Z',
+  },
+  'notif-shop-drop': {
+    id: 'notif-shop-drop',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    fanId: 'fan-linh',
+    type: 'promotional',
+    category: 'promotional',
+    sourceAttribution: 'platform',
+    title: 'Sản phẩm mới đã lên kệ!',
+    body: 'Khám phá bộ sưu tập thu với nhiều món đồ xinh xắn dành riêng cho bạn.',
+    isRead: false,
+    targetRoute: '/shop',
+    createdAt: '2026-09-08T10:00:00Z',
+    updatedAt: '2026-09-08T10:00:00Z',
+  },
+  'notif-community-moment': {
+    id: 'notif-community-moment',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    fanId: 'fan-linh',
+    type: 'promotional',
+    category: 'promotional',
+    sourceAttribution: 'platform',
+    title: 'Khoảnh khắc mới từ cộng đồng',
+    body: 'Cùng xem những khoảnh khắc đáng yêu mà mọi người đã chia sẻ trong tuần qua nhé!',
+    isRead: false,
+    targetRoute: '/explore',
+    createdAt: '2026-09-07T14:30:00Z',
+    updatedAt: '2026-09-07T14:30:00Z',
+  },
+  'notif-space-care': {
+    id: 'notif-space-care',
+    tenantId: 'vieworld-demo',
+    version: 1,
+    fanId: 'fan-linh',
+    type: 'promotional',
+    category: 'promotional',
+    sourceAttribution: 'platform',
+    title: 'Đừng quên chăm sóc không gian của bạn nhé!',
+    body: 'Không gian của bạn đã lâu chưa cập nhật. Thêm vài món đồ mới để làm mới góc nhỏ nào!',
+    isRead: true,
+    targetRoute: '/me',
+    createdAt: '2026-09-06T09:15:00Z',
+    updatedAt: '2026-09-06T09:15:00Z',
   },
 };
 
@@ -822,16 +887,16 @@ export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppSta
   return {
     activeTenantId: 'vieworld-demo',
     demoTime: INITIAL_DEMO_TIME,
-    worlds: structuredClone(CANONICAL_WORLDS),
+    worlds: { ...structuredClone(EXPANDED_WORLDS), ...structuredClone(CANONICAL_WORLDS) },
     avatarAssets: structuredClone(CANONICAL_AVATARS),
-    sessions: structuredClone(CANONICAL_SESSIONS),
+    sessions: { ...structuredClone(EXPANDED_SESSIONS), ...structuredClone(CANONICAL_SESSIONS) },
     memberships: structuredClone(CANONICAL_MEMBERSHIPS),
     benefits: structuredClone(CANONICAL_BENEFITS),
     participations: {},
     orders: {},
     supportCases: {},
     fanProfile: structuredClone(DEFAULT_FAN_PROFILE),
-    products: { ...structuredClone(CANONICAL_PRODUCTS), ...structuredClone(NEW_MERCH) },
+    products: { ...structuredClone(EXPANDED_PRODUCTS), ...structuredClone(NEW_MERCH), ...structuredClone(CANONICAL_PRODUCTS) },
     questions: structuredClone(INITIAL_QUESTIONS),
     polls: structuredClone(INITIAL_POLLS),
     capsules: {},
@@ -840,36 +905,45 @@ export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppSta
     followedWorldIds: ['artist-a'],
     rsvpdSessionIds: ['session-dropin-01'],
     inLobbySessionIds: [],
+    hallMessages: { ...structuredClone(EXPANDED_HALL_MESSAGES), 'artist-a': [] },
   };
 }
 
 /**
- * Required Named Scenario Presets (§5.4)
+ * Required Named Scenario Presets (§5.4 & §5 of Implementation Plan)
  */
 export const scenarioPresets = {
   /** 1. New Fan: No follows, no memberships, no saved capsules, no orders */
-  newFan: (tenantId: TenantId = 'vieworld-demo'): AppState => {
-    const base = createInitialState(tenantId);
-    return {
-      ...base,
-      followedWorldIds: [],
-      rsvpdSessionIds: [],
-      memberships: {},
-      benefits: {},
-      orders: {},
-      participations: {},
-      capsules: {},
-      questions: {},
-      notifications: {},
-    };
-  },
+  newFan: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'newFan'),
 
-  /** 2. Active Member: Full baseline with active membership and followed world */
-  activeMember: (tenantId: TenantId = 'vieworld-demo'): AppState => {
-    return createInitialState(tenantId);
-  },
+  /** 2. Casual Fan: Follow 2 artists (Artist B & C), no membership */
+  casualFan: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'casualFan'),
 
-  /** 3. Benefit Pending: Membership active but both benefits pending */
+  /** 3. Hall Member: Active member of Artist A, Hall-active */
+  hallMember: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'hallMember'),
+  activeMember: (tenantId: TenantId = 'vieworld-demo'): AppState => createInitialState(tenantId),
+
+  /** 4. Multi-fandom Fan: Follows all 7 worlds */
+  multiFandom: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'multiFandom'),
+
+  /** 5. Collector: ~30 owned items, dense room diorama */
+  collector: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'collector'),
+
+  /** 6. Long-time Fan: Milestones & capsules across 2024, 2025, 2026 */
+  longtimeFan: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'longtimeFan'),
+
+  /** 7. Commerce Fan: Saved products, cart, preorders, digital equipment */
+  commerceFan: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'commerceFan'),
+
+  /** 8. Public Voice Fan: Consented + artist-selected message */
+  publicVoiceFan: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'publicVoiceFan'),
+
+  /** Room fixtures */
+  roomDense: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'roomDense'),
+  roomSparse: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'roomSparse'),
+  edgeCases: (tenantId: TenantId = 'vieworld-demo'): AppState => applyPersonaToState(createInitialState(tenantId), 'edgeCases'),
+
+  /** Benefit Pending: Membership active but both benefits pending */
   benefitPending: (tenantId: TenantId = 'vieworld-demo'): AppState => {
     const base = createInitialState(tenantId);
     return {

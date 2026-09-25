@@ -1,0 +1,145 @@
+/* My Space: fan-owned surfaces, distinct from the cinematic Artist World. */
+.vw-page-myspace .v7-space-header-block { background: transparent; border: 0; box-shadow: none; padding: 4px 0 22px; }
+.vw-page-myspace .v7-space-hero-row { align-items: end; gap: 18px; border-bottom: 1px solid #e8e8df; padding-bottom: 16px; }
+.vw-page-myspace .v7-space-eyebrow { color: #426f57; letter-spacing: .11em; }
+.vw-page-myspace .v7-space-title { font-family: Lora, Georgia, serif; font-size: clamp(30px, 3.3vw, 42px); font-weight: 500; letter-spacing: -.025em; color: #202b30; }
+.vw-page-myspace .v7-space-mood { color: #263742; font-weight: 650; }
+.vw-page-myspace .v7-space-bio { color: #67757a; }
+.vw-page-myspace .v7-space-tabs { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; gap: clamp(4px, 1vw, 20px); }
+.vw-page-myspace .v7-space-tabs button { border-radius: 0; padding: 10px 16px; color: #65717b; border-bottom: 2px solid transparent; min-height: 44px; }
+.vw-page-myspace .v7-space-tabs button.active, .vw-page-myspace .v7-space-tabs button[aria-pressed=true] { background: transparent; box-shadow: none; color: #1d2c33; border-bottom-color: #416852; }
+.vw-page-myspace .v7-private-note { margin: 14px 0 4px; font: 12px/1.55 inherit; color: #6e7c78; }
+
+/* Image remains a clean background; selected canonical items form compositions in five fixed zones. */
+.vw-page-myspace .v6-display-scene { background: #fcf8ef; border-radius: 24px; }
+.vw-page-myspace .v6-fixture { border: 0; }
+.vw-page-myspace .v6-fixture-shirt { width: 14%; height: 25%; }
+.vw-page-myspace .v6-fixture-ticket { width: 16%; height: 22%; }
+.vw-page-myspace .v6-fixture-achievement { width: 15%; height: 25%; }
+.vw-page-myspace .v6-fixture-lightstick { width: 7%; height: 25%; }
+.vw-page-myspace .v6-fixture-disc { width: 18%; height: 22%; }
+.vw-page-myspace .v6-fixture-label { background: rgba(34, 53, 45, .84); border-color: rgba(255,255,255,.34); }
+.vw-page-myspace .v6-display-scene.is-view-mode .v6-fixture-label { opacity: 0; }
+.vw-page-myspace .v6-display-scene.is-view-mode .v6-fixture:hover .v6-fixture-label, .vw-page-myspace .v6-display-scene.is-view-mode .v6-fixture:focus-visible .v6-fixture-label { opacity: 1; }
+.vw-page-myspace .v7-room-social-bar { background: transparent; border: 0; box-shadow: none; padding: 6px 0 13px; }
+.vw-page-myspace .v6-display-scene.is-edit-mode .v6-fixture { border-color: #54745e !important; background: rgba(251, 251, 244, .17) !important; box-shadow: none !important; animation: none !important; }
+.vw-page-myspace .v6-display-scene.is-view-mode .v6-fixture:not(.occupied) { opacity: 0; }
+.myspace-surface-composition { position: relative; width: 100%; height: 100%; display: block; overflow: visible; pointer-events: none; }
+.myspace-room-prop { position: absolute; display: grid; place-items: center; filter: drop-shadow(0 3px 4px rgba(43,35,26,.22)); }
+.myspace-room-prop > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.myspace-room-prop.is-cutout { filter: drop-shadow(0 5px 6px rgba(41,37,27,.24)); }
+.myspace-room-prop-matte { display: grid; place-items: center; width: 100%; height: 100%; box-sizing: border-box; overflow: hidden; background: #f9f5e9; }
+.myspace-room-prop-matte > img { display: block; width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.myspace-room-prop-symbol { display: grid; place-items: center; width: 100%; height: 100%; color: #a38b5b; font-size: clamp(12px,2.2cqw,30px); }
+/* Missing transparent props become intentional room objects, never bare studio photos. */
+.myspace-room-prop.is-wall .myspace-room-prop-matte { padding: 7%; border: 4px solid #bc9368; border-radius: 3px; box-shadow: inset 0 0 0 2px #f4e1b7, 0 2px 5px #3e322a2e; }
+.myspace-room-prop.is-rack .myspace-room-prop-matte { padding: 8% 8% 18%; border: 2px solid #e8d9ba; border-radius: 3px; box-shadow: 0 2px 5px #3e322a29; }
+.myspace-room-prop.is-shelf .myspace-room-prop-matte, .myspace-room-prop.is-desk .myspace-room-prop-matte { padding: 5%; border: 2px solid #e2cba6; border-radius: 3px; background: #f6ecdc; box-shadow: 2px 3px 0 #ae8f6a6b; }
+.myspace-room-prop.is-spotlight .myspace-room-prop-matte { padding: 9%; border: 2px solid #e6dec9; border-radius: 14px 14px 6px 6px; background: #fffcf0d9; box-shadow: inset 0 0 8px #ffffffb8, 0 3px 7px #44352935; }
+.myspace-room-prop.is-spotlight .myspace-room-prop-matte::after { content: ''; position: absolute; width: 88%; height: 7%; bottom: 0; border-radius: 50%; background: #b8906b; }
+.vw-page-myspace .v7-room-social-bar { gap: 10px; }
+.vw-page-myspace .vw-room-hint { color: #68736a; font-size: 12px; margin: 10px 2px 26px; }
+.myspace-surface-capacity { color: #63746a; font-size: 13px; margin: 8px 0 12px; }
+.myspace-layout-presets, .myspace-other-surfaces { display: flex; gap: 7px; flex-wrap: wrap; margin: 12px 0; }
+.myspace-layout-presets button, .myspace-other-surfaces button, .myspace-surface-item-actions button { border: 1px solid #d9e0d7; background: #fffdfa; color: #365449; border-radius: 999px; padding: 7px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+.myspace-layout-presets button[aria-pressed=true] { background: #365849; color: white; border-color: #365849; }
+.myspace-surface-item-actions { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.myspace-surface-item-actions button { padding: 5px 9px; }
+.myspace-surface-item-actions button[aria-pressed=true] { color: #254d38; background: #e3eee2; }
+.myspace-drawer-notice { color: #7e4c2d; background: #fff3e4; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+.myspace-mobile-surfaces { display: none; }
+.v7-drawer-item-card button:disabled { opacity: .5; cursor: default; }
+
+/* Paper-note character with readable Vietnamese body text. */
+.vw-page-myspace .v7-guestbook-grid { gap: 18px; }
+.vw-page-myspace .v7-sticky-note { transform: none; min-height: 170px; border-radius: 12px; box-shadow: 0 5px 13px rgba(51,44,29,.08); }
+.vw-page-myspace .v7-sticky-note:hover { transform: translateY(-3px); }
+.vw-page-myspace .v7-note-author { font-family: inherit; font-weight: 650; }
+.vw-page-myspace .v7-note-time { font-family: inherit; opacity: .68; }
+.vw-page-myspace .v7-note-body { font-family: inherit !important; font-style: normal !important; font-size: 14px; line-height: 1.72; color: #31423e; }
+.vw-page-myspace .v7-sticky-note.note-color-yellow { background: #fff7df; border-color: #f2e5bd; }
+.vw-page-myspace .v7-sticky-note.note-color-pink { background: #fff0f2; border-color: #f4dbe0; }
+.vw-page-myspace .v7-sticky-note.note-color-mint { background: #edf6e9; border-color: #dcebd4; }
+
+/* Private collection: less card chrome than VieSHOP, different grammar for keepsakes. */
+.myspace-collection { padding: 4px 0 44px; color: #26343b; }
+.myspace-mode-tabs, .myspace-avatar-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 20px; }
+.myspace-mode-tabs button, .myspace-avatar-tabs button, .myspace-category-chips button { border: 1px solid #d8e0de; background: #fff; border-radius: 999px; color: #334b43; min-height: 38px; padding: 7px 17px; font: inherit; font-size: 13px; cursor: pointer; }
+.myspace-mode-tabs button[aria-pressed=true], .myspace-avatar-tabs button[aria-pressed=true], .myspace-category-chips button[aria-pressed=true] { color: #fff; background: #355b48; border-color: #355b48; }
+.myspace-room-link { margin-left: auto; font-size: 13px; color: #425c52; border: 0; background: transparent; cursor: pointer; text-decoration: none; padding: 8px 0; }
+.myspace-collection-search { display: flex; align-items: center; gap: 10px; max-width: 670px; min-height: 44px; border: 1px solid #dae2e0; border-radius: 999px; padding: 0 15px; color: #597065; background: #fff; }
+.myspace-collection-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #26343b; font: inherit; font-size: 13px; }
+.myspace-collection-filter-row { display: flex; align-items: start; justify-content: space-between; gap: 14px; margin-top: 14px; }
+.myspace-category-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.myspace-category-chips button { min-height: 34px; padding: 5px 12px; }
+.myspace-advanced-filters { position: relative; flex: none; font-size: 13px; }
+.myspace-advanced-filters summary { list-style: none; cursor: pointer; border: 1px solid #d8e0de; border-radius: 999px; padding: 8px 14px; background: #fff; }
+.myspace-advanced-filters summary::-webkit-details-marker { display: none; }
+.myspace-advanced-filters > div { position: absolute; z-index: 7; right: 0; top: calc(100% + 6px); width: min(290px, 80vw); border: 1px solid #e0e5df; border-radius: 14px; background: #fffdf9; box-shadow: 0 12px 30px rgba(28,43,34,.12); padding: 16px; display: grid; gap: 12px; }
+.myspace-advanced-filters label { display: grid; gap: 5px; }
+.myspace-advanced-filters select { border: 1px solid #d8e0de; border-radius: 8px; padding: 8px; background: white; color: #26343b; }
+.myspace-advanced-filters button { border: 0; background: transparent; color: #355b48; cursor: pointer; text-align: left; }
+.myspace-collection-count { color: #6c7871; font-size: 12px; margin: 18px 2px 12px; }
+.myspace-collection-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+.myspace-object-card { min-width: 0; overflow: visible; border: 1px solid #eeeae2; border-radius: 15px; background: #fffdf9; box-shadow: 0 5px 16px rgba(55,42,31,.045); }
+.myspace-object-image { position: relative; height: clamp(170px, 16vw, 240px); display: grid; place-items: center; border-radius: 14px 14px 0 0; background: #f4f0e8; overflow: visible; }
+.myspace-object-image > img { width: 100%; height: 100%; object-fit: contain; padding: 12px; box-sizing: border-box; border-radius: inherit; }
+.myspace-collection-grid.is-memories .myspace-object-image { background: #e9e7df; }
+.myspace-collection-grid.is-memories .myspace-object-image > img { object-fit: cover; padding: 0; }
+.myspace-object-card.is-milestone .myspace-object-image { background: radial-gradient(circle at 50% 44%,#fff8e7,#e6e9db); }
+.myspace-keepsake-emblem { display: grid; justify-items: center; gap: 8px; color: #9d834c; font-family: Lora, Georgia, serif; }
+.myspace-object-caption { padding: 12px 15px 15px; }
+.myspace-object-caption h3 { margin: 0 0 5px; font-size: 14px; line-height: 1.4; color: #273943; }
+.myspace-object-caption p { margin: 0; color: #6f7c7d; font-size: 12px; line-height: 1.4; }
+.myspace-object-menu-trigger { position: absolute; z-index: 5; right: 10px; top: 10px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(33,50,47,.09); border-radius: 50%; background: #fffdf2ee; color: #334b43; cursor: pointer; }
+.myspace-object-menu { position: absolute; z-index: 20; top: 47px; right: 9px; display: grid; min-width: 150px; padding: 5px; background: #fff; border: 1px solid #e1e5dd; border-radius: 10px; box-shadow: 0 12px 25px rgba(26,43,32,.15); }
+.myspace-object-menu button, .myspace-object-menu a { border: 0; text-decoration: none; background: transparent; text-align: left; color: #31473a; padding: 9px; font: inherit; font-size: 12px; cursor: pointer; border-radius: 6px; }
+.myspace-object-menu button:hover, .myspace-object-menu a:hover { background: #eff4ec; }
+.myspace-collection-empty { text-align: center; padding: 40px 20px; color: #687970; }
+.myspace-collection-empty button { border: 0; background: transparent; color: #315841; cursor: pointer; }
+.myspace-history-details { margin: 25px 0; border-top: 1px solid #e2e7df; padding-top: 14px; }
+.myspace-history-details > summary { cursor: pointer; color: #476854; font-size: 13px; }
+.myspace-modal-backdrop { position: fixed; inset: 0; z-index: 120; background: rgba(24,37,31,.4); display: grid; place-items: center; padding: 18px; }
+.myspace-modal { position: relative; width: min(540px,100%); max-height: 90vh; overflow: auto; border-radius: 18px; padding: 22px; box-sizing: border-box; background: #fffdf8; box-shadow: 0 20px 65px rgba(11,25,18,.22); }
+.myspace-modal h2 { font-family: Lora, Georgia, serif; font-size: 22px; margin: 10px 0; }
+.myspace-modal p { font-size: 13px; line-height: 1.7; color: #56655b; }
+.myspace-modal-close { position: absolute; right: 16px; top: 16px; border: 0; background: #f2f4ef; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
+.myspace-modal-image { display: grid; place-items: center; height: 210px; background: #f5f2e9; border-radius: 12px; color: #8c9c79; }
+.myspace-modal-image img { width: 100%; height: 100%; object-fit: contain; }
+.myspace-primary-action { border: 0; border-radius: 999px; background: #365b48; color: #fff; padding: 11px 19px; font: inherit; cursor: pointer; }
+.myspace-primary-action:disabled { opacity: .5; cursor: default; }
+.myspace-surface-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.myspace-surface-choices button { display: grid; text-align: left; gap: 5px; border: 1px solid #dfe5db; border-radius: 11px; padding: 13px; background: #fdfdf8; color: #314d3d; cursor: pointer; }
+.myspace-surface-choices button:disabled { opacity: .5; cursor: default; }
+.myspace-surface-choices small { color: #718073; }
+
+/* Avatar editor keeps canonical clothing/accessory inventory; no synthetic extra controls. */
+.myspace-avatar-editor { color: #283840; padding-bottom: 40px; }
+.myspace-avatar-header { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin: 8px 0 18px; }
+.myspace-avatar-header h2 { font-size: 22px; margin: 0 0 5px; }
+.myspace-avatar-header p { color: #67766d; font-size: 13px; margin: 0; }
+.myspace-avatar-layout { display: grid; grid-template-columns: minmax(250px, .8fr) minmax(0, 1.2fr); gap: 22px; align-items: stretch; }
+.myspace-avatar-preview { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; min-height: 445px; border-radius: 20px; background: #eee6d7; }
+.myspace-avatar-preview::before { content: ''; position: absolute; inset: -5%; z-index: -2; background: url('/images/myspace-room-v2.png') center/cover; filter: blur(6px) saturate(.7); opacity: .68; }
+.myspace-avatar-preview::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg,rgba(255,251,239,.18),rgba(255,250,234,.43)); }
+.myspace-avatar-preview .avatar-renderer { width: clamp(160px, 16vw, 250px) !important; height: clamp(200px, 23vw, 310px) !important; filter: drop-shadow(0 9px 15px rgba(40,38,29,.17)); }
+.myspace-avatar-preview span { color: #253831; font-weight: 650; background: #fff9e4d9; border-radius: 999px; padding: 5px 15px; }
+.myspace-avatar-preview small { color: #4a5c51; }
+.myspace-avatar-controls { border: 1px solid #e7e6df; border-radius: 20px; padding: 18px; background: #fefdf9; min-width: 0; }
+.myspace-avatar-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin: 0 0 20px; }
+.myspace-avatar-tabs button { border-radius: 12px; padding: 10px 7px; }
+.myspace-avatar-panel { min-height: 238px; }
+.myspace-avatar-panel h3 { margin: 5px 0 13px; font-size: 14px; }
+.myspace-avatar-panel p { color: #708077; font-size: 12px; line-height: 1.6; }
+.myspace-avatar-options { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; margin-bottom: 20px; }
+.myspace-avatar-options button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 5px; min-height: 105px; border: 1px solid #e2e6dd; border-radius: 11px; background: #fffdf7; color: #334b3a; padding: 9px 5px; font: inherit; font-size: 11px; text-align: center; cursor: pointer; }
+.myspace-avatar-options button[aria-pressed=true] { background: #eef5ed; border-color: #466b51; box-shadow: inset 0 0 0 1px #466b51; }
+.myspace-avatar-options button > img { width: 55px; height: 55px; object-fit: contain; }
+.myspace-avatar-options button > svg:last-child { position: absolute; right: 5px; top: 5px; color: #355c46; }
+.myspace-avatar-option-symbol { font-size: 34px; line-height: 55px; }
+.myspace-avatar-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 25px; }
+.myspace-avatar-actions button:not(.myspace-primary-action) { border: 1px solid #dbe1dc; border-radius: 999px; background: white; color: #345446; font: inherit; font-size: 12px; padding: 8px 13px; cursor: pointer; }
+.myspace-avatar-actions button:disabled { opacity: .45; cursor: default; }
+.myspace-avatar-notice { font-size: 12px; min-height: 18px; color: #42654e; }
+@media(max-width:900px){.myspace-avatar-layout{grid-template-columns:1fr}.myspace-avatar-preview{min-height:300px}.myspace-avatar-options{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:620px){.vw-page-myspace .v7-space-hero-row{display:block}.vw-page-myspace .v7-space-hero-right{overflow-x:auto;margin-top:15px}.vw-page-myspace .v7-space-tabs{width:max-content}.vw-page-myspace .v7-space-tabs button{padding:9px 12px}.myspace-mobile-surfaces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}.myspace-mobile-surfaces button{display:flex;justify-content:space-between;gap:5px;align-items:center;text-align:left;border:1px solid #dfe4da;background:#fffdf8;border-radius:9px;padding:9px;color:#3b5845;font:inherit;font-size:11px}.myspace-mobile-surfaces small{white-space:nowrap;color:#728071}.myspace-collection-filter-row{display:block}.myspace-advanced-filters{margin-top:10px}.myspace-advanced-filters>div{left:0;right:auto}.myspace-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.myspace-object-image{height:160px}.myspace-object-caption{padding:10px}.myspace-object-caption h3{font-size:12px}.myspace-object-caption p{font-size:11px}.myspace-avatar-options{grid-template-columns:repeat(2,minmax(0,1fr))}.myspace-avatar-header{display:block}.myspace-room-link{margin-left:0}.myspace-surface-choices{grid-template-columns:1fr}.myspace-avatar-controls{padding:12px}.myspace-avatar-actions{justify-content:stretch}.myspace-avatar-actions button{flex:1}}

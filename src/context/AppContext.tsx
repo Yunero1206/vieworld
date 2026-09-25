@@ -25,18 +25,23 @@ export interface AppProviderProps {
   children: React.ReactNode;
   initialTenantId?: TenantId;
   disableAutoHydrate?: boolean; // Useful for isolated unit tests
+  initialState?: AppState;
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({
   children,
   initialTenantId = 'vieworld-demo',
   disableAutoHydrate = false,
+  initialState,
 }) => {
-  const [isHydrated, setIsHydrated] = useState(disableAutoHydrate);
+  const [isHydrated, setIsHydrated] = useState(disableAutoHydrate || !!initialState);
   const [storageNotice, setStorageNotice] = useState<string | null>(null);
 
   // Initialize reducer with clean state
   const [state, dispatch] = useReducer(appReducer, initialTenantId, (tId) => {
+    if (initialState) {
+      return initialState;
+    }
     if (disableAutoHydrate) {
       return createInitialState(tId);
     }

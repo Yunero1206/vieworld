@@ -1,169 +1,195 @@
-# VieWorld — Nền Tảng Kết Nối Fandom & Thế Giới Tương Tác Số
+# VieWorld — một thế giới, cùng nhau
 
 <div align="center">
 
-![VieWorld Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-355%20passed%20%7C%2035%20suites-success?style=flat-square)
-![React](https://img.shields.io/badge/React-19.0.0-61dafb.svg?style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?style=flat-square)
-![Vite](https://img.shields.io/badge/Vite-6.1-646CFF.svg?style=flat-square)
-![License](https://img.shields.io/badge/License-Proprietary%20%2F%20All%20Rights%20Reserved-red.svg?style=flat-square)
-![Author](https://img.shields.io/badge/Author-Phạm%20Thanh%20Phú-orange.svg?style=flat-square)
+![Build](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-379%20passed%20%7C%2037%20files-success?style=flat-square)
+![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square)
+![License](https://img.shields.io/badge/license-proprietary-red?style=flat-square)
 
-<br/>
-
-**VieWorld — Một thế giới, cùng nhau.**  
-*Nền tảng fandom diorama 2.5D độc lập, ấm cúng, chân thực, nơi người hâm mộ và nghệ sĩ cùng sẻ chia những khoảnh khắc đáng nhớ.*
+**Một fan world ấm cúng, nơi fan khám phá nghệ sĩ, gặp nhau trong những khoảnh khắc chung, giữ lại kỷ niệm và mua merch khi điều đó thật sự phù hợp.**
 
 </div>
 
----
+![Quảng trường VieWorld](./public/images/world-v8/plaza.webp)
 
-## 👤 Thông Tin Tác Giả & Bản Quyền Sở Hữu Trí Tuệ
+## VieWorld là gì?
 
-> [!IMPORTANT]
-> ### TUYÊN BỐ BẢN QUYỀN ĐỘC QUYỀN (PROPRIETARY COPYRIGHT NOTICE)
-> - **Tác giả / Nhà thiết kế & Sáng lập:** **Phạm Thanh Phú**
-> - **Bản quyền:** **Copyright © 2026 Phạm Thanh Phú. All rights reserved.**
-> - **Giấy phép:** Proprietary (Toàn bộ quyền được bảo lưu theo giấy phép [LICENSE](./LICENSE)).
-> 
-> Toàn bộ ý tưởng sản phẩm, cấu trúc kiến trúc phần mềm, mã nguồn (frontend & architecture), thiết kế giao diện (UI/UX), đồ họa/vector, cơ chế tương tác và tài liệu hiến pháp sản phẩm trong kho lưu trữ này là **tài sản trí tuệ độc quyền của Phạm Thanh Phú**.  
-> Mọi hành vi sao chép, trích xuất, tái phân phối, chuyển nhượng hoặc thương mại hóa khi chưa có sự chấp thuận bằng văn bản chính thức từ tác giả đều bị nghiêm cấm theo quy định pháp luật về Sở hữu trí tuệ.
+VieWorld là nguyên mẫu sản phẩm fandom do **Phạm Thanh Phú** thiết kế và phát triển. Sản phẩm không đặt platform hay cửa hàng ở trung tâm; nhân vật chính của trải nghiệm là mối quan hệ giữa fan, nghệ sĩ và cộng đồng.
 
----
-
-## 🌟 Giới Thiệu Dự Án (Overview & Vision)
-
-**VieWorld** là một nguyên mẫu sản phẩm quan hệ người hâm mộ di động (*portable fan relationship platform*) do **Phạm Thanh Phú** nghiên cứu và phát triển. Dự án giải quyết các vấn đề phân mảnh, thiếu tin cậy và thương mại hóa thái quá trong các mô hình fandom truyền thống bằng cách thiết lập một không gian kỹ thuật số minh bạch, nơi người hâm mộ thực sự sở hữu các kỷ niệm và giá trị gắn bó cùng nghệ sĩ yêu thích.
-
-### 🔄 The Signature Loop (Vòng lặp trải nghiệm cốt lõi)
+Thay vì một dashboard chứa nhiều module rời rạc, VieWorld dùng hình ảnh một thế giới có thể ghé thăm. Quảng trường là điểm bắt đầu chung, còn từng địa điểm đảm nhiệm một vai trò rõ ràng trong fan journey.
 
 ```text
-Khám phá (Explore) 
-    ↳ Vào thế giới nghệ sĩ (Enter World) 
-        ↳ Theo dõi / Đăng ký (Follow / RSVP) 
-            ↳ Tham gia tương tác trực tiếp (Moments Live) 
-                ↳ Lưu trữ Moment Capsule 
-                    ↳ Không gian cá nhân (My Space) 
-                        ↳ Trưng bày phòng 2.5D & Phục hồi kỷ niệm 
-                            ↳ Quay lại khoảnh khắc kế tiếp (Return)
+Quảng trường
+  → Explore: tìm nghệ sĩ và world phù hợp
+  → Moments: theo dõi hoạt động, lịch hẹn và tham gia live
+  → My Space: thể hiện danh tính fan và giữ bộ sưu tập
+  → VieSHOP: thử, chọn và mua đúng phiên bản sản phẩm
+  → Quay lại cho khoảnh khắc tiếp theo
 ```
 
----
+## Năm không gian chính
 
-## 🎨 Hệ Thống Nhận Diện & Không Gian Quảng Trường (Brand & Plaza System)
+| Không gian | Vai trò trong hành trình | Những gì fan làm được |
+|---|---|---|
+| **Quảng trường** `/` | Bản đồ chung và điểm trở về | Nhìn thấy bốn điểm đến, chọn nơi muốn ghé, trở về My Space qua avatar trung tâm |
+| **Explore** `/explore` | Trang chủ nghệ sĩ và discovery | Tìm nghệ sĩ/chương trình, xem world nổi bật, hoạt động mới và quản lý danh sách đang theo dõi |
+| **Moments** `/moments` | Ngôi nhà hoạt động của từng nghệ sĩ | Chọn nghệ sĩ, xem feed, lịch, live/concert, hall cộng đồng và merchandise liên quan |
+| **My Space** `/me` | Danh tính và tài sản của fan | Tùy biến avatar, trưng bày năm loại kỷ vật, duyệt bộ sưu tập, xem Fandom Pass và quyền riêng tư |
+| **VieSHOP** `/shop` | Commerce nằm trong fan journey | Lọc theo nghệ sĩ/loại sản phẩm, phân biệt Physical–Digital–Duo, thử đồ, thêm giỏ và theo dõi đơn |
 
-### 1. 🌟 Nhận Diện Thương Hiệu Mới: Chữ V Fandom & Quỹ Đạo Thiên Thể
-- **Biểu tượng chữ V hữu cơ:** Chữ **V** bo tròn hiện đại chuyển sắc xanh rêu ô-liu (`#224834` – `#559972`).
-- **Quỹ đạo thiên thể (Celestial Orbit Ring):** Vòng elip ngọc bích ôm lấy chữ V kèm hạt hành tinh nhỏ ở góc trên bên phải.
-- **Ngôi sao thần tượng phát sáng (`✦`):** Tỏa ánh kim vàng ấm (`#E2A638` – `#FFE082`) và 3 tia sáng hướng lên trong lòng chữ V, thể hiện sự thăng hoa của nghệ thuật và tình cảm fan.
-- **Component vector thuần:** `<VieWorldLogo />` sắc nét tuyệt đối ở mọi độ phân giải.
+`/artists` vẫn được giữ làm alias tương thích cho các deep link Explore cũ.
 
-### 2. 🏛️ Quảng Trường VieWorld Plaza — Navigation Hub Trực Quan
-- **Kiến trúc 4 Điểm Đến Chính:**
-  - **Explore** (Trên-Trái): Khám phá các nghệ sĩ, cộng đồng và thế giới âm nhạc (`/artists`).
-  - **Moments** (Dưới-Trái): Sân khấu live, buổi hẹn trực tuyến và tín hiệu mới nhất (`/moments`).
-  - **My Space** (Trên-Phải): Góc phòng riêng tư, bộ sưu tập, tủ đồ và lưu bút fan (`/me`).
-  - **VieSHOP** (Dưới-Phải): Cửa hàng vật phẩm số, merch chính hãng và thẻ hội viên (`/shop`).
-- **Bảng hiệu chìm (Engraved Signboard Typography):** Tên bảng hiệu được khắc chìm tinh tế trực tiếp vào bề mặt gỗ và kim loại của từng tòa nhà (sử dụng kỹ thuật letterpress shadow), không dùng thẻ trắng thô ráp lơ lửng.
-- **Chip thông báo nhấp nháy (Pulsing Ambient Badges):** Đặt gọn gàng ngay phía dưới bảng hiệu, bỏ dấu chấm màu rối mắt, có hiệu ứng thở nhẹ nhàng (`vw-noti-pulse`).
-- **Tâm điểm la bàn ngôi sao:** Đặt nhân vật Linh Nguyễn ngay trung tâm với lối tắt trở về My Space.
-- **Responsive 2x2 trên Mobile:** Tự động chuyển đổi thành cụm thẻ tiện ích dễ dàng chạm bằng một ngón tay.
+## Fan journey hiện tại
 
----
+### 1. Khám phá và theo dõi
 
-## 🚀 Các Không Gian Cốt Lõi (Core Spaces)
+- Explore ưu tiên world đang theo dõi, hoạt động gần đây và discovery thay vì hiển thị một danh mục khô cứng.
+- Tìm kiếm hỗ trợ tiếng Việt không dấu và lọc theo nghệ sĩ, chương trình hoặc trạng thái live.
+- Mỗi world dẫn sang đúng Moments của nghệ sĩ, không tạo một giao diện platform thứ hai.
 
-### 1. 🔍 Explore (Khám Phá Nghệ Sĩ & Thế Giới)
-- Tìm kiếm tức thì với công cụ phân loại theo thể loại, trạng thái Live và nghệ sĩ đang theo dõi.
-- Thẻ nghệ sĩ giàu thông tin: banner visual, số lượng người theo dõi, sự kiện sắp diễn ra.
+### 2. Hẹn gặp và tham gia Moments
 
-### 2. 💬 Moments & Live Concert
-- **Stage Phát sóng Chân thực (Honest Presence):** Phản ánh chính xác trạng thái online/offline của host. Tuyệt đối không dùng AI đóng giả nghệ sĩ.
-- **Phòng Live Chat Đồng Bộ:** Hỗ trợ bình luận, thả phản ứng cảm xúc và ghim tin nhắn.
-- **YouTube-Style Live Poll Overlay:** Bình chọn trực tiếp dạng overlay nổi tinh gọn, không chiếm không gian phát sóng.
-- **Lưu trữ Moment Capsules:** Đóng gói khoảnh khắc đáng nhớ vào bộ sưu tập cá nhân kèm ghi chú riêng tư.
+- Trạng thái phiên được thể hiện trung thực: `scheduled`, `open`, `running`, `paused`, `ended` hoặc `cancelled`.
+- Live, lobby mở sớm và lịch sắp tới là ba trạng thái khác nhau; vào lobby không được tính là đã tham dự live.
+- Fan có thể RSVP, chat có kiểm duyệt, gửi câu hỏi, bình chọn và nhận capsule khi đủ điều kiện tham dự.
+- Replay không giả lập sự hiện diện trực tiếp và không tự cấp vật phẩm live.
 
-### 3. 🏠 My Space (Không Gian Riêng Tư Của Fan)
-- **Cấu trúc 3 tab WAI-ARIA tinh gọn:**
-  1. *Phòng của tôi*: Căn phòng 2.5D có thể chuyển đổi giữa Chế độ xem (View) và Chế độ chỉnh sửa (Edit).
-  2. *Bộ sưu tập*: Toàn bộ đồ số, capsule và merch fan đang sở hữu, cho phép trưng/cất tức thì.
-  3. *Avatar*: Trình tùy biến phụ kiện và trang phục cho nhân vật chibi.
-- **Avatar Account Menu:** Đưa các tiện ích như *Túi đồ*, *Fandom Pass*, *Quyền riêng tư*, *Đơn hàng*, *Trợ giúp* vào popover menu gọn gàng trên thanh điều hướng.
-- **Chế độ xem như khách (Visitor Projection):** Cho phép bạn bè ghé thăm, đọc câu chuyện kỷ niệm và dán giấy nhớ lưu bút (`RoomGuestbook`).
+### 3. Giữ kỷ niệm và thể hiện bản thân
 
-### 4. 🛍️ VieSHOP (Đại Siêu Thị Fandom Toàn Diện)
-- **Gom cụm theo Product Family:** Mỗi dòng sản phẩm gom gọn các biến thể `Hàng thật · Digital · Duo`.
-- **Phòng thử đồ Digital:** Banner thử đồ thu gọn cùng drawer thử trang phục trực quan trên avatar.
-- **Lưới sản phẩm 4 cột toàn màn hình:** Tối ưu hóa theo tiêu chuẩn Baymard Institute.
+- Avatar fan có nhiều kiểu tóc, phụ kiện và digital look dùng nhất quán trên toàn app.
+- Bộ sưu tập hỗ trợ tìm kiếm và lọc theo loại vật phẩm, nghệ sĩ và thời gian.
+- Fan chủ động chọn áo, ticket, album, lightstick hoặc achievement để đưa vào Phòng trưng bày.
+- Public profile chỉ chiếu những gì fan đã chọn; cài đặt phòng, lượt ghé, guestbook và membership signal có thể kiểm soát riêng.
 
----
+### 4. Mua sắm có ngữ cảnh
 
-## 🛠️ Ngăn Xếp Kỹ Thuật (Tech Stack)
+- Product family gom các phiên bản **Physical**, **Digital** và **Duo** nhưng vẫn mô tả rõ fan sẽ nhận gì.
+- Digital try-on chỉ là xem trước, không tự thêm giỏ, tạo đơn hay thay đổi avatar đã lưu.
+- Journey commerce tách bạch: thử sản phẩm → thêm giỏ → kiểm tra đơn → xác nhận mô phỏng → theo dõi tiến trình.
+- Chi tiết đơn thể hiện các mốc khởi tạo, xác nhận, thanh toán mô phỏng, chuẩn bị hàng, vận chuyển và dự kiến giao.
 
-| Lớp (Layer) | Công nghệ sử dụng |
+### 5. Nhận thông báo và được hỗ trợ
+
+- Notification center dùng chung cho nghệ sĩ, lịch hẹn, quyền lợi, đơn hàng và hỗ trợ.
+- Có trạng thái đã đọc/chưa đọc, đánh dấu tất cả, preference theo nhóm và giao diện riêng cho desktop/mobile.
+- Deep link đưa fan về đúng object thay vì chỉ mở một inbox chung.
+- Support case giữ lịch sử xử lý và không tự động cấp quyền lợi khi chưa được đối soát.
+
+## Nguyên tắc sản phẩm
+
+VieWorld hiện là **interactive prototype**, vì vậy app cố ý giữ các ranh giới sau:
+
+- Không đăng nhập thật, không thu thập mật khẩu và không yêu cầu camera/microphone.
+- Không thanh toán thật; mọi checkout và trạng thái thanh toán đều được ghi rõ là mô phỏng.
+- Không giả mạo nghệ sĩ đang online, không tạo read receipt giả và không dùng avatar draft trên live stage.
+- Không tự cấp membership, benefit, capsule hoặc quyền mua khi điều kiện chưa hợp lệ.
+- Dữ liệu demo được cô lập theo tenant và lưu cục bộ trên trình duyệt để phục vụ prototype.
+
+## UX, responsive và accessibility
+
+- Desktop dùng top navigation; mobile dùng bottom navigation năm điểm chạm chính.
+- Account popover gom hồ sơ, world đang theo dõi, Fandom Pass, túi đồ/đơn hàng, notification settings, privacy và trợ giúp.
+- Dialog/drawer có focus management, đóng bằng `Escape` và trả focus về trigger.
+- App có skip link, landmark/ARIA labels, trạng thái focus và fallback khi hình ảnh hoặc deep link không hợp lệ.
+- Layout được kiểm tra tại desktop `1440×900` và mobile `390×844`, không có horizontal overflow ở các route chính.
+
+## Kiến trúc kỹ thuật
+
+| Lớp | Công nghệ / trách nhiệm |
 |---|---|
-| **Core Framework** | React 19 (`react`, `react-dom`, `react-router-dom` v7) |
-| **Language** | TypeScript 5.7 (Strict Mode, Type-safe Contracts) |
-| **Bundler & Dev Server** | Vite 6.4 (Tối ưu hóa Rollup code-splitting chunks) |
-| **Kiểm thử tự động** | Vitest 3.2 + Testing Library + JSDOM (**35 test suites, 355 tests PASS 100%**) |
-| **Giao diện & Đồ họa** | Vanilla CSS Design System, Glassmorphism, Nunito & Be Vietnam Pro Typography |
-| **Icons** | Lucide React |
+| UI | React 19, React Router 7, Lucide React |
+| Ngôn ngữ | TypeScript 5.7 |
+| Styling | Vanilla CSS, design tokens, Be Vietnam Pro và Nunito được self-host |
+| State/domain | Reducer-based domain model, invariant rõ cho session, commerce, benefit và collection |
+| Persistence | Local storage adapter và lớp IndexedDB thử nghiệm; chưa có production backend |
+| Build | Vite 6 với route-level lazy loading và vendor chunking |
+| Test | Vitest 3, Testing Library và JSDOM |
 
----
+### Các route quan trọng
 
-## 💻 Cài Đặt & Chạy Cục Bộ (Getting Started)
+```text
+/                         Quảng trường VieWorld
+/explore                  Artist & world discovery
+/moments                  Hoạt động theo nghệ sĩ
+/sessions/:sessionId      Live/listening/live-house session
+/me                       My Space, collection, avatar, privacy
+/members/:fanId           Bản xem không gian của một fan khác
+/shop                     VieSHOP
+/cart                     Giỏ đồ
+/checkout/:checkoutId     Checkout mô phỏng
+/orders/:orderId          Theo dõi đơn hàng
+/inbox                    Tất cả thông báo
+/support/:caseId          Chi tiết hỗ trợ
+/studio                   Công cụ demo cho người tổ chức
+```
 
-### Yêu cầu môi trường:
-- **Node.js:** `>= 18.x` (khuyến nghị Node 20 LTS hoặc Node 22)
-- **npm:** `>= 9.x`
+## Chạy dự án
 
-### Các bước cài đặt:
+Yêu cầu: Node.js 20+ và npm 9+.
 
 ```bash
-# 1. Clone repository
 git clone https://github.com/Yunero1206/vieworld.git
 cd vieworld
-
-# 2. Cài đặt dependencies
-npm install
-
-# 3. Khởi chạy dev server
+npm ci
 npm run dev
-# Mặc định truy cập tại: http://localhost:5173
+```
 
-# 4. Kiểm tra TypeScript & Chạy toàn bộ Test Suite
-npx tsc -b
-npm run test
+Dev server mặc định chạy tại `http://localhost:5173`.
 
-# 5. Đóng gói bản Production
+### Kiểm tra trước khi phát hành
+
+```bash
+npm run typecheck
+npm test
 npm run build
-
-# 6. Chạy thử bản Build (Preview)
 npm run preview
 ```
 
----
+Trạng thái release gần nhất:
 
-## 🌐 Triển Khai Lên Render (Deployment on Render)
+- TypeScript typecheck: pass
+- Automated tests: **379/379**, 37 test files
+- Production build: pass
+- Browser QA: desktop và mobile pass, không có console warning/error hoặc ảnh hỏng ở các hành trình chính
 
-Dự án đã được cấu hình tối ưu để triển khai trực tiếp lên **[Render](https://render.com/)**:
+## Cấu trúc repository
 
-### Cách 1: Triển Khai dạng "Static Site" (Khuyên dùng - Nhanh & Miễn Phí)
-1. Đăng nhập [Render Dashboard](https://dashboard.render.com/) ➔ **New +** ➔ **Static Site**.
-2. Kết nối repo: `Yunero1206/vieworld`.
-3. Điền thông số:
-   - **Build Command:** `npm install && npm run build`
-   - **Publish Directory:** `dist`
-4. **Rewrite Rule (BẮT BUỘC cho SPA routing):**
-   - Source: `/*` ➔ Destination: `/index.html` (Type: `Rewrite`)
-5. Nhấn **Create Static Site**.
+```text
+src/
+  components/       UI dùng lại, avatar, community, notifications
+  context/          App provider và hydration
+  data/             Demo fixtures và cấu hình artist
+  domain/           Types, reducer và tenant configuration
+  services/         Persistence adapters
+  styles/           Design system theo từng surface
+  tests/            Domain, journey, accessibility và regression tests
+  views/            Route-level product surfaces
+  world/            Commerce, privacy, event status, collection và world rules
+public/
+  fonts/             Font self-host và license
+  images/            Art direction, avatar, plaza và merchandise assets
+docs/                Product decisions, contracts, QA và handoff history
+```
 
-### Cách 2: Triển Khai dạng "Web Service" hoặc Render Blueprint
-Trong repo đã có sẵn file [`render.yaml`](./render.yaml) để triển khai tự động chỉ với 1 click.
+## Deploy lên Render
 
----
+Repo có sẵn [`render.yaml`](./render.yaml) cho hai lựa chọn:
 
-## 📜 Giấy Phép (License)
+- **Static Site** — khuyến nghị cho prototype SPA, publish thư mục `dist` và rewrite `/*` về `/index.html`.
+- **Web Service** — chạy `npm start` trên Node.js 20.
 
-Dự án phát hành theo giấy phép bản quyền độc quyền [LICENSE](./LICENSE). Bản quyền © 2026 **Phạm Thanh Phú**.
+Build command hiện tại là:
+
+```bash
+npm install && npm run build
+```
+
+## Tác giả và bản quyền
+
+> **Tác giả / Product Designer & Developer:** Phạm Thanh Phú<br>
+> **Copyright © 2026 Phạm Thanh Phú. All rights reserved.**
+
+VieWorld là phần mềm proprietary. Toàn bộ ý tưởng sản phẩm, mã nguồn, kiến trúc, UI/UX, đồ họa và tài liệu trong repository được bảo lưu theo [LICENSE](./LICENSE). Không sao chép, phân phối hoặc thương mại hóa khi chưa có chấp thuận bằng văn bản của tác giả.

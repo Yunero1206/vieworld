@@ -1,0 +1,49 @@
+.artist-context-switcher { display: flex; gap: 7px; overflow-x: auto; margin-bottom: 17px; padding-bottom: 4px; scrollbar-width: none; }
+.artist-context-switcher::-webkit-scrollbar { display: none; }
+.artist-context-switcher a { flex: none; max-width: 270px; overflow: hidden; padding: 9px 13px; border: 1px solid #415166; border-radius: 999px; color: #cbd6e5; font-size: 12px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.artist-context-switcher a[aria-current='page'] { border-color: #9fb9ee; background: #30476c; color: #fff; }
+.artist-context-stage { margin-bottom: 27px; color: #f5f7fb; }
+.artist-context-stage-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 15px; }
+.artist-context-stage-heading small { color: #9eb9e6; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+.fan-shell .artist-context-stage-heading h2 { margin: 5px 0 5px; color: #fff; font: 500 clamp(25px, 2.5vw, 35px)/1.2 var(--font-editorial) !important; }
+.artist-context-stage-heading p { display: flex; align-items: center; gap: 7px; margin: 0; color: #bbc7d7; font-size: 12px; }
+.artist-context-close { flex: none; padding: 8px 12px; border: 1px solid #4a5c72; border-radius: 7px; color: #dbe7fa; font-size: 12px; text-decoration: none; }
+.artist-context-stage-grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(270px, .72fr); gap: 13px; align-items: stretch; }
+.artist-context-main { min-width: 0; }
+.artist-context-live-media { overflow: hidden; border: 1px solid #40516a; border-radius: 9px; background: #111a28; }
+.artist-context-live-media .avatar-stage-venue { min-height: min(31vw, 390px) !important; border: 0 !important; border-radius: 0 !important; }
+.artist-context-live-media .stage-player-overlay { border-radius: 0 !important; }
+.artist-context-artwork { position: relative; display: flex; align-items: end; min-height: clamp(270px, 31vw, 390px); overflow: hidden; isolation: isolate; padding: 28px; border: 1px solid #40516a; border-radius: 9px; background: #111a28; }
+.artist-context-artwork::after { content: ''; position: absolute; inset: 30% 0 0; z-index: -1; background: linear-gradient(transparent, rgba(9, 15, 23, .94)); }
+.artist-context-artwork img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; filter: brightness(.7); }
+.artist-context-artwork div { display: grid; gap: 7px; }
+.artist-context-artwork span { color: #d7e3f4; font-size: 12px; }
+.artist-context-artwork strong { font: 500 clamp(25px, 3vw, 39px)/1.2 var(--font-editorial); }
+.artist-context-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 11px; }
+.artist-context-actions :is(button, a, summary) { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 8px 12px; border: 1px solid #718bad; border-radius: 7px; background: #293d58; color: #eef4ff; font: 12px var(--font-sans); text-decoration: none; cursor: pointer; }
+.artist-context-actions button:disabled { opacity: .65; cursor: default; }
+.artist-context-actions details { position: relative; }
+.artist-context-actions details ul { position: absolute; z-index: 2; min-width: 220px; margin: 5px 0 0; padding: 13px 13px 13px 30px; border: 1px solid #526783; border-radius: 7px; background: #1e2b39; color: #e2ebf8; font-size: 12px; line-height: 1.6; box-shadow: 0 14px 35px #070d16bb; }
+.artist-context-actions > span,.artist-context-honesty { color: #aebed0; font-size: 11px; line-height: 1.5; }
+.artist-context-honesty { margin: 10px 0 0; }
+.artist-context-hall { display: flex; flex-direction: column; min-width: 0; min-height: 360px; overflow: hidden; border: 1px solid #3a4a5e; border-radius: 9px; background: #1b2633; }
+.artist-context-hall > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 15px; border-bottom: 1px solid #39485c; }
+.artist-context-hall > header div,.artist-context-hall > header a { display: inline-flex; align-items: center; gap: 7px; }
+.artist-context-hall > header strong { font-size: 13px; }
+.artist-context-hall > header a { flex: none; color: #bcd2f3; font-size: 11px; text-decoration: none; }
+.artist-context-hall-messages { flex: 1; max-height: 395px; overflow-y: auto; padding: 10px 15px; }
+.artist-context-hall-messages p { display: grid; gap: 5px; margin: 0; padding: 10px 0; border-bottom: 1px solid #344251; font-size: 12px; line-height: 1.5; }
+.artist-context-hall-messages strong { color: #b9ccee; font-size: 11px; }
+.artist-context-hall-messages span { color: #f0f3f8; }
+.artist-context-hall form { display: flex; gap: 5px; margin: 10px; padding: 4px; border: 1px solid #526783; border-radius: 7px; }
+.artist-context-hall input { flex: 1; min-width: 0; padding: 7px; border: 0; background: transparent; color: #fff; font: 12px var(--font-sans); }
+.artist-context-hall form button { display: grid; place-items: center; width: 34px; border: 0; border-radius: 5px; background: #587abe; color: #fff; cursor: pointer; }
+.artist-context-hall form button:disabled { opacity: .5; cursor: default; }
+.artist-context-hall-gate { display: flex; flex: 1; flex-direction: column; align-items: start; justify-content: center; gap: 8px; padding: 25px; }
+.artist-context-hall-gate strong { font: 500 19px var(--font-editorial); }
+.artist-context-hall-gate p { margin: 0; color: #b8c4d2; font-size: 12px; line-height: 1.5; }
+.artist-context-hall-gate a { display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; color: #c5d8f7; font-size: 12px; text-decoration: none; }
+.artist-context-stage :is(a, button, input, summary):focus-visible,.artist-context-switcher a:focus-visible { outline: 2px solid #a2c4ff; outline-offset: 3px; }
+@media (max-width: 950px) { .artist-context-stage-grid { grid-template-columns: minmax(0, 1.35fr) minmax(240px, .8fr); } }
+@media (max-width: 720px) { .artist-context-stage-grid { grid-template-columns: 1fr; } .artist-context-hall { min-height: 230px; } .artist-context-live-media .avatar-stage-venue { min-height: 250px !important; } }
+@media (max-width: 520px) { .artist-context-stage-heading { align-items: start; } .artist-context-close { white-space: nowrap; } .artist-context-artwork { min-height: 250px; padding: 17px; } }

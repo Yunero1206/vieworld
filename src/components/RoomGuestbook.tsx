@@ -14,51 +14,9 @@ export interface StickyNote {
   isPinned?: boolean;
 }
 
-const DEFAULT_NOTES: Record<string, StickyNote[]> = {
-  'fan-linh': [
-    {
-      id: 'note-1',
-      authorId: 'fan-mai',
-      authorName: 'Mai Anh',
-      text: 'Ghé phòng Linh thấy mâm đĩa than acoustic mê xỉu! Bữa nào hẹn nhau đi concert nhé!',
-      sticker: '🎵 Yêu acoustic',
-      color: 'yellow',
-      createdAt: 'Hôm qua, 18:24',
-      isPinned: true,
-    },
-    {
-      id: 'note-2',
-      authorId: 'fan-minh',
-      authorName: 'Minh Khang',
-      text: 'Phòng decor chiếc áo Star Club siêu hợp tone! Chúc bạn tuần mới vui vẻ!',
-      sticker: '✨ Phòng xinh xỉu',
-      color: 'pink',
-      createdAt: '2 ngày trước',
-    },
-  ],
-  'fan-mai': [
-    {
-      id: 'note-m1',
-      authorId: 'fan-linh',
-      authorName: 'Linh Nguyễn',
-      text: 'Kệ đĩa First Notes của Mai đỉnh quá! Hôm nay ghé thăm phòng Mai học hỏi decor nè.',
-      sticker: '✨ Phòng xinh xỉu',
-      color: 'mint',
-      createdAt: 'Hôm nay, 14:10',
-    },
-  ],
-  'fan-minh': [
-    {
-      id: 'note-k1',
-      authorId: 'fan-mai',
-      authorName: 'Mai Anh',
-      text: 'Cây Star Light của Khang phát sáng đẹp ghê! Khi nào có concert nhớ rủ nhé!',
-      sticker: '🔥 Cháy concert',
-      color: 'purple',
-      createdAt: '3 ngày trước',
-    },
-  ],
-};
+import { EXPANDED_GUESTBOOK_NOTES } from '../data/expandedUniverse';
+
+const DEFAULT_NOTES: Record<string, StickyNote[]> = EXPANDED_GUESTBOOK_NOTES;
 
 const STICKER_PRESETS = [
   '✨ Phòng xinh xỉu',

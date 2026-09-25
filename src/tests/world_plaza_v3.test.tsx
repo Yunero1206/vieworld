@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import { WorldPlazaView } from '../views/WorldPlazaView';
@@ -13,23 +13,23 @@ import { loadState, saveState } from '../services/storageAdapter';
 const initial=()=>createInitialState('vieworld-demo');
 function mount(path='/'){return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<WorldPlazaView/>}/><Route path="/worlds/:worldId" element={<FanWorldView/>}/><Route path="/worlds/:worldId/moments" element={<FanWorldView/>}/><Route path="/worlds/:worldId/archive" element={<FanWorldView/>}/><Route path="/moments" element={<FanWorldView/>}/><Route path="/archive" element={<FanWorldView/>}/><Route path="/me" element={<FanWorldView/>}/></Routes></MemoryRouter></AppProvider>);}
 const read=()=>loadState('vieworld-demo',initial().fanProfile.id).state;
-describe('Five-place fan home',()=>{
+describe('Fan home and room',()=>{
   beforeEach(()=>localStorage.clear());
-  it('starts in a plaza with five distinct doors, not in the last artist room',()=>{
+  it('starts with a brief orientation and a contextual way back, not an artist room',()=>{
     const state=appReducer(initial(),{type:'VISIT_FAN_WORLD',worldId:'neon-sessions'});saveState(state);mount();
-    expect(screen.getByRole('heading',{level:1}).textContent).toBe('Hôm nay, mình ghé đâu?');
-    const doors=within(screen.getByRole('navigation',{name:'Các nơi của VieWorld'})).getAllByRole('link');
-    expect(doors.map(a=>a.getAttribute('href'))).toEqual(['/artists','/me','/moments','/shop']);
-    expect(screen.getByRole('link',{name:/Về My Space của/})).toBeInTheDocument();
+    expect(screen.getByRole('heading',{level:1}).textContent).toContain('Chào Linh.');
+    expect(screen.getByRole('region',{name:'Gần đây'})).toBeInTheDocument();
+    expect(screen.getByRole('region',{name:'Khoảnh khắc sắp tới'})).toBeInTheDocument();
+    expect(screen.getByRole('link',{name:/Trở lại với Neon Sessions/})).toHaveAttribute('href','/explore');
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
-  it('still exposes all five destinations if plaza art fails',()=>{
-    const {container}=mount();fireEvent.error(container.querySelector('.vw-background')!);
-    expect(container.querySelector('.vw-no-art')).toBeInTheDocument();
-    fireEvent.click(within(screen.getByRole('navigation',{name:'Các nơi của VieWorld'})).getByRole('link',{name:/Moments/}));
-    expect(screen.getByRole('heading',{level:1}).textContent).toContain('Moments');
+  it('links a real live session without claiming extra activity',()=>{
+    mount();
+    expect(screen.getByRole('link',{name:/Artist A: Drop-in Trò chuyện đầu tuần/})).toHaveAttribute('href','/sessions/session-dropin-01');
+    expect(screen.queryByText(/Mở presale/)).not.toBeInTheDocument();
   });
   it.each([['/worlds/artist-a','moments'],['/worlds/artist-a/moments','moments'],['/worlds/artist-a/archive','archive'],['/me','myspace']])('%s renders its own room artwork', (path,image)=>{
-    const {container}=mount(path);if(image==='moments')fireEvent.click(screen.getByRole('button',{name:'Live & Concert'}));if(image==='myspace'){expect(container.querySelector('.v6-room-art')).toHaveAttribute('src','/images/world-v6/myspace.webp');expect(screen.getByRole('link',{name:/Về quảng trường/})).toHaveAttribute('href','/');}else expect(container.querySelector('.fw-scene-art')).toBeNull();
+    const {container}=mount(path);if(image==='moments')fireEvent.click(screen.getByRole('button',{name:'Live & Concert'}));if(image==='myspace'){expect(container.querySelector('.v6-room-art')).toHaveAttribute('src','/images/myspace-room-v2.png');expect(screen.getByRole('link',{name:/Về quảng trường/})).toHaveAttribute('href','/');}else expect(container.querySelector('.fw-scene-art')).toBeNull();
   });
   it('saves an edited room without touching orders, memberships or collections',()=>{
     const state=initial();const design:RoomDesign={...DEFAULT_ROOM,theme:'dusk',items:[{id:'a',kind:'lamp',x:60,y:66,rotation:90}]};

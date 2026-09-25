@@ -1,4 +1,3 @@
-import { ownedDigitalLook } from '../world/merchCatalog';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, Lock, Package, Search, Heart, Truck, Monitor, Check, X, SlidersHorizontal, Info } from 'lucide-react';
@@ -7,38 +6,24 @@ import { AvatarRenderer } from '../components/AvatarRenderer';
 import { WorldPanel } from '../components/WorldPanel';
 import { ProductVisual } from '../components/ProductVisual';
 import { Product } from '../domain/types';
-import { DELIVERY_LABELS, MERCH_IMAGE_ROOT, ownsDigitalProduct } from '../world/merchCatalog';
+import { DELIVERY_LABELS, MERCH_IMAGE_ROOT, ownedDigitalLook, ownsDigitalProduct } from '../world/merchCatalog';
 import { ORDER_LABELS } from '../world/fanWorld';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { getTenantConfig } from '../domain/tenantConfig';
+import { availableShopCategories, getPreviewCapabilities, previewEdition, productBadge, productPrice, shopCategory, SHOP_CATEGORY_LABELS } from '../world/shopPresentation';
 
-const money = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
-
-const categories = [
-  ['all', 'Tất cả'],
-  ['merch', 'Merch & Lightstick'],
-  ['album', 'Album / CD'],
-  ['membership', 'Pass & Membership'],
-];
 
 interface ProductFamily {
   key: string;
-  familyId?: string;
   title: string;
   worldId: string;
   artistName: string;
-  category: string;
   variants: Product[];
-  formatsLabel: string;
-  minPrice: number;
-  maxPrice: number;
-  priceDisplay: string;
   primaryProduct: Product;
-  digitalTwinProduct?: Product;
   previewOnly: boolean;
 }
 
-function MerchArt({ product, digital = false }: { product: Product; digital?: boolean }) {
+function MerchArt({ product, digital = false, eager = false }: { product: Product; digital?: boolean; eager?: boolean }) {
   const [failed, setFailed] = useState(false);
   const image = digital ? product.digitalImage : product.image;
   useEffect(() => setFailed(false), [image]);
@@ -46,7 +31,7 @@ function MerchArt({ product, digital = false }: { product: Product; digital?: bo
     <img
       src={`${MERCH_IMAGE_ROOT}/${image}.png`}
       alt={`${product.title} · ${digital || product.delivery === 'digital' ? 'minh họa digital' : 'thiết kế hàng thật'} · thiết kế kỷ niệm`}
-      loading="lazy"
+      loading={eager ? 'eager' : 'lazy'}
       onError={() => setFailed(true)}
     />
   ) : (
@@ -68,6 +53,11 @@ export function FanShopView() {
   const delivery = params.get('delivery') || 'all';
   const sort = params.get('sort') || 'featured';
   const savedOnly = params.get('saved') === 'true';
+  const availability = params.get('availability') || 'all';
+  const preorderOnly = params.get('preorder') === 'true';
+  const previewOnly = params.get('preview') === 'true';
+  const minPrice = Number(params.get('min') || 0);
+  const maxPrice = Number(params.get('max') || 0);
 
   const [size, setSize] = useState('');
   const [digitalPhoto, setDigitalPhoto] = useState(false);
@@ -75,13 +65,15 @@ export function FanShopView() {
   const [added, setAdded] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [fittingDrawerOpen, setFittingDrawerOpen] = useState(false);
+  const [previewTab, setPreviewTab] = useState<'avatar' | 'room'>('avatar');
   const [showFormatModal, setShowFormatModal] = useState(false);
   const openedHere = useRef(false);
 
   const selectedId = params.get('product');
   const selected = selectedId ? state.products[selectedId] : undefined;
   const world = worldId ? state.worlds[worldId] : undefined;
-  const allProducts = Object.values(state.products);
+  const allProducts = useMemo(() => Object.values(state.products).filter(product => product.tenantId === state.activeTenantId), [state.products, state.activeTenantId]);
+  const categories = availableShopCategories(allProducts);
   const ownOrders = Object.values(state.orders).filter(o => o.fanId === state.fanProfile.id);
   const saved = state.fanProfile.savedProductIds || [];
 
@@ -98,7 +90,7 @@ export function FanShopView() {
     } else {
       next.set(key, value);
     }
-    setParams(next, { replace: true });
+    setParams(next, { replace: key === 'q' || key === 'min' || key === 'max' });
   };
 
   const setQuery = (q: string) => updateParam('q', q, '');
@@ -111,10 +103,16 @@ export function FanShopView() {
   const clearAllFilters = () => {
     const next = new URLSearchParams(params);
     next.delete('q');
-    next.delete('artist');
     next.delete('delivery');
     next.delete('saved');
-    setParams(next, { replace: true });
+    next.delete('availability');
+    next.delete('preorder');
+    next.delete('preview');
+    next.delete('min');
+    next.delete('max');
+    next.delete('sort');
+    next.delete('category');
+    setParams(next);
   };
 
   const openProduct = (id: string) => {
@@ -135,14 +133,17 @@ export function FanShopView() {
     }
   };
 
+  const cartCount = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
   const eligible = selected?.requiredBenefitId ? state.benefits[selected.requiredBenefitId] : undefined;
   const locked = !!selected?.requiredBenefitId && (!eligible || !['eligible', 'claimed'].includes(eligible.status));
   const unavailable = selected && (!selected.isAvailable || selected.stockCount <= 0);
   const variants = selected ? allProducts.filter(p => (p.familyId || p.id) === (selected.familyId || selected.id)) : [];
-  const digitalTwin = (p: Product) => allProducts.find(x => (x.familyId || x.id) === (p.familyId || p.id) && x.delivery === 'digital' && x.digitalSlot);
-  const tryProduct = selected && digitalTwin(selected);
-  const previewLook = trying?.digitalSlot ? { ...ownedDigitalLook(state), [trying.digitalSlot]: trying.digitalItemId } : ownedDigitalLook(state);
-  const owned = !!trying && ownsDigitalProduct(state, trying);
+  const digitalTwin = (p: Product) => previewEdition(p, allProducts);
+  const tryProduct = selected && getPreviewCapabilities(selected, allProducts);
+  const previewEditionProduct = trying && digitalTwin(trying);
+  const previewCapabilities = trying && getPreviewCapabilities(trying, allProducts);
+  const previewLook = previewEditionProduct?.digitalSlot ? { ...ownedDigitalLook(state), [previewEditionProduct.digitalSlot]: previewEditionProduct.digitalItemId } : ownedDigitalLook(state);
+  const owned = !!previewEditionProduct && ownsDigitalProduct(state, previewEditionProduct);
 
   // Group all products into Product Families
   const productFamilies = useMemo(() => {
@@ -155,43 +156,19 @@ export function FanShopView() {
 
     const families: ProductFamily[] = [];
     for (const [key, vars] of map.entries()) {
-      const primary = vars.find(v => v.delivery === 'physical') || vars[0];
-      const prices = vars.map(v => v.priceVND);
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
+      const primary = vars.find(v => v.delivery === 'physical' && v.isAvailable && v.stockCount > 0)
+        || vars.find(v => v.isAvailable && v.stockCount > 0)
+        || vars.find(v => v.delivery === 'physical')
+        || vars[0];
       const isPreview = vars.every(v => v.previewOnly);
-
-      const formatSet = new Set(vars.map(v => v.delivery || 'physical'));
-      const formatLabels: string[] = [];
-      if (formatSet.has('physical')) formatLabels.push('Hàng thật');
-      if (formatSet.has('digital')) formatLabels.push('Digital');
-      if (formatSet.has('bundle')) formatLabels.push('Duo');
-
-      const twin = vars.find(v => v.delivery === 'digital' && v.digitalSlot);
-
-      let priceDisplay = '';
-      if (isPreview) {
-        priceDisplay = 'Xem thông tin';
-      } else if (minPrice === maxPrice) {
-        priceDisplay = money(minPrice);
-      } else {
-        priceDisplay = `${money(minPrice)} – ${money(maxPrice)}`;
-      }
 
       families.push({
         key,
-        familyId: primary.familyId,
         title: primary.title,
         worldId: primary.worldId || 'artist-a',
         artistName: state.worlds[primary.worldId]?.name || 'VieWorld',
-        category: primary.category || 'merch',
         variants: vars,
-        formatsLabel: formatLabels.join(' · '),
-        minPrice,
-        maxPrice,
-        priceDisplay,
         primaryProduct: primary,
-        digitalTwinProduct: twin,
         previewOnly: isPreview,
       });
     }
@@ -202,23 +179,30 @@ export function FanShopView() {
   const filteredFamilies = useMemo(() => {
     return productFamilies.filter(fam => {
       if (filter !== 'all' && fam.worldId !== filter) return false;
-      if (category === 'merch' && fam.category !== 'merch') return false;
-      if (category === 'album' && fam.category !== 'album') return false;
-      if (category === 'membership' && !['membership', 'ticket'].includes(fam.category)) return false;
-      if (category === 'ticket' && fam.category !== 'ticket') return false;
+      if (category !== 'all' && shopCategory(fam.primaryProduct) !== category) return false;
       if (delivery !== 'all' && !fam.variants.some(v => (v.delivery || 'physical') === delivery)) return false;
       if (savedOnly && !fam.variants.some(v => saved.includes(v.id))) return false;
+      if (preorderOnly && !fam.variants.some(v => v.releaseType === 'pre_order')) return false;
+      if (previewOnly && !fam.variants.some(v => { const capabilities = getPreviewCapabilities(v, allProducts); return capabilities.avatar || capabilities.room; })) return false;
+      if (availability === 'available' && (fam.previewOnly || !fam.primaryProduct.isAvailable || fam.primaryProduct.stockCount <= 0)) return false;
+      if (availability === 'sold-out' && (fam.previewOnly || (fam.primaryProduct.isAvailable && fam.primaryProduct.stockCount > 0))) return false;
+      if (availability === 'concept' && !fam.previewOnly) return false;
+      if (Number.isFinite(minPrice) && minPrice > 0 && fam.primaryProduct.priceVND < minPrice) return false;
+      if (Number.isFinite(maxPrice) && maxPrice > 0 && fam.primaryProduct.priceVND > maxPrice) return false;
       if (query && !matchesVietnameseQuery(fam.title, query) && !fam.variants.some(v => matchesVietnameseQuery(v.title, query))) return false;
       return true;
     }).sort((a, b) => {
-      if (sort === 'low') return a.minPrice - b.minPrice;
-      if (sort === 'high') return b.maxPrice - a.maxPrice;
-      return Number(!!b.familyId) - Number(!!a.familyId);
+      if (sort === 'low') return a.primaryProduct.priceVND - b.primaryProduct.priceVND;
+      if (sort === 'high') return b.primaryProduct.priceVND - a.primaryProduct.priceVND;
+      return Number(!!b.primaryProduct.familyId) - Number(!!a.primaryProduct.familyId);
     });
-  }, [productFamilies, filter, category, delivery, savedOnly, query, sort, saved]);
+  }, [productFamilies, filter, category, delivery, savedOnly, query, sort, saved, preorderOnly, previewOnly, availability, minPrice, maxPrice, allProducts]);
 
-  const hasActiveFilters = query || (filter !== 'all' && filter !== worldId) || delivery !== 'all' || savedOnly;
-  const activeFilterCount = (query ? 1 : 0) + (filter !== 'all' && filter !== worldId ? 1 : 0) + (delivery !== 'all' ? 1 : 0) + (savedOnly ? 1 : 0);
+  const hasActiveFilters = !!query || delivery !== 'all' || savedOnly || availability !== 'all' || preorderOnly || previewOnly || minPrice > 0 || maxPrice > 0;
+  const activeFilterCount = (query ? 1 : 0) + (delivery !== 'all' ? 1 : 0) + (savedOnly ? 1 : 0) + (availability !== 'all' ? 1 : 0) + (preorderOnly ? 1 : 0) + (previewOnly ? 1 : 0) + (minPrice > 0 || maxPrice > 0 ? 1 : 0);
+  const heroWorldId = filter === 'all' ? 'artist-a' : filter;
+  const heroFamilies = productFamilies.filter(family => family.worldId === heroWorldId && family.primaryProduct.image && !family.previewOnly).slice(0, 4);
+  const heroName = filter === 'all' ? 'STAR CLUB · HANOI 2026' : `${state.worlds[filter]?.name || 'ARTIST WORLD'} · VIESHOP`;
 
   function buy() {
     if (!selected || locked || unavailable || selected.previewOnly || (selected.sizes && !size)) return;
@@ -235,135 +219,38 @@ export function FanShopView() {
     );
   }
 
-  const dressingRoom = (compact = false) => (
-    <aside className={`fw-fitting-room ${compact ? 'compact' : ''}`} aria-label="Phòng thử đồ digital">
-      <p className="fw-eyebrow">PHÒNG THỬ ĐỒ KỸ THUẬT SỐ</p>
-      <h2>Định hình phong cách của bạn.</h2>
-      <div className="fw-fitting-mirror">
-        <AvatarRenderer
-          role="fan"
-          size="preview"
-          appearance={state.fanProfile.avatarPreset}
-          displayName={state.fanProfile.displayName}
-          accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
-          digitalLook={previewLook}
-        />
-      </div>
-      <p>{trying ? trying.title : 'Chọn áo, nón hoặc lightstick để thử trên avatar.'}</p>
-      <small>
-        {trying
-          ? owned
-            ? 'Bạn đã sở hữu bản digital này.'
-            : 'Đang thử · Chưa sở hữu · Chưa đổi diện mạo đã lưu'
-          : 'Mua hàng thật không tự tặng đồ digital.'}
-      </small>
-      {trying && (
-        <div>
-          {owned ? (
-            <button className="fw-button" onClick={() => dispatch({ type: 'EQUIP_DIGITAL_PRODUCT', productId: trying.id })}>
-              <Check size={16} /> Mặc và lưu
-            </button>
-          ) : (
-            <button className="fw-button" onClick={() => openProduct(trying.id)}>
-              Xem bản digital <ArrowRight size={15} />
-            </button>
-          )}
-          <button className="fw-text-button" onClick={() => setTrying(null)}>
-            <X size={15} /> Bỏ thử
-          </button>
-        </div>
-      )}
-      <Link className="fw-text-button" to="/me?panel=wardrobe">
-        Về tủ đồ cá nhân →
-      </Link>
-    </aside>
-  );
-
   return (
     <div className="fw-shop-page fw-shop-v2">
-      <header className="fw-shop-story">
+      <header className="fw-shop-story vw-shop-hero">
         <div className="fw-shop-story-copy">
-          <p className="fw-eyebrow">{shopTitle.toUpperCase()} · BỘ SƯU TẬP ĐẶC BIỆT · STAR CLUB</p>
+          <p className="fw-eyebrow">{heroName}</p>
           <h1>Ngoài đời. Trong world.<br /><em>Vẫn là điều mình thích.</em></h1>
-          <p>Áo mặc đi concert. Lightstick cầm trong world.<br />Mỗi phiên bản đều ghi rõ những gì bạn nhận.</p>
-          <button
-            className="fw-text-button fw-hero-discover"
-            onClick={() => {
-              setCategory('merch');
-              setDelivery('all');
-              document.getElementById('shop-catalog')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Khám phá Star Club <ArrowRight size={17} />
+          <p>Những món gắn với âm nhạc và kỷ niệm — chọn đúng phiên bản bạn muốn mang về.</p>
+          <button type="button" className="fw-hero-discover" onClick={() => document.getElementById('shop-catalog')?.scrollIntoView({ behavior: 'smooth' })}>
+            Khám phá bộ sưu tập <ArrowRight size={17} />
           </button>
         </div>
-        <button
-          onClick={() => openProduct('product-lightstick-real')}
-          aria-label="Khám phá Star Light lightstick"
-          className="fw-shop-spotlight-card"
-        >
-          <div className="fw-spotlight-media">
-            <MerchArt product={state.products['product-lightstick-real'] || allProducts[0]} />
-          </div>
-          <div className="fw-spotlight-badge">
-            <span className="fw-spotlight-pill">NỔI BẬT</span>
-            <span>STAR LIGHT <small>Thiết kế kỷ niệm mẫu</small></span>
-          </div>
-        </button>
+        <div className="vw-shop-hero-art" aria-label={`Một vài món từ ${heroName}`}>
+          {heroFamilies.map(family => <div key={family.key}><MerchArt product={family.primaryProduct} eager /></div>)}
+        </div>
       </header>
 
       <nav className="fw-shop-categories" aria-label={`Danh mục ${shopTitle}`}>
-        {categories.map(([id, label]) => (
+        {categories.map(id => (
           <button
             key={id}
             aria-pressed={category === id}
             onClick={() => setCategory(id)}
           >
-            {label}
+            {SHOP_CATEGORY_LABELS[id]}
           </button>
         ))}
       </nav>
 
-      {/* Compact Digital Fitting Room Strip */}
-      <div className="fw-fitting-strip" aria-label="Phòng thử đồ digital">
-        <div className="fw-fitting-strip-left">
-          <div className="fw-fitting-strip-avatar">
-            <AvatarRenderer
-              role="fan"
-              size="sm"
-              appearance={state.fanProfile.avatarPreset}
-              displayName={state.fanProfile.displayName}
-              accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
-              digitalLook={previewLook}
-            />
-          </div>
-          <div className="fw-fitting-strip-text">
-            <strong>Phòng thử đồ Digital</strong>
-            <span>
-              {trying
-                ? `Đang thử: ${trying.title}. Xem trước trang phục trên avatar.`
-                : 'Thử ngay trang phục và lightstick lên avatar của bạn trước khi chọn mua.'}
-            </span>
-          </div>
-        </div>
-        <div className="fw-fitting-strip-actions">
-          <button
-            type="button"
-            className="fw-button fw-fitting-strip-btn"
-            onClick={() => setFittingDrawerOpen(true)}
-          >
-            {trying ? 'Xem diện mạo đầy đủ →' : `Thử với ${state.fanProfile.displayName} →`}
-          </button>
-          {trying && (
-            <button
-              type="button"
-              className="fw-text-button"
-              onClick={() => setTrying(null)}
-            >
-              Bỏ thử
-            </button>
-          )}
-        </div>
+      <div className="fw-fitting-strip vw-shop-try-strip" aria-label="Thử trong My Space">
+        <img src="/images/myspace-room-v2.png" alt="Một góc phòng My Space" loading="lazy" />
+        <div className="fw-fitting-strip-text"><strong>Thử trong My Space</strong><span>Xem vật phẩm này trên avatar hoặc trong phòng của bạn trước khi chọn.</span></div>
+        <button type="button" className="fw-fitting-strip-btn" onClick={() => { updateParam('preview', 'true'); document.getElementById('shop-catalog')?.scrollIntoView({ behavior: 'smooth' }); }}>Xem món có thể thử <ArrowRight size={16}/></button>
       </div>
 
       <div className="fw-shop-layout fw-shop-fullwidth" id="shop-catalog">
@@ -410,16 +297,18 @@ export function FanShopView() {
               {saved.length > 0 && <small>({saved.length})</small>}
             </button>
 
-            <select
-              aria-label="Sắp xếp sản phẩm"
-              value={sort}
-              onChange={e => setSort(e.target.value)}
+            <Link
+              to="/cart"
+              className="fw-button fw-shop-cart-link"
+              aria-label={`Mở giỏ hàng${cartCount > 0 ? `, ${cartCount} món` : ''}`}
             >
-              <option value="featured">Bộ sưu tập</option>
-              <option value="low">Giá tăng dần</option>
-              <option value="high">Giá giảm dần</option>
-            </select>
+              <ShoppingBag size={15} />
+              <span>Giỏ hàng</span>
+              {cartCount > 0 && <span className="vw-shop-cart-count">{cartCount}</span>}
+            </Link>
           </div>
+
+          <div className="vw-shop-artist-row"><span>Nghệ sĩ</span><button type="button" aria-pressed={filter === 'all'} onClick={() => worldId ? navigate('/shop') : setFilter('all')}>Tất cả</button>{Object.values(state.worlds).filter(w => w.type === 'artist' && w.tenantId === state.activeTenantId && allProducts.some(p => p.worldId === w.id)).map(w => <button key={w.id} type="button" aria-pressed={filter === w.id} onClick={() => worldId ? navigate(`/shop?artist=${w.id}`) : setFilter(w.id)}>{w.name}</button>)}{filter !== 'all' && <button type="button" className="vw-shop-scope" onClick={() => navigate('/shop')} aria-label={`Bỏ lọc nghệ sĩ ${state.worlds[filter]?.name || filter}`}>Bỏ lọc nghệ sĩ <X size={14}/></button>}</div>
 
           {/* Applied filters strip */}
           {hasActiveFilters && (
@@ -428,11 +317,6 @@ export function FanShopView() {
               {query && (
                 <button type="button" className="fw-applied-chip" onClick={() => setQuery('')}>
                   "{query}" <X size={12} />
-                </button>
-              )}
-              {filter !== 'all' && filter !== worldId && (
-                <button type="button" className="fw-applied-chip" onClick={() => setFilter('all')}>
-                  {state.worlds[filter]?.name || filter} <X size={12} />
                 </button>
               )}
               {delivery !== 'all' && (
@@ -453,6 +337,7 @@ export function FanShopView() {
 
           <div className="fw-catalog-meta">
             <p className="fw-catalog-count">{filteredFamilies.length} thiết kế · Giá và tồn kho mô phỏng</p>
+            <Link to="/me?section=collection" className="vw-shop-owned-link">Đồ của tôi <ArrowRight size={14}/></Link>
           </div>
 
           {!filteredFamilies.length && (
@@ -473,6 +358,9 @@ export function FanShopView() {
                 ? fam.variants.find(v => (v.delivery || 'physical') === delivery)
                 : null) || fam.primaryProduct;
               const isSaved = fam.variants.some(v => saved.includes(v.id));
+              const badge = productBadge(repProduct);
+              const preview = getPreviewCapabilities(repProduct, allProducts);
+              const price = productPrice(repProduct);
 
               return (
                 <article className="fw-product-tile" key={fam.key}>
@@ -482,16 +370,13 @@ export function FanShopView() {
                   >
                     <div className="fw-product-art">
                       <MerchArt product={repProduct} />
-                      <span className="fw-product-delivery-pill">
-                        {repProduct.previewOnly ? 'Thiết kế mẫu' : DELIVERY_LABELS[repProduct.delivery || 'physical']}
-                      </span>
-                      <i><ArrowRight size={20} /></i>
+                      {badge && <span className="fw-product-delivery-pill">{badge}</span>}
                     </div>
                     <small className="fw-product-subline">
-                      {fam.artistName} · {repProduct.previewOnly ? 'Chưa mở bán' : !repProduct.isAvailable || repProduct.stockCount <= 0 ? 'Hết hàng' : repProduct.releaseType === 'pre_order' ? 'Pre-order · Đợt 1' : repProduct.delivery === 'digital' ? 'Digital tức thì' : fam.formatsLabel}
+                      {fam.artistName}{repProduct.batchLabel && repProduct.releaseType !== 'pre_order' && !repProduct.previewOnly ? ` · ${repProduct.batchLabel}` : ''}
                     </small>
-                    <h2>{fam.title}</h2>
-                    <strong>{fam.priceDisplay}</strong>
+                    <h2>{delivery === 'all' ? fam.title : repProduct.title}</h2>
+                    {fam.previewOnly ? <strong>Xem thông tin</strong> : <p className="vw-shop-card-price">{price.compareAt && <del>{price.compareAt}</del>}<strong>{price.current}</strong></p>}
                   </button>
                   <div className="fw-product-extra">
                     <button
@@ -502,16 +387,17 @@ export function FanShopView() {
                     >
                       <Heart size={17} fill={isSaved ? 'currentColor' : 'none'} />
                     </button>
-                    {fam.digitalTwinProduct && (
+                    {(preview.avatar || preview.room) && (
                       <button
                         type="button"
                         className="fw-text-button fw-product-try"
                         onClick={() => {
-                          setTrying(fam.digitalTwinProduct!);
-                          openProduct(fam.primaryProduct.id);
+                          setTrying(repProduct);
+                          setPreviewTab(preview.avatar ? 'avatar' : 'room');
+                          setFittingDrawerOpen(true);
                         }}
                       >
-                        Thử digital
+                        Thử trong My Space
                       </button>
                     )}
                   </div>
@@ -543,7 +429,7 @@ export function FanShopView() {
         <WorldPanel title="Bộ lọc sản phẩm" onClose={() => setFilterDrawerOpen(false)}>
           <div className="fw-filter-drawer-body">
             <div className="fw-filter-group">
-              <h3>Nghệ sĩ & Chương trình</h3>
+              <h3>Nghệ sĩ</h3>
               <div className="fw-filter-chip-grid">
                 <button
                   type="button"
@@ -552,7 +438,7 @@ export function FanShopView() {
                 >
                   Tất cả nghệ sĩ
                 </button>
-                {Object.values(state.worlds).map(w => (
+                {Object.values(state.worlds).filter(w => w.type === 'artist' && w.tenantId === state.activeTenantId && allProducts.some(p => p.worldId === w.id)).map(w => (
                   <button
                     key={w.id}
                     type="button"
@@ -564,6 +450,14 @@ export function FanShopView() {
                 ))}
               </div>
             </div>
+
+            <div className="fw-filter-group"><h3>Tình trạng</h3><div className="fw-filter-chip-grid">{[['all', 'Tất cả'], ['available', 'Có thể chọn'], ['sold-out', 'Hết hàng'], ['concept', 'Concept']].map(([key, label]) => <button key={key} type="button" className={`fw-filter-select-chip ${availability === key ? 'is-selected' : ''}`} onClick={() => updateParam('availability', key, 'all')}>{label}</button>)}</div></div>
+
+            <div className="vw-shop-filter-options"><label><input type="checkbox" checked={preorderOnly} onChange={event => updateParam('preorder', event.target.checked ? 'true' : 'false', 'false')}/>Chỉ xem pre-order</label><label><input type="checkbox" checked={previewOnly} onChange={event => updateParam('preview', event.target.checked ? 'true' : 'false', 'false')}/>Có thể thử trong My Space</label></div>
+
+            <div className="vw-shop-filter-price"><label>Giá từ (₫)<input type="number" min="0" step="10000" value={params.get('min') || ''} onChange={event => updateParam('min', event.target.value, '')}/></label><label>Đến (₫)<input type="number" min="0" step="10000" value={params.get('max') || ''} onChange={event => updateParam('max', event.target.value, '')}/></label></div>
+
+            <label className="vw-shop-filter-sort">Sắp xếp<select aria-label="Sắp xếp sản phẩm" value={sort} onChange={event => setSort(event.target.value)}><option value="featured">Nổi bật</option><option value="low">Giá tăng dần</option><option value="high">Giá giảm dần</option></select></label>
 
             <div className="fw-filter-group">
               <h3>Hình thức nhận sản phẩm</h3>
@@ -613,64 +507,15 @@ export function FanShopView() {
         </WorldPanel>
       )}
 
-      {/* Digital Fitting Drawer Modal */}
-      {fittingDrawerOpen && (
-        <WorldPanel title="Phòng thử đồ Digital" onClose={() => setFittingDrawerOpen(false)}>
-          <div className="fw-fitting-modal-content">
-            <div className="fw-fitting-mirror">
-              <AvatarRenderer
-                role="fan"
-                size="preview"
-                appearance={state.fanProfile.avatarPreset}
-                displayName={state.fanProfile.displayName}
-                accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
-                digitalLook={previewLook}
-              />
-            </div>
-            <h3>{trying ? trying.title : 'Chọn đồ để thử trên avatar'}</h3>
-            <p className="fw-muted">
-              {trying
-                ? owned
-                  ? 'Bạn đã sở hữu bản digital này trong tủ đồ.'
-                  : 'Đang thử · Chưa sở hữu · Chưa đổi diện mạo đã lưu'
-                : 'Bấm "Thử digital" ở bất kỳ trang phục hoặc lightstick nào để xem trước diện mạo.'}
-            </p>
-            {trying && (
-              <div className="fw-fitting-modal-buttons">
-                {owned ? (
-                  <button
-                    type="button"
-                    className="fw-button"
-                    onClick={() => dispatch({ type: 'EQUIP_DIGITAL_PRODUCT', productId: trying.id })}
-                  >
-                    <Check size={16} /> Mặc và lưu
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="fw-button"
-                    onClick={() => {
-                      setFittingDrawerOpen(false);
-                      openProduct(trying.id);
-                    }}
-                  >
-                    Xem bản digital <ArrowRight size={15} />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="fw-text-button"
-                  onClick={() => setTrying(null)}
-                >
-                  <X size={15} /> Bỏ thử
-                </button>
-              </div>
-            )}
-            <div className="fw-fitting-modal-links">
-              <Link to="/me?panel=wardrobe" className="fw-text-button">
-                Về tủ đồ cá nhân trong My Space →
-              </Link>
-            </div>
+      {fittingDrawerOpen && trying && previewCapabilities && (
+        <WorldPanel title="Thử trong My Space" onClose={() => setFittingDrawerOpen(false)}>
+          <div className="vw-shop-preview">
+            <h3>{trying.title}</h3>
+            {previewCapabilities.avatar && previewCapabilities.room && <div className="vw-shop-preview-tabs"><button type="button" aria-pressed={previewTab === 'avatar'} onClick={() => setPreviewTab('avatar')}>Trên avatar</button><button type="button" aria-pressed={previewTab === 'room'} onClick={() => setPreviewTab('room')}>Trong phòng</button></div>}
+            {previewTab === 'avatar' && previewCapabilities.avatar ? <div className="vw-shop-preview-avatar"><AvatarRenderer role="fan" size="preview" appearance={state.fanProfile.avatarPreset} displayName={state.fanProfile.displayName} accessoryId={state.fanProfile.wardrobeChoice?.accessoryId} digitalLook={previewLook}/></div> : <div className="vw-shop-preview-room"><img src="/images/myspace-room-v2.png" alt="Phòng My Space"/><div className={`vw-shop-preview-object ${trying.category === 'album' ? 'is-album' : trying.category === 'ticket' ? 'is-ticket' : /lightstick/.test(trying.image || '') ? 'is-lightstick' : 'is-clothing'}`}><MerchArt product={trying}/></div></div>}
+            <p className="fw-muted">Chỉ là hình xem trước. Bản hàng thật không tự mở khóa đồ digital, trừ khi phiên bản đã chọn ghi rõ kèm digital.</p>
+            {previewTab === 'avatar' && owned && previewEditionProduct && <button type="button" className="fw-button" onClick={() => dispatch({ type: 'EQUIP_DIGITAL_PRODUCT', productId: previewEditionProduct.id })}><Check size={16}/>Mặc và lưu</button>}
+            <button type="button" className="fw-text-button" onClick={() => setFittingDrawerOpen(false)}>Quay lại món đồ</button>
           </div>
         </WorldPanel>
       )}
@@ -716,7 +561,7 @@ export function FanShopView() {
       )}
 
       {/* Product Detail Modal */}
-      {selectedId && (
+      {selectedId && !fittingDrawerOpen && (
         <WorldPanel title={selected?.title || 'Không tìm thấy món đồ'} onClose={close}>
           {selected ? (
             <>
@@ -740,7 +585,7 @@ export function FanShopView() {
               <div className="fw-product-detail-art">
                 <MerchArt product={selected} digital={digitalPhoto} />
               </div>
-              <small className="fw-muted">Thiết kế mẫu · Digital được thể hiện riêng với hàng thật</small>
+              <small className="fw-muted">Hình minh họa của phiên bản đang chọn; bản digital được thể hiện riêng với hàng thật.</small>
 
               {variants.length > 1 && (
                 <div className="fw-variant-selector" aria-label="Chọn phiên bản sản phẩm">
@@ -761,14 +606,12 @@ export function FanShopView() {
                 {selected.releaseType === 'pre_order' ? ' · PRE-ORDER' : ''}
               </p>
 
-              <h3 className="fw-product-price">
-                {selected.previewOnly ? 'Mẫu trưng bày · Chưa mở bán' : money(selected.priceVND)}
-              </h3>
+              <h3 className="fw-product-price">{selected.previewOnly ? 'Concept · Chưa mở bán' : <>{productPrice(selected).compareAt && <del className="vw-shop-old-price">{productPrice(selected).compareAt}</del>}{productPrice(selected).current}</>}</h3>
 
               {/* Fulfillment clarity badge */}
               <div className="fw-fulfillment-badge">
                 {selected.delivery === 'physical' && (
-                  <p><Truck size={15} /><span>{selected.estimatedShipping || 'Dự kiến giao hàng: Tháng 10/2026'}{selected.batchLabel ? ` (${selected.batchLabel})` : ''}</span></p>
+                  <p><Truck size={15} /><span>{selected.estimatedShipping || 'Xem thông tin giao nhận khi chốt đơn.'}{selected.batchLabel ? ` (${selected.batchLabel})` : ''}</span></p>
                 )}
                 {selected.delivery === 'digital' && (
                   <p><Monitor size={15} /><span>Kích hoạt ngay vào My Space & Tủ đồ cá nhân sau khi xác nhận</span></p>
@@ -803,21 +646,9 @@ export function FanShopView() {
                 </label>
               )}
 
-              {tryProduct && (
-                <div className="fw-dialog-tryon-box">
-                  <button
-                    className="fw-text-button"
-                    onClick={() => setTrying(trying ? null : tryProduct)}
-                  >
-                    Thử lên avatar · không mua
-                  </button>
-                  {trying && dressingRoom(true)}
-                </div>
-              )}
+              {tryProduct && (tryProduct.avatar || tryProduct.room) && <button type="button" className="fw-text-button vw-shop-detail-preview" onClick={() => { setTrying(selected); setPreviewTab(tryProduct.avatar ? 'avatar' : 'room'); setFittingDrawerOpen(true); }}>Thử trong My Space · không mua <ArrowRight size={16}/></button>}
 
-              {!selected.previewOnly && (
-                <p>{unavailable ? 'Món này hiện đã hết hàng.' : `Còn ${selected.stockCount} suất trong danh mục mô phỏng.`}</p>
-              )}
+              {!selected.previewOnly && unavailable && <p>Món này hiện đã hết hàng.</p>}
 
               {locked && (
                 <p className="fw-locked">
@@ -825,14 +656,7 @@ export function FanShopView() {
                 </p>
               )}
 
-              {selected.previewOnly ? (
-                <Link
-                  className="fw-button fw-buy"
-                  to={selected.category === 'membership' ? '/me?panel=membership' : '/worlds/artist-a?panel=concerts'}
-                >
-                  {selected.category === 'membership' ? 'Xem chương trình hội viên' : 'Xem lịch concert · Không phải mua vé'}
-                </Link>
-              ) : (
+              {selected.previewOnly ? <p className="vw-shop-concept-note">Đây là thiết kế concept để xem trước, chưa thể thêm vào giỏ.{selected.category === 'membership' && <> <Link to="/me?panel=membership">Xem chương trình hội viên →</Link></>}</p> : (
                 <button
                   className="fw-button fw-buy"
                   onClick={buy}
@@ -852,7 +676,7 @@ export function FanShopView() {
               {state.lastError && <p role="alert">{state.lastError.message}</p>}
 
               <p className="fw-muted">
-                Trải nghiệm an toàn: Không thu tiền thật. Thử đồ để xem trước diện mạo trên avatar trước khi quyết định thêm vào bộ sưu tập cá nhân.
+                Giao dịch thử nghiệm, không thu tiền thật. Vật phẩm chỉ vào Bộ sưu tập sau khi đơn được bàn giao.
               </p>
 
               <details className="fw-product-terms">

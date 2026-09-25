@@ -5,6 +5,7 @@
 import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Question, SupportCase } from './types';
 import { createInitialState } from '../data/fixtures';
 import { ARTIST_NOTES } from '../world/fanWorld';
+import { getExploreProjectById } from '../world/exploreRows';
 import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
 import { validRoomDesign } from '../world/places';
 import { commerceReducer } from '../world/commerce';
@@ -21,11 +22,20 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'SEND_HALL_MESSAGE': {
       if (!canEnterHall(state, action.worldId)) return { ...state, lastError: { code: 'HALL_MEMBERSHIP_REQUIRED', message: 'Hall này dành cho hội viên đang hoạt động của đúng nhà nhạc.' } };
+      const roomId = action.roomId || `hall-${action.worldId}`;
+      const roomSession = state.sessions[roomId];
+      const sessionWorld = roomSession && state.worlds[roomSession.worldId];
+      const isArtistSession = roomSession?.worldId === action.worldId
+        || (sessionWorld?.type === 'ip' && sessionWorld.linkedWorldIds.includes(action.worldId));
+      const isProjectRoom = getExploreProjectById(action.worldId, roomId)?.id === roomId;
+      if (roomId !== `hall-${action.worldId}` && !isArtistSession && !isProjectRoom) {
+        return { ...state, lastError: { code: 'HALL_ROOM_INVALID', message: 'Không tìm thấy phòng trò chuyện này trong world.' } };
+      }
       const messages = state.hallMessages?.[action.worldId] || [];
       const value = action.text.trim();
       if (messages.some(m => m.id === action.requestId)) return state;
       if (!value || value.length > 280) return { ...state, lastError: { code: 'HALL_MESSAGE_INVALID', message: 'Lời nhắn cần từ 1 đến 280 ký tự.' } };
-      return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: `hall-${action.worldId}`, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime }].slice(-100) } };
+      return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: roomId, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime }].slice(-100) } };
     }
     case 'REPORT_HALL_MESSAGE': {
       if (!canEnterHall(state, action.worldId)) return state;

@@ -98,12 +98,13 @@ describe('World v2: ownership and access contracts',()=>{
   it('try-on renders digital but neither buys nor persists appearance',()=>{
     mount('/shop?product=product-star-shirt-real');const dialog=screen.getByRole('dialog');
     expect(within(dialog).getByRole('button',{name:'Chọn kích cỡ trước'})).toBeDisabled();
-    fireEvent.click(within(dialog).getByRole('button',{name:/Thử lên avatar/}));
-    expect(within(dialog).getByTestId('digital-shirt')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button',{name:/Thử trong My Space/}));
+    const preview=screen.getByRole('dialog',{name:'Thử trong My Space'});
+    expect(within(preview).getByTestId('digital-shirt')).toBeInTheDocument();
     const state=loadState('vieworld-demo',initial().fanProfile.id).state;
     expect(state.fanProfile.digitalLook?.shirt).toBeUndefined();expect(Object.keys(state.orders)).toHaveLength(0);
-    fireEvent.click(within(dialog).getByRole('button',{name:'Bỏ thử'}));
-    expect(within(dialog).queryByTestId('digital-shirt')).not.toBeInTheDocument();
+    fireEvent.click(within(preview).getByRole('button',{name:'Quay lại món đồ'}));
+    expect(within(screen.getByRole('dialog')).queryByTestId('digital-shirt')).not.toBeInTheDocument();
   });
   it('dual-commerce: fulfilled digital item activates in wardrobe and persists look', () => {
     let state = fulfilled('product-star-shirt-digital');
@@ -124,4 +125,3 @@ describe('World v2: ownership and access contracts',()=>{
     expect(ownsDigitalProduct(state, state.products[order.productId])).toBe(false);
   });
 });
-

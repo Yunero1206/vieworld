@@ -302,14 +302,10 @@ describe('Review Fixes & UX Regression Suite', () => {
 
       // Cap is rendered in "Tất cả"
       expect(screen.getByText('Nón Everyday Star · Digital')).toBeInTheDocument();
-      expect(
-        screen.getByText('Vật phẩm sưu tập cá nhân · Không có vị trí trên diorama phòng')
-      ).toBeInTheDocument();
-
-      // Does not offer "Đặt vào Phòng trưng bày" for the cap
-      expect(screen.queryByRole('button', { name: 'Đặt vào Phòng trưng bày' })).not.toBeInTheDocument();
-      // Offers wardrobe shortcut
-      expect(screen.getByRole('link', { name: 'Mặc trong Tủ đồ →' })).toBeInTheDocument();
+      // Collection actions stay contextual: an avatar-only cap is not offered as room decor.
+      fireEvent.click(screen.getByRole('button', { name: 'Tùy chọn Nón Everyday Star · Digital' }));
+      expect(screen.getByRole('menuitem', { name: 'Xem chi tiết' })).toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'Trưng trong phòng' })).not.toBeInTheDocument();
     });
   });
 
@@ -384,26 +380,11 @@ describe('Review Fixes & UX Regression Suite', () => {
         </AppProvider>
       );
 
-      // Section region exists
-      const region = screen.getByRole('region', { name: 'Hoạt động nổi bật' });
-      expect(region).toBeInTheDocument();
-
-      // Live now section is visible
-      expect(within(region).getByText(/Đang diễn ra trực tiếp/)).toBeInTheDocument();
-      expect(within(region).getByText('Live Chat Đang Diễn Ra')).toBeInTheDocument();
-
-      // Upcoming section is visible
-      expect(within(region).getByText(/Sắp diễn ra/)).toBeInTheDocument();
-      const upcomingCards = within(region)
-        .getAllByRole('link')
-        .filter(l => l.textContent?.includes('Concert'));
-      // Near session must come before far session
-      const nearIndex = upcomingCards.findIndex(c => c.textContent?.includes('Concert Gần Nhất'));
-      const farIndex = upcomingCards.findIndex(c => c.textContent?.includes('Concert Xa Hơn'));
-      expect(nearIndex).toBeLessThan(farIndex);
-
-      // Updates section is visible
-      expect(within(region).getByText(/Cập nhật mới nhất/)).toBeInTheDocument();
+      // Explore ranks the Artist World once; event activity is a ranking signal, not a second feed.
+      expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();
+      expect(document.querySelectorAll('[data-world="artist-a"]')).toHaveLength(1);
+      expect(screen.getByRole('link', { name: 'Vào world của Artist A' })).toHaveAttribute('href', '/artist/artist-a');
+      expect(screen.queryByRole('region', { name: 'Đang có chuyện gì' })).not.toBeInTheDocument();
     });
   });
 
@@ -552,7 +533,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       );
 
       // Pre-order badge is shown on pre-order items
-      expect(screen.getAllByText(/Pre-order · Đợt 1/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Pre-order').length).toBeGreaterThan(0);
 
       // Click product to open detail
       const starShirtBtn = screen.getByRole('heading', { name: 'Áo Star Club' }).closest('button');

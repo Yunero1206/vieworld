@@ -9,6 +9,7 @@ import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
 import { RoomGuestbook } from '../components/RoomGuestbook';
 import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { AvatarRenderer } from '../components/AvatarRenderer';
+import { loadPrivacySettings } from '../world/privacy';
 
 export function MemberSpaceView() {
   const { state } = useApp();
@@ -21,13 +22,14 @@ export function MemberSpaceView() {
   const [isPassOpen, setIsPassOpen] = useState(false);
 
   const own = fanId === state.fanProfile.id;
+  const privacySettings = own ? loadPrivacySettings() : undefined;
   const fan = own ? currentPublicFan(state) : DEMO_FANS.find(f => f.id === fanId);
 
   if (!fan) {
     return (
       <div className="fw-empty">
         <h1>Chưa tìm thấy người bạn này.</h1>
-        <Link to="/moments">Về Moments</Link>
+        <Link to="/explore">Về Explore</Link>
       </div>
     );
   }
@@ -53,7 +55,7 @@ export function MemberSpaceView() {
     <div className="fw-experience v5-member-space vw-place-page">
       <header className="v7-space-header-block v7-member-header-block">
         <div className="v7-space-topbar">
-          <Link className="v7-space-back-btn" to={own ? '/me' : '/moments?artist=artist-a&panel=hall'}>
+          <Link className="v7-space-back-btn" to={own ? '/me' : '/artist/artist-a/hall'}>
             <ArrowLeft size={14} />
             <span>{own ? 'Quay lại phòng của tôi' : 'Về Hall hội viên'}</span>
           </Link>
@@ -96,6 +98,21 @@ export function MemberSpaceView() {
             <p className="v7-space-subtitle">
               {fan.mood || 'Một góc nhỏ cho những điều mình yêu.'}
             </p>
+            {own && privacySettings?.roomVisibility === 'private' && (
+              <div
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 12px',
+                  background: '#FEF2F2',
+                  border: '1px solid #F87171',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '12px',
+                  color: '#991B1B',
+                }}
+              >
+                🔒 <strong>Chế độ riêng tư:</strong> Chỉ bạn có thể nhìn thấy không gian này. Khách ngoài không thể truy cập.
+              </div>
+            )}
           </div>
 
           <div className="v7-space-hero-right">
@@ -122,8 +139,10 @@ export function MemberSpaceView() {
       <DisplayRoomScene
         fan={fan}
         items={displayItems}
+        surfaces={fan.displaySurfaces}
         onSelect={slot => {
-          const i = displayItems.findIndex(v => v.slot === slot);
+          const selectedId = fan.displaySurfaces?.[slot].itemIds[0];
+          const i = displayItems.findIndex(v => selectedId ? v.id === selectedId : v.slot === slot);
           setSelected(i < 0 ? null : i);
         }}
         isVinylPlaying={isVinylPlaying}
@@ -137,6 +156,7 @@ export function MemberSpaceView() {
         }}
         isLiked={isLiked}
         isOwner={false}
+        showVisitCount={own ? privacySettings?.showVisitCount : true}
         isEditMode={false}
       />
 
@@ -212,7 +232,25 @@ export function MemberSpaceView() {
       </section>
 
       {/* Guestbook Wall */}
-      <RoomGuestbook fanId={fan.id} isOwner={own} />
+      {(!own || privacySettings?.guestbookEnabled) ? (
+        <RoomGuestbook fanId={fan.id} isOwner={own} />
+      ) : (
+        <div
+          className="v7-guestbook-disabled-note"
+          style={{
+            padding: '24px',
+            textAlign: 'center',
+            color: 'var(--muted)',
+            fontSize: '13px',
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-lg)',
+            margin: '20px 0',
+            border: '1px dashed var(--border)',
+          }}
+        >
+          <p>Chủ phòng đã tạm ẩn sổ lưu bút.</p>
+        </div>
+      )}
 
       {/* Polaroid Fandom Pass Modal for Member */}
       <FandomPolaroidPass

@@ -89,6 +89,17 @@ export const InboxView: React.FC = () => {
     return <Bell size={18} color="var(--muted)" />;
   };
 
+  const getNotificationActionLabel = (notif: Notification) => {
+    const route = notif.targetRoute || '';
+    if (route.includes('/sessions') || route.includes('session=')) return 'Xem phiên trực tiếp';
+    if (route.includes('/orders') || route.includes('panel=bag') || route.includes('/cart')) return 'Xem đơn hàng';
+    if (route.includes('/support')) return 'Xem vụ việc hỗ trợ';
+    if (route.includes('/benefits') || route.includes('panel=membership')) return 'Xem quyền lợi';
+    if (route.includes('panel=capsules') || route.includes('/me')) return 'Xem kỷ niệm';
+    if (route.includes('/shop')) return 'Ghé VieSHOP';
+    return 'Xem chi tiết';
+  };
+
   const formatNotificationTime = (isoTime: string) => {
     try {
       const date = new Date(isoTime);
@@ -165,29 +176,37 @@ export const InboxView: React.FC = () => {
         </div>
       </div>
 
-      {/* Truthful System Disclosures */}
-      <div
+      {/* Truthful System Disclosures (Collapsible details to prioritize notifications list) */}
+      <details
         className="card"
         style={{
-          padding: '14px 18px',
+          padding: '12px 16px',
           marginBottom: '20px',
           backgroundColor: 'var(--surface)',
           borderLeft: '4px solid var(--primary)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '6px',
+          cursor: 'pointer',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)', fontWeight: '700', fontSize: 'var(--text-xs)' }}>
+        <summary
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: 'var(--primary)',
+            fontWeight: '700',
+            fontSize: 'var(--text-xs)',
+            outline: 'none',
+          }}
+        >
           <ShieldCheck size={16} />
-          <span>CAM KẾT MINH BẠCH & BẢO VỆ QUYỀN RIÊNG TƯ</span>
-        </div>
-        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', lineHeight: 1.5 }}>
+          <span>CAM KẾT MINH BẠCH &amp; BẢO VỆ QUYỀN RIÊNG TƯ (Nhấn để xem)</span>
+        </summary>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', lineHeight: 1.6, marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-subtle)' }}>
           • <strong>Thông báo cục bộ:</strong> 100% thông báo diễn ra in-app. Không yêu cầu quyền Browser Push, không thu thập email hay số điện thoại của fan.
           <br />
           • <strong>Không giả lập tin nhắn riêng tư:</strong> Mọi thông báo đều xuất phát từ sự kiện hệ thống hoặc ban tổ chức. Nghệ sĩ ảo không gửi tin nhắn cá nhân 1-1 giả tạo.
         </div>
-      </div>
+      </details>
 
       {/* Preferences Subpanel */}
       {showPreferences && (
@@ -334,6 +353,7 @@ export const InboxView: React.FC = () => {
           borderBottom: '1px solid var(--border)',
           paddingBottom: '12px',
           marginBottom: '20px',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <button
@@ -540,7 +560,7 @@ export const InboxView: React.FC = () => {
                           gap: '6px',
                         }}
                       >
-                        <span>Đi tới đối tượng</span>
+                        <span>{getNotificationActionLabel(notif)}</span>
                         <ArrowRight size={14} />
                       </button>
                     )}

@@ -1,0 +1,86 @@
+.fan-shell .fw-shop-page.fw-shop-v2 { max-width: 1460px; padding: 24px clamp(18px,3vw,42px) 64px; color: #243229; }
+.fan-shell .fw-shop-story.vw-shop-hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); min-height:316px; gap:18px; align-items:center; overflow:hidden; margin:0 0 18px; padding:clamp(24px,3vw,42px); border:1px solid #e7e6dc; border-radius:16px; background:linear-gradient(105deg,#fbf9f2 0%,#f1f2e9 55%,#e9ecdf 100%); box-shadow:none; }
+.fan-shell .vw-shop-hero .fw-eyebrow { font-size:11px; letter-spacing:.12em; color:#39573d; font-weight:800; }
+.fan-shell .vw-shop-hero h1 { color:#20322a; font-family:var(--font-display); font-size:clamp(29px,3.3vw,50px); line-height:1.13; font-weight:600; margin:12px 0; }
+.fan-shell .vw-shop-hero h1 em { color:#506b53; font-weight:500; }
+.fan-shell .vw-shop-hero p:not(.fw-eyebrow) { color:#5b675e; max-width:44ch; font-size:14px; line-height:1.65; margin:0 0 18px; }
+.fan-shell .vw-shop-hero .fw-hero-discover { min-height:43px; display:inline-flex; align-items:center; gap:10px; padding:10px 19px!important; border:0!important; background:#2c4c36!important; color:#fff!important; border-radius:999px!important; box-shadow:none; cursor:pointer; }
+.fan-shell .vw-shop-hero .fw-hero-discover:hover { background:#203e2b!important; transform:none; }
+.vw-shop-hero-art { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:end; gap:8px; min-height:240px; }
+.vw-shop-hero-art > div { aspect-ratio:.73; display:grid; place-items:center; background:#fffcf3ad; border:1px solid #e9e5d9; border-radius:15px; overflow:hidden; transform:rotate(-3deg); box-shadow:0 8px 20px #35462b15; }
+.vw-shop-hero-art > div:nth-child(2) { transform:translateY(-22px) rotate(3deg); }
+.vw-shop-hero-art > div:nth-child(3) { transform:translateY(8px) rotate(-2deg); }
+.vw-shop-hero-art > div:nth-child(4) { transform:translateY(-10px) rotate(4deg); }
+.vw-shop-hero-art img { width:100%; height:100%; object-fit:cover; }
+.fan-shell .fw-shop-categories { gap:0; margin:0 0 14px; padding:0; border-bottom:1px solid #dfe5dc; }
+.fan-shell .fw-shop-categories { scrollbar-width:none; }
+.fan-shell .fw-shop-categories::-webkit-scrollbar { display:none; }
+.fan-shell .fw-shop-categories button { min-height:43px; padding:8px 16px; border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; color:#647067; font-size:13px; box-shadow:none; }
+.fan-shell .fw-shop-categories button[aria-pressed=true] { color:#294d36; background:transparent; border-color:#294d36; box-shadow:none; }
+.fan-shell .fw-fitting-strip.vw-shop-try-strip { display:grid; grid-template-columns:190px minmax(0,1fr) auto; align-items:center; gap:20px; padding:0 20px 0 0; min-height:108px; margin:0 0 18px; overflow:hidden; border:1px solid #e6e8df; border-radius:14px; background:#f6f7f0; box-shadow:none; }
+.vw-shop-try-strip > img { width:190px; height:108px; object-fit:cover; object-position:center; }
+.vw-shop-try-strip .fw-fitting-strip-text { display:flex; flex-direction:column; gap:5px; }
+.vw-shop-try-strip .fw-fitting-strip-text strong { color:#2d4934; font-size:18px; }
+.vw-shop-try-strip .fw-fitting-strip-text span { color:#58665c; font-size:12px; line-height:1.5; }
+.vw-shop-try-strip .fw-fitting-strip-btn { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:8px 15px; border:1px solid #c4d1c4; border-radius:999px; background:#fff; color:#2c4c36; font-size:12px; font-weight:700; white-space:nowrap; cursor:pointer; }
+.fan-shell .fw-shop-v2 .fw-shop-layout.fw-shop-fullwidth { display:block; }
+.fan-shell .fw-shop-v2 .fw-shop-toolbar { gap:10px; flex-wrap:nowrap; margin:0 0 11px; }
+.fan-shell .fw-shop-v2 .fw-shop-search-box { min-width:190px; height:42px; border:1px solid #dae1da; border-radius:999px; box-shadow:none; background:#fff; }
+.fan-shell .fw-shop-v2 .fw-shop-search-box:focus-within { border-color:#57856a; box-shadow:0 0 0 3px #b4d0bc66; }
+.fan-shell .fw-shop-v2 .fw-shop-search-box input { color:#233329; }
+.fan-shell .fw-shop-v2 .fw-filter-btn,.fan-shell .fw-shop-v2 .fw-saved-btn,.fan-shell .fw-shop-v2 .fw-shop-cart-link { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:42px; padding:8px 14px!important; border:1px solid #d8e0d9!important; border-radius:999px!important; background:#fff!important; color:#2d4032!important; font-size:12px!important; font-weight:700!important; box-shadow:none; white-space:nowrap; text-decoration:none; }
+.fan-shell .fw-shop-v2 .fw-saved-btn[aria-pressed=true] { background:#f4eeee!important; border-color:#e1c9c6!important; color:#8b4141!important; }
+.fan-shell .fw-shop-v2 .fw-shop-cart-link { margin-left:auto; }
+.vw-shop-cart-count { min-width:18px; height:18px; display:inline-grid; place-items:center; border-radius:50%; background:#315b3c; color:white; font-size:10px; }
+.vw-shop-artist-row { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:0 0 13px; }
+.vw-shop-artist-row > span { margin-right:5px; color:#657468; font-size:12px; font-weight:700; }
+.vw-shop-artist-row button { min-height:33px; padding:6px 12px; border:1px solid #e2e8df; border-radius:999px; background:#fff; color:#3c5042; font-size:12px; cursor:pointer; }
+.vw-shop-artist-row button[aria-pressed=true] { background:#31533b; border-color:#31533b; color:#fff; }
+.vw-shop-artist-row .vw-shop-scope { display:inline-flex; align-items:center; gap:5px; margin-left:auto; background:#eff5ef; border-color:#cbdccc; color:#31533b; }
+.fan-shell .fw-catalog-meta { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0 13px; }
+.fan-shell .fw-catalog-count { margin:0; font-size:12px; color:#758176; }
+.vw-shop-owned-link { display:inline-flex; align-items:center; gap:5px; color:#3e5d48; font-size:12px; text-decoration:none; }
+.fan-shell .fw-shop-v2 .fw-product-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.fan-shell .fw-shop-v2 .fw-product-tile { padding:8px; border:1px solid #e8ebe5; border-radius:14px; background:#fff; box-shadow:none; transition:border-color .18s,transform .18s; }
+.fan-shell .fw-shop-v2 .fw-product-tile:hover { transform:translateY(-2px); border-color:#c1d1c4; box-shadow:0 8px 24px #334b3510; }
+.fan-shell .fw-shop-v2 .fw-product-art { width:100%; aspect-ratio:1.22; border-radius:9px; background:#f5f3ec; }
+.fan-shell .fw-shop-v2 .fw-product-art img { width:100%; height:100%; object-fit:contain; mix-blend-mode:multiply; }
+.fan-shell .fw-shop-v2 .fw-product:hover .fw-product-art img { transform:scale(1.025); }
+.fan-shell .fw-shop-v2 .fw-product-art > span { top:8px; left:8px; padding:4px 7px; border-radius:5px; background:#fdfcf4ed; color:#3c5a40; font-size:10px; box-shadow:none; }
+.fan-shell .fw-shop-v2 .fw-product > small { margin:10px 2px 0; color:#6b776d; font-size:11px; font-weight:500; }
+.fan-shell .fw-shop-v2 .fw-product h2 { min-height:2.7em; margin:4px 2px 2px; font-size:13px; line-height:1.35; font-weight:700; color:#24352a; }
+.fan-shell .fw-shop-v2 .fw-product > strong,.fan-shell .fw-shop-v2 .vw-shop-card-price strong { margin:3px 2px 0; color:#26372b; font-size:13px; font-weight:800; }
+.vw-shop-card-price { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; margin:0; }
+.vw-shop-card-price del,.vw-shop-old-price { color:#929b93; font-size:11px; font-weight:400; }
+.vw-shop-old-price { margin-right:8px; }
+.fan-shell .fw-shop-v2 .fw-product-extra { margin-top:6px; padding:5px 2px 0; border-top:0; }
+.fan-shell .fw-shop-v2 .fw-product-fav { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; color:#516b59; }
+.fan-shell .fw-shop-v2 .fw-product-try { min-height:32px; padding:5px 9px; border:1px solid #dce5db; border-radius:999px; color:#34543c; font-size:10px; }
+.vw-shop-filter-options { display:grid; gap:10px; padding:14px 0; }
+.vw-shop-filter-options label { display:flex; align-items:center; gap:9px; color:#33483b; font-size:13px; }
+.vw-shop-filter-options input { width:17px; height:17px; accent-color:#3d6549; }
+.vw-shop-filter-price { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.vw-shop-filter-price label,.vw-shop-filter-sort { display:grid; gap:6px; color:#4f6153; font-size:12px; font-weight:700; }
+.vw-shop-filter-price input,.vw-shop-filter-sort select { min-width:0; min-height:39px; padding:7px 9px; border:1px solid #d7e0d7; border-radius:8px; background:#fff; color:#26382b; }
+.vw-shop-filter-sort { margin:16px 0; }
+.vw-shop-preview h3 { margin:2px 0 12px; color:#243a2b; font-size:19px; }
+.vw-shop-preview-tabs { display:flex; gap:7px; margin:10px 0; }
+.vw-shop-preview-tabs button { min-height:38px; padding:7px 12px; border:1px solid #d2ddd2; border-radius:999px; background:#fff; color:#405343; cursor:pointer; }
+.vw-shop-preview-tabs button[aria-pressed=true] { background:#31563d; color:#fff; border-color:#31563d; }
+.vw-shop-preview-avatar { min-height:300px; display:grid; place-items:center; overflow:hidden; border-radius:14px; background:linear-gradient(#f5f2e8b8,#f5f2e8b8),url('/images/myspace-room-v2.png') center/cover; }
+.vw-shop-preview-room { position:relative; overflow:hidden; border-radius:14px; background:#f4f0e5; }
+.vw-shop-preview-room > img { display:block; width:100%; height:auto; }
+.vw-shop-preview-object { position:absolute; width:18%; aspect-ratio:1; display:grid; place-items:center; overflow:hidden; border-radius:8px; background:#fffdf4cf; box-shadow:0 5px 20px #1a281b40; }
+.vw-shop-preview-object img { max-width:100%; max-height:100%; object-fit:contain; mix-blend-mode:multiply; }
+.vw-shop-preview-object.is-clothing { top:31%; left:18%; width:17%; }
+.vw-shop-preview-object.is-ticket { top:26%; left:39%; width:13%; }
+.vw-shop-preview-object.is-album { top:43%; right:12%; width:16%; }
+.vw-shop-preview-object.is-lightstick { top:33%; right:30%; width:12%; }
+.vw-shop-preview > .fw-muted { margin:12px 0; line-height:1.55; }
+.vw-shop-preview > button { margin-right:8px; }
+.vw-shop-detail-preview { display:inline-flex; align-items:center; gap:7px; margin:12px 0; }
+.vw-shop-concept-note { padding:12px 14px; border-radius:9px; background:#f4f2ed; color:#4b594f; font-size:13px; }
+.fan-shell .fw-shop-v2 :is(button,a,input,select,summary):focus-visible { outline:3px solid #669973; outline-offset:3px; }
+@media (max-width:1120px) { .fan-shell .fw-shop-v2 .fw-product-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .vw-shop-hero-art { min-height:210px; } }
+@media (max-width:800px) { .fan-shell .fw-shop-story.vw-shop-hero { grid-template-columns:1fr; } .vw-shop-hero-art { min-height:170px; } .vw-shop-hero-art > div { aspect-ratio:1.3; } .fan-shell .fw-shop-v2 .fw-product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .fan-shell .fw-shop-v2 .fw-shop-toolbar { flex-wrap:wrap; } .fan-shell .fw-shop-v2 .fw-shop-search-box { flex-basis:100%; } }
+@media (max-width:560px) { .fan-shell .fw-shop-page.fw-shop-v2 { padding:15px 14px 60px; } .fan-shell .fw-shop-story.vw-shop-hero { padding:21px; min-height:0; } .vw-shop-hero h1 { font-size:29px; } .vw-shop-hero-art { gap:5px; min-height:110px; } .fan-shell .fw-fitting-strip.vw-shop-try-strip { grid-template-columns:96px 1fr; gap:10px; padding:0 10px 0 0; } .vw-shop-try-strip > img { width:96px; height:110px; } .vw-shop-try-strip .fw-fitting-strip-text strong { font-size:14px; } .vw-shop-try-strip .fw-fitting-strip-text span { font-size:10px; } .vw-shop-try-strip .fw-fitting-strip-btn { grid-column:1/-1; justify-content:center; margin:0 10px 10px; } .fan-shell .fw-shop-v2 .fw-filter-btn,.fan-shell .fw-shop-v2 .fw-saved-btn,.fan-shell .fw-shop-v2 .fw-shop-cart-link { flex:1; padding:7px 8px!important; font-size:11px!important; } .vw-shop-artist-row { overflow-x:auto; flex-wrap:nowrap; padding-bottom:5px; } .vw-shop-artist-row button { white-space:nowrap; } .vw-shop-artist-row .vw-shop-scope { margin-left:0; } .fan-shell .fw-shop-v2 .fw-product-grid { gap:8px; } .fan-shell .fw-shop-v2 .fw-product-tile { padding:6px; } .fan-shell .fw-shop-v2 .fw-product h2 { font-size:12px; } .fan-shell .fw-shop-v2 .fw-product-try { font-size:9px; } .vw-shop-filter-price { grid-template-columns:1fr; } }

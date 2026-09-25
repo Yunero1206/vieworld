@@ -1,0 +1,128 @@
+.fan-shell {
+  --shell-surface: #fff;
+  --shell-ink: #202a3b;
+  --shell-muted: #627085;
+  --shell-border: #e8ecf2;
+  --shell-search: #f1f4f9;
+  --shell-hover: #f4f6fa;
+  --shell-selected: #f0f3f9;
+  --shell-accent: #49679f;
+  --shell-focus: #597db5;
+}
+.fan-shell[data-artist-world='true'] {
+  --shell-surface: #171e25;
+  --shell-ink: #f6f6f2;
+  --shell-muted: #c4cbd5;
+  --shell-border: #303944;
+  --shell-search: #242d37;
+  --shell-hover: #263442;
+  --shell-selected: #293543;
+  --shell-accent: #91adf0;
+  --shell-focus: #b7c9eb;
+}
+.fan-shell .fw-header {
+  display: grid;
+  grid-template-columns: minmax(125px, 180px) minmax(260px, 1fr) minmax(140px, 180px);
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  height: 76px;
+  padding: 0 clamp(20px, 3vw, 42px);
+  border-bottom: 1px solid var(--shell-border);
+  background: var(--shell-surface);
+  color: var(--shell-ink);
+}
+.fw-brand-info small { display: none; }
+.fan-shell .fw-brand-title { font-family: var(--font-editorial) !important; font-size: 23px; font-weight: 700; letter-spacing: -.075em; color: var(--shell-ink); }
+.fan-shell .fw-brand-logo { width: 26px; height: 26px; }
+.fw-global-search { display: flex; align-items: center; gap: 13px; width: min(100%, 820px); min-height: 46px; padding: 0 12px 0 18px; border-radius: 999px; background: var(--shell-search); color: var(--shell-muted); }
+.fw-global-search:focus-within { outline: 2px solid var(--shell-focus); outline-offset: 2px; }
+.fw-global-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--shell-ink); font: 400 13px var(--font-sans); }
+.fw-global-search input::placeholder { color: var(--shell-muted); opacity: .8; }
+.fw-global-search button { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--shell-muted); cursor: pointer; }
+.fw-global-search button:hover { background: var(--shell-selected); }
+.fw-header-phrase { justify-self: end; max-width: 155px; color: var(--shell-muted); font: italic 400 15px/1.2 var(--font-editorial); text-align: right; }
+
+.fw-site-frame { display: grid; grid-template-columns: 72px minmax(0, 1fr); min-height: calc(100dvh - 76px); }
+.fan-shell .fw-site-frame > .fw-main { width: 100%; min-width: 0; max-width: 1600px; margin: 0 auto; }
+.fw-side-nav {
+  position: sticky; top: 0; align-self: start; z-index: 25;
+  display: flex; flex-direction: column; align-items: stretch; gap: 9px;
+  box-sizing: border-box; width: 72px; height: calc(100dvh - 76px); padding: 20px 10px 170px;
+  overflow: hidden auto; scrollbar-width: none; border-right: 1px solid var(--shell-border); background: var(--shell-surface);
+  transition: width .2s ease, box-shadow .2s ease;
+}
+.fw-side-nav::-webkit-scrollbar { display: none; }
+.fw-side-nav:hover, .fw-side-nav:focus-within { width: 184px; box-shadow: 10px 8px 30px rgba(35,48,69,.08); }
+.fw-side-nav a {
+  position: relative; display: flex; align-items: center; justify-content: flex-start; gap: 15px;
+  flex: none; min-height: 50px; padding: 0 12px; border-radius: 11px; color: var(--shell-muted);
+  font-size: 13px; font-weight: 500; white-space: nowrap; text-decoration: none;
+  transition: background-color .18s ease, color .18s ease;
+}
+.fw-side-nav a svg { flex: none; }
+.fw-side-nav .fw-nav-label { opacity: 0; transition: opacity .12s ease; }
+.fw-side-nav:hover .fw-nav-label, .fw-side-nav:focus-within .fw-nav-label { opacity: 1; }
+.fw-side-nav a:hover { background: var(--shell-hover); color: var(--shell-ink); }
+.fw-side-nav a.selected { background: var(--shell-selected); color: var(--shell-ink); font-weight: 700; }
+.fw-side-nav a.selected::before { content: ''; position: absolute; left: -10px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--shell-accent); }
+.fw-side-nav a:focus-visible { outline: 3px solid var(--shell-focus); outline-offset: 2px; }
+.fw-artist-avatar { position: relative; display: inline-grid; place-items: center; flex: none; width: 27px; height: 27px; overflow: hidden; border: 1px solid var(--shell-border); border-radius: 50%; background: var(--shell-selected); color: var(--shell-ink); }
+.fw-artist-avatar::before { content: attr(data-initial); font: 700 13px/1 var(--font-editorial); }
+.fw-artist-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; transform: scale(1.3); }
+.fw-artist-avatar.is-triptych img { object-position: left center; transform: none; }
+.fw-mobile-bottom-nav .fw-artist-avatar { width: 23px; height: 23px; }
+.fw-mobile-nav-popover .fw-artist-avatar { width: 23px; height: 23px; }
+.fan-shell .fw-mobile-bottom-nav { background: var(--shell-surface); border-top-color: var(--shell-border); }
+.fan-shell .fw-mobile-bottom-nav a { color: var(--shell-muted); }
+.fan-shell .fw-mobile-bottom-nav a:is(.active,[aria-current='page']) { color: var(--shell-accent); }
+
+/* The existing cart, bell, and account controls dock at the foot of the rail. */
+.fan-shell .fw-header-tools {
+  position: fixed; left: 9px; bottom: 18px; z-index: 31;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: 54px; margin: 0; padding: 0;
+  color: var(--shell-ink);
+}
+.fw-header-tools :is(.fw-icon, .fw-profile-btn) { width: 45px; height: 45px; }
+.fw-header-tools :is(a, button):focus-visible { outline: 3px solid var(--shell-focus); outline-offset: 2px; }
+.fan-shell .fw-account-menu-popover { position: fixed; top: auto; right: auto; bottom: 16px; left: 72px; max-height: min(700px, calc(100dvh - 32px)); }
+.fan-shell[data-artist-world='true'] .fw-menu { background: #202b37; border-color: #3b4c5d; color: #eef2f7; box-shadow: 0 20px 48px rgba(0,0,0,.35); }
+.fan-shell[data-artist-world='true'] .fw-menu-profile-card { background: #293746; border-color: #3b4c5d; }
+.fan-shell[data-artist-world='true'] .fw-menu-profile-link:hover,
+.fan-shell[data-artist-world='true'] .fw-menu-item:hover,
+.fan-shell[data-artist-world='true'] .fw-menu-utility-row > :is(a,button):hover { background: #334354; color: #fff; }
+.fan-shell[data-artist-world='true'] .fw-menu-profile-name,
+.fan-shell[data-artist-world='true'] .fw-menu-item { color: #e9eef6; }
+.fan-shell[data-artist-world='true'] .fw-menu-profile-sub,
+.fan-shell[data-artist-world='true'] .fw-menu-profile-arrow,
+.fan-shell[data-artist-world='true'] .fw-menu-utility-row > :is(a,button) { color: #b2bfce; }
+.fan-shell[data-artist-world='true'] .fw-menu-group-title { color: #9dadbf; }
+.fan-shell[data-artist-world='true'] .fw-menu-item-icon { background: #354457; color: #d0d9e5; }
+.fan-shell[data-artist-world='true'] .fw-menu-item:hover .fw-menu-item-icon { background: #405a77; color: #fff; }
+.fan-shell[data-artist-world='true'] .fw-menu-count-neutral { background: #405a77; color: #eaf1fa; }
+.fan-shell[data-artist-world='true'] .fw-menu-divider { background: #3b4c5d; }
+
+@media (max-width: 1100px) and (min-width: 769px) {
+  .fan-shell .fw-header { grid-template-columns: 160px minmax(200px, 1fr); }
+  .fw-header-phrase { display: none; }
+}
+@media (max-width: 768px) {
+  .fan-shell .fw-header { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; height: auto; min-height: 112px; padding: 10px 16px 12px; }
+  .fan-shell .fw-brand { grid-column: 1; grid-row: 1; }
+  .fan-shell .fw-brand-title { font-size: 21px; }
+  .fw-global-search { grid-column: 1 / -1; grid-row: 2; min-height: 43px; padding-left: 15px; }
+  .fw-header-phrase { display: none; }
+  .fw-site-frame { display: block; min-height: calc(100dvh - 112px); }
+  .fw-side-nav { display: none; }
+  .fan-shell .fw-header-tools { position: static; grid-column: 2; grid-row: 1; flex-direction: row; width: auto; gap: 3px; }
+  .fw-header-tools :is(.fw-icon, .fw-profile-btn) { width: 38px; height: 38px; }
+  .fan-shell .fw-account-menu-popover { position: absolute; top: 57px; right: 12px; bottom: auto; left: auto; }
+}
+@media (max-width: 410px) {
+  .fan-shell .fw-brand-title { font-size: 19px; }
+  .fw-header-tools :is(.fw-icon, .fw-profile-btn) { width: 34px; height: 34px; }
+  .fw-header-tools { gap: 0 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fw-side-nav, .fw-side-nav a, .fw-side-nav a span { transition: none; }
+}

@@ -1,5 +1,6 @@
 import type { AppState } from '../domain/types';
 import { historyCards, hasHistoryBadge } from './history';
+import { readDisplaySurfaces } from './displaySurfaces';
 
 export type DisplaySlot = 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement';
 
@@ -9,6 +10,8 @@ export interface DisplayItem {
   title: string;
   detail: string;
   image?: string;
+  roomAsset?: string;
+  footprint?: 1 | 2 | 3;
   worldId?: string;
   collectedAt?: string;
   isDisplayCompatible?: boolean;
@@ -39,18 +42,20 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     );
     if (receipts.length === 0) return [];
     const latestReceipt = receipts.sort((a, b) => (b.fulfilledAt || '').localeCompare(a.fulfilledAt || ''))[0];
-    const slot: DisplaySlot | undefined =
-      p.digitalSlot === 'shirt' || p.image?.startsWith('shirt') ? 'shirt'
-      : p.digitalSlot === 'lightstick' || p.image?.startsWith('lightstick') ? 'lightstick'
+    const slot: DisplaySlot | undefined = p.roomSurface
+      || (p.digitalSlot === 'shirt' || /(?:shirt|hoodie|bomber)-/.test(p.image || '') ? 'shirt'
+      : p.digitalSlot === 'lightstick' || /lightstick-/.test(p.image || '') ? 'lightstick'
       : p.category === 'album' ? 'disc'
       : p.category === 'ticket' ? 'ticket'
-      : undefined;
+      : undefined);
 
     return [{
       id: p.id,
       slot,
       title: p.title,
       image: p.image,
+      roomAsset: p.roomAsset,
+      footprint: p.roomFootprint || (/(?:cap)-/.test(p.image || '') ? 1 : undefined),
       worldId: p.worldId,
       collectedAt: latestReceipt?.fulfilledAt,
       isDisplayCompatible: Boolean(slot),
@@ -119,7 +124,20 @@ export function displayOptions(s: AppState): (DisplayItem & { slot: DisplaySlot 
 }
 
 export function displayedItems(s: AppState) {
-  const selected = s.fanProfile.displaySlots || {};
-  return displayOptions(s).filter(i => selected[i.slot] === i.id);
+  const options = displayOptions(s);
+  const selected = readDisplaySurfaces(s.fanProfile, options);
+  return options.filter(i => Object.values(selected).some(surface => surface.itemIds.includes(i.id)));
 }
 
+export function displayAssetUrl(item: DisplayItem): string | undefined {
+  if (!item.image) return undefined;
+  if (item.image.startsWith('/') || /^https?:\/\//.test(item.image)) return item.image;
+  return `/images/merch-v2/${item.image}.png`;
+}
+
+/** A prepared transparent prop is optional. Without it the room uses a designed frame/case. */
+export function displayRoomAssetUrl(item: DisplayItem): string | undefined {
+  if (item.roomAsset) return item.roomAsset;
+  if (item.image === 'shirt-physical') return '/images/world-v6/shirt-cutout.webp';
+  return undefined;
+}

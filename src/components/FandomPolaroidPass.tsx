@@ -1,9 +1,12 @@
-import { useState } from 'react';
-import { X, Copy, Check, QrCode } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { X, Copy, Check, QrCode, Download, AlertCircle } from 'lucide-react';
 import { AvatarRenderer } from './AvatarRenderer';
 import { VieWorldLogo } from './VieWorldLogo';
 import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
 import type { DisplayItem } from '../world/display';
+import { useDialogA11y } from '../hooks/useDialogA11y';
+import { useApp } from '../context/AppContext';
 
 interface FandomPolaroidPassProps {
   isOpen: boolean;
@@ -30,33 +33,133 @@ export function FandomPolaroidPass({
   mood,
   badge: _badge,
   fandomName = 'VieWorld',
-  companionDays: _companionDays = 128,
+  companionDays = 128,
   items,
   fanId,
 }: FandomPolaroidPassProps) {
+  const navigate = useNavigate();
+  const modalRef = useRef<HTMLDivElement>(null);
+  useDialogA11y(isOpen, onClose, modalRef);
+
+  const { state } = useApp();
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   if (!isOpen) return null;
 
   const shareUrl = `${window.location.origin}/members/${fanId}`;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {
-      // fallback
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const handleCopyLink = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setCopyError(false);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        throw new Error('Clipboard not supported');
+      }
+    } catch {
+      setCopyError(true);
+      setTimeout(() => setCopyError(false), 3000);
+    }
+  };
+
+  // Real canvas-based image export
+  const handleDownloadImage = () => {
+    try {
+      setDownloading(true);
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 600, 800);
+
+      // Border frame
+      ctx.lineWidth = 12;
+      ctx.strokeStyle = '#EEF2FF';
+      ctx.strokeRect(6, 6, 588, 788);
+
+      // Top banner
+      ctx.fillStyle = '#5B46E8';
+      ctx.fillRect(20, 20, 560, 60);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 20px "Be Vietnam Pro", sans-serif';
+      ctx.fillText('VIEWORLD · FANDOM PASS', 40, 58);
+
+      // Fandom pill
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '14px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(fandomName, 460, 56);
+
+      // Fan info
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(fanName, 40, 140);
+
+      ctx.fillStyle = '#6B7280';
+      ctx.font = 'italic 16px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`"${mood || 'Một góc nhỏ cho những điều mình yêu.'}"`, 40, 180);
+
+      // Member badge box
+      ctx.fillStyle = '#F8F9FA';
+      ctx.fillRect(40, 210, 520, 100);
+      ctx.strokeStyle = '#E5E7EB';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(40, 210, 520, 100);
+
+      ctx.fillStyle = '#5B46E8';
+      ctx.font = 'bold 16px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`Thành viên đồng hành: ${companionDays} ngày`, 60, 250);
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '14px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`ID định danh: @${fanId} · Quyền truy cập: Hall & Moments`, 60, 285);
+
+      // Footer stamp
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '12px "Be Vietnam Pro", sans-serif';
+      ctx.fillText(`Cộng đồng VieWorld 2026 · ${shareUrl}`, 40, 740);
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `vieworld-pass-${fanId}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch {
+      // ignore
+    } finally {
+      setTimeout(() => setDownloading(false), 1500);
+    }
   };
 
   const displayedPreviews = items.filter(i => i.image).slice(0, 3);
+  const isOwner = fanId === state.fanProfile.id;
+  const userBenefits = Object.values(state.benefits || {}).filter(
+    b => b.fanId === fanId && ['eligible', 'claimed'].includes(b.status)
+  );
 
   return (
-    <div className="v7-polaroid-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Thẻ Fandom Pass">
-      <div className="v7-polaroid-modal" onClick={e => e.stopPropagation()}>
-        <button className="v7-polaroid-close-btn" onClick={onClose} aria-label="Đóng">
+    <div
+      className="v7-polaroid-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Thẻ Fandom Pass"
+    >
+      <div
+        ref={modalRef}
+        className="v7-polaroid-modal"
+        tabIndex={-1}
+        onClick={e => e.stopPropagation()}
+      >
+        <button className="v7-polaroid-close-btn" onClick={onClose} aria-label="Đóng thẻ">
           <X size={18} />
         </button>
 
@@ -86,12 +189,18 @@ export function FandomPolaroidPass({
             <div className="v7-polaroid-info">
               <h3 className="v7-polaroid-name">{fanName}</h3>
               <p className="v7-polaroid-mood">"{mood || 'Một góc nhỏ cho những điều mình yêu.'}"</p>
-              
+
               <div className="v7-polaroid-claims-grid">
-                <span className="v7-polaroid-claim-pill">Pulse Crew Membership</span>
-                <span className="v7-polaroid-claim-pill">Active Member since Sep 2026</span>
+                <span className="v7-polaroid-claim-pill">{fandomName} Pass</span>
+                <span className="v7-polaroid-claim-pill">
+                  {isOwner ? 'Thành viên đang hoạt động' : 'Thành viên kết nối'}
+                </span>
                 <span className="v7-polaroid-claim-pill">Hall Access ✓</span>
-                <span className="v7-polaroid-claim-pill">3 đặc quyền khả dụng</span>
+                <span className="v7-polaroid-claim-pill">
+                  {userBenefits.length > 0
+                    ? `${userBenefits.length} đặc quyền khả dụng`
+                    : 'Thẻ giao lưu cộng đồng'}
+                </span>
               </div>
             </div>
           </div>
@@ -103,7 +212,11 @@ export function FandomPolaroidPass({
               {displayedPreviews.map((it, idx) => (
                 <div key={idx} className="v7-polaroid-item-chip" title={it.title}>
                   <img
-                    src={it.image?.startsWith('shirt') ? '/images/world-v6/shirt-cutout.webp' : `${MERCH_IMAGE_ROOT}/${it.image}.png`}
+                    src={
+                      it.image?.startsWith('shirt')
+                        ? '/images/world-v6/shirt-cutout.webp'
+                        : `${MERCH_IMAGE_ROOT}/${it.image}.png`
+                    }
                     alt={it.title}
                   />
                   <span>{it.title}</span>
@@ -134,25 +247,40 @@ export function FandomPolaroidPass({
               onClick={handleCopyLink}
               style={{ flex: '1 1 140px' }}
             >
-              {copied ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
-              <span>{copied ? 'Đã sao chép link!' : 'Chia sẻ liên kết'}</span>
+              {copied ? (
+                <Check size={16} color="#10B981" />
+              ) : copyError ? (
+                <AlertCircle size={16} color="#DC2626" />
+              ) : (
+                <Copy size={16} />
+              )}
+              <span>
+                {copied ? 'Đã sao chép link!' : copyError ? 'Chưa thể chép tự động' : 'Chia sẻ liên kết'}
+              </span>
             </button>
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => {
-                alert('Ảnh thẻ Fandom Pass đã sẵn sàng để lưu về máy!');
+              onClick={handleDownloadImage}
+              disabled={downloading}
+              style={{
+                borderRadius: '12px',
+                fontSize: '13px',
+                padding: '8px 14px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
-              style={{ borderRadius: '12px', fontSize: '13px', padding: '8px 14px' }}
             >
-              Lưu ảnh
+              <Download size={14} />
+              <span>{downloading ? 'Đang xuất ảnh…' : 'Lưu ảnh thẻ'}</span>
             </button>
             <button
               type="button"
               className="btn btn-secondary"
               onClick={() => {
                 onClose();
-                window.location.href = '/me?panel=benefits';
+                navigate('/me?panel=benefits');
               }}
               style={{ borderRadius: '12px', fontSize: '13px', padding: '8px 14px' }}
             >

@@ -29,7 +29,7 @@
 }
 
 .explore-eyebrow {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
@@ -270,7 +270,7 @@
   bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   padding: 1px 6px;
   border-radius: 9999px;
@@ -303,7 +303,7 @@
 }
 
 .explore-avatar-fandom {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted, #6B7280);
   margin-top: 2px;
   width: 100%;
@@ -313,7 +313,7 @@
 }
 
 .explore-avatar-companion {
-  font-size: 10px;
+  font-size: 12px;
   color: #94A3B8;
   margin-top: 1px;
 }
@@ -565,7 +565,7 @@
   right: 12px;
   background: #DC2626;
   color: #FFFFFF;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 9999px;
@@ -582,7 +582,7 @@
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(4px);
   color: #FFFFFF;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
   padding: 3px 8px;
