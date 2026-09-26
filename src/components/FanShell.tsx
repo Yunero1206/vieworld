@@ -1,7 +1,7 @@
 import { ownedDigitalLook } from '../world/merchCatalog';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Compass, ShoppingBag, ShoppingCart, UserRound, Menu, X, Music2, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight, BellRing, Search } from 'lucide-react';
+import { Compass, ShoppingBag, ShoppingCart, UserRound, Menu, X, Music2, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight, BellRing, Sun, Moon } from 'lucide-react';
 import { StatusNotice } from './StatusNotice';
 import { ResetDrawer } from './ResetDrawer';
 import { WorldGuidePanel } from './WorldGuidePanel';
@@ -17,6 +17,10 @@ import { mapDomainToDisplay } from './notifications/notificationHelper';
 import { DisplayNotification } from './notifications/notification.types';
 import { ArtistNavAvatar, GlobalNavigation } from './GlobalNavigation';
 import { artistIdFromPath, getCurrentArtistId, setCurrentArtistId } from '../world/currentArtist';
+import { useAppearance } from '../hooks/useAppearance';
+import { SearchCombobox } from './SearchCombobox';
+import { globalSearchSuggestions } from '../world/searchDiscovery';
+import { validHomeDestination } from '../world/homeDestination';
 
 export const FanShell = () => {
   const { state, dispatch, storageNotice, dismissNotice, resetActiveTenant } = useApp();
@@ -35,13 +39,17 @@ export const FanShell = () => {
   const accountBtnRef = useRef<HTMLButtonElement>(null);
   const bellBtnRef = useRef<HTMLButtonElement>(null);
 
+  const { appearance, toggleAppearance } = useAppearance();
+
   const navigate = useNavigate();
+  const searchSuggestions = useMemo(() => globalSearchSuggestions(state), [state.worlds, state.sessions, state.products, state.activeTenantId]);
   const cartCount = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
 
   const { pathname, search } = useLocation();
-  const unread = Object.values(state.notifications || {}).filter(n => !n.isRead).length;
+  const personalNotifications = Object.values(state.notifications || {}).filter(n => n.tenantId === state.activeTenantId && n.fanId === state.fanProfile.id);
+  const unread = personalNotifications.filter(n => !n.isRead).length;
 
-  const notificationsList: DisplayNotification[] = Object.values(state.notifications || {})
+  const notificationsList: DisplayNotification[] = personalNotifications
     .sort((a, b) => new Date(b.createdAt || b.updatedAt).getTime() - new Date(a.createdAt || a.updatedAt).getTime())
     .map(mapDomainToDisplay);
 
@@ -60,6 +68,10 @@ export const FanShell = () => {
   };
 
   useEffect(() => {
+    const to = pathname + search;
+    if (validHomeDestination(state, to)) dispatch({ type: 'REMEMBER_FAN_DESTINATION', to });
+  }, [pathname, search, state.activeTenantId, dispatch]);
+  useEffect(() => {
     setMobileMenu(false);
     setAccountMenu(false);
     window.scrollTo?.(0, 0);
@@ -67,6 +79,12 @@ export const FanShell = () => {
   useEffect(() => {
     if (pathname === '/explore' || pathname === '/artists') setSearchQuery(new URLSearchParams(search).get('q') || '');
   }, [pathname, search]);
+
+  useEffect(() => {
+    if (!accountMenu) return;
+    const timer = window.setTimeout(() => accountRef.current?.querySelector<HTMLElement>('a,button')?.focus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [accountMenu]);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -92,6 +110,7 @@ export const FanShell = () => {
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        if (accountMenu) accountBtnRef.current?.focus();
         setMobileMenu(false);
         setAccountMenu(false);
       }
@@ -113,30 +132,8 @@ export const FanShell = () => {
   }, [inArtistWorld, currentArtistId, state.activeTenantId]);
   const navArtist = artistContext?.type === 'artist' ? { id: artistContext.id, name: artistContext.name } : undefined;
 
-  return (
-    <div className="fan-shell" data-testid="app-container" data-tenant={state.activeTenantId} data-artist-world={inArtistWorld ? 'true' : undefined}>
-      <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">Chuyển đến nội dung chính</a>
-      <header className={`fw-header ${pathname === '/' ? 'fw-header-plaza' : ''}`}>
-        <NavLink to="/" className="fw-brand" aria-label={`${tenantConfig.labels.brandName} — về thế giới`}>
-          <VieWorldLogo size={32} className="fw-brand-logo" />
-          <div className="fw-brand-info">
-            <span className="fw-brand-title">{tenantConfig.labels.brandName}</span>
-            <small>{state.activeTenantId === 'vieworld-demo' ? 'một thế giới, cùng nhau' : tenantConfig.tagline}</small>
-          </div>
-        </NavLink>
-
-        <form className="fw-global-search" role="search" onSubmit={event => {
-          event.preventDefault();
-          const query = searchQuery.trim();
-          navigate(query ? `/explore?q=${encodeURIComponent(query)}` : '/explore');
-        }}>
-          <Search size={19} aria-hidden="true" />
-          <input value={searchQuery} onChange={event => setSearchQuery(event.target.value)} aria-label="Tìm nghệ sĩ, world, sự kiện, capsule" placeholder="Tìm nghệ sĩ, world, sự kiện, capsule…" />
-          <button type="submit" aria-label="Tìm kiếm"><Search size={18} aria-hidden="true" /></button>
-        </form>
-        <span className="fw-header-phrase" aria-hidden="true">For the moments that stay</span>
-
-        <div className="fw-header-tools">
+  const utilityControls = (
+    <div className="fw-header-tools">
           {/* Permanent Cart Access */}
           <NavLink
             to="/cart"
@@ -144,6 +141,7 @@ export const FanShell = () => {
             aria-label={`Giỏ hàng${cartCount > 0 ? `, ${cartCount} món` : ''}`}
           >
             <ShoppingCart size={19} />
+            <span className="fw-nav-label">Giỏ hàng</span>
             {cartCount > 0 && <i>{cartCount}</i>}
           </NavLink>
 
@@ -160,7 +158,7 @@ export const FanShell = () => {
             type="button"
             className={`fw-profile-btn ${accountMenu ? 'active' : ''}`}
             aria-label={`Tài khoản của ${state.fanProfile.displayName}`}
-            aria-haspopup="menu"
+            aria-controls="fan-account-menu"
             aria-expanded={accountMenu}
             onClick={() => {
               setAccountMenu(!accountMenu);
@@ -175,6 +173,7 @@ export const FanShell = () => {
               appearance={state.fanProfile.avatarPreset}
               displayName={state.fanProfile.displayName}
             />
+            <span className="fw-nav-label">Tài khoản</span>
           </button>
 
           {/* Mobile-only Hamburger Menu Button */}
@@ -192,15 +191,44 @@ export const FanShell = () => {
             {mobileMenu ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
+  );
+
+  return (
+    <div
+      className="fan-shell"
+      data-testid="app-container"
+      data-tenant={state.activeTenantId}
+      data-artist-world={inArtistWorld ? 'true' : undefined}
+      data-theme={appearance}
+    >
+      <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">Chuyển đến nội dung chính</a>
+      <header className="fw-header">
+        <NavLink to="/" className="fw-brand" aria-label={`${tenantConfig.labels.brandName} — về thế giới`}>
+          <VieWorldLogo size={32} className="fw-brand-logo" />
+          <div className="fw-brand-info">
+            <span className="fw-brand-title">{tenantConfig.labels.brandName}</span>
+            <small>{state.activeTenantId === 'vieworld-demo' ? 'một thế giới, cùng nhau' : tenantConfig.tagline}</small>
+          </div>
+        </NavLink>
+
+        <SearchCombobox className="fw-global-search" value={searchQuery} onChange={setSearchQuery}
+          suggestions={searchSuggestions} label="Tìm nghệ sĩ, world, sự kiện, capsule" placeholder="Tìm nghệ sĩ, world, sự kiện…"
+          onSelect={item => { setSearchQuery(''); if (item.target) navigate(item.target); }}
+          onSubmit={query => navigate(query ? `/explore?q=${encodeURIComponent(query)}` : '/explore')} />
+        <span className="fw-header-phrase" aria-hidden="true">For the moments that stay</span>
 
         {/* Account Menu Popover */}
         {accountMenu && (
           <nav
             ref={accountRef}
+            id="fan-account-menu"
             className="fw-menu fw-account-menu-popover"
             aria-label="Tài khoản và tiện ích"
             onKeyDown={e => {
-              if (e.key === 'Escape') setAccountMenu(false);
+              if (e.key === 'Escape') {
+                setAccountMenu(false);
+                accountBtnRef.current?.focus();
+              }
             }}
           >
             <NavLink
@@ -221,7 +249,7 @@ export const FanShell = () => {
               </div>
               <div className="fw-menu-profile-meta">
                 <strong className="fw-menu-profile-name">{state.fanProfile.displayName}</strong>
-                <span className="fw-menu-profile-sub">Hồ sơ fan</span>
+                <span className="fw-menu-profile-sub">Góc riêng của bạn · My Space</span>
               </div>
               <ChevronRight className="fw-menu-profile-arrow" size={18} aria-hidden="true" />
             </NavLink>
@@ -253,6 +281,11 @@ export const FanShell = () => {
 
             <div className="fw-menu-group">
               <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
+              <button type="button" className="fw-menu-item fw-menu-btn" onClick={toggleAppearance}
+                aria-label={appearance === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
+                <span className="fw-menu-item-icon">{appearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Giao diện<small>{appearance === 'dark' ? 'Tối · chuyển sang sáng' : 'Sáng · chuyển sang tối'}</small></span>
+              </button>
               <button
                 type="button"
                 className="fw-menu-item fw-menu-btn"
@@ -264,13 +297,13 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <BellRing size={16} />
                 </span>
-                <span className="fw-menu-item-label">Cài đặt thông báo</span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Cài đặt thông báo<small>Cuộc hẹn, kỷ niệm và đơn hàng</small></span>
               </button>
               <NavLink to="/me?panel=privacy" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
                 <span className="fw-menu-item-icon">
                   <Shield size={16} />
                 </span>
-                <span className="fw-menu-item-label">Quyền riêng tư</span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Quyền riêng tư<small>Ai được ghé phòng và xem góc riêng</small></span>
               </NavLink>
               <button
                 type="button"
@@ -283,13 +316,19 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <HelpCircle size={16} />
                 </span>
-                <span className="fw-menu-item-label">Trợ giúp</span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Hướng dẫn VieWorld<small>Hall, My Space, vật phẩm và quyền lợi</small></span>
               </button>
+              <NavLink to="/me?panel=support" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+                <span className="fw-menu-item-icon"><HelpCircle size={16} /></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Yêu cầu hỗ trợ<small>Kiểm tra đơn hàng hoặc quyền lợi</small></span>
+              </NavLink>
             </div>
 
             <div className="fw-menu-divider" />
 
-            <div className="fw-menu-utility-row" aria-label="Công cụ bản thử nghiệm">
+            <details className="fw-menu-demo-tools">
+              <summary>Công cụ bản thử nghiệm</summary>
+              <div className="fw-menu-utility-row" aria-label="Công cụ bản thử nghiệm">
               <NavLink to="/studio" onClick={() => setAccountMenu(false)}>
                 <LayoutDashboard size={14} />
                 <span>Studio</span>
@@ -304,7 +343,8 @@ export const FanShell = () => {
                 <FlaskConical size={14} />
                 <span>Kịch bản demo</span>
               </button>
-            </div>
+              </div>
+            </details>
           </nav>
         )}
 
@@ -395,7 +435,7 @@ export const FanShell = () => {
         )}
       </header>
       <div className="fw-site-frame">
-        <GlobalNavigation pathname={pathname} artist={navArtist} shopLabel={tenantConfig.labels.shopTitle || 'VieSHOP'} />
+        <GlobalNavigation pathname={pathname} artist={navArtist} shopLabel={tenantConfig.labels.shopTitle || 'VieSHOP'} utilities={utilityControls} />
         <main id="main-content" className="fw-main">
           {storageNotice && <StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice} />}
           {state.lastError && <StatusNotice message={state.lastError.message} type="error" onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })} />}
@@ -415,6 +455,7 @@ export const FanShell = () => {
       <NotificationPreferencesModal
         isOpen={notifPrefsOpen}
         onClose={() => setNotifPrefsOpen(false)}
+        returnFocusRef={accountBtnRef}
       />
     </div>
   );

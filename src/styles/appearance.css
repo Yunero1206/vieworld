@@ -1,0 +1,165 @@
+/* Appearance is a fan preference, not a simulated world state.
+   Cinematic media and physical paper/room assets retain their own material colors. */
+:root, .fan-shell[data-theme='light'] {
+  --appearance-bg: #f8faf7;
+  --appearance-surface: #ffffff;
+  --appearance-soft: #f0f4ef;
+  --appearance-ink: #24312b;
+  --appearance-muted: #5d6d63;
+  --appearance-border: #dfe6df;
+  --appearance-accent: #416a51;
+  --appearance-selected: #e9f0e9;
+  --appearance-focus: #48785d;
+}
+:root[data-theme='dark'], .fan-shell[data-theme='dark'] {
+  --appearance-bg: #141c19;
+  --appearance-surface: #1c2621;
+  --appearance-soft: #26332b;
+  --appearance-ink: #eef2e9;
+  --appearance-muted: #afbeb2;
+  --appearance-border: #3b4b40;
+  --appearance-accent: #a8cfb4;
+  --appearance-selected: #304237;
+  --appearance-focus: #b8ddc2;
+}
+.fan-shell[data-theme] {
+  --bg: var(--appearance-bg); --surface: var(--appearance-surface);
+  --surface-subtle: var(--appearance-soft); --ink: var(--appearance-ink);
+  --muted: var(--appearance-muted); --border: var(--appearance-border);
+  --border-subtle: var(--appearance-border); --primary: var(--appearance-accent);
+  --primary-light: var(--appearance-selected);
+  --shell-surface: var(--appearance-surface); --shell-ink: var(--appearance-ink);
+  --shell-muted: var(--appearance-muted); --shell-border: var(--appearance-border);
+  --shell-search: var(--appearance-soft); --shell-hover: var(--appearance-soft);
+  --shell-selected: var(--appearance-selected); --shell-accent: var(--appearance-accent);
+  --shell-focus: var(--appearance-focus);
+  color: var(--ink); background: var(--bg);
+}
+.fan-shell .fw-main { background: var(--bg); }
+.fan-shell .vx-loading { color: var(--muted); }
+.fan-shell[data-theme] .fw-header {
+  position: sticky; top: 0; height: 76px; min-height: 76px;
+  padding-top: 0; background: var(--shell-surface); color: var(--shell-ink);
+}
+.fan-shell .fw-global-search input { background: transparent; color: var(--shell-ink); }
+.fan-shell .vw-home-editorial { --home-ink: var(--ink); --home-muted: var(--muted); background: var(--bg); }
+.fan-shell .vw-home-editorial :is(h1,h2,h3) { color: var(--home-ink); }
+.fan-shell .vw-home-feature-card { background: var(--surface); border-color: var(--border); }
+.fan-shell .vw-home-feature-action { background: var(--appearance-accent); color: var(--appearance-surface); }
+.fan-shell :is(.vw-home-feature-copy p,.vw-home-feature-kicker,.vw-home-feature-note,.vw-home-intro p span,.vw-home-footer) { color: var(--muted); }
+.fan-shell .vw-home-footer i { background: var(--border); }
+.fan-shell .vw-home-filters button { color: var(--muted); }
+.fan-shell .vw-home-filters button[aria-pressed='true'] { color: var(--ink); border-color: var(--primary); }
+.fan-shell .vw-home-see-all { color: var(--muted); }
+.fan-shell .vw-home-now { background: var(--surface-subtle); color: var(--ink); border-color: var(--primary); }
+.fan-shell :is(.vw-home-now-label,.vw-home-now-world) { color: var(--primary); }
+.fan-shell .vw-home-empty { background: var(--surface); color: var(--muted); border-color: var(--border); }
+.fan-shell .vw-home-empty a { color: var(--primary); }
+
+/* Discovery stays asset-led: no additional cards, badges or themed decorative chrome. */
+.fan-shell .explore-world-list { color: var(--ink); }
+.fan-shell :is(.explore-world-header p,.explore-voice-line,.explore-world-query,.explore-world-empty,.explore-world-demo-note) { color: var(--muted); }
+.fan-shell :is(.explore-featured-name,.explore-compact-tile) { color: var(--ink); }
+.fan-shell :is(.explore-featured-row,.explore-compact-tile) { border-color: var(--border); }
+.fan-shell .explore-compact-tile:hover { background: var(--surface-subtle); }
+.fan-shell :is(.explore-project-line,.explore-world-query a,.explore-world-query button) { color: var(--primary); }
+
+/* My Space's surrounding UI changes; the warm room and readable paper do not invert. */
+.fan-shell .vw-page-myspace { background: var(--bg); color: var(--ink); }
+.fan-shell .vw-page-myspace .v7-space-eyebrow { color: var(--primary); }
+.fan-shell .vw-page-myspace .v7-visitor-counter { color: var(--muted); }
+.fan-shell .vw-page-myspace :is(.v7-room-mode-btn,.v7-room-preview-btn,.v7-room-polaroid-btn,.v7-room-privacy-btn,.v7-room-heart-btn,.v7-space-edit-intro-btn) {
+  background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+}
+.fan-shell .vw-page-myspace .v7-room-controls-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.fan-shell .vw-page-myspace .v7-room-controls-group button { min-height: 40px; white-space: nowrap; }
+.fan-shell .vw-page-myspace :is(.v7-space-title,.v7-space-mood,.myspace-collection,.myspace-avatar-editor,.myspace-object-caption h3,.myspace-avatar-header h2) { color: var(--ink); }
+.fan-shell .vw-page-myspace :is(.v7-space-bio,.v7-private-note,.vw-room-hint,.myspace-collection-count,.myspace-object-caption p,.myspace-avatar-header p,.myspace-avatar-panel p,.myspace-surface-capacity) { color: var(--muted); }
+.fan-shell .vw-page-myspace :is(.v7-space-hero-row,.v7-space-tabs) { border-color: var(--border); }
+.fan-shell .vw-page-myspace .v7-space-tabs button { color: var(--muted); }
+.fan-shell .vw-page-myspace .v7-space-tabs button[aria-pressed='true'] { color: var(--ink); border-color: var(--primary); }
+.fan-shell :is(.myspace-object-card,.myspace-avatar-controls,.myspace-modal,.myspace-advanced-filters > div,.myspace-object-menu) { background: var(--surface); border-color: var(--border); color: var(--ink); }
+.fan-shell :is(.myspace-mode-tabs button,.myspace-avatar-tabs button,.myspace-category-chips button,.myspace-avatar-options button,.myspace-avatar-actions button:not(.myspace-primary-action),.myspace-advanced-filters summary,.myspace-advanced-filters select,.myspace-collection-search,.myspace-mobile-surfaces button,.myspace-layout-presets button,.myspace-other-surfaces button,.myspace-surface-item-actions button) { background: var(--surface); border-color: var(--border); color: var(--ink); }
+.fan-shell :is(.myspace-mode-tabs,.myspace-avatar-tabs,.myspace-category-chips,.myspace-avatar-options,.myspace-layout-presets) button[aria-pressed='true'] { background: var(--appearance-selected); color: var(--primary); border-color: var(--primary); }
+.fan-shell :is(.myspace-room-link,.myspace-avatar-notice,.myspace-history-details > summary) { color: var(--primary); }
+.fan-shell .myspace-collection-search input { color: var(--ink); }
+.fan-shell .myspace-object-menu :is(button,a) { color: var(--ink); }
+.fan-shell .myspace-object-menu :is(button,a):hover { background: var(--surface-subtle); }
+.fan-shell .vw-page-myspace :is(.v7-note-author,.v7-note-author a) { color: #31423e; }
+.fan-shell .vw-page-myspace .v7-note-time { color: #52645a; opacity: 1; }
+.fan-shell .vw-page-myspace .v7-note-body { color: #31423e; }
+
+/* Storefront UI follows appearance. Canonical product photos stay on a light studio mat. */
+.fan-shell .fw-shop-page.fw-shop-v2 { color: var(--ink); }
+.fan-shell .fw-shop-story.vw-shop-hero { background: linear-gradient(105deg,var(--surface),var(--surface-subtle)); border-color: var(--border); }
+.fan-shell .vw-shop-hero :is(h1,h1 em,.fw-eyebrow) { color: var(--ink); }
+.fan-shell .vw-shop-hero p:not(.fw-eyebrow) { color: var(--muted); }
+.fan-shell .fw-fitting-strip.vw-shop-try-strip { background: var(--surface-subtle); border-color: var(--border); }
+.fan-shell .vw-shop-try-strip .fw-fitting-strip-text strong { color: var(--ink); }
+.fan-shell .vw-shop-try-strip .fw-fitting-strip-text span { color: var(--muted); }
+.fan-shell .fw-shop-v2 .fw-product-tile { background: var(--surface); border-color: var(--border); }
+.fan-shell .fw-shop-v2 :is(.fw-product h2,.fw-product > strong,.vw-shop-card-price strong) { color: var(--ink); }
+.fan-shell .fw-shop-v2 :is(.fw-product > small,.fw-catalog-count) { color: var(--muted); }
+.fan-shell :is(.vw-shop-owned-link,.fw-shop-categories button,.vw-shop-artist-row > span) { color: var(--muted); }
+.fan-shell .fw-shop-categories { border-color: var(--border); }
+.fan-shell .fw-shop-categories button[aria-pressed='true'] { color: var(--primary); border-color: var(--primary); }
+.fan-shell .fw-shop-v2 :is(.fw-product-fav,.fw-product-try) { color: var(--primary); border-color: var(--border); background: var(--surface-subtle); }
+.fan-shell :is(.vw-shop-artist-row button,.vw-shop-preview-tabs button,.vw-shop-try-strip .fw-fitting-strip-btn,.vw-shop-filter-price input,.vw-shop-filter-sort select) { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.fan-shell .vw-shop-artist-row button[aria-pressed='true'] { background: var(--appearance-selected); color: var(--primary); border-color: var(--primary); }
+.fan-shell .fw-shop-v2 .fw-shop-search-box { background: var(--surface); border-color: var(--border); }
+.fan-shell .fw-shop-v2 .fw-shop-search-box input { color: var(--ink); background: transparent; }
+.fan-shell .fw-shop-v2 :is(.fw-filter-btn,.fw-saved-btn,.fw-shop-cart-link) { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--border) !important; }
+.fan-shell .vw-shop-filter-options label,.fan-shell .vw-shop-filter-sort { color: var(--ink); }
+
+/* Existing dialogs and utilities retain their roles rather than becoming another visual system. */
+.fan-shell :is(.fw-panel,.moments-drawer-panel) { background: var(--surface); color: var(--ink); }
+.fan-shell :is(.fw-panel > header,.fw-product-terms,.moments-drawer-header,.moments-drawer-footer) { border-color: var(--border); }
+.fan-shell :is(.fw-panel h2,.fw-panel h3,.moments-drawer-title,.moments-drawer-total,.moments-field-label) { color: var(--ink); }
+.fan-shell :is(.fw-panel-body .fw-muted,.fw-includes,.fw-panel .fw-eyebrow,.moments-drawer-desc,.moments-drawer-eyebrow) { color: var(--muted); }
+.fan-shell :is(.fw-product-photo-tabs button,.fw-variant-selector button,.fw-size-select select,.moments-size-pills button,.moments-drawer-close-btn) { background: var(--surface-subtle); color: var(--ink); border-color: var(--border); }
+.fan-shell :is(.fw-product-photo-tabs,.fw-variant-selector,.moments-size-pills) button[aria-pressed='true'] { background: var(--appearance-selected); color: var(--primary); border-color: var(--primary); }
+.fan-shell :is(.fw-fulfillment-badge,.moments-drawer-note) { background: var(--surface-subtle); color: var(--ink); border-color: var(--border); }
+.fan-shell .vw-shop-detail-preview { color: var(--primary); }
+.fan-shell[data-theme='dark'] :is(.card,.fw-menu,.v7-intro-modal,.v7-privacy-modal,.v7-polaroid-modal,.v7-slot-picker-drawer,.fw-drawer,.fw-shop-drawer) { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.fan-shell[data-theme] .fw-menu-profile-card { background: var(--surface-subtle); border-color: var(--border); }
+.fan-shell[data-theme] :is(.fw-menu-profile-name,.fw-menu-item,.fw-menu-utility-row > a,.fw-menu-utility-row > button) { color: var(--ink); }
+.fan-shell[data-theme] :is(.fw-menu-item:hover,.fw-menu-profile-link:hover,.fw-menu-utility-row > a:hover,.fw-menu-utility-row > button:hover) { background: var(--surface-subtle); color: var(--ink); }
+.fan-shell[data-theme] :is(.fw-menu-item-icon,.fw-menu-count-neutral) { background: var(--appearance-selected); color: var(--ink); }
+.fan-shell[data-theme] .fw-menu-item:hover .fw-menu-item-icon { background: var(--appearance-selected); color: var(--ink); }
+.fan-shell[data-theme] :is(.fw-menu-profile-sub,.fw-menu-group-title,.fw-menu-profile-arrow) { color: var(--muted); }
+.fan-shell[data-theme] .fw-menu-divider { background: var(--border); }
+.fan-shell .fw-profile-btn.active { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.fan-shell :focus-visible { outline-color: var(--appearance-focus) !important; box-shadow: none !important; }
+.fan-shell .skip-link { color: #fff !important; background: #365d46; }
+@media (min-width: 769px) {
+  .fan-shell .fw-account-menu-popover { left: 176px; width: min(340px,calc(100vw - 192px)); }
+  .fan-shell:has(.fw-account-menu-popover) .fw-navigation-rail { width: 168px; }
+  .fan-shell:has(.fw-account-menu-popover) .fw-navigation-rail .fw-nav-label { opacity: 1; }
+}
+@media (max-width: 768px) {
+  .fan-shell[data-theme] .fw-header { height: auto; min-height: 112px; padding-top: 10px; }
+  .fan-shell .vw-page-myspace .v7-room-social-bar { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+  .fan-shell .vw-page-myspace .v7-social-actions { min-width: 0; width: 100%; }
+  .fan-shell .vw-page-myspace .v7-room-controls-group { justify-content: flex-start; }
+  .fan-shell .vw-page-myspace .v7-room-controls-group button { font-size: 12px; padding: 8px 12px; height: auto; }
+}
+/* Account utilities are contextual, not additional global destinations. */
+.fan-shell .fw-menu-item-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.fan-shell .fw-menu-item-copy small { color: var(--muted); font: 400 11px/1.4 var(--font-sans); white-space: normal; }
+.fan-shell .fw-account-menu-popover .fw-menu-item { min-height: 44px; }
+.fw-menu-demo-tools summary { padding: 10px 12px; color: var(--muted); font-size: 11px; cursor: pointer; }
+.fw-menu-demo-tools summary:focus-visible { outline: 2px solid var(--shell-focus); outline-offset: -2px; }
+
+/* Portalled notification panels inherit the same root appearance tokens. */
+:is(.vw-all-notif-panel,.vw-mobile-notif-popover,.vw-prefs-modal) { background: var(--appearance-surface); color: var(--appearance-ink); border-color: var(--appearance-border); }
+:is(.vw-all-notif-header,.vw-mobile-notif-header,.vw-mobile-notif-footer) { background: var(--appearance-soft); border-color: var(--appearance-border); }
+:is(.vw-all-item,.vw-mobile-item,.vw-prefs-item) { background: var(--appearance-soft); border-color: var(--appearance-border); }
+:is(.vw-all-item.is-read,.vw-mobile-item.is-read) { background: var(--appearance-surface); opacity: .85; }
+:is(.vw-all-title,.vw-all-item-title,.vw-mobile-notif-title,.vw-mobile-item-title,.vw-prefs-title,.vw-prefs-item-name) { color: var(--appearance-ink); }
+:is(.vw-all-item-desc,.vw-all-time,.vw-mobile-time,.vw-mobile-item-desc,.vw-prefs-item-desc,.vw-prefs-subtitle,.vw-all-mark-read-btn,.vw-all-close-btn,.vw-mobile-mark-read-btn,.vw-prefs-close-btn) { color: var(--appearance-muted); }
+:is(.vw-all-category,.vw-all-item-cta,.vw-all-back-btn,.vw-mobile-category,.vw-mobile-view-all-btn) { color: var(--appearance-accent); }
+:is(.vw-prefs-header,.vw-prefs-footer) { border-color: var(--appearance-border); }
+:is(.vw-prefs-item:hover,.vw-mobile-item:hover,.vw-all-mark-read-btn:hover,.vw-all-close-btn:hover,.vw-prefs-close-btn:hover,.vw-mobile-mark-read-btn:hover) { background: var(--appearance-selected); color: var(--appearance-ink); }
+:is(.vw-prefs-modal,.vw-all-notif-panel,.vw-mobile-notif-popover) button { min-height: 36px; }
+:is(.vw-prefs-modal,.vw-all-notif-panel,.vw-mobile-notif-popover) button:focus-visible { outline: 2px solid var(--appearance-focus); outline-offset: 2px; }
+.vw-prefs-item-desc { line-height: 1.6; }

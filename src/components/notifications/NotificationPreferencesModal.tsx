@@ -6,20 +6,25 @@ import { useApp } from '../../context/AppContext';
 interface NotificationPreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const NotificationPreferencesModal: React.FC<NotificationPreferencesModalProps> = ({
   isOpen,
   onClose,
+  returnFocusRef,
 }) => {
   const { state, dispatch } = useApp();
   const modalRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
     document.body.style.overflow = 'hidden';
 
     const timer = setTimeout(() => {
@@ -29,7 +34,15 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
+      } else if (e.key === 'Tab' && modalRef.current) {
+        const elements = modalRef.current.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled)');
+        const first = elements[0];
+        const last = elements[elements.length - 1];
+        if ((e.shiftKey && document.activeElement === first) || (!e.shiftKey && document.activeElement === last) || !modalRef.current.contains(document.activeElement)) {
+          e.preventDefault();
+          (e.shiftKey ? last : first)?.focus();
+        }
       }
     };
 
@@ -38,8 +51,10 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
       clearTimeout(timer);
+      if (previousFocus?.isConnected) previousFocus.focus();
+      else returnFocusRef?.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, returnFocusRef]);
 
   if (!isOpen) return null;
 
@@ -65,36 +80,36 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
     {
       key: 'sessionReminders' as const,
       icon: Bell,
-      title: 'Nhắc nhở sự kiện & Phiên trực tiếp',
-      desc: 'Nhận thông báo khi giữ chỗ (RSVP), khi sảnh chờ mở và khi phiên giao lưu nghệ sĩ ảo bắt đầu.',
+      title: 'Cuộc hẹn đã giữ chỗ',
+      desc: 'Nhắc lịch live và sự kiện bạn đã đăng ký, từ phòng chờ đến lúc bắt đầu.',
       color: '#2F6650',
     },
     {
       key: 'capsuleReady' as const,
       icon: Sparkles,
-      title: 'Kỷ vật Moment Capsule',
-      desc: 'Thông báo khi kỷ vật ghi nhận tham gia phiên trực tiếp được tạo và lưu trữ trong My Space.',
+      title: 'Kỷ niệm sẵn sàng',
+      desc: 'Khi capsule ghi nhận buổi bạn tham gia được lưu vào My Space.',
       color: '#2563EB',
     },
     {
       key: 'orderUpdates' as const,
       icon: ShoppingBag,
-      title: 'Cập nhật đơn hàng VieSHOP',
-      desc: 'Thông báo xác nhận đơn hàng mô phỏng và bàn giao vật phẩm vào Bộ sưu tập của bạn.',
+      title: 'Đơn hàng & vật phẩm',
+      desc: 'Xác nhận đơn hàng demo và cập nhật vật phẩm vào Bộ sưu tập của bạn.',
       color: '#D97706',
     },
     {
       key: 'supportUpdates' as const,
       icon: Headphones,
-      title: 'Hồ sơ hỗ trợ & Đối soát',
-      desc: 'Cập nhật tiến trình xác minh, kết luận hỗ trợ và đồng bộ quyền lợi từ ban tổ chức.',
+      title: 'Yêu cầu hỗ trợ',
+      desc: 'Cập nhật yêu cầu của bạn về đơn hàng, quyền lợi hoặc dữ liệu cần kiểm tra.',
       color: '#4F46E5',
     },
     {
       key: 'promotional' as const,
       icon: Megaphone,
-      title: 'Thông tin quảng bá & Tin tức mới',
-      desc: 'Tách riêng thông tin ra mắt vật phẩm, chương trình quà tặng đặc biệt và sự kiện mùa giải.',
+      title: 'Tin từ VieSHOP & chương trình',
+      desc: 'Tin ra mắt vật phẩm và chương trình mới. Bạn có thể tắt riêng nhóm này.',
       color: '#DC2626',
     },
   ];
@@ -115,7 +130,7 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
               Cài đặt thông báo
             </h2>
             <p className="vw-prefs-subtitle">
-              Tùy chỉnh các thông báo bạn muốn nhận trong thế giới VieWorld.
+              Chỉ nhận những điều bạn muốn được nhắc. Không phải mọi cập nhật đều cần thông báo.
             </p>
           </div>
           <button
@@ -130,11 +145,11 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
         </div>
 
         <div className="vw-prefs-list">
-          {preferenceItems.map(({ key, icon: Icon, title, desc, color }) => {
+          {preferenceItems.map(({ key, icon: Icon, title, desc }) => {
             const isEnabled = prefs[key] ?? true;
             return (
               <div key={key} className="vw-prefs-item">
-                <div className="vw-prefs-item-icon" style={{ backgroundColor: `${color}14`, color }}>
+                <div className="vw-prefs-item-icon" style={{ backgroundColor: 'var(--appearance-selected)', color: 'var(--appearance-accent)' }}>
                   <Icon size={18} />
                 </div>
                 <div className="vw-prefs-item-content">

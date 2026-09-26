@@ -60,7 +60,7 @@ describe('Explore world browser connections', () => {
     expect(new Set(rows.map(row => row.world_id)).size).toBe(rows.length);
     expect(rows.every(row => row.moments.length === 2)).toBe(true);
     expect(rows.some(row => row.world_id === 'neon-sessions')).toBe(false);
-    expect(rows.filter(row => row.featured_project)).toHaveLength(1);
+    expect(rows.filter(row => row.featured_project)).toHaveLength(2);
   });
 
   it('opens the account menu following shortcut as a scoped Explore view', () => {

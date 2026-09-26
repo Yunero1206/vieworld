@@ -28,7 +28,12 @@ export function getCategoryInfo(notif: DomainNotification): {
   thumbnailUrl: string;
   ctaLabel: string;
 } {
-  const cat = (notif.category || notif.type || '').toLowerCase();
+  const explicit = (notif.category || notif.type || '').toLowerCase();
+  // Promotional notices often lack a useful category; the canonical destination is a safer signal than title keywords.
+  const route = notif.targetRoute || '';
+  const cat = explicit === 'promotional' ? /^\/shop(?:[/?]|$)/.test(route) ? 'shop'
+    : /^\/me(?:[/?]|$)/.test(route) ? 'space'
+    : /^\/sessions\//.test(route) ? 'session' : explicit : explicit;
   if (cat.includes('session') || cat.includes('artist')) {
     return {
       type: 'session',

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, X, Plus, Check, SlidersHorizontal, Shield } from 'lucide-react';
+import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from './AvatarRenderer';
 import { ownedDigitalLook, MERCH_IMAGE_ROOT } from '../world/merchCatalog';
@@ -10,6 +10,7 @@ import { composeRoomSurface } from '../world/roomComposition';
 import type { PublicFan } from '../world/community';
 import { RoomGuestbook } from './RoomGuestbook';
 import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
+import { RoomPolaroidModal } from './RoomPolaroidModal';
 
 interface DisplayRoomSceneProps {
   fan: Pick<PublicFan, 'name' | 'look' | 'accessory' | 'appearance'> & { id?: string };
@@ -30,6 +31,7 @@ interface DisplayRoomSceneProps {
   isVisitorMode?: boolean;
   onToggleVisitorMode?: () => void;
   onOpenPrivacy?: () => void;
+  onOpenPolaroid?: () => void;
 }
 
 export function DisplayRoomScene({
@@ -51,6 +53,7 @@ export function DisplayRoomScene({
   isVisitorMode = false,
   onToggleVisitorMode,
   onOpenPrivacy,
+  onOpenPolaroid,
 }: DisplayRoomSceneProps) {
   const [ambientFeedback, setAmbientFeedback] = useState<string | null>(null);
   const feedbackTimeout = useRef<number | null>(null);
@@ -156,6 +159,18 @@ export function DisplayRoomScene({
                   aria-label="Xem phòng như khách ghé thăm"
                 >
                   Xem như khách ↗
+                </button>
+              )}
+              {onOpenPolaroid && (
+                <button
+                  type="button"
+                  className="v7-room-polaroid-btn"
+                  onClick={onOpenPolaroid}
+                  title="Chụp ảnh góc phòng chia sẻ nhanh"
+                  aria-label="Chụp ảnh góc phòng chia sẻ nhanh"
+                >
+                  <Camera size={14} />
+                  <span>Chụp ảnh phòng</span>
                 </button>
               )}
               {onOpenPrivacy && (
@@ -303,6 +318,7 @@ export function PersonalDisplayRoom({
   const [isLightstickActive, setIsLightstickActive] = useState(true);
   const [heartsCount, setHeartsCount] = useState(19);
   const [isLiked, setIsLiked] = useState(false);
+  const [isPolaroidOpen, setIsPolaroidOpen] = useState(false);
 
   const lastTriggerButtonRef = useRef<HTMLElement | null>(null);
 
@@ -404,6 +420,7 @@ export function PersonalDisplayRoom({
         isVisitorMode={isVisitorMode}
         onToggleVisitorMode={() => setRoomMode(m => (m === 'visitor' ? 'view' : 'visitor'))}
         onOpenPrivacy={onOpenPrivacy}
+        onOpenPolaroid={() => setIsPolaroidOpen(true)}
       />
 
       {isEditMode && <nav className="myspace-mobile-surfaces" aria-label="Chọn khu vực trưng bày">
@@ -607,6 +624,19 @@ export function PersonalDisplayRoom({
           <p>Chủ phòng đã tạm ẩn sổ lưu bút.</p>
         </div>
       )}
+
+      <RoomPolaroidModal
+        isOpen={isPolaroidOpen}
+        onClose={() => setIsPolaroidOpen(false)}
+        fanName={state.fanProfile.displayName}
+        avatarPreset={state.fanProfile.avatarPreset}
+        digitalLook={ownedDigitalLook(state)}
+        accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
+        mood={state.fanProfile.publicIdentity?.mood}
+        companionDays={128}
+        items={displayed}
+        fanId={state.fanProfile.id}
+      />
     </section>
   );
 }

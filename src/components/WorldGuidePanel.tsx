@@ -119,7 +119,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
           style={{
             padding: '20px 24px',
             borderBottom: '1px solid var(--border)',
-            backgroundColor: '#FAF5FF',
+            backgroundColor: 'var(--surface-subtle)',
             display: 'flex',
             flexDirection: 'column',
             gap: '12px',
@@ -129,7 +129,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Compass size={22} color="var(--primary)" />
               <h2 id="guide-title" style={{ fontSize: 'var(--text-lg)', fontWeight: '800', margin: 0, color: 'var(--ink)' }}>
-                VieGuide — Hướng dẫn Nền tảng
+                Hướng dẫn VieWorld
               </h2>
             </div>
             <button
@@ -157,9 +157,9 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
               alignItems: 'center',
               gap: '8px',
               padding: '8px 12px',
-              backgroundColor: '#EDE9FE',
+              backgroundColor: 'var(--surface-subtle)',
               borderRadius: 'var(--radius-sm)',
-              border: '1px solid #DDD6FE',
+              border: '1px solid var(--border)',
               fontSize: 'var(--text-xs)',
               color: 'var(--primary)',
               fontWeight: '700',
@@ -171,10 +171,10 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
           </div>
 
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--ink)', fontWeight: '500', lineHeight: '1.5' }}>
-            Cẩm nang VieWorld: Tra cứu nhanh và chính xác thông tin về hội viên, lịch phát sóng, quyền lợi và các hoạt động của nghệ sĩ.
+            Tìm đường trong Artist World, Hall và My Space; tra cứu vật phẩm, cuộc hẹn và quyền lợi của bạn.
           </p>
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4' }}>
-            Trợ lý tra cứu thông tin tĩnh được kiểm duyệt cục bộ. Không sử dụng API mô hình ngôn ngữ trực tuyến (LLM là X02 riêng biệt). Không có thẩm quyền can thiệp hay thay đổi dữ liệu ứng dụng.
+            Hướng dẫn có sẵn trong bản demo, không đại diện cho nghệ sĩ và không thay đổi tài khoản hay đơn hàng của bạn.
           </p>
         </div>
 
@@ -223,7 +223,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
           {/* Quick Topic Chips */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Chủ đề được phê duyệt sẵn:
+              Bạn cần tìm gì?
             </span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {APPROVED_KNOWLEDGE_CARDS.map((card) => (
@@ -277,7 +277,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
                     data-testid="guide-answer-card"
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <span className="tag" style={{ backgroundColor: '#FAF5FF', color: 'var(--primary)', fontWeight: '700', fontSize: '10px' }}>
+                      <span className="tag" style={{ backgroundColor: 'var(--surface-subtle)', color: 'var(--primary)', fontWeight: '700', fontSize: '10px' }}>
                         {card.topicLabel}
                       </span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: 'var(--muted)' }}>
@@ -381,7 +381,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
               <div
                 style={{
                   padding: '16px',
-                  backgroundColor: '#F8FAFC',
+                  backgroundColor: 'var(--surface-subtle)',
                   border: '1px dashed var(--border)',
                   borderRadius: 'var(--radius-md)',
                   display: 'flex',
@@ -435,7 +435,7 @@ export const WorldGuidePanel: React.FC<WorldGuidePanelProps> = ({
             color: 'var(--muted)',
           }}
         >
-          <span>Trợ lý nội bộ VieWorld · 100% Cục bộ</span>
+          <span>Cẩm nang VieWorld · Bản thử nghiệm</span>
           <button
             type="button"
             onClick={onClose}

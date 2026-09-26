@@ -89,6 +89,8 @@ export interface Session extends BaseRecord {
 }
 
 export interface Membership extends BaseRecord {
+  /** Start of the current paid/demo membership period, never inferred from updatedAt. */
+  startedAt?: string;
   fanId: string;
   worldId: string;
   status: 'inactive' | 'active' | 'expired';
@@ -160,7 +162,7 @@ export interface FanProfile extends BaseRecord {
     equippedAt: string;
   };
   showcaseSlots?: [string | null, string | null, string | null];
-  worldJourney?: { visitedWorldIds: string[]; readNoteIds: string[]; lastWorldId?: string };
+  worldJourney?: { visitedWorldIds: string[]; readNoteIds: string[]; lastWorldId?: string; lastDestination?: string };
   digitalLook?: { shirt?: string; hat?: string; lightstick?: string };
   savedProductIds?: string[];
   roomDesign?: import('../world/places').RoomDesign;
@@ -223,6 +225,9 @@ export interface ChatMessage {
   reportRef?: string;
   isVip?: boolean;
   badgeLabel?: string;
+  replyToId?: string;
+  /** Canonical public Moment references, not duplicated media uploads. */
+  momentIds?: string[];
   /** Explicit author opt-in plus moderation required before a voice can leave its world. */
   explorePreviewConsent?: boolean;
   explorePreviewStatus?: 'pending' | 'approved' | 'rejected';
@@ -307,6 +312,8 @@ export interface DomainError {
  * Consolidated Application State Container
  */
 export interface AppState {
+  hallReactions?: Record<string, Record<string, string[]>>;
+  artistLetters?: { id: string; worldId: string; fanId: string; text: string; createdAt: string }[];
   cart?: import('../world/commerce').CartLine[];
   ticketArchive?: import('../world/history').HistoryCard[];
   hallMessages?: Record<string, ChatMessage[]>;
@@ -349,12 +356,15 @@ export type AppAction =
   | { type: 'RETURN_HISTORY_CARDS'; cardIds: string[] }
   | { type: 'SAVE_PUBLIC_IDENTITY'; bio: string; mood: string; badge?: 10 | 20; productIds?: string[] }
   | { type: 'SAVE_ROOM_DESIGN'; design: import('../world/places').RoomDesign }
-  | { type: 'SEND_HALL_MESSAGE'; worldId: string; text: string; requestId: string; roomId?: string }
+  | { type: 'SEND_HALL_MESSAGE'; worldId: string; text: string; requestId: string; roomId?: string; replyToId?: string; momentIds?: string[] }
+  | { type: 'TOGGLE_HALL_REACTION'; worldId: string; roomId: string; messageId: string }
+  | { type: 'SEND_ARTIST_LETTER'; worldId: string; text: string; requestId: string }
   | { type: 'REPORT_HALL_MESSAGE'; worldId: string; messageId: string }
   | { type: 'TOGGLE_SAVED_PRODUCT'; productId: string }
   | { type: 'EQUIP_DIGITAL_PRODUCT'; productId: string }
   | { type: 'REMOVE_DIGITAL_SLOT'; slot: 'shirt' | 'hat' | 'lightstick' }
   | { type: 'VISIT_FAN_WORLD'; worldId: string }
+  | { type: 'REMEMBER_FAN_DESTINATION'; to: string }
   | { type: 'READ_ARTIST_NOTE'; noteId: string }
   | { type: 'TOGGLE_FOLLOW'; worldId: string }
   | { type: 'TOGGLE_RSVP'; sessionId: string }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowRight, ShoppingBag, Lock, Package, Search, Heart, Truck, Monitor, Check, X, SlidersHorizontal, Info } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Lock, Package, Heart, Truck, Monitor, Check, X, SlidersHorizontal, Info } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { WorldPanel } from '../components/WorldPanel';
@@ -9,6 +9,7 @@ import { Product } from '../domain/types';
 import { DELIVERY_LABELS, MERCH_IMAGE_ROOT, ownedDigitalLook, ownsDigitalProduct } from '../world/merchCatalog';
 import { ORDER_LABELS } from '../world/fanWorld';
 import { matchesVietnameseQuery } from '../utils/textSearch';
+import { SearchCombobox } from '../components/SearchCombobox';
 import { getTenantConfig } from '../domain/tenantConfig';
 import { availableShopCategories, getPreviewCapabilities, previewEdition, productBadge, productPrice, shopCategory, SHOP_CATEGORY_LABELS } from '../world/shopPresentation';
 
@@ -66,6 +67,7 @@ export function FanShopView() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [fittingDrawerOpen, setFittingDrawerOpen] = useState(false);
   const [previewTab, setPreviewTab] = useState<'avatar' | 'room'>('avatar');
+  const [tryStance, setTryStance] = useState<'default' | 'cheer'>('default');
   const [showFormatModal, setShowFormatModal] = useState(false);
   const openedHere = useRef(false);
 
@@ -235,46 +237,14 @@ export function FanShopView() {
         </div>
       </header>
 
-      <nav className="fw-shop-categories" aria-label={`Danh mục ${shopTitle}`}>
-        {categories.map(id => (
-          <button
-            key={id}
-            aria-pressed={category === id}
-            onClick={() => setCategory(id)}
-          >
-            {SHOP_CATEGORY_LABELS[id]}
-          </button>
-        ))}
-      </nav>
-
-      <div className="fw-fitting-strip vw-shop-try-strip" aria-label="Thử trong My Space">
-        <img src="/images/myspace-room-v2.png" alt="Một góc phòng My Space" loading="lazy" />
-        <div className="fw-fitting-strip-text"><strong>Thử trong My Space</strong><span>Xem vật phẩm này trên avatar hoặc trong phòng của bạn trước khi chọn.</span></div>
-        <button type="button" className="fw-fitting-strip-btn" onClick={() => { updateParam('preview', 'true'); document.getElementById('shop-catalog')?.scrollIntoView({ behavior: 'smooth' }); }}>Xem món có thể thử <ArrowRight size={16}/></button>
-      </div>
 
       <div className="fw-shop-layout fw-shop-fullwidth" id="shop-catalog">
         <section>
           <div className="fw-shop-toolbar">
-            <div className="fw-search fw-shop-search-box">
-              <Search size={16} className="fw-shop-search-icon" />
-              <input
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Tìm sản phẩm, album, lightstick muốn mua..."
-                aria-label="Tìm sản phẩm"
-              />
-              {query && (
-                <button
-                  type="button"
-                  className="fw-shop-search-clear"
-                  onClick={() => setQuery('')}
-                  aria-label="Xóa từ khóa"
-                >
-                  <X size={13} />
-                </button>
-              )}
-            </div>
+            <SearchCombobox className="fw-shop-search-box" value={query} onChange={setQuery}
+              label="Tìm sản phẩm" placeholder="Tìm sản phẩm, album, lightstick…"
+              suggestions={productFamilies.filter(family => filter === 'all' || family.worldId === filter).map(family => ({ id: family.primaryProduct.id, keywords: family.artistName, label: family.title, context: `${family.artistName} · ${SHOP_CATEGORY_LABELS[shopCategory(family.primaryProduct)]}` }))}
+              onSelect={item => openProduct(item.id)} />
 
             <button
               type="button"
@@ -308,7 +278,13 @@ export function FanShopView() {
             </Link>
           </div>
 
-          <div className="vw-shop-artist-row"><span>Nghệ sĩ</span><button type="button" aria-pressed={filter === 'all'} onClick={() => worldId ? navigate('/shop') : setFilter('all')}>Tất cả</button>{Object.values(state.worlds).filter(w => w.type === 'artist' && w.tenantId === state.activeTenantId && allProducts.some(p => p.worldId === w.id)).map(w => <button key={w.id} type="button" aria-pressed={filter === w.id} onClick={() => worldId ? navigate(`/shop?artist=${w.id}`) : setFilter(w.id)}>{w.name}</button>)}{filter !== 'all' && <button type="button" className="vw-shop-scope" onClick={() => navigate('/shop')} aria-label={`Bỏ lọc nghệ sĩ ${state.worlds[filter]?.name || filter}`}>Bỏ lọc nghệ sĩ <X size={14}/></button>}</div>
+          <div className="vw-shop-browse-row">
+            <nav className="fw-shop-categories" aria-label={`Danh mục ${shopTitle}`}>
+              {categories.map(id => <button key={id} type="button" aria-pressed={category === id} onClick={() => setCategory(id)}>{SHOP_CATEGORY_LABELS[id]}</button>)}
+            </nav>
+            <button type="button" className="vw-shop-preview-toggle" aria-pressed={previewOnly} onClick={() => updateParam('preview', previewOnly ? 'false' : 'true')}><Monitor size={16}/>Có thể thử trong My Space</button>
+          </div>
+          {filter !== 'all' && <div className="vw-shop-active-scope"><button type="button" onClick={() => worldId ? navigate('/shop') : setFilter('all')} aria-label={`Bỏ lọc nghệ sĩ ${state.worlds[filter]?.name || filter}`}>{state.worlds[filter]?.name || filter}<X size={14}/></button><span>Đang xem vật phẩm của world này</span></div>}
 
           {/* Applied filters strip */}
           {hasActiveFilters && (
@@ -512,7 +488,45 @@ export function FanShopView() {
           <div className="vw-shop-preview">
             <h3>{trying.title}</h3>
             {previewCapabilities.avatar && previewCapabilities.room && <div className="vw-shop-preview-tabs"><button type="button" aria-pressed={previewTab === 'avatar'} onClick={() => setPreviewTab('avatar')}>Trên avatar</button><button type="button" aria-pressed={previewTab === 'room'} onClick={() => setPreviewTab('room')}>Trong phòng</button></div>}
-            {previewTab === 'avatar' && previewCapabilities.avatar ? <div className="vw-shop-preview-avatar"><AvatarRenderer role="fan" size="preview" appearance={state.fanProfile.avatarPreset} displayName={state.fanProfile.displayName} accessoryId={state.fanProfile.wardrobeChoice?.accessoryId} digitalLook={previewLook}/></div> : <div className="vw-shop-preview-room"><img src="/images/myspace-room-v2.png" alt="Phòng My Space"/><div className={`vw-shop-preview-object ${trying.category === 'album' ? 'is-album' : trying.category === 'ticket' ? 'is-ticket' : /lightstick/.test(trying.image || '') ? 'is-lightstick' : 'is-clothing'}`}><MerchArt product={trying}/></div></div>}
+            {previewTab === 'avatar' && previewCapabilities.avatar ? (
+              <>
+                <div className="vw-shop-preview-avatar">
+                  <AvatarRenderer
+                    role="fan"
+                    size="preview"
+                    appearance={state.fanProfile.avatarPreset}
+                    displayName={state.fanProfile.displayName}
+                    accessoryId={tryStance === 'cheer' ? (previewLook.lightstick || 'lightstick-star') : state.fanProfile.wardrobeChoice?.accessoryId}
+                    digitalLook={previewLook}
+                  />
+                </div>
+                <div className="vw-shop-stance-controls" role="group" aria-label="Tư thế thử đồ">
+                  <button
+                    type="button"
+                    className={`vw-shop-stance-btn ${tryStance === 'default' ? 'active' : ''}`}
+                    onClick={() => setTryStance('default')}
+                    aria-pressed={tryStance === 'default'}
+                  >
+                    Tư thế đứng chào
+                  </button>
+                  <button
+                    type="button"
+                    className={`vw-shop-stance-btn ${tryStance === 'cheer' ? 'active' : ''}`}
+                    onClick={() => setTryStance('cheer')}
+                    aria-pressed={tryStance === 'cheer'}
+                  >
+                    Vẫy lightstick
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="vw-shop-preview-room">
+                <img src="/images/myspace-room-v2.png" alt="Phòng My Space" />
+                <div className={`vw-shop-preview-object ${trying.category === 'album' ? 'is-album' : trying.category === 'ticket' ? 'is-ticket' : /lightstick/.test(trying.image || '') ? 'is-lightstick' : 'is-clothing'}`}>
+                  <MerchArt product={trying} />
+                </div>
+              </div>
+            )}
             <p className="fw-muted">Chỉ là hình xem trước. Bản hàng thật không tự mở khóa đồ digital, trừ khi phiên bản đã chọn ghi rõ kèm digital.</p>
             {previewTab === 'avatar' && owned && previewEditionProduct && <button type="button" className="fw-button" onClick={() => dispatch({ type: 'EQUIP_DIGITAL_PRODUCT', productId: previewEditionProduct.id })}><Check size={16}/>Mặc và lưu</button>}
             <button type="button" className="fw-text-button" onClick={() => setFittingDrawerOpen(false)}>Quay lại món đồ</button>

@@ -64,18 +64,13 @@ export const NotificationNotice: React.FC<NotificationNoticeProps> = ({
               />
               <span className="vw-notice-category-text">{item.categoryLabel}</span>
             </div>
-            <time className="vw-notice-time">{item.timeAgo}</time>
+            <time className="vw-notice-time" dateTime={item.createdAt}>{item.timeAgo}</time>
           </div>
 
           <h3 className="vw-notice-title">{item.title}</h3>
 
           {item.body && <p className="vw-notice-desc">{item.body}</p>}
 
-          <div className="vw-notice-cta">
-            <span className="vw-notice-cta-link">
-              {item.ctaLabel || (item.targetRoute ? 'Xem chi tiết →' : 'Đã nhận')}
-            </span>
-          </div>
         </div>
       </div>
     </article>

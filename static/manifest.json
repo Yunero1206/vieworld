@@ -1,0 +1,17 @@
+{
+  "name": "VieWorld — Thế giới Fandom Kết nối",
+  "short_name": "VieWorld",
+  "description": "Portable Fan Relationship & Interactive Fandom Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#5B46E8",
+  "icons": [
+    {
+      "src": "/images/world-v8/plaza.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    }
+  ]
+}

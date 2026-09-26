@@ -19,6 +19,7 @@ const filters: { id: 'all' | HomeActivity['category']; label: string }[] = [
 ];
 
 function activityImage(activity: HomeActivity) {
+  if (activity.mediaSrc) return activity.mediaSrc;
   if (activity.category === 'shop') return productPin;
   return getArtistCover(activity.worldId);
 }
@@ -49,7 +50,7 @@ export function WorldPlazaView() {
   }).format(new Date(state.demoTime));
   const otherRecent = recent.filter(item => item.id !== `event-${now?.id}`);
   const shownRecent = filter === 'all' ? otherRecent.slice(0, 4) : recent.filter(item => item.category === filter).slice(0, 4);
-  const featuredImage = continueWith.visual === 'space' ? mySpaceArt : getArtistCover(continueWith.worldId);
+  const featuredImage = continueWith.to.startsWith('/shop') ? productPin : continueWith.to.startsWith('/explore') ? getArtistCover() : continueWith.visual === 'space' ? mySpaceArt : getArtistCover(continueWith.worldId);
 
   useEffect(() => { document.title = 'Home · VieWorld'; }, []);
 
@@ -64,35 +65,53 @@ export function WorldPlazaView() {
       </header>
 
       {now && <Link className="vw-home-now" to={now.to}>
-        <span className="vw-home-now-label">{now.eyebrow} · demo</span>
-        <strong>{now.title}</strong>
-        <span className="vw-home-now-world">{now.detail}</span>
+        <img src={getArtistCover(state.sessions[now.id]?.worldId)} alt=""/>
+        <div className="vw-home-now-content"><span className="vw-home-now-label">Đang diễn ra <span>· {now.eyebrow}</span></span>
+        <strong>{now.title}</strong><span className="vw-home-now-world">{now.detail}</span></div>
+        <span className="vw-home-now-action">Ghé xem</span>
         <ArrowRight size={17} aria-hidden="true" />
       </Link>}
 
       <section className="vw-home-feature" aria-labelledby="vw-home-feature-title">
         <div className="vw-home-section-title">
-          <h2 id="vw-home-feature-title">{continueWith.visual === 'space' ? 'Một nơi để bắt đầu' : 'Tiếp tục từ chỗ bạn dừng lại'}</h2>
-          <ArrowRight size={19} aria-hidden="true" />
+          <h2 id="vw-home-feature-title">{continueWith.action === 'Ghé lại' ? 'Tiếp tục từ chỗ bạn dừng lại' : 'Một nơi để bắt đầu'}</h2>
         </div>
         <Link className="vw-home-feature-card" to={continueWith.to}>
           <div className="vw-home-feature-image">
             <img src={featuredImage} alt="" fetchPriority="high" />
-            <span>{continueWith.visual === 'capsule' ? 'KỶ NIỆM CỦA BẠN' : continueWith.visual === 'world' ? 'WORLD BẠN ĐÃ GHÉ' : 'MY SPACE'}</span>
+            <span>{continueWith.action === 'Ghé lại' ? 'NƠI BẠN VỪA GHÉ' : 'MY SPACE'}</span>
           </div>
           <div className="vw-home-feature-copy">
-            <span className="vw-home-feature-kicker">{continueWith.visual === 'capsule' ? 'Capsule' : continueWith.visual === 'world' ? 'Artist World' : 'Góc của bạn'}</span>
+            <span className="vw-home-feature-kicker">{continueWith.visual === 'world' ? 'Artist World' : continueWith.to.startsWith('/shop') ? 'VieSHOP' : continueWith.to.startsWith('/explore') ? 'Explore' : 'My Space'}</span>
             <h3>{continueWith.title}</h3>
             <p>{continueWith.detail}</p>
-            <span className="vw-home-feature-note">{continueWith.visual === 'capsule' ? 'Những điều bạn chọn giữ lại' : continueWith.visual === 'world' ? 'Nơi bạn đã dừng chân gần nhất' : 'Hãy chọn thứ bạn muốn trưng bày và lưu giữ'}</span>
             <span className="vw-home-feature-action">{continueWith.action} <ArrowRight size={18} aria-hidden="true" /></span>
           </div>
         </Link>
       </section>
 
+      <section className="vw-home-upcoming" aria-labelledby="vw-home-upcoming-title">
+        <div className="vw-home-section-row">
+          <div className="vw-home-section-title"><h2 id="vw-home-upcoming-title">Khoảnh khắc sắp tới</h2><p>Những cuộc hẹn phía trước.</p></div>
+          <Link className="vw-home-see-all" to="/explore">Khám phá thêm <ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
+        {upcomingAll.length ? <div className="vw-home-upcoming-grid">
+          {upcomingAll.map(item => {
+            const when = formatWhen(item.at || state.demoTime, state.demoTime);
+            return <Link key={item.id} className="vw-home-upcoming-card" to={item.to} aria-label={`${item.title}, ${when.day} ${when.time}`}>
+              <img src={getArtistCover(item.worldId)} alt="" loading="lazy" />
+              <div className="vw-home-card-shade" />
+              <span className="vw-home-upcoming-context">{item.related ? 'TỪ WORLD BẠN THEO DÕI' : 'KHÁM PHÁ'}</span>
+              <div className="vw-home-upcoming-copy"><small>{when.day} · {when.time}</small><strong>{item.title}</strong><span>{item.detail}</span></div>
+              <span className="vw-home-card-arrow"><ArrowRight size={18} aria-hidden="true" /></span>
+            </Link>;
+          })}
+        </div> : <div className="vw-home-empty"><p>Chưa có lịch nào sắp tới. Không bỏ lỡ gì đâu.</p><Link to="/explore">Khám phá world khác <ArrowRight size={16} aria-hidden="true" /></Link></div>}
+      </section>
+
       <section className="vw-home-recent" aria-labelledby="vw-home-recent-title">
         <div className="vw-home-section-row">
-          <div className="vw-home-section-title"><h2 id="vw-home-recent-title">Gần đây</h2></div>
+          <div className="vw-home-section-title"><h2 id="vw-home-recent-title">Gần đây</h2><p>Những điều mới và kỷ niệm đã giữ.</p></div>
           <div className="vw-home-filters" role="group" aria-label="Lọc nội dung gần đây">
             {filters.map(item => <button key={item.id} type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)}>{item.label}</button>)}
           </div>
@@ -111,25 +130,6 @@ export function WorldPlazaView() {
           <p>Chưa có {filter === 'all' ? 'điều gì cần xem thêm' : filters.find(item => item.id === filter)?.label.toLowerCase()} ở mục này.</p>
           <Link to={filter === 'shop' ? '/shop' : filter === 'capsule' ? '/me?panel=capsules' : '/explore'}>Dạo quanh tiếp <ArrowRight size={16} aria-hidden="true" /></Link>
         </div>}
-      </section>
-
-      <section className="vw-home-upcoming" aria-labelledby="vw-home-upcoming-title">
-        <div className="vw-home-section-row">
-          <div className="vw-home-section-title"><h2 id="vw-home-upcoming-title">Khoảnh khắc sắp tới</h2><ArrowRight size={19} aria-hidden="true" /></div>
-          <Link className="vw-home-see-all" to="/explore">Khám phá thêm <ArrowRight size={16} aria-hidden="true" /></Link>
-        </div>
-        {upcomingAll.length ? <div className="vw-home-upcoming-grid">
-          {upcomingAll.map(item => {
-            const when = formatWhen(item.at || state.demoTime, state.demoTime);
-            return <Link key={item.id} className="vw-home-upcoming-card" to={item.to} aria-label={`${item.title}, ${when.day} ${when.time}`}>
-              <img src={getArtistCover(item.worldId)} alt="" loading="lazy" />
-              <div className="vw-home-card-shade" />
-              <span className="vw-home-upcoming-context">{item.related ? 'TỪ WORLD BẠN THEO DÕI' : 'KHÁM PHÁ'}</span>
-              <div className="vw-home-upcoming-copy"><small>{when.day} · {when.time}</small><strong>{item.title}</strong><span>{item.detail}</span></div>
-              <span className="vw-home-card-arrow"><ArrowRight size={18} aria-hidden="true" /></span>
-            </Link>;
-          })}
-        </div> : <div className="vw-home-empty"><p>Chưa có lịch nào sắp tới. Không bỏ lỡ gì đâu.</p><Link to="/explore">Khám phá world khác <ArrowRight size={16} aria-hidden="true" /></Link></div>}
       </section>
 
       <footer className="vw-home-footer"><span>VieWorld</span><i /><small>MUSIC&nbsp; — &nbsp;PEOPLE&nbsp; — &nbsp;MEMORIES</small></footer>

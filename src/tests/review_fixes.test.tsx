@@ -409,7 +409,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       );
 
       // Search box has value from URL
-      const searchBox = screen.getByRole('textbox', { name: 'Tìm sản phẩm' }) as HTMLInputElement;
+      const searchBox = screen.getByRole('combobox', { name: 'Tìm sản phẩm' }) as HTMLInputElement;
       expect(searchBox.value).toBe('ao');
 
       // Merch category button is selected
@@ -461,7 +461,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       expect(screen.queryByLabelText('Bộ lọc đang áp dụng')).not.toBeInTheDocument();
 
       // Enter query
-      const searchBox = screen.getByRole('searchbox');
+      const searchBox = screen.getByRole('combobox', { name: 'Tìm trong bộ sưu tập' });
       fireEvent.change(searchBox, { target: { value: 'star' } });
       expect(searchBox).toHaveValue('star');
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Volume2, VolumeX, Music, Play, Pause, Lock, AlertCircle, Radio, Heart } from 'lucide-react';
 
 export interface SilentMediaPlaceholderProps {
+  showCheer?: boolean;
   isMuted: boolean;
   onToggleMute: () => void;
   isPlaying: boolean;
@@ -15,6 +16,7 @@ export interface SilentMediaPlaceholderProps {
 }
 
 export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
+  showCheer = true,
   isMuted,
   onToggleMute,
   isPlaying,
@@ -238,7 +240,7 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
           </div>
 
           {/* Track Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '280px' }}>
+          <div className="player-track-info" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '280px' }}>
             <Music size={13} color="#34D399" style={{ flexShrink: 0 }} />
             <span style={{ fontWeight: '600' }}>{trackTitle}</span>
           </div>
@@ -275,7 +277,7 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
           </div>
 
           {/* YouTube / Weverse Live Stream Cheer Heart Button */}
-          <button
+          {showCheer && <button
             type="button"
             onClick={handleCheer}
             className="stage-cheer-btn"
@@ -286,7 +288,7 @@ export const SilentMediaPlaceholder: React.FC<SilentMediaPlaceholderProps> = ({
           >
             <Heart size={15} fill="#F43F5E" color="#F43F5E" className="heart-icon-bounce" />
             <span>{cheerCount >= 1000 ? `${(cheerCount / 1000).toFixed(1)}k` : cheerCount}</span>
-          </button>
+          </button>}
         </div>
       </div>
 

@@ -1,0 +1,73 @@
+/* Final scoped presentation: calm orientation and one bounded, readable inbox. */
+.fan-shell .vw-home-intro { margin:12px 0 22px; }
+.fan-shell .vw-home-now { padding:12px; gap:14px; border:1px solid var(--border); border-radius:12px; min-height:88px; }
+.vw-home-now > img { width:76px; height:64px; flex:none; object-fit:cover; border-radius:8px; }
+.vw-home-now-content { display:flex; flex:1; min-width:0; flex-direction:column; gap:3px; }
+.fan-shell .vw-home-now strong { font-size:15px; white-space:normal; line-height:1.5; }
+.fan-shell .vw-home-now-label { font-size:12px; letter-spacing:0; text-transform:none; }
+.vw-home-now-label > span { font-weight:400; }
+.fan-shell .vw-home-now-world { font-size:12px; }
+.vw-home-now-action { font-size:13px; white-space:nowrap; }
+.fan-shell .vw-home-feature-card { grid-template-columns:minmax(150px,.35fr) 1fr; min-height:0; }
+.fan-shell .vw-home-feature-image { min-height:0; height:184px; }
+.fan-shell .vw-home-feature-copy { padding:20px 24px; min-height:0; }
+.fan-shell .vw-home-feature-copy h3 { font-size:clamp(19px,2vw,24px); line-height:1.4; margin:4px 0; }
+.fan-shell .vw-home-feature-copy p { margin:0; max-width:none; }
+.fan-shell .vw-home-feature-action { min-height:36px; padding:4px 12px; margin-top:10px; }
+.fan-shell .vw-home-section-title { flex-wrap:wrap; gap:4px 14px; }
+.vw-home-section-title p { margin:0; font-size:13px; color:var(--muted); }
+.fan-shell .vw-home-feature .vw-home-section-title h2 { font-size:20px; }
+.fan-shell .vw-home-recent,.fan-shell .vw-home-upcoming { margin-top:28px; }
+.fan-shell .vw-home-recent-card { min-height:172px; }
+
+.vw-notif-dialog.vw-inbox-dialog { width:min(720px,calc(100vw - 32px)); height:auto; max-height:calc(100dvh - 32px); overflow:hidden; display:flex; border-radius:18px; background:var(--appearance-surface); color:var(--appearance-ink); border:1px solid var(--appearance-border); box-shadow:0 24px 72px #0004; font:400 14px/1.6 var(--font-sans); }
+.vw-notification-inbox { display:flex; flex-direction:column; width:100%; min-height:0; max-height:calc(100dvh - 34px); }
+.vw-inbox-heading { padding:22px 68px 16px 24px; border-bottom:1px solid var(--appearance-border); flex:none; background:var(--appearance-soft); }
+.vw-inbox-brand { display:flex; align-items:center; gap:6px; color:var(--appearance-accent); font-size:12px; font-weight:600; }
+.vw-inbox-heading h2 { font:600 23px/1.4 var(--font-sans); color:var(--appearance-ink); margin:4px 0; letter-spacing:-.025em; }
+.vw-inbox-heading p { color:var(--appearance-muted); font-size:12px; margin:0; }
+.vw-inbox-dialog .vw-notif-close-btn { top:20px; right:20px; width:40px; height:40px; background:var(--appearance-surface); color:var(--appearance-ink); border:1px solid var(--appearance-border); box-shadow:none; }
+.vw-inbox-scroll { min-height:0; max-height:480px; overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; padding:12px 18px; }
+.vw-inbox-scroll ul { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+.vw-inbox-dialog .vw-paper-notice { padding:14px; height:auto; min-height:0; margin:0; transform:none; background:var(--appearance-soft); border:1px solid transparent; border-radius:10px; color:var(--appearance-ink); opacity:1; box-shadow:none; }
+.vw-inbox-dialog .vw-paper-notice:hover { transform:none; border-color:var(--appearance-accent); box-shadow:none; }
+.vw-inbox-dialog .vw-paper-notice.is-read { background:var(--appearance-surface); border-color:var(--appearance-border); }
+.vw-inbox-dialog .vw-notice-tape { display:none; }
+.vw-inbox-dialog .vw-notice-layout { align-items:start; gap:14px; }
+.vw-inbox-dialog .vw-polaroid-frame { width:54px; height:68px; max-height:none; flex:none; padding:3px; transform:none; border-radius:4px; }
+.vw-inbox-dialog .vw-paper-notice:hover .vw-polaroid-frame { transform:none; }
+.vw-inbox-dialog .vw-notice-body { min-width:0; }
+.vw-inbox-dialog .vw-notice-header { gap:10px; }
+.vw-inbox-dialog .vw-notice-category-text { font:500 12px/1.5 var(--font-sans); color:var(--appearance-accent); }
+.vw-inbox-dialog .vw-notice-time { color:var(--appearance-muted); font:400 12px/1.5 var(--font-sans); }
+.vw-inbox-dialog .vw-notice-title { font:600 14px/1.55 var(--font-sans); color:var(--appearance-ink); margin:4px 0; }
+.vw-inbox-dialog .vw-notice-desc { font:400 13px/1.6 var(--font-sans); color:var(--appearance-muted); margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.vw-inbox-dialog .is-read .vw-notice-dot { opacity:.25; }
+.vw-inbox-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; flex:none; padding:12px 24px; border-top:1px solid var(--appearance-border); }
+.vw-inbox-footer > span { color:var(--appearance-muted); font-size:12px; }
+.vw-inbox-footer button { display:flex; align-items:center; gap:6px; min-height:40px; border:0; background:transparent; color:var(--appearance-accent); font:500 12px/1.5 var(--font-sans); cursor:pointer; }
+.vw-inbox-footer button:disabled { color:var(--appearance-muted); cursor:default; }
+.vw-inbox-empty { margin:16px; color:var(--appearance-muted); }
+.vw-inbox-dialog :focus-visible { outline:2px solid var(--appearance-focus); outline-offset:2px; }
+@media(max-width:600px) {
+  .fan-shell .vw-home-now { flex-wrap:nowrap; align-items:center; }
+  .fan-shell .vw-home-now-label { width:auto; }
+  .vw-home-now-label > span,.vw-home-now-action { display:none; }
+  .fan-shell .vw-home-now-world { display:block; }
+  .vw-home-now > img { width:52px; height:58px; }
+  .fan-shell .vw-home-feature-card { grid-template-columns:92px 1fr; }
+  .fan-shell .vw-home-feature-image { height:100%; min-height:170px; }
+  .fan-shell .vw-home-feature-image span { display:none; }
+  .fan-shell .vw-home-feature-copy { padding:14px; }
+  .fan-shell .vw-home-feature-copy h3 { font-size:17px; }
+  .fan-shell .vw-home-feature-copy p { font-size:13px; }
+  .vw-inbox-heading { padding-left:18px; }
+  .vw-inbox-scroll { padding:10px; }
+  .vw-inbox-footer { padding:8px 14px; }
+  .vw-inbox-footer > span { display:none; }
+  .vw-inbox-footer button { margin-left:auto; }
+  .vw-inbox-dialog .vw-polaroid-frame { width:42px; height:54px; }
+  .vw-inbox-dialog .vw-notice-layout { gap:10px; }
+  .vw-inbox-dialog .vw-notice-header { flex-wrap:wrap; gap:0 8px; }
+}
+@media(prefers-reduced-motion:reduce) { .vw-inbox-dialog,.vw-notif-backdrop { animation:none; } }

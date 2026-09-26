@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CheckCheck, Leaf } from 'lucide-react';
 import { DisplayNotification } from './notification.types';
 import { NotificationNotice } from './NotificationNotice';
 
@@ -7,12 +7,14 @@ interface DesktopNotificationBoardProps {
   notifications: DisplayNotification[];
   onSelectNotification: (item: DisplayNotification) => void;
   onViewAll: () => void;
+  onMarkAllAsRead?: () => void;
 }
 
 export const DesktopNotificationBoard: React.FC<DesktopNotificationBoardProps> = ({
   notifications,
   onSelectNotification,
   onViewAll,
+  onMarkAllAsRead,
 }) => {
   // Sort notifications: unread first, then by date recent
   const sorted = [...notifications].sort((a, b) => {
@@ -25,14 +27,10 @@ export const DesktopNotificationBoard: React.FC<DesktopNotificationBoardProps> =
 
   return (
     <div className="vw-wide-board-card">
-      {/* Physical Board Background Asset */}
-      <img
-        src="/images/world-v8/standee-blank.png"
-        alt=""
-        aria-hidden="true"
-        className="vw-wide-board-frame"
-        draggable={false}
-      />
+      <header className="vw-bulletin-heading"><Leaf size={22} aria-hidden="true"/><span>VieWorld</span>
+        <h2 id="vw-notif-dialog-title" className="vw-board-title">Bảng thông báo</h2>
+        <p>{notifications.filter(item => !item.read).length ? `${notifications.filter(item => !item.read).length} điều mới dành cho bạn` : 'Một góc nhỏ để không bỏ lỡ điều quan trọng.'}</p>
+      </header>
 
       {/* 2x2 Pinned Notices Safe Board Surface */}
       <div
@@ -59,6 +57,7 @@ export const DesktopNotificationBoard: React.FC<DesktopNotificationBoardProps> =
 
         {/* Restrained In-Board Action: "Xem tất cả thông báo →" */}
         <div className="vw-wide-board-footer">
+          {onMarkAllAsRead && notifications.some(item => !item.read) && <button type="button" className="vw-bulletin-mark" onClick={onMarkAllAsRead}><CheckCheck size={16}/> Đánh dấu đã đọc</button>}
           <button
             type="button"
             className="vw-wide-view-all-btn"

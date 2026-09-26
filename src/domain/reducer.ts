@@ -5,12 +5,14 @@
 import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Question, SupportCase } from './types';
 import { createInitialState } from '../data/fixtures';
 import { ARTIST_NOTES } from '../world/fanWorld';
-import { getExploreProjectById } from '../world/exploreRows';
+import { getExploreMomentById } from '../world/exploreRows';
+import { hallEntries, isArtistHallRoom } from '../world/artistPresentation';
 import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
 import { validRoomDesign } from '../world/places';
 import { commerceReducer } from '../world/commerce';
 import { shippingReducer } from '../world/shipping';
 import { historyReducer } from '../world/history';
+import { validHomeDestination } from '../world/homeDestination';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   const featureState=commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
@@ -23,19 +25,31 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'SEND_HALL_MESSAGE': {
       if (!canEnterHall(state, action.worldId)) return { ...state, lastError: { code: 'HALL_MEMBERSHIP_REQUIRED', message: 'Hall này dành cho hội viên đang hoạt động của đúng nhà nhạc.' } };
       const roomId = action.roomId || `hall-${action.worldId}`;
-      const roomSession = state.sessions[roomId];
-      const sessionWorld = roomSession && state.worlds[roomSession.worldId];
-      const isArtistSession = roomSession?.worldId === action.worldId
-        || (sessionWorld?.type === 'ip' && sessionWorld.linkedWorldIds.includes(action.worldId));
-      const isProjectRoom = getExploreProjectById(action.worldId, roomId)?.id === roomId;
-      if (roomId !== `hall-${action.worldId}` && !isArtistSession && !isProjectRoom) {
+      if (!isArtistHallRoom(state, action.worldId, roomId)) {
         return { ...state, lastError: { code: 'HALL_ROOM_INVALID', message: 'Không tìm thấy phòng trò chuyện này trong world.' } };
       }
       const messages = state.hallMessages?.[action.worldId] || [];
       const value = action.text.trim();
       if (messages.some(m => m.id === action.requestId)) return state;
+      if (action.replyToId && !hallEntries(state,action.worldId,roomId).some(item => item.id === action.replyToId)) return state;
+      const momentIds = [...new Set(action.momentIds || [])];
+      if (momentIds.length > 3 || momentIds.some(id => !getExploreMomentById(action.worldId,id))) return state;
       if (!value || value.length > 280) return { ...state, lastError: { code: 'HALL_MESSAGE_INVALID', message: 'Lời nhắn cần từ 1 đến 280 ký tự.' } };
-      return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: roomId, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime }].slice(-100) } };
+      return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: roomId, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime, replyToId: action.replyToId, momentIds }].slice(-100) } };
+    }
+    case 'TOGGLE_HALL_REACTION': {
+      if (!canEnterHall(state, action.worldId) || !isArtistHallRoom(state,action.worldId,action.roomId) || !hallEntries(state,action.worldId,action.roomId).some(item => item.id === action.messageId)) return state;
+      const reactions = state.hallReactions?.[action.worldId] || {};
+      const ids = reactions[action.messageId] || [];
+      const fanId = state.fanProfile.id;
+      return { ...state, hallReactions: { ...state.hallReactions, [action.worldId]: { ...reactions, [action.messageId]: ids.includes(fanId) ? ids.filter(id => id !== fanId) : [...ids,fanId] } } };
+    }
+    case 'SEND_ARTIST_LETTER': {
+      const text = action.text.trim();
+      if (!canEnterHall(state,action.worldId) || !isArtistHallRoom(state,action.worldId,`hall-${action.worldId}`) || !text || text.length > 1000) return state;
+      const letters = state.artistLetters || [];
+      if (letters.some(letter => letter.id === action.requestId)) return state;
+      return { ...state, artistLetters: [...letters,{ id: action.requestId, worldId: action.worldId, fanId: state.fanProfile.id, text, createdAt: state.demoTime }].slice(-100) };
     }
     case 'REPORT_HALL_MESSAGE': {
       if (!canEnterHall(state, action.worldId)) return state;
@@ -53,6 +67,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'REMOVE_DIGITAL_SLOT': {
       return { ...state, fanProfile: { ...state.fanProfile, digitalLook: { ...state.fanProfile.digitalLook, [action.slot]: undefined } } };
+    }
+    case 'REMEMBER_FAN_DESTINATION': {
+      if (!validHomeDestination(state, action.to)) return state;
+      const progress = state.fanProfile.worldJourney || { visitedWorldIds: [], readNoteIds: [] };
+      if (progress.lastDestination === action.to) return state;
+      return { ...state, fanProfile: { ...state.fanProfile, worldJourney: { ...progress, lastDestination: action.to } } };
     }
     case 'VISIT_FAN_WORLD': {
       if (!state.worlds[action.worldId]) return state;
@@ -1241,6 +1261,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         (action.worldId === 'artist-a' ? 'member-a-01' : `member-${action.worldId}-${fanId}`);
 
       const newMembership: Membership = {
+        startedAt: state.demoTime,
         id: membershipId,
         tenantId: state.activeTenantId,
         version: (existingMembership?.version || 0) + 1,
@@ -1697,7 +1718,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'MARK_NOTIFICATION_READ': {
       const notif = state.notifications[action.notificationId];
-      if (!notif || notif.isRead) return state;
+      if (!notif || notif.isRead || notif.tenantId !== state.activeTenantId || notif.fanId !== state.fanProfile.id) return state;
 
       return {
         ...state,
@@ -1716,7 +1737,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const updated = { ...state.notifications };
       let changed = false;
       for (const id of Object.keys(updated)) {
-        if (!updated[id].isRead) {
+        if (!updated[id].isRead && updated[id].tenantId === state.activeTenantId && updated[id].fanId === state.fanProfile.id) {
           updated[id] = { ...updated[id], isRead: true, updatedAt: state.demoTime };
           changed = true;
         }

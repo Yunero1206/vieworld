@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Compass, House, ShoppingBag, UserRound, type LucideIcon } from 'lucide-react';
 import { getArtistNavPortrait } from '../world/artistVisuals';
@@ -29,16 +29,19 @@ function itemsFor(pathname: string, artist?: CurrentArtistNav, shopLabel = 'VieS
   ];
 }
 
-export function GlobalNavigation({ pathname, artist, shopLabel }: { pathname: string; artist?: CurrentArtistNav; shopLabel?: string }) {
+export function GlobalNavigation({ pathname, artist, shopLabel, utilities }: { pathname: string; artist?: CurrentArtistNav; shopLabel?: string; utilities?: ReactNode }) {
   const items = itemsFor(pathname, artist, shopLabel);
   return <>
+    <div className="fw-navigation-rail">
     <nav className="fw-side-nav" aria-label="Điều hướng chính">
       {items.map(item => <Link key={item.to} to={item.to} aria-label={item.artist ? `World của ${item.label}` : item.label}
         aria-current={item.active ? 'page' : undefined} className={`${item.active ? 'selected' : ''}${item.artist ? ' fw-side-context' : ''}`}>
-        {item.artist ? <ArtistNavAvatar artist={item.artist} /> : item.icon && <item.icon size={21} aria-hidden="true" />}
+        <span className="fw-nav-icon">{item.artist ? <ArtistNavAvatar artist={item.artist} /> : item.icon && <item.icon size={21} aria-hidden="true" />}</span>
         <span className="fw-nav-label">{item.label}</span>
       </Link>)}
     </nav>
+    {utilities}
+    </div>
     <nav className="fw-mobile-bottom-nav" aria-label="Điều hướng di động">
       {items.map(item => <Link key={item.to} to={item.to} className={item.active ? 'active' : ''}
         aria-current={item.active ? 'page' : undefined} aria-label={item.artist ? `World của ${item.label}` : item.label}>

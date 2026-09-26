@@ -29,7 +29,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
         const membershipCard = result.cards.find((c) => c.topic === 'membership');
         expect(membershipCard).toBeDefined();
         expect(membershipCard?.title).toContain('Tư cách Hội viên');
-        expect(membershipCard?.actionLink.to).toBe('/worlds/artist-a?panel=membership');
+        expect(membershipCard?.actionLink.to).toBe('/me?panel=membership');
         expect(membershipCard?.sourceTitle).toContain('docs/CONSTITUTION.md §3');
         expect(membershipCard?.updatedAt).toBe('2026-09-09');
       }
@@ -137,8 +137,8 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
 
       // Verify valid navigation link to actual app object
       const actionLinks = screen.getAllByTestId('guide-action-link');
-      expect(actionLinks[0]).toHaveAttribute('href', '/worlds/artist-a?panel=membership');
-      expect(actionLinks[0]).toHaveTextContent('Đến trang Hội viên Artist A');
+      expect(actionLinks[0]).toHaveAttribute('href', '/me?panel=membership');
+      expect(actionLinks[0]).toHaveTextContent('Xem Hội viên & quyền lợi');
     });
 
     it('clicking quick topic chip renders corresponding approved knowledge card', () => {
@@ -275,7 +275,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
       );
 
       // Check disclosures
-      expect(screen.getByText(/Không sử dụng API mô hình ngôn ngữ trực tuyến \(LLM là X02 riêng biệt\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Hướng dẫn có sẵn trong bản demo, không đại diện cho nghệ sĩ/i)).toBeInTheDocument();
       expect(screen.queryByText(/AI trực tiếp/i)).not.toBeInTheDocument();
     });
   });

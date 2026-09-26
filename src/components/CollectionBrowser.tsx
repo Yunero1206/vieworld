@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Award, MoreHorizontal, Search, X } from 'lucide-react';
+import { Award, MoreHorizontal, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { displayAssetUrl, ownedCollection, type DisplayItem, type DisplaySlot } from '../world/display';
 import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSelection } from '../world/displaySurfaces';
 import { ArchiveCollection } from './ArchiveCollection';
 import { matchesVietnameseQuery } from '../utils/textSearch';
+import { SearchCombobox } from './SearchCombobox';
 
 type Mode = 'objects' | 'memories';
 const objectCategories = [['all', 'Tất cả'], ['shirt', 'Áo'], ['ticket', 'Vé'], ['disc', 'Đĩa'], ['lightstick', 'Lightstick'], ['other', 'Khác']];
@@ -14,7 +15,9 @@ const memoryCategories = [['all', 'Tất cả'], ['concert', 'Concert'], ['fan-p
 export function CollectionBrowser() {
   const { state, dispatch } = useApp();
   const [params, setParams] = useSearchParams();
-  const [mode, setMode] = useState<Mode>('objects');
+  const rawCategory = params.get('type') || params.get('custom') || 'all';
+  const category = rawCategory === 'achievement' ? 'milestone' : rawCategory;
+  const mode: Mode = params.get('mode') === 'memories' || memoryCategories.some(([id]) => id !== 'all' && id === category) ? 'memories' : 'objects';
   const [query, setQuery] = useState('');
   const [artist, setArtist] = useState('all');
   const [eventName, setEventName] = useState('all');
@@ -23,7 +26,6 @@ export function CollectionBrowser() {
   const [detail, setDetail] = useState<DisplayItem | null>(null);
   const [placing, setPlacing] = useState<DisplayItem | null>(null);
   const [notice, setNotice] = useState('');
-  const category = params.get('type') || params.get('custom') || 'all';
   const owned = useMemo(() => ownedCollection(state), [state]);
   const surfaces = useMemo(() => readDisplaySurfaces(state.fanProfile, owned), [state.fanProfile, owned]);
   const categories = mode === 'objects' ? objectCategories : memoryCategories;
@@ -50,10 +52,11 @@ export function CollectionBrowser() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  function setCategory(value: string) {
+  function setCategory(value: string, nextMode: Mode = mode) {
     const next = new URLSearchParams(params);
     next.set('section', 'collection');
     next.delete('custom');
+    if (nextMode === 'memories') next.set('mode', 'memories'); else next.delete('mode');
     if (value === 'all') next.delete('type'); else next.set('type', value);
     setParams(next, { replace: true });
   }
@@ -84,12 +87,15 @@ export function CollectionBrowser() {
 
   return <section className="myspace-collection" aria-label="Bộ sưu tập riêng">
     <nav className="myspace-mode-tabs" aria-label="Loại bộ sưu tập">
-      <button type="button" aria-pressed={mode === 'objects'} onClick={() => { setMode('objects'); setCategory('all'); }}>Vật phẩm</button>
-      <button type="button" aria-pressed={mode === 'memories'} onClick={() => { setMode('memories'); setCategory('all'); }}>Kỷ niệm & dấu mốc</button>
+      <button type="button" aria-pressed={mode === 'objects'} onClick={() => setCategory('all', 'objects')}>Vật phẩm</button>
+      <button type="button" aria-pressed={mode === 'memories'} onClick={() => setCategory('all', 'memories')}>Kỷ niệm & dấu mốc</button>
       <Link to="/me" className="myspace-room-link">Xem Phòng của tôi ↗</Link>
     </nav>
     <div className="myspace-collection-tools">
-      <label className="myspace-collection-search"><Search size={18}/><input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={mode === 'objects' ? 'Tìm vật phẩm trong bộ sưu tập…' : 'Tìm một kỷ niệm…'} aria-label="Tìm trong bộ sưu tập" /></label>
+      <SearchCombobox className="myspace-collection-search" value={query} onChange={setQuery}
+        label="Tìm trong bộ sưu tập" placeholder={mode === 'objects' ? 'Tìm vật phẩm trong bộ sưu tập…' : 'Tìm một kỷ niệm…'}
+        suggestions={owned.filter(item => (mode === 'memories') === ['event', 'achievement', 'moment'].includes(item.sourceType || '')).map(item => ({ id: item.id, label: item.title, context: [state.worlds[item.worldId || '']?.name, item.eventName].filter(Boolean).join(' · ') || 'Bộ sưu tập của bạn' }))}
+        onSelect={item => { setQuery(item.label); setDetail(owned.find(ownedItem => ownedItem.id === item.id) || null); }} />
       <div className="myspace-collection-filter-row">
         <nav className="myspace-category-chips" aria-label="Danh mục">{categories.map(([id, label]) => <button key={id} type="button" aria-pressed={selectedCategory === id} onClick={() => setCategory(id)}>{label}</button>)}</nav>
         <details className="myspace-advanced-filters"><summary>Bộ lọc{artist !== 'all' || eventName !== 'all' || year !== 'all' ? ' · đang dùng' : ''}</summary><div>

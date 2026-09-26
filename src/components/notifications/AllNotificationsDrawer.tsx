@@ -3,6 +3,7 @@ import { ArrowLeft, X, CheckCheck } from 'lucide-react';
 import { DisplayNotification } from './notification.types';
 
 interface AllNotificationsDrawerProps {
+  embedded?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onBackToBoard: () => void;
@@ -12,6 +13,7 @@ interface AllNotificationsDrawerProps {
 }
 
 export const AllNotificationsDrawer: React.FC<AllNotificationsDrawerProps> = ({
+  embedded = false,
   isOpen,
   onClose,
   onBackToBoard,
@@ -22,7 +24,7 @@ export const AllNotificationsDrawer: React.FC<AllNotificationsDrawerProps> = ({
 
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || embedded) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -35,14 +37,14 @@ export const AllNotificationsDrawer: React.FC<AllNotificationsDrawerProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, embedded]);
 
   if (!isOpen) return null;
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="vw-all-notif-panel" role="dialog" aria-modal="true" aria-labelledby="vw-all-notif-title">
+    <div className="vw-all-notif-panel" role={embedded ? 'region' : 'dialog'} aria-modal={embedded ? undefined : true} aria-labelledby="vw-all-notif-title">
       <div className="vw-all-notif-header">
         <button
           type="button"

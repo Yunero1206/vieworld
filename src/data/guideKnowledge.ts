@@ -50,7 +50,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Tư cách Hội viên',
     title: 'Tư cách Hội viên & Điều kiện nâng cấp',
     description:
-      'Hội viên là mối quan hệ gắn kết với từng nhà nhạc, tách biệt với Theo dõi miễn phí. Mở Túi đồ → Hội viên & quyền lợi để xem tư cách, nâng cấp mô phỏng và nhận quyền lợi đủ điều kiện. VieWorld không thu tiền thật trong bản thử nghiệm.',
+      'Theo dõi giúp bạn giữ liên hệ với Artist World; hội viên là quyền riêng của từng world, bao gồm truy cập Hall khi đủ điều kiện. Mở Hội viên & quyền lợi để xem tư cách và quyền lợi. VieWorld không thu tiền thật trong bản thử nghiệm.',
     keywords: [
       'hội viên',
       'membership',
@@ -63,8 +63,8 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'điều kiện',
     ],
     actionLink: {
-      to: '/worlds/artist-a?panel=membership',
-      label: 'Đến trang Hội viên Artist A',
+      to: '/me?panel=membership',
+      label: 'Xem Hội viên & quyền lợi',
     },
     sourceTitle: 'docs/CONSTITUTION.md §3 (Follow vs. Membership)',
     updatedAt: '2026-09-09',
@@ -101,7 +101,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'VieSHOP & Đơn hàng',
     title: 'Cửa hàng VieSHOP & Quy trình Giao nhận (Fulfilment)',
     description:
-      'VieSHOP cung cấp các vật phẩm lưu niệm số và hiện vật (huy hiệu, áo thun). Trong bản thử nghiệm, thanh toán hoàn toàn là mô phỏng không thu tiền thật. Sau khi thanh toán (Paid), ban tổ chức sẽ đối soát giao nhận (Fulfilled) để ghi nhận quyền sở hữu hiện vật trong My World.',
+      'VieSHOP là nơi xem và chọn vật phẩm. Giao dịch hiện tại là demo, không thu tiền thật. Vật phẩm đã nhận nằm trong My Space / Bộ sưu tập; chỉ món tương thích mới có thể trưng trong phòng hoặc dùng trên avatar.',
     keywords: [
       'đơn hàng',
       'order',
@@ -119,7 +119,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'shirt',
     ],
     actionLink: {
-      to: '/worlds/artist-a/shop',
+      to: '/shop?artist=artist-a',
       label: 'Mở cửa hàng VieSHOP Artist A',
     },
     sourceTitle: 'docs/CONSTITUTION.md §3 (Payment vs. Fulfilment)',
@@ -147,7 +147,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'lịch diễn',
     ],
     actionLink: {
-      to: '/sessions/session-dropin-01',
+      to: '/artist/artist-a',
       label: 'Vào sân khấu sự kiện trực tiếp',
     },
     sourceTitle: 'docs/CONTRACTS.md §4 (Route Surface & Venues)',
@@ -159,7 +159,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Kỷ niệm số Moment Capsule',
     title: 'Kỷ niệm số Moment Capsule & Ghi chú cá nhân',
     description:
-      'Moment Capsule là kỷ vật số ghi nhận sự hiện diện trực tiếp của bạn trong các phiên diễn cùng nghệ sĩ. Khán giả có thể lưu trữ và viết ghi chú cảm xúc riêng tư trong My World. Người chỉ xem lại bản ghi sẽ không nhận được kỷ niệm tham dự trực tiếp.',
+      'Moment Capsule giữ dấu vết của buổi bạn đã tham gia. Mở My Space / Bộ sưu tập để xem kỷ niệm và ghi chú cá nhân. Xem lại bản ghi không tự tạo kỷ niệm tham dự trực tiếp.',
     keywords: [
       'kỷ niệm',
       'capsule',
@@ -172,7 +172,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'attendance',
     ],
     actionLink: {
-      to: '/me?panel=capsules',
+      to: '/me?section=collection&panel=capsules',
       label: 'Mở kệ kỷ niệm trong phòng',
     },
     sourceTitle: 'docs/CONSTITUTION.md §3 (Attendance vs. Replay)',
@@ -206,10 +206,10 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
   {
     id: 'guide-card-avatar',
     topic: 'avatar',
-    topicLabel: 'Avatar Studio',
-    title: 'Quản trị Avatar nghệ sĩ & Tủ đồ cá nhân',
+    topicLabel: 'Avatar của bạn',
+    title: 'Diện mạo, trang phục và phụ kiện',
     description:
-      'Avatar trong VieWorld là biểu tượng 2D do nghệ sĩ trực tiếp điều khiển, tuyệt đối không dùng AI đóng giả người thật. Điều hành viên quản lý các bản nháp, thẩm định trước phát sóng và ngưng sử dụng trong Avatar Studio.',
+      'Mở My Space / Avatar để chọn diện mạo, trang phục và phụ kiện từ tài sản hiện có. Bạn có thể xem trước trong phòng rồi lưu thay đổi. Đồ trưng bày trong phòng không tự trở thành phụ kiện; chỉ vật phẩm tương thích mới dùng được trên avatar. Không có tạo avatar bằng AI trong bản này.',
     keywords: [
       'avatar',
       'studio',
@@ -222,8 +222,8 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       'nghệ sĩ ảo',
     ],
     actionLink: {
-      to: '/studio/avatar',
-      label: 'Mở Avatar Studio',
+      to: '/me?section=avatar',
+      label: 'Chỉnh avatar trong My Space',
     },
     sourceTitle: 'docs/DECISIONS.md DEC-010 (Avatar Asset Governance)',
     updatedAt: '2026-09-09',
@@ -232,9 +232,9 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     id: 'guide-card-tenants',
     topic: 'tenants',
     topicLabel: 'Một thế giới, một danh tính',
-    title: 'Cùng một bạn ở nhà nhạc, phòng riêng và VieSHOP',
+    title: 'Home, Explore, Artist World, My Space và VieSHOP',
     description:
-      'VieWorld có một trải nghiệm chung với bốn tab: Artist Home, Moments, My Space và VieSHOP. Logo VieWorld đưa về quảng trường. Bộ sưu tập riêng nằm trong My Space. Đổi nhà nhạc không đổi tài khoản hay diện mạo. Avatar, kỷ niệm và đơn hàng cùng đi theo bạn. Dữ liệu thử nghiệm chỉ được lưu trong trình duyệt này; chưa đồng bộ tài khoản qua dịch vụ bên ngoài. Các kho demo cũ được giữ nguyên để tránh mất dữ liệu, không còn là các giao diện công khai riêng.',
+      'Home giúp bạn nắm tình hình; Explore là nơi ghé những Artist World khác. World đang ghé nằm ở slot artist trên sidebar, với Trang chính / Hall / Kho lưu trữ bên trong. Moment mở trong context của world, không có kênh Moments riêng. My Space giữ phòng, bộ sưu tập và avatar của bạn; VieSHOP là nơi mua vật phẩm. Dữ liệu demo lưu trong trình duyệt này, chưa đồng bộ tài khoản qua dịch vụ bên ngoài.',
     keywords: [
       'tenant',
       'mfan',

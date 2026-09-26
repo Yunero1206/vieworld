@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MessageSquare, Pin, Trash2, Send } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -186,7 +187,13 @@ export function RoomGuestbook({ fanId, isOwner }: { fanId: string; isOwner: bool
             )}
 
             <div className="v7-note-top">
-              <span className="v7-note-author">{n.authorName}</span>
+              <Link
+                to={n.authorId === state.fanProfile.id ? '/me' : `/members/${n.authorId}`}
+                className="v7-note-author-link"
+                title={`Ghé My Space của ${n.authorName}`}
+              >
+                <span className="v7-note-author">{n.authorName}</span>
+              </Link>
               <span className="v7-note-time">{n.createdAt}</span>
             </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Sparkles } from 'lucide-react';
 import { Product } from '../domain/types';
 import { ProductFamily } from '../world/moments';
 import { MERCH_IMAGE_ROOT, DELIVERY_LABELS } from '../world/merchCatalog';
@@ -183,8 +183,9 @@ export function ProductFamilyQuickView({
           )}
 
           {isBundle && (
-            <div className="moments-drawer-note moments-note-bundle">
-              <span>Bao gồm sản phẩm ngoài đời thực kèm phiên bản tương ứng cho avatar VieWorld.</span>
+            <div className="moments-drawer-note moments-note-bundle" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+              <Sparkles size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+              <span><strong>Kèm vật phẩm digital:</strong> Hàng vật lý và phiên bản dùng trong My Space. Vật phẩm được thêm vào Bộ sưu tập khi đơn hoàn tất.</span>
             </div>
           )}
 

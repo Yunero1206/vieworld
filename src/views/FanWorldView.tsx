@@ -207,7 +207,7 @@ export function FanWorldView() {
   const sessions = Object.values(state.sessions);
   const note = ARTIST_NOTES.find(n => n.worldId === world?.id);
   const noteRead = !!note && !!state.fanProfile.worldJourney?.readNoteIds.includes(note.id);
-  const capsules = Object.values(state.capsules).filter(c => c.fanId === state.fanProfile.id);
+  const capsules = Object.values(state.capsules).filter(c => c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId);
   const savedCapsules = capsules.filter(c => c.isSaved);
   const slots = state.fanProfile.showcaseSlots || [null, null, null];
   const orders = Object.values(state.orders).filter(o => o.fanId === state.fanProfile.id);

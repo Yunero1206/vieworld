@@ -53,6 +53,16 @@ describe('In-World Notification Board Feature Suite', () => {
   });
 
   describe('3. NotificationOverlay Component & Accessibility', () => {
+    it('keeps one unified inbox and closes immediately with Escape', () => {
+      const handleClose = vi.fn();
+      render(<NotificationOverlay isOpen onClose={handleClose} notifications={sampleNotifications} onSelectNotification={vi.fn()} onMarkAllAsRead={vi.fn()} />);
+      expect(screen.getByRole('dialog', { name: 'Bảng thông báo' })).toBeInTheDocument();
+      expect(screen.getAllByRole('dialog')).toHaveLength(1);
+      expect(screen.getByRole('region', { name: 'Tất cả thông báo' })).toBeInTheDocument();
+      expect(screen.queryByText(/Xem chi tiết|Xem tất cả thông báo/)).not.toBeInTheDocument();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(handleClose).toHaveBeenCalledTimes(1);
+    });
     it('renders dialog portal with accessibility attributes and handles close button', () => {
       const handleClose = vi.fn();
 

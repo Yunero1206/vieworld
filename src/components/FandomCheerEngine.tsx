@@ -30,34 +30,44 @@ export const FandomCheerEngine: React.FC<FandomCheerEngineProps> = ({ worldId, c
   const [cheerCount, setCheerCount] = useState<number>(initialCounts[worldId] || 20000);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isBumping, setIsBumping] = useState(false);
+  const [streak, setStreak] = useState(0);
   const particleIdRef = useRef(0);
   const bumpTimeoutRef = useRef<number | null>(null);
-
+  const streakTimerRef = useRef<number | null>(null);
 
   const triggerCheer = () => {
     // Increment cheer count
     setCheerCount(prev => prev + 1);
+
+    // Track rhythmic sync streak (resets if idle > 1.8s)
+    setStreak(prev => {
+      const next = prev + 1;
+      if (streakTimerRef.current) clearTimeout(streakTimerRef.current);
+      streakTimerRef.current = window.setTimeout(() => setStreak(0), 1800);
+      return next;
+    });
 
     // Trigger bump scale animation on badge
     setIsBumping(true);
     if (bumpTimeoutRef.current) clearTimeout(bumpTimeoutRef.current);
     bumpTimeoutRef.current = window.setTimeout(() => setIsBumping(false), 200);
 
-    // Generate 3-4 diverse particles
-    const particleTypes: Array<'star' | 'heart' | 'sparkle' | 'zap'> = ['star', 'heart', 'sparkle'];
-    const newParticles: Particle[] = Array.from({ length: 3 }).map(() => {
+    // Generate 3-5 diverse particles based on streak
+    const burstCount = streak >= 5 ? 5 : 3;
+    const particleTypes: Array<'star' | 'heart' | 'sparkle' | 'zap'> = ['star', 'heart', 'sparkle', 'zap'];
+    const newParticles: Particle[] = Array.from({ length: burstCount }).map(() => {
       particleIdRef.current += 1;
       return {
         id: particleIdRef.current,
-        startX: (Math.random() - 0.5) * 24,
-        endX: (Math.random() - 0.5) * 90,
-        rotation: (Math.random() - 0.5) * 60,
+        startX: (Math.random() - 0.5) * 28,
+        endX: (Math.random() - 0.5) * (streak >= 5 ? 120 : 90),
+        rotation: (Math.random() - 0.5) * 70,
         type: particleTypes[Math.floor(Math.random() * particleTypes.length)],
         color: fandom.signatureLightstick.color,
       };
     });
 
-    setParticles(prev => [...prev.slice(-15), ...newParticles]);
+    setParticles(prev => [...prev.slice(-18), ...newParticles]);
   };
 
   // Clean up old particles after animation finishes (1.2s)
@@ -113,11 +123,20 @@ export const FandomCheerEngine: React.FC<FandomCheerEngineProps> = ({ worldId, c
               {cheerCount.toLocaleString('vi-VN')} lượt cổ vũ
             </span>
           </div>
+
+          <div className="fandom-cheer-tempo-row">
+            <span className="fandom-cheer-tempo-pill">♫ Nhịp hòa thanh 120 BPM</span>
+            {streak >= 3 && (
+              <span className="fandom-cheer-streak-badge">
+                ⚡ x{streak} Hòa nhịp!
+              </span>
+            )}
+          </div>
         </div>
 
         <button
           type="button"
-          className="fandom-cheer-btn"
+          className={`fandom-cheer-btn in-sync-pulse ${streak >= 4 ? 'is-streaking' : ''}`}
           style={{
             background: fandom.signatureLightstick.gradient,
             boxShadow: `0 4px 14px ${(fandom.signatureLightstick as any).glowColor || fandom.signatureLightstick.color}`,
@@ -125,7 +144,7 @@ export const FandomCheerEngine: React.FC<FandomCheerEngineProps> = ({ worldId, c
           onClick={triggerCheer}
           onKeyDown={handleKeyDown}
           aria-label="Vẫy Lightstick cổ vũ"
-          title={`Vẫy Lightstick ${fandom.fandomName} (Phím Space)`}
+          title={`Vẫy Lightstick ${fandom.fandomName} (Phím Space · 120 BPM)`}
         >
           <Sparkles size={20} className="fandom-lightstick-icon" />
         </button>

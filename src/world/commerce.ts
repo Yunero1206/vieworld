@@ -2,7 +2,8 @@ import type { AppAction, AppState, Order } from '../domain/types';
 
 export interface CartLine { key: string; productId: string; optionLabel?: string; quantity: number }
 export const cartKey = (id:string, option='') => `${id}::${option}`;
-export const money = (n:number) => new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n);
+const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+export const money = (n:number) => currencyFormatter.format(n);
 export const cartFingerprint = (s:AppState) => JSON.stringify((s.cart || []).map(l=>[l.key,l.quantity,s.products[l.productId]?.priceVND]));
 export const orderAmount = (o:Order,s:AppState) => (o.unitPriceVND ?? s.products[o.productId]?.priceVND ?? 0)*(o.quantity || 1);
 const fail=(s:AppState,message:string):AppState=>({...s,lastError:{code:'CHECKOUT_INVALID',message}});

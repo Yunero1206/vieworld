@@ -36,6 +36,13 @@ describe('Current Artist navigation context', () => {
     expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Home', 'Explore', 'My Space', 'VieSHOP']);
   });
 
+  it('keeps utility controls in the same desktop rail even without an artist', () => {
+    render(<MemoryRouter><GlobalNavigation pathname="/" utilities={<button>Giao diện tối</button>} /></MemoryRouter>);
+    const rail = document.querySelector('.fw-navigation-rail')!;
+    expect(within(rail as HTMLElement).getByRole('navigation', { name: 'Điều hướng chính' })).toBeInTheDocument();
+    expect(within(rail as HTMLElement).getByRole('button', { name: 'Giao diện tối' })).toBeInTheDocument();
+  });
+
   it('uses a visible initial when artist artwork is absent or fails', () => {
     const { rerender } = render(<ArtistNavAvatar artist={{ id: 'missing-artist', name: 'Artist Z' }} />);
     expect(document.querySelector('.fw-artist-avatar')).toHaveAttribute('data-initial', 'A');

@@ -1,0 +1,52 @@
+/* Shared reading layer: artwork stays cinematic; controls follow appearance. */
+.fan-shell { --space-section: 28px; --space-inline: clamp(17px,3vw,44px); font-family: var(--font-sans); line-height: 1.55; }
+.fan-shell :is(input,textarea,select) { font-family: var(--font-sans); }
+.fan-shell[data-theme] .fw-main h1 { font-family: var(--font-editorial) !important; font-weight: 500 !important; letter-spacing: -.025em !important; }
+.fan-shell[data-theme] .btn-primary:not(:disabled) { background: var(--primary); color: var(--surface); }
+.fan-shell :is(input,textarea)::placeholder { color: var(--muted); opacity: 1; }
+.fan-shell :is(.vw-home-editorial,.explore-world-list,.vw-page-myspace,.fw-shop-page.fw-shop-v2) { padding-inline: var(--space-inline); padding-top: 24px; }
+.fan-shell :is(.vw-home-editorial h1,.vw-home-editorial h2,.vw-home-editorial h3,.explore-world-list h1,.explore-world-list h2,.v7-space-title,.fw-shop-story h1) { letter-spacing: -.025em !important; line-height: 1.3; }
+.fan-shell :is(.vw-home-section-row,.artist-world-section-head) { gap: 12px; flex-wrap: wrap; }
+.fan-shell :is(.vw-home-intro p,.explore-world-header p,.v7-space-bio,.fw-shop-story p) { font-size: 14px; line-height: 1.65; }
+.fan-shell :is(.explore-voice-line,.explore-project-line,.explore-world-demo-note,.fw-menu-item-copy small) { font-size: 12px; line-height: 1.5; }
+.fan-shell .explore-project-line { white-space: normal; }
+.fan-shell .explore-world-demo-note { color: var(--muted); }
+.fan-shell .artist-world-page { overflow-anchor: none; background: var(--bg); color: var(--ink); }
+.fan-shell[data-artist-world='true'] { background: var(--bg); }
+.fan-shell .artist-world-body { padding-inline: var(--space-inline); }
+.fan-shell .artist-home-section { margin-bottom: var(--space-section); }
+.fan-shell .artist-world-local-nav { border-color: var(--border); }
+.fan-shell .artist-world-local-nav a { color: var(--muted); }
+.fan-shell .artist-world-local-nav a[aria-current='page'] { color: var(--ink); border-bottom-color: var(--primary); }
+.fan-shell[data-theme] :is(.artist-world-section-head h2,.artist-inner-heading h2,.artist-hall-page h3,.artist-archive-page h3,.artist-archive-chapters h4,.artist-moment-focus h2,.artist-context-stage-heading h2) { color: var(--ink); font-family: var(--font-editorial) !important; font-weight: 500 !important; letter-spacing: -.02em !important; line-height: 1.3; }
+.fan-shell :is(.artist-home-voices blockquote,.artist-home-products a,.artist-home-deeper details,.artist-hall-room-grid button,.artist-hall-conversation,.artist-hall-aside,.artist-archive-chapters article,.artist-archive-recent,.artist-world-context,.artist-world-empty,.artist-context-hall) { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.fan-shell :is(.artist-home-voices p,.artist-home-products strong,.artist-hall-aside strong,.artist-context-stage,.artist-context-hall-messages span,.artist-archive-recent a) { color: var(--ink); }
+.fan-shell :is(.artist-home-voices footer,.artist-home-products small,.artist-home-deeper p,.artist-inner-heading p,.artist-inner-heading > span,.artist-hall-room-grid small,.artist-hall-conversation > header p,.artist-hall-empty,.artist-hall-aside span,.artist-archive-chapters p,.artist-archive-chapters small,.artist-moment-focus small,.artist-moment-focus p,.artist-context-stage-heading p,.artist-context-actions > span,.artist-context-honesty,.artist-context-hall-gate p,.artist-world-context span) { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.fan-shell :is(.artist-world-section-head a,.artist-home-deeper a,.artist-hall-aside a,.artist-archive-chapters a,.artist-focus-back,.artist-moment-focus article a,.artist-context-hall header a,.artist-context-hall-gate a,.artist-world-context a) { color: var(--primary); font-size: 13px; }
+.fan-shell :is(.artist-home-deeper a,.artist-home-deeper details,.artist-inner-heading > span,.artist-hall-conversation > header,.artist-hall-aside > p,.artist-archive-recent a,.artist-context-hall > header,.artist-context-hall-messages p) { border-color: var(--border); }
+.fan-shell :is(.artist-home-products strong,.artist-home-moments strong,.artist-hall-messages article strong,.artist-hall-aside strong,.artist-archive-recent strong) { font-size: 13px; line-height: 1.5; }
+.fan-shell :is(.artist-home-voices svg,.artist-home-products svg,.artist-context-stage-heading small,.artist-context-hall-messages strong,.artist-world-context small) { color: var(--primary); }
+.fan-shell :is(.artist-hall-gate,.artist-context-hall-gate) { color: var(--ink); }
+.fan-shell :is(.artist-hall-messages article p,.artist-hall-compose,.artist-context-actions details ul) { background: var(--surface-subtle); color: var(--ink); border-color: var(--border); font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.fan-shell :is(.artist-hall-compose input,.artist-context-hall input) { color: var(--ink); font-size: 14px; }
+.fan-shell :is(.artist-context-hall form,.artist-archive-year) { border-color: var(--border); }
+.fan-shell .artist-archive-year::before { background: var(--primary); }
+.fan-shell :is(.artist-context-actions button,.artist-context-actions a,.artist-context-actions summary,.artist-context-close,.artist-archive-filters button,.artist-context-switcher a) { background: var(--surface); border-color: var(--border); color: var(--ink); min-height: 40px; font-size: 13px; }
+.fan-shell :is(.artist-hall-room-grid button[aria-pressed='true'],.artist-archive-filters button[aria-pressed='true'],.artist-context-switcher a[aria-current='page']) { background: var(--appearance-selected); border-color: var(--primary); color: var(--ink); box-shadow: none; }
+.fan-shell :is(.artist-hall-compose button,.artist-context-hall form button,.artist-hall-gate button) { min-width: 40px; min-height: 40px; background: #365d46; color: #fff; border-color: #365d46; }
+.fan-shell :is(.artist-context-artwork,.artist-world-object,.artist-home-moments a) { color: #f5f7fb; }
+.fan-shell .artist-context-stage-heading { flex-wrap: wrap; align-items: start; }
+.fan-shell .artist-context-stage-heading > div { flex: 1 1 240px; min-width: 0; }
+.fan-shell :is(.artist-context-stage-heading h2,.artist-world-hero-identity h1) { scroll-margin-top: 100px; }
+.fan-shell .artist-context-actions details ul { right: 0; max-width: min(320px,80vw); min-width: 200px; z-index: 5; }
+.fan-shell :is(.v7-note-body,.v7-note-author) { font-family: var(--font-sans) !important; font-style: normal; line-height: 1.65; }
+@media (max-width: 768px) {
+  .fan-shell { --space-section: 24px; }
+  .fan-shell .artist-world-local-nav { gap: clamp(18px,5vw,32px); padding-inline: 5px; }
+  .fan-shell .artist-world-section-head a { white-space: normal; }
+  .fan-shell .artist-context-stage-heading { gap: 12px; }
+  .fan-shell .artist-world-hero.compact { flex-direction: row; justify-content: flex-start; min-height: 100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fan-shell *, .fan-shell *::before, .fan-shell *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

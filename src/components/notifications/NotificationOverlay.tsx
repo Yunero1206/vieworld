@@ -1,10 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { DisplayNotification } from './notification.types';
-import { DesktopNotificationBoard } from './DesktopNotificationBoard';
-import { MobileNotificationPopover } from './MobileNotificationPopover';
-import { AllNotificationsDrawer } from './AllNotificationsDrawer';
+import { NotificationInbox } from './NotificationInbox';
 
 interface NotificationOverlayProps {
   isOpen: boolean;
@@ -25,53 +23,45 @@ export const NotificationOverlay: React.FC<NotificationOverlayProps> = ({
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const [viewMode, setViewMode] = useState<'board' | 'all'>('board');
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth <= 680;
-  });
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
-  // Track viewport width for desktop vs mobile presentation
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 680);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Reset viewMode when opened/closed
-  useEffect(() => {
-    if (isOpen) {
-      setViewMode('board');
-    }
-  }, [isOpen]);
-
-  // Lock body scroll and manage keyboard trap
+  // The inbox owns scrolling; lock both document scroll roots until it closes.
   useEffect(() => {
     if (!isOpen) return;
-
     const previousOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    const appRoot = document.getElementById('root');
+    const previousInert = appRoot?.inert;
+    if (appRoot) appRoot.inert = true;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    const returnElement = returnFocusRef?.current || document.activeElement as HTMLElement;
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+      if (appRoot) appRoot.inert = Boolean(previousInert);
+      returnElement?.focus();
+    };
+  }, [isOpen, returnFocusRef]);
 
+  useEffect(() => {
+    if (!isOpen) return;
     const timer = setTimeout(() => {
-      closeBtnRef.current?.focus();
+      const target = closeBtnRef.current || dialogRef.current?.querySelector<HTMLElement>('button');
+      (target || dialogRef.current)?.focus();
     }, 50);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        if (viewMode === 'all') {
-          setViewMode('board');
-        } else {
-          onClose();
-        }
+        onCloseRef.current();
         return;
       }
 
       if (e.key === 'Tab' && dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
         );
         if (focusables.length === 0) return;
 
@@ -79,12 +69,12 @@ export const NotificationOverlay: React.FC<NotificationOverlayProps> = ({
         const lastElement = focusables[focusables.length - 1];
 
         if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
+          if (document.activeElement === firstElement || !dialogRef.current.contains(document.activeElement)) {
             e.preventDefault();
             lastElement.focus();
           }
         } else {
-          if (document.activeElement === lastElement) {
+          if (document.activeElement === lastElement || !dialogRef.current.contains(document.activeElement)) {
             e.preventDefault();
             firstElement.focus();
           }
@@ -95,33 +85,30 @@ export const NotificationOverlay: React.FC<NotificationOverlayProps> = ({
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
       clearTimeout(timer);
-      returnFocusRef?.current?.focus();
     };
-  }, [isOpen, onClose, viewMode, returnFocusRef]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return createPortal(
     <div
-      className={`vw-notif-backdrop ${isMobile ? 'is-mobile-backdrop' : 'is-desktop-backdrop'}`}
+      className="vw-notif-backdrop is-desktop-backdrop"
       onClick={onClose}
       role="presentation"
     >
       <div
         ref={dialogRef}
-        className={`vw-notif-dialog ${isMobile ? 'is-mobile-dialog' : 'is-desktop-dialog'} ${
-          viewMode === 'all' ? 'is-all-mode' : ''
-        }`}
+        className="vw-notif-dialog vw-inbox-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="vw-notif-dialog-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top-right floating close button on Desktop Board */}
-        {!isMobile && viewMode !== 'all' && (
+        {/* Close stays outside the scrolling list on every viewport. */}
+        {(
           <button
             ref={closeBtnRef}
             type="button"
@@ -134,35 +121,14 @@ export const NotificationOverlay: React.FC<NotificationOverlayProps> = ({
           </button>
         )}
 
-        {/* Content presentation depending on screen and viewMode */}
-        {viewMode === 'all' ? (
-          <AllNotificationsDrawer
-            isOpen={true}
-            onClose={onClose}
-            onBackToBoard={() => setViewMode('board')}
+        {(
+          <NotificationInbox
             notifications={notifications}
+            onMarkAllAsRead={onMarkAllAsRead}
             onSelectNotification={(item) => {
               onSelectNotification(item);
               onClose();
             }}
-            onMarkAllAsRead={onMarkAllAsRead}
-          />
-        ) : isMobile ? (
-          <MobileNotificationPopover
-            notifications={notifications}
-            onSelectNotification={onSelectNotification}
-            onMarkAllAsRead={onMarkAllAsRead}
-            onViewAll={() => setViewMode('all')}
-            onClose={onClose}
-          />
-        ) : (
-          <DesktopNotificationBoard
-            notifications={notifications}
-            onSelectNotification={(item) => {
-              onSelectNotification(item);
-              onClose();
-            }}
-            onViewAll={() => setViewMode('all')}
           />
         )}
       </div>

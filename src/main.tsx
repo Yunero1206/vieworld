@@ -30,9 +30,21 @@ import './styles/artist-world-v2.css';
 import './styles/artist-context.css';
 import './styles/my-space-v2.css';
 import './styles/shop-v3.css';
+import './styles/appearance.css';
+import './styles/experience.css';
+import './styles/refinement.css';
+import './styles/artist-bulletin.css';
+import './styles/home-inbox.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+
+// Register PWA Service Worker for offline My Space access
+if (import.meta.env.PROD && typeof window !== 'undefined' && 'serviceWorker' in navigator && !navigator.userAgent.includes('jsdom')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

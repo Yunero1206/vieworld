@@ -1,6 +1,7 @@
 import type { AppState, Session } from '../domain/types';
 import { ARTIST_NOTES } from './fanWorld';
 import { getTruthfulSessionStatus } from './eventStatus';
+import { homeDestination } from './homeDestination';
 
 export interface HomeCue {
   id: string;
@@ -20,6 +21,7 @@ export interface HomeActivity {
   to: string;
   worldId?: string;
   at: string;
+  mediaSrc?: string;
 }
 
 export interface HomeUpcoming extends HomeCue {
@@ -30,7 +32,10 @@ export interface HomeUpcoming extends HomeCue {
 const sessionRoute = (session: Session) => `/sessions/${encodeURIComponent(session.id)}`;
 
 export function getHomeOrientation(state: AppState) {
-  const sessions = Object.values(state.sessions);
+  const inWorld = (id: string) => state.worlds[id]?.tenantId === state.activeTenantId;
+  const ownsCapsule = (capsule: AppState['capsules'][string]) => capsule.tenantId === state.activeTenantId && capsule.fanId === state.fanProfile.id && inWorld(capsule.worldId);
+  const notesForTenant = state.activeTenantId === 'vieworld-demo' ? ARTIST_NOTES.filter(note => inWorld(note.worldId)) : [];
+  const sessions = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved !== false && inWorld(session.worldId));
   const isRelevant = (session: Session) =>
     state.followedWorldIds.includes(session.worldId) || state.rsvpdSessionIds.includes(session.id);
   const relevant = sessions.filter(isRelevant);
@@ -62,7 +67,7 @@ export function getHomeOrientation(state: AppState) {
     }));
 
   const readNoteIds = state.fanProfile.worldJourney?.readNoteIds || [];
-  const notes: HomeCue[] = ARTIST_NOTES
+  const notes: HomeCue[] = notesForTenant
     .filter(note => state.followedWorldIds.includes(note.worldId)
       && Date.parse(note.publishedAt) <= Date.parse(state.demoTime)
       && !readNoteIds.includes(note.id))
@@ -79,7 +84,7 @@ export function getHomeOrientation(state: AppState) {
     }));
 
   const capsules: HomeCue[] = Object.values(state.capsules)
-    .filter(capsule => capsule.fanId === state.fanProfile.id && !capsule.isSaved)
+    .filter(capsule => ownsCapsule(capsule) && !capsule.isSaved)
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
     .slice(0, 1)
     .map(capsule => ({
@@ -95,12 +100,11 @@ export function getHomeOrientation(state: AppState) {
   const updates = [...capsules, ...notes].slice(0, 3);
 
   const recent: HomeActivity[] = [
-    ...(now ? [{
-      id: `event-${now.id}`, category: 'event' as const, label: now.eyebrow,
-      title: now.title, to: now.to,
-      worldId: active?.worldId, at: state.demoTime,
-    }] : []),
-    ...ARTIST_NOTES
+    ...relevant.filter(session => session.status === 'ended').map(session => ({
+      id: `event-${session.id}`, category: 'event' as const, label: 'Cuộc hẹn đã khép lại',
+      title: session.title, to: sessionRoute(session), worldId: session.worldId, at: session.updatedAt,
+    })).filter(item => Date.parse(item.at) <= Date.parse(state.demoTime)),
+    ...notesForTenant
       .filter(note => state.followedWorldIds.includes(note.worldId)
         && Date.parse(note.publishedAt) <= Date.parse(state.demoTime))
       .map(note => ({
@@ -109,22 +113,24 @@ export function getHomeOrientation(state: AppState) {
         worldId: note.worldId, at: note.publishedAt,
       })),
     ...Object.values(state.capsules)
-      .filter(capsule => capsule.fanId === state.fanProfile.id)
+      .filter(capsule => ownsCapsule(capsule) && Date.parse(capsule.updatedAt) <= Date.parse(state.demoTime))
       .map(capsule => ({
-        id: `capsule-${capsule.id}`, category: 'capsule' as const, label: 'Capsule của bạn',
+        id: `capsule-${capsule.id}`, category: 'capsule' as const, label: capsule.isSaved ? 'Kỷ niệm đã lưu' : 'Kỷ niệm chờ lưu',
         title: state.sessions[capsule.sessionId]?.title || 'Một kỷ niệm đã giữ',
         to: '/me?panel=capsules', worldId: capsule.worldId, at: capsule.updatedAt,
       })),
     ...Object.values(state.products)
       .filter(product => product.tenantId === state.activeTenantId
+        && inWorld(product.worldId)
         && state.followedWorldIds.includes(product.worldId)
         && product.isAvailable && product.stockCount > 0 && !product.previewOnly
         && !product.requiredBenefitId && Date.parse(product.updatedAt) <= Date.parse(state.demoTime))
+      .sort((a,b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
       .slice(0, 1)
       .map(product => ({
         id: `product-${product.id}`, category: 'shop' as const, label: 'Đang có ở VieSHOP',
         title: product.title, to: `/shop?product=${encodeURIComponent(product.id)}`,
-        worldId: product.worldId, at: product.updatedAt,
+        worldId: product.worldId, at: product.updatedAt, mediaSrc: product.image,
       })),
   ].sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).slice(0, 8);
 
@@ -140,19 +146,9 @@ export function getHomeOrientation(state: AppState) {
       to: sessionRoute(session), kind: 'upcoming' as const, at: session.scheduledStartTime,
       worldId: session.worldId, related: isRelevant(session),
     }));
-  const savedCapsule = Object.values(state.capsules)
-    .filter(capsule => capsule.fanId === state.fanProfile.id && capsule.isSaved)
-    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
   const lastWorldId = state.fanProfile.worldJourney?.lastWorldId;
-  const lastWorld = lastWorldId && state.worlds[lastWorldId];
-  const continueWith = savedCapsule ? {
-    visual: 'capsule' as const,
-    worldId: savedCapsule.worldId,
-    title: state.sessions[savedCapsule.sessionId]?.title || 'Moment Capsule của bạn',
-    detail: 'Kỷ niệm bạn đã giữ lại',
-    to: '/me?panel=capsules',
-    action: 'Mở kỷ niệm',
-  } : lastWorld ? {
+  const lastWorld = lastWorldId && inWorld(lastWorldId) && state.worlds[lastWorldId];
+  const continueWith = homeDestination(state) || (lastWorld ? {
     visual: 'world' as const,
     worldId: lastWorld.id,
     title: `Trở lại với ${lastWorld.name}`,
@@ -165,7 +161,7 @@ export function getHomeOrientation(state: AppState) {
     detail: 'Những điều bạn chọn giữ và trưng bày',
     to: '/me',
     action: 'Mở My Space',
-  };
+  });
 
   return { now, upcoming, updates, recent, upcomingAll, continueWith };
 }

@@ -26,6 +26,7 @@ export const NotificationBell = forwardRef<HTMLButtonElement, NotificationBellPr
         title={label}
       >
         <Bell size={19} aria-hidden="true" />
+        <span className="fw-nav-label">Thông báo</span>
         {unreadCount > 0 && <i>{unreadCount > 99 ? '99+' : unreadCount}</i>}
       </button>
     );

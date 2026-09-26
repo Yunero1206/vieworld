@@ -23,6 +23,9 @@ import {
   HelpCircle,
   BarChart3,
   Lock,
+  Coffee,
+  Film,
+  Sparkles,
 } from 'lucide-react';
 
 export const SessionView: React.FC = () => {
@@ -39,9 +42,25 @@ export const SessionView: React.FC = () => {
   // Livestream Cheer Reactions State (Weverse / TikTok / YouTube Live pattern)
   const [cheerCount, setCheerCount] = useState(1280);
   const [floatingHearts, setFloatingHearts] = useState<{ id: number; left: number; color: string }[]>([]);
+  const [milestoneToast, setMilestoneToast] = useState<string | null>(null);
+  const milestoneTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Zen / Cinema Mode State (Keyboard: Z)
+  const [isZenMode, setIsZenMode] = useState(false);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'z' || e.key === 'Z') && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        setIsZenMode((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleTriggerCheer = () => {
-    setCheerCount((prev) => prev + 1);
+    const nextCount = cheerCount + 1;
+    setCheerCount(nextCount);
     const id = Date.now() + Math.random();
     const colors = ['#EF4444', '#EC4899', '#F43F5E', '#8B5CF6', '#F59E0B', '#10B981'];
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -50,6 +69,13 @@ export const SessionView: React.FC = () => {
     setTimeout(() => {
       setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
     }, 1800);
+
+    // Crowd cheer milestone toast celebration (every 50 cheers or key round numbers)
+    if (nextCount % 50 === 0 || nextCount === 1300 || nextCount === 1350 || nextCount === 1500 || nextCount === 2000) {
+      setMilestoneToast(`🎉 Cả khán phòng vừa chạm mốc ${nextCount.toLocaleString('vi-VN')} nhịp sáng cổ vũ! ✨`);
+      if (milestoneTimeoutRef.current) clearTimeout(milestoneTimeoutRef.current);
+      milestoneTimeoutRef.current = setTimeout(() => setMilestoneToast(null), 3500);
+    }
   };
 
   // Safe Recovery Screen when session is invalid
@@ -269,8 +295,29 @@ export const SessionView: React.FC = () => {
           )}
           <span style={{ color: 'var(--muted)' }}>/</span>
           <span style={{ fontWeight: '700', color: 'var(--text)' }}>{session.title}</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className={`btn ${isZenMode ? 'btn-primary' : 'btn-secondary'} btn-zen-toggle`}
+              onClick={() => setIsZenMode(!isZenMode)}
+              title="Chế độ Rạp chiếu phim (Phím Z: Ẩn/Hiện chat)"
+              aria-pressed={isZenMode}
+              style={{ fontSize: '12px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            >
+              <Film size={13} />
+              <span>{isZenMode ? 'Bật lại Chat' : 'Chế độ Rạp chiếu (Zen)'}</span>
+            </button>
+          </div>
         </div>
       </nav>
+
+      {/* Crowd Cheer Milestone Toast */}
+      {milestoneToast && (
+        <div className="vw-cheer-milestone-toast" role="status" aria-live="polite">
+          <Sparkles size={16} />
+          <span>{milestoneToast}</span>
+        </div>
+      )}
 
       {/* Global Error Banner */}
       {state.lastError && (
@@ -342,9 +389,34 @@ export const SessionView: React.FC = () => {
       )}
 
       {/* Main Layout Grid: Stage + Details (Left: 1fr | Right: 390px) */}
-      <div className="live-stream-grid">
+      <div className={`live-stream-grid ${isZenMode ? 'is-zen-mode' : ''}`}>
         {/* Left Area: Sân khấu & Media Controls */}
         <div className="live-stream-stage-col">
+          {/* Cozy Lobby Anticipation Card when scheduled or open */}
+          {['open', 'scheduled'].includes(session.status) && (
+            <div className="vw-lobby-anticipation-card" data-testid="lobby-warmup-card">
+              <div className="vw-lobby-anticipation-top">
+                <div className="vw-lobby-tea-badge">
+                  <Coffee size={14} />
+                  <span>PHÒNG CHỜ ẤM CÚNG</span>
+                </div>
+                <div className="vw-lobby-eta-pill">
+                  <Clock size={13} />
+                  <span>Bắt đầu lúc: <strong>{formatVietnamTime(session.scheduledStartTime)}</strong></span>
+                </div>
+              </div>
+              <h3 className="vw-lobby-title">
+                {session.status === 'open'
+                  ? 'Pha một tách trà ấm, sự kiện sẽ bắt đầu sau ít phút nữa.'
+                  : 'Sự kiện đã lên lịch hẹn. Hãy đặt lời nhắc để cùng bước vào thế giới đúng giờ.'}
+              </h3>
+              <p className="vw-lobby-artist-quote">
+                &ldquo;Cảm ơn bạn đã ghé chơi và đồng hành tối nay. Cùng giữ ấm và thư giãn với những giai điệu nhé.&rdquo;
+                <small> — {world?.name || 'Nghệ sĩ'}</small>
+              </p>
+            </div>
+          )}
+
           {/* 2D Avatar Stage Hero Player with YouTube-style bottom controls overlay (§2.3, §5.1, P13) */}
           <div className="live-room__stage-frame" style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
             <AvatarStage

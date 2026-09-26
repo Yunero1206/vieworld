@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, X } from 'lucide-react';
 import { DisplayNotification } from './notification.types';
 
 interface MobileNotificationPopoverProps {
@@ -24,7 +24,7 @@ export const MobileNotificationPopover: React.FC<MobileNotificationPopoverProps>
       {/* Header */}
       <div className="vw-mobile-notif-header">
         <div className="vw-mobile-notif-title-wrap">
-          <h2 className="vw-mobile-notif-title">Thông báo</h2>
+          <h2 id="vw-notif-dialog-title" className="vw-mobile-notif-title">Thông báo</h2>
           {unreadCount > 0 && (
             <span className="vw-mobile-notif-badge">{unreadCount}</span>
           )}
@@ -40,6 +40,7 @@ export const MobileNotificationPopover: React.FC<MobileNotificationPopoverProps>
             <Check size={16} aria-hidden="true" />
           </button>
         )}
+        <button type="button" className="vw-mobile-mark-read-btn" onClick={onClose} aria-label="Đóng bảng thông báo"><X size={18} aria-hidden="true" /></button>
       </div>
 
       {/* List */}

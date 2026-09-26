@@ -1,178 +1,163 @@
-# VieWorld — một thế giới, cùng nhau
+# VieWorld
 
-<div align="center">
+Một nơi để giữ lại những điều từ world của nghệ sĩ và fandom: concert từng đi, khoảnh khắc nhớ, vật phẩm đã giữ và những cuộc hẹn sắp tới.
 
-![Build](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-427%20passed%20%7C%2046%20files-success?style=flat-square)
-![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square)
-![Universe](https://img.shields.io/badge/Universe-Expanded%20v2-8a2be2?style=flat-square)
-![License](https://img.shields.io/badge/license-proprietary-red?style=flat-square)
+Nguyên mẫu sản phẩm do **Phạm Thanh Phú** thiết kế và phát triển. Artist và fan là nhân vật chính; app là hạ tầng giúp khám phá, kết nối và lưu giữ. Không cần giả lập một thế giới sống, cũng không cần gây áp lực rằng fan phải luôn online.
 
-**Một fan world ấm cúng, nơi fan khám phá nghệ sĩ, gặp nhau trong những khoảnh khắc chung, giữ lại kỷ niệm và kết nối trong một vũ trụ fandom thống nhất.**
+## Hướng sản phẩm
 
-</div>
+- Giảm uncertainty để fan có thể enjoy. Home là orientation surface, không phải feed vô tận.
+- New ≠ Notification. Chỉ những thay đổi đáng interrupt mới cần thông báo.
+- Explore là world browser: artist → lát cắt visual → tiếng nói công khai của fandom.
+- Event/live giữ context trong Artist World, không teleport user sang một app khác.
+- Collection là những thứ đã giữ; Room là những thứ chủ động chọn trưng bày.
+- VieSHOP giữ shopping thông thường. Không fake urgency, không biến concept thành hàng đang bán.
 
-![Quảng trường VieWorld](./static/images/world-v8/plaza.webp)
+## Điểm đến và routes
 
----
+Sidebar: **Home / Explore / [Current Artist] / My Space / VieSHOP**. Artist được giữ theo lần ghé gần nhất; nếu chưa có lựa chọn, app chọn một featured artist một lần rồi lưu lại.
 
-## 🌟 VieWorld là gì?
+| Điểm đến | Route | Vai trò |
+| --- | --- | --- |
+| Home | `/` | Đang xảy ra gì, tiếp tục từ đâu, điều gì thay đổi và sắp tới |
+| Explore | `/explore` | Featured world rows và grid avatar compact của các world còn lại |
+| Artist World | `/artist/:artistId` | Identity → active contexts → public Hall voices → tối đa 5 recent slices → commerce → đi sâu |
+| Hall | `/artist/:artistId/hall` | Room → conversation → activity rail; chat hội viên không phải public feed |
+| Kho lưu trữ | `/artist/:artistId/archive` | Năm/chapter trước, filter là lens phụ |
+| Moment Focus | `/artist/:artistId/moment/:momentId` | Một object trong world, có đường quay lại nơi đã mở |
+| My Space | `/me` | Phòng của tôi / Bộ sưu tập / Avatar |
+| VieSHOP | `/shop` | Catalog tổng; `?artist=artist-a` giữ scope, `&product=…` mở sản phẩm |
+| Giỏ hàng / checkout demo | `/cart`, `/checkout/:checkoutId` | Commerce mô phỏng, không thanh toán thật |
 
-VieWorld là nguyên mẫu sản phẩm fandom do **Phạm Thanh Phú** thiết kế và phát triển. Sản phẩm không đặt platform hay cửa hàng thương mại ở trung tâm; nhân vật chính của toàn bộ trải nghiệm là mối quan hệ gắn kết và chân thành giữa **Fan, Nghệ sĩ và Cộng đồng**.
+`/moments` cũ chuyển về Explore. Moment deep-link cũ resolve artist rồi chuyển sang Moment Focus. Session có artist context chuyển tới `/artist/:artistId?context=session:…`; session legacy chưa map vẫn có fallback riêng.
 
-Thay vì một dashboard kỹ thuật số chứa các tab tính năng rời rạc, VieWorld tổ chức trải nghiệm như một thế giới sống động có thể ghé thăm:
-- **Quảng trường (Plaza)** đóng vai trò là giao lộ trung tâm và điểm xuất phát chung.
-- **Từng không gian chuyên biệt** đảm nhiệm một vai trò rõ ràng, liền mạch và tự nhiên trong hành trình của fan.
+Trong Artist World, local tabs luôn là **Trang chính / Hall / Kho lưu trữ**. Chọn context giữ world và sidebar; chuyển trong cùng route đưa focus có kiểm soát, giữ compact artist identity nhìn thấy được và tôn trọng reduced motion. Không tự phát media.
 
-```text
-Quảng trường (Plaza)
-  ├── Explore: Khám phá nghệ sĩ, world và khoảnh khắc cộng đồng
-  ├── Artist World & Moments: Ngôi nhà của nghệ sĩ, theo dõi sự kiện live, archive và thảo luận tại Hall
-  ├── My Space: Định hình danh tính avatar cá nhân, lưu giữ kỷ niệm và quản lý bộ sưu tập
-  ├── VieSHOP: Thử đồ trực quan (Try-on), chọn phiên bản thực/số (Physical, Digital, Duo)
-  └── Quay trở về với thế giới chung cho những khoảnh khắc tiếp theo
-```
+### Artist World và bảng thông báo
 
----
+Trang chính và Archive dùng hero cinematic; Hall/Moment/context dùng compact identity. Trang chính có tối đa ba hoạt động, public Hall voices, rail Moments và vật phẩm từ catalog canonical. Hall dùng rail phòng → conversation → activity rail, với badge hội viên, thích, trả lời, chia sẻ tối đa ba Moments công khai và emoji. Phòng của chương trình IP liên kết thuộc đúng Artist World; không kéo phòng của một artist khác vào chỉ vì có liên kết khám phá.
 
-## 🏛️ Các không gian trải nghiệm chính
+Archive đọc theo năm rồi chapter; mở chapter mới xem các Moments/context bên trong. `?filter=…&chapter=…` giữ lens/chapter khi quay lại từ Moment Focus. Rail “Mới được giữ lại” mở rộng được và chuyển xuống dưới trên mobile. Các chapter demo cũ chưa có media giữ nguyên và được đánh dấu minh họa, không bịa số capsule hay gán ảnh mới vào một năm lịch sử. Capsule cá nhân chỉ được lấy từ đúng tenant và chủ sở hữu.
 
-| Không gian | Đường dẫn | Vai trò trong hành trình | Tính năng cốt lõi cho Fan |
-|---|---|---|---|
-| **Quảng trường** | `/` | Giao lộ kết nối toàn bộ vũ trụ | Chiêm ngưỡng diorama 2.5D, chọn điểm đến, truy cập nhanh hồ sơ cá nhân qua Avatar trung tâm. |
-| **Explore** | `/explore` | Khám phá nghệ sĩ & cộng đồng | Duyệt các hàng khoảnh khắc nổi bật (featured & compact rows), tìm kiếm thông minh, lọc nghệ sĩ theo trạng thái. |
-| **Artist World** | `/artist/:artistId` | Không gian chuyên biệt của từng nghệ sĩ | Truy cập trang chủ nghệ sĩ, dòng thời gian sự kiện, phòng thảo luận Hall và biên niên sử Archive. |
-| **Moments & Live** | `/moments`, `/sessions/:id` | Đồng hành cùng sự kiện trực tiếp | Tham gia phòng phát sóng trực tiếp, phòng chờ (lobby), tương tác lightstick ảo, gửi lời cổ vũ và hỏi đáp. |
-| **My Space** | `/me` | Không gian và danh tính của riêng fan | Tùy biến avatar fan chibi, trang trí kệ đồ 2.5D, quản lý Fandom Pass, gắn thẻ kỷ vật và xem sổ lưu bút (Guestbook). |
-| **VieSHOP** | `/shop` | Mua sắm có ngữ cảnh trong fan journey | Xem theo family sản phẩm, phân biệt Physical – Digital – Bundle/Duo, thử đồ trực quan và kiểm tra đơn hàng mô phỏng. |
+`artistPresentation.ts` giải quyết phòng/visual, `artistArchive.ts` nhóm chapter và `ArtistVisualRail` dùng native horizontal scroll với nút điều hướng khi cần. `artist-bulletin.css` là lớp presentation giới hạn cho Artist và thông báo; không đổi shell chung.
 
----
+Bảng thông báo là một inbox duy nhất trên desktop và mobile: toàn bộ thông báo của đúng fan/tenant, mới nhất trước, cuộn bên trong; header và nút đọc tất cả không cuộn theo nội dung. Chọn cả ô để mở destination và đánh dấu đã đọc, không có tầng “Xem tất cả” hay CTA lặp lại. Esc đóng, focus trap và trả focus về chuông; nền inert theo [WAI-ARIA Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/). Không tự mở modal khi có nội dung mới.
 
-## 🪐 Vũ trụ Fandom mở rộng (Expanded Universe)
+### Home: hiện tại, ghé lại, tương lai, cập nhật
 
-VieWorld sở hữu một bộ dữ liệu thử nghiệm phong phú và chặt chẽ, được thiết kế theo đúng quy chuẩn kiến trúc thực tế:
+Home giữ banner “Đang diễn ra” nhỏ chỉ khi world theo dõi/đã RSVP thực sự có phiên chạy hoặc sảnh mở theo đồng hồ demo. Khối quay lại thấp hơn và nhớ chính xác destination/tab/context gần nhất qua `worldJourney.lastDestination`; không tự ưu tiên capsule đã lưu. Home không tự ghi đè nơi quay lại; dữ liệu cũ fallback về lastWorldId. `/me?panel=capsules` vẫn là chức năng ghi chú riêng/lưu capsule còn dùng trong luồng tham dự → kỷ niệm → trưng bày, không phải route chết. Lịch sắp tới đứng trước “Gần đây”; Gần đây gồm cuộc hẹn đã kết thúc, lời nhắn, capsule và cập nhật shop — không phải toàn bộ đều là event trong quá khứ. Live không lặp trong mục này. Asset sản phẩm lấy từ sản phẩm canonical, không dùng một ảnh pin cho mọi món.
 
-### 1. 7 Artist Worlds với 7 vai trò riêng biệt
-- **Artist A (`artist-a`)**: Thế giới Live-first flagship, lịch trình diễn và sự kiện tương tác cao.
-- **MIRA (`artist-mira`)**: Thế giới thiên về cốt truyện (Lore/Archive-heavy), thần thoại ánh trăng và cộng đồng Moonies.
-- **KAI (`artist-kai`)**: Thế giới Cyberpunk tràn đầy năng lượng đường phố, cộng đồng Pulse Crew sôi nổi.
-- **Artist D (`artist-d`)**: Kho lưu trữ chiều sâu với 3 năm lịch sử hoạt động liên tục (2024, 2025, 2026).
-- **Artist E (`artist-e`)**: Nghệ sĩ mới ra mắt (Debut artist) với trạng thái sơ khởi và các khung dữ liệu ban đầu.
-- **Artist F (`artist-f`)**: Thế giới đa dạng sản phẩm (Commerce-heavy) với đủ loại phân loại hàng hóa.
-- **Artist G (`artist-g`)**: Nghệ sĩ tĩnh lặng (Quiet artist) với ít sự kiện hoạt động, kiểm tra tính ổn định của layout.
+`homeOrientation.ts` lọc tenant, world và quyền phát nhất quán, capsules theo fan/tenant, sắp lịch gần nhất và không tự biến ngày thực tế thành ngày demo. Lựa chọn bố cục dựa trên [visual hierarchy](https://www.nngroup.com/articles/visual-hierarchy-ux-definition/) và phân biệt [status indicators / notifications](https://www.nngroup.com/articles/indicators-validations-notifications/); đây là quyết định thiết kế cho prototype, chưa phải kết quả nghiên cứu fan VieWorld. `home-inbox.css` chỉ scope Home/inbox, dùng typography và light/dark tokens hiện có.
 
-### 2. Hệ sinh thái 30 Fan & Personas
-- **8 Key Fan Personas**: Được thiết kế để kiểm thử mọi ngóc ngách trải nghiệm (Hardcore Collector, Lurker Streamer, Debut Visitor, Multistan Socialite, International Fan, Audio Purist, Event Hunter, Casual Browser).
-- **22 Crowd Fans**: Đảm bảo mật độ sinh động cho các phòng Hall, danh sách tương tác và không gian cộng đồng.
+Rà liên kết: mode Vật phẩm/Kỷ niệm của Collection được giữ bằng URL; legacy `type=achievement` map sang lens Dấu mốc. Đọc một/tất cả thông báo chỉ đổi record đúng tenant/fan. Rail Artist chỉ cập nhật state khi trạng thái mép thực sự thay đổi, không re-render theo mỗi pixel scroll. Không đổi schema ownership/cart hoặc xóa dữ liệu capsule.
 
-### 3. Dòng thời gian & Tính riêng tư nghiêm ngặt
-- **18 World Contexts / Sessions**: Bao phủ đầy đủ các pha thời gian: `running`, `scheduled`, `ended`, `cleared`.
-- **8–10 Phòng Hall**: Quy định ranh giới riêng tư chặt chẽ. Thảo luận nội bộ của hội viên không bao giờ rò rỉ ra ngoài Explore trừ khi có sự đồng ý (`explorePreviewConsent: true`) và kiểm duyệt (`explorePreviewStatus: 'approved'`).
-- **23 Public Fan Voices**: Tiếng nói cộng đồng được chọn lọc từ Hall clips, Guestbook notes và Q&A replies.
-- **42 Sản phẩm với Single Entity Model**: Đầy đủ danh mục Merch, Album, Ticket, Membership với các thuộc tính xem trước minh bạch (`avatar: boolean`, `room: boolean`).
-- **15 Ghi chú Guestbook**: Từng fan để lại sticker, màu sắc và lời chúc tại các tọa độ riêng trong phòng.
+Schema thêm optional `ChatMessage.replyToId`, `momentIds`, `AppState.hallReactions` và `artistLetters`; dữ liệu cũ không cần reset. Reply/media/reaction kiểm tra đúng phòng và Artist World; chat không tự thành public voice. Lời riêng hiện chỉ lưu trên thiết bị, chưa gửi artist/team. Chia sẻ ảnh trong Hall hiện dùng Moment canonical, chưa có upload ảnh cá nhân hoặc realtime backend. Artist A có thêm một fan-project minh họa dùng asset cũ; không sinh thư viện ảnh mới trong packet này.
 
----
+## Chạy local
 
-## 🧭 Hành trình Fan hoàn chỉnh (Fan Journeys)
+Dùng Node.js LTS tương thích Vite 6 và npm. Cài dependency từ lockfile:
 
-1. **Khám phá tự nhiên**: Tìm kiếm nghệ sĩ có hỗ trợ tiếng Việt không dấu, xem các mẩu chuyện nổi bật tại Explore và bước vào thế giới riêng của nghệ sĩ.
-2. **Hẹn gặp & Đồng hành**: Nhận thông báo sự kiện, RSVP lịch diễn, tương tác qua phòng phát sóng thời gian thực và tham gia vào không gian Hall dành cho hội viên.
-3. **Giữ gìn kỷ niệm**: Tùy chỉnh diện mạo avatar fan với các trang phục số sở hữu, đặt vật phẩm lên kệ phòng cá nhân 2.5D, và viết lưu bút cho bạn bè.
-4. **Mua sắm minh bạch**: Thử đồ số (Digital Try-on) trước khi mua, hiểu rõ từng gói sản phẩm ngoài đời thực hay trang phục cho avatar mà không bị nhập nhằng.
-5. **Kịch bản kiểm thử linh hoạt**: Dễ dàng chuyển đổi giữa các persona qua công cụ `ScenarioManager` tích hợp sẵn.
-
----
-
-## 🛠️ Kiến trúc kỹ thuật & Công nghệ
-
-| Tầng kiến trúc | Công nghệ & Thư viện | Trách nhiệm |
-|---|---|---|
-| **Core UI** | React 19, React Router 7, Lucide React | Xây dựng giao diện hướng thành phần, rendering hiệu năng cao. |
-| **Ngôn ngữ** | TypeScript 5.7 (Chế độ nghiêm ngặt) | Đảm bảo an toàn kiểu dữ liệu 100% trên toàn bộ codebase. |
-| **Styling** | Vanilla CSS, Design Tokens | Không phụ thuộc TailwindCSS, sử dụng hệ thống token nhất quán và font self-hosted (Be Vietnam Pro, Nunito). |
-| **Quản lý trạng thái** | Reducer Domain State, Pure Invariants | Quản lý logic bằng reducer thuần khiết, tính bất biến reference nghiêm ngặt. |
-| **Tài nguyên tĩnh** | Vite 6, thư mục `static/` | Tối ưu hóa bundle, chia tách vendor chunks và hỗ trợ tải trang tức thì. |
-| **Kiểm thử tự động** | Vitest 3, Testing Library, JSDOM | Bộ kiểm thử toàn diện với 46 test suite kiểm tra hợp đồng và hành trình người dùng. |
-
----
-
-## 📁 Cấu trúc thư mục
-
-```text
-├── src/
-│   ├── assets/              # Tài nguyên nội bộ dự án
-│   ├── components/          # Các component UI tái sử dụng (Shell, Avatar, Stage, Notifications,...)
-│   ├── context/             # AppContext & Provider hỗ trợ hydration và scenario state
-│   ├── data/                # Canonical fixtures, Expanded Universe & Scenario Manager
-│   ├── domain/              # Types, Reducers, và cấu hình Tenant (VieWorld, MFan, FanMe)
-│   ├── hooks/               # Custom React hooks (Accessibility, Dialogs,...)
-│   ├── services/            # Storage adapters (LocalStorage, Memory fallback)
-│   ├── styles/              # Design tokens và hệ thống style theo từng không gian
-│   ├── tests/               # 46 test files kiểm thử tự động toàn diện
-│   ├── utils/               # Tiện ích tìm kiếm tiếng Việt và xử lý dữ liệu
-│   ├── views/               # Các trang view cấp route chính (Plaza, Explore, ArtistWorld, Shop,...)
-│   └── world/               # Business logic về cộng đồng, thương mại, sự kiện và quyền riêng tư
-├── static/                  # Thư mục tài nguyên public phục vụ Vite (Images, Fonts, Media)
-├── index.html               # Điểm vào ứng dụng SPA
-├── vite.config.ts           # Cấu hình Vite dev server và production build
-└── package.json             # Danh sách dependencies và các kịch bản chạy lệnh
-```
-
----
-
-## 🚀 Hướng dẫn cài đặt & Khởi chạy
-
-### Yêu cầu môi trường
-- **Node.js**: Phiên bản 20 trở lên
-- **npm**: Phiên bản 9 trở lên
-
-### Các bước cài đặt
-
-```bash
-# 1. Clone kho lưu trữ
-git clone https://github.com/Yunero1206/vieworld.git
-cd vieworld
-
-# 2. Cài đặt dependencies
+```sh
 npm ci
-
-# 3. Khởi chạy dev server
 npm run dev
 ```
 
-Mở trình duyệt tại: `http://localhost:5173`
+Mở địa chỉ terminal in ra, mặc định `http://localhost:5173`.
 
----
-
-## 🧪 Kiểm thử và Đóng gói sản phẩm
-
-```bash
-# Kiểm tra an toàn kiểu dữ liệu (TypeScript)
+```sh
 npm run typecheck
-
-# Chạy toàn bộ 46 test suite (427 tests)
 npm test
-
-# Đóng gói bản phát hành sản xuất
 npm run build
-
-# Chạy thử bản build sản xuất
 npm run preview
 ```
 
-### Kết quả kiểm định chất lượng:
-- **TypeScript Typecheck**: Pass 100% (Không lỗi `TS6133`, `TS18048`, `TS2322`).
-- **Automated Tests**: **427/427 passed (46/46 test files)**.
-- **Production Build**: Hoàn thành sạch sẽ trong ~5.3s, tối ưu hóa CSS và JS chunks.
+Nếu config loader gặp lỗi quyền trên môi trường Windows bị giới hạn, thử `npm test -- --configLoader runner` hoặc `npm exec vite -- build --configLoader runner`. Đây là workaround môi trường, không phải yêu cầu của app.
 
----
+## Kiến trúc và dữ liệu
 
-## 👤 Tác giả & Bản quyền
+React 19, React Router, TypeScript, Vite, CSS thuần. Vitest + Testing Library kiểm thử domain và UI. Các destination chính dùng route-level lazy loading.
 
-> **Tác giả / Product Designer & Developer:** Phạm Thanh Phú  
-> **Copyright © 2026 Phạm Thanh Phú. All rights reserved.**
+```text
+src/components/   shell, room, avatar, context stage, notification UI
+src/views/        route-level pages
+src/hooks/        appearance, dialogs, artist context transition
+src/domain/       typed state, reducers và invariants
+src/world/        selectors, artist/context, commerce và room logic
+src/data/         canonical fixtures và demo scenarios
+src/services/     persistence, fallback và backup
+src/styles/       tokens, page styles, shared reading layer
+src/tests/        domain, integration và regression tests
+static/           public images, fonts, media, service worker
+```
 
-VieWorld là phần mềm thuộc quyền sở hữu trí tuệ của tác giả. Toàn bộ thiết kế ý tưởng, mã nguồn, kiến trúc hệ thống và tài nguyên đồ họa được bảo lưu bản quyền. Vui lòng không sao chép, tái phân phối hoặc thương mại hóa khi chưa có sự chấp thuận bằng văn bản từ tác giả.
+`static/` là publicDir của Vite; `dist/` là build output. Không sửa asset ở `dist/` rồi kỳ vọng source cũng thay đổi.
+
+Giữ stable IDs và canonical objects. Shop/Collection/Room/Avatar dùng quan hệ ownership/display/equipment, không sao chép product card thành entity khác. Artist commerce đọc cùng `state.products` với shop; format giá dùng utility chung `src/world/commerce.ts`.
+
+Room dùng display surfaces có maxItems, footprint/capacity, compatibility, focal item và preset geometry. Lưu lựa chọn và quan hệ trưng bày; renderer bố trí trong scene coordinate system. Không physics engine, không free pixel placement, không tự trưng mọi món mới mua.
+
+Hall preview dùng public/consented projection đã xét eligibility, không lấy toàn bộ private chat. Client-side checks **không phải security boundary cho production**.
+
+### Giới hạn backend
+
+Hiện là frontend prototype. State lưu theo namespace/tenant qua adapter local storage, có fallback và backup hiện có. Không có server authentication, payment gateway, realtime backend hay server-authoritative inventory. Demo time/presence không phải dữ liệu live production.
+
+Không reset dữ liệu chỉ để sửa presentation. Packet theme không đổi schema ownership/cart. Reducer invariants/idempotency giúp demo; production vẫn cần:
+
+- Server authentication/authorization cho membership, Hall và private room.
+- Public projection API riêng; consent/revocation/moderation có audit trail.
+- Checkout idempotency, inventory transaction và payment verification phía server.
+- Pagination khi catalog/archive/world pool lớn; đo trên dữ liệu và thiết bị thật.
+- Đồng bộ, retention và migration cho dữ liệu fan; local storage không phải backup tài khoản.
+
+## Typography, spacing, light/dark
+
+Lora self-hosted cho tiêu đề editorial; Be Vietnam Pro cho body/UI, có Vietnamese subsets. Artwork/logo giữ identity riêng. Không dùng handwriting cho toàn bộ lời nhắn tiếng Việt.
+
+Hệ chữ mới giữ hai family đang có thay vì thêm font: Be Vietnam Pro 400 cho nội dung, 500 cho nhãn, 600 cho title vật phẩm, 700 cho emphasis; Lora 500–600 cho heading editorial. UI 14px, body 15px, metadata 13px, caption 12px, line-height 1.5–1.65. `--font-display` không còn trỏ tới Nunito; không sinh glyph/font AI vì cần bộ dấu, hinting và license thực sự. Nguồn family: [Be Vietnam Pro](https://github.com/bettergui/BeVietnamPro).
+
+`appearance.css` quản lý semantic tokens nền/surface/text/muted/accent/focus. `experience.css` là reading/spacing layer chung, tải sau page styles. Tránh mã màu cố định cho vùng đọc; hero/media và giấy/room không cần đảo màu như UI.
+
+`refinement.css` chốt typography, rail 64px/152px, search và catalog/context density sau các stylesheet legacy. Icon/artist avatar cùng cột 28px; nhãn Giỏ hàng/Thông báo/Tài khoản xuất hiện khi mở rail. Mobile giữ icon có accessible name.
+
+### Search và hội viên trong live
+
+`SearchCombobox` dùng chung grammar cho header, Shop và Collection: tối đa 6 gợi ý, exact/prefix trước contains, tìm tiếng Việt không dấu, Arrow Up/Down/Enter/Escape, không bắt phím Enter khi IME đang composition. Gợi ý tự chạy trong local catalog, không gửi câu tìm hoặc dữ liệu fan tới Google. Header chỉ index Artist World, sự kiện được phép, Moments public và sản phẩm đúng tenant; Collection chỉ index đồ đã sở hữu theo mode; Shop index product families trong artist scope. Học mẫu tương tác từ [WAI-ARIA Combobox](https://www.w3.org/WAI/ARIA/apg/patterns/combobox/) và [GOV.UK search autocomplete](https://design-guide.publishing.service.gov.uk/components/search-autocomplete/).
+
+Shop: search/tiện ích → một hàng danh mục → catalog. Nghệ sĩ ở Bộ lọc, chỉ show scope chip khi được chọn. “Có thể thử trong My Space” là lens nhỏ; preview từng món vẫn mở đúng món, không chuyển tới một màn hình chung.
+
+Membership thêm optional `startedAt` cho kỳ hiện tại. Badge cạnh tên chat có mốc mới/1/3/6/12 tháng, mỗi artist demo có symbol riêng; không xếp hạng theo tiền. Không suy ngày bắt đầu từ `updatedAt`; record cũ chưa có ngày chỉ có badge hội viên, không tenure giả. Expired/inactive không được badge. Demo voices đánh dấu “mẫu”; badge demo không phải membership của một người thật. Gia hạn sau khi hết kỳ bắt đầu kỳ mới; chưa triển khai lịch sử cộng dồn nhiều kỳ. Tham khảo nguyên tắc loyalty badge của [YouTube memberships](https://support.google.com/youtube/answer/7544492?hl=en).
+
+Context stage vẫn dùng Session/Hall room canonical. Ánh sáng khi artist đang present/live và lightstick reaction cục bộ là visual demo, không số liệu khán giả. Reduced motion tắt chuyển động; private Hall vẫn kiểm tra membership. Không có WebSocket/live streaming backend mới trong packet này.
+
+Spacing section dùng token chung; heading/link/actions wrap trên màn hình hẹp thay vì thu nhỏ chữ. Explore giữ density, My Space giữ warmth, Artist World giữ cinematic artwork nhưng Hall/Archive/controls theo cùng appearance.
+
+Regression test token text/link trên reading surfaces theo ngưỡng 4.5:1 cho chữ thường của [WCAG 2.2](https://www.w3.org/TR/WCAG22/#contrast-minimum). Đây không phải chứng nhận toàn app đạt WCAG: overlays, ảnh chứa chữ, states, zoom và screen reader vẫn cần kiểm tra riêng. Tôn trọng [reduced motion](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html).
+
+Agency và belonging là nguyên tắc thiết kế, không phải tác động tâm lý đã được chứng minh cho app. Áp dụng tinh thần autonomy/relatedness từ [Self-Determination Theory](https://selfdeterminationtheory.org/theory/) để fan được chọn cách tham gia; không thêm guilt copy, XP hay pressure-driven commerce.
+
+## Hiệu năng và offline
+
+- Giữ code splitting; tái sử dụng currency formatter; memoize/dedupe artist products bằng Set.
+- Tái sử dụng ảnh hiện có, không gen thư viện ảnh mới trong packet này.
+- Hero không lazy load; grid dùng lazy loading khi renderer hỗ trợ, giữ geometry/ratio để hạn chế layout shift. Tham khảo [CLS](https://web.dev/articles/optimize-cls) và [lazy loading](https://web.dev/learn/performance/lazy-load-images-and-iframe-elements).
+- Worker chỉ can thiệp navigation và public app assets cùng origin, không API/private responses. Chỉ retire cache namespace VieWorld. HTML fallback dành cho navigation; script thiếu khi offline trả lỗi, không HTML giả JavaScript.
+- Worker mới không ép takeover tab đang mở. Đóng các tab cũ/mở lại để worker mới activate. Offline là best-effort cho asset đã cache, không cam kết mọi route/asset chưa ghé hoạt động offline.
+
+Deploy cần SPA navigation fallback về `index.html`. Public assets phải có đúng MIME; URL asset không tồn tại không nên rewrite thành HTML. Cache file hashed dài hạn; HTML/worker cần cơ chế cập nhật. Chỉ expose dev/preview server ra mạng khi có chủ đích.
+
+Nhiều stylesheet legacy còn được giữ để bảo toàn flow cũ. Gom toàn bộ CSS/chia AppContext theo domain là packet riêng cần profiling và regression coverage, không xóa hàng loạt chỉ để bundle nhỏ hơn. Đo [INP](https://web.dev/articles/optimize-inp), LCP/CLS trên thiết bị thật trước khi tuyên bố performance production.
+
+## QA khi sửa app
+
+- Home, Explore, Artist Home/context, Hall, Archive, My Space ba tab và Shop ở light/dark.
+- Vietnamese diacritics, keyboard/focus, text zoom, reduced motion, màn hình hẹp.
+- Context giữ artist identity; back/close không mất world; deep link không bị scroll hook chiếm quyền.
+- Shop global/scoped; concept/sold-out, empty results, saved/cart và preview compatibility.
+- Ownership không duplicate; Collection → Room/equipment cùng canonical reference.
+- Cache không can thiệp API, không trả HTML cho script lỗi.
+- Typecheck, test suite, production build. Không dùng badge/số test cố định làm cam kết chất lượng.
+
+## Bản quyền
+
+© 2026 Phạm Thanh Phú. All rights reserved. Phần mềm và tài nguyên được bảo lưu bản quyền; không sao chép, tái phân phối hoặc thương mại hóa khi chưa có chấp thuận bằng văn bản của tác giả.

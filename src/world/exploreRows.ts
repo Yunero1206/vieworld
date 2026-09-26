@@ -45,6 +45,7 @@ const mediaByWorld: Record<string, { avatar: ExploreMedia; moments: [ExploreMedi
 };
 
 const projects: Record<string, { id: string; title: string }> = {
+  'artist-a': { id: 'project-a-birthday', title: 'Gửi lời chúc đến Artist A' },
   'artist-c': { id: 'project-c-birthday', title: 'Birthday Project đang mở' },
 };
 
@@ -167,13 +168,23 @@ export function getExploreProjectById(worldId: string, id: string): ExploreProje
   return project?.id === id ? { id, worldId, title: project.title, targetUrl: `/artist/${worldId}?context=explore-project:${id}`, isDemo: true } : undefined;
 }
 
+export function getWorldProject(worldId: string): ExploreProject | undefined {
+  const project = projects[worldId];
+  return project ? getExploreProjectById(worldId, project.id) : undefined;
+}
+
 /** Artist Worlds are the unit of discovery; programs such as Neon Sessions cannot become rows. */
 export function selectExploreRows(state: AppState, query = ''): ExploreWorldRow[] {
   const demoRotation = ['artist-b', 'artist-c', 'artist-d', 'artist-e'];
   const day = Math.floor(Date.parse(state.demoTime) / 86_400_000);
   const candidates = Object.values(state.worlds)
     .filter(world => world.tenantId === state.activeTenantId && world.type === 'artist' && mediaByWorld[world.id])
-    .filter(world => !query.trim() || matchesVietnameseQuery(`${world.name} ${world.description} ${mediaByWorld[world.id].titles.join(' ')} ${projects[world.id]?.title || ''}`, query))
+    .filter(world => {
+      if (!query.trim()) return true;
+      const publicContexts = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved !== false && (session.worldId === world.id || state.worlds[session.worldId]?.linkedWorldIds.includes(world.id))).map(session => session.title);
+      const products = Object.values(state.products).filter(product => product.tenantId === state.activeTenantId && product.worldId === world.id).map(product => product.title);
+      return matchesVietnameseQuery(`${world.name} ${world.description} ${getWorldMoments(world.id).map(moment => moment.title).join(' ')} ${projects[world.id]?.title || ''} ${publicContexts.join(' ')} ${products.join(' ')}`, query);
+    })
     .map(world => {
       const media = mediaByWorld[world.id];
       const owned = Object.values(state.sessions).filter(session => session.worldId === world.id && session.rightsApproved !== false);

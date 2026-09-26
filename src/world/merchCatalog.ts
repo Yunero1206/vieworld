@@ -58,7 +58,7 @@ export function ownsDigitalProduct(state: AppState, product: Product) {
 }
 
 export function canEnterHall(state: AppState, worldId: string) {
-  return Object.values(state.memberships).some(m => m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
+  return state.worlds[worldId]?.tenantId === state.activeTenantId && Object.values(state.memberships).some(m => m.tenantId === state.activeTenantId && m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
 }
 
 export const hasActiveMembership = canEnterHall;

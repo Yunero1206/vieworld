@@ -50,9 +50,9 @@ describe('Artist World entry boundary', () => {
 
   it('uses top-shell search and never exposes unconsented fan voices in Explore', () => {
     mount('/');
-    const input = screen.getByRole('textbox', { name: 'Tìm nghệ sĩ, world, sự kiện, capsule' });
+    const input = screen.getByRole('combobox', { name: 'Tìm nghệ sĩ, world, sự kiện, capsule' });
     fireEvent.change(input, { target: { value: 'artist a' } });
-    fireEvent.submit(input.closest('form')!);
+    fireEvent.keyDown(input, { key: 'Enter' });
     expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Vào world của Artist A' })).toHaveAttribute('href', '/artist/artist-a');
     expect(screen.getByText(/Nay nghe setlist vậy/)).toBeInTheDocument();
