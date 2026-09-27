@@ -21,12 +21,20 @@ import { useAppearance } from '../hooks/useAppearance';
 import { SearchCombobox } from './SearchCombobox';
 import { globalSearchSuggestions } from '../world/searchDiscovery';
 import { validHomeDestination } from '../world/homeDestination';
+import { isDemoSignedIn } from '../world/account';
+import { AuthOverlay } from './account/AuthOverlay';
+import { AccountInfoDialog } from './account/AccountInfoDialog';
+import { PrivacyDialog } from './account/PrivacyDialog';
+import { SupportDialog } from './account/SupportDialog';
+import { ApplicationHealth } from './ApplicationHealth';
 
 export const FanShell = () => {
   const { state, dispatch, storageNotice, dismissNotice, resetActiveTenant } = useApp();
   const tenantConfig = getTenantConfig(state.activeTenantId);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [accountMenu, setAccountMenu] = useState(false);
+  const [utility, setUtility] = useState<'auth' | 'account' | 'privacy' | 'support' | null>(null);
+  const signedIn = isDemoSignedIn(state);
   const [guide, setGuide] = useState(false);
   const [review, setReview] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -38,6 +46,10 @@ export const FanShell = () => {
   const accountRef = useRef<HTMLElement>(null);
   const accountBtnRef = useRef<HTMLButtonElement>(null);
   const bellBtnRef = useRef<HTMLButtonElement>(null);
+  function openUtility(value: NonNullable<typeof utility>) {
+    accountBtnRef.current?.focus();
+    setAccountMenu(false); setMobileMenu(false); setUtility(value);
+  }
 
   const { appearance, toggleAppearance } = useAppearance();
 
@@ -46,6 +58,18 @@ export const FanShell = () => {
   const cartCount = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
 
   const { pathname, search } = useLocation();
+  useEffect(() => {
+    const artistId = artistIdFromPath(pathname);
+    const artist = artistId && state.worlds[artistId];
+    const label = artist ? `${artist.name} · ${pathname.endsWith('/hall') ? 'Hall' : pathname.endsWith('/archive') ? 'Kho lưu trữ' : pathname.includes('/moment/') ? 'Khoảnh khắc' : 'Artist World'}`
+      : pathname === '/' || pathname === '/worlds' ? 'Home' : pathname.startsWith('/shop') ? 'VieSHOP' : pathname.startsWith('/me') ? 'My Space' : pathname.startsWith('/explore') ? 'Explore' : pathname.startsWith('/cart') || pathname.startsWith('/checkout') ? 'Giỏ hàng demo' : 'Bản trải nghiệm';
+    document.title = `${label} — VieWorld`;
+  }, [pathname, state.worlds]);
+  useEffect(() => {
+    const openAuth = () => { setAccountMenu(false); setMobileMenu(false); setUtility('auth'); };
+    window.addEventListener('vieworld-open-auth', openAuth);
+    return () => window.removeEventListener('vieworld-open-auth', openAuth);
+  }, []);
   const personalNotifications = Object.values(state.notifications || {}).filter(n => n.tenantId === state.activeTenantId && n.fanId === state.fanProfile.id);
   const unread = personalNotifications.filter(n => !n.isRead).length;
 
@@ -157,23 +181,24 @@ export const FanShell = () => {
             ref={accountBtnRef}
             type="button"
             className={`fw-profile-btn ${accountMenu ? 'active' : ''}`}
-            aria-label={`Tài khoản của ${state.fanProfile.displayName}`}
+            aria-label={signedIn ? `Tài khoản của ${state.fanProfile.displayName}` : 'Đăng nhập hoặc đăng ký VieWorld'}
             aria-controls="fan-account-menu"
             aria-expanded={accountMenu}
             onClick={() => {
-              setAccountMenu(!accountMenu);
+              if (signedIn) setAccountMenu(!accountMenu);
+              else openUtility('auth');
               setMobileMenu(false);
             }}
           >
-            <AvatarRenderer
+            {signedIn ? <AvatarRenderer
               role="fan"
               digitalLook={ownedDigitalLook(state)}
               size="sm"
               accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
               appearance={state.fanProfile.avatarPreset}
               displayName={state.fanProfile.displayName}
-            />
-            <span className="fw-nav-label">Tài khoản</span>
+            /> : <UserRound size={24} aria-hidden="true"/>}
+            <span className="fw-nav-label">{signedIn ? 'Tài khoản' : 'Đăng nhập'}</span>
           </button>
 
           {/* Mobile-only Hamburger Menu Button */}
@@ -281,6 +306,10 @@ export const FanShell = () => {
 
             <div className="fw-menu-group">
               <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
+              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('account')}>
+                <span className="fw-menu-item-icon"><UserRound size={16}/></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Thông tin tài khoản<small>Liên hệ & nơi nhận · chỉ bạn xem</small></span>
+              </button>
               <button type="button" className="fw-menu-item fw-menu-btn" onClick={toggleAppearance}
                 aria-label={appearance === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
                 <span className="fw-menu-item-icon">{appearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
@@ -299,18 +328,19 @@ export const FanShell = () => {
                 </span>
                 <span className="fw-menu-item-label fw-menu-item-copy">Cài đặt thông báo<small>Cuộc hẹn, kỷ niệm và đơn hàng</small></span>
               </button>
-              <NavLink to="/me?panel=privacy" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('privacy')}>
                 <span className="fw-menu-item-icon">
                   <Shield size={16} />
                 </span>
                 <span className="fw-menu-item-label fw-menu-item-copy">Quyền riêng tư<small>Ai được ghé phòng và xem góc riêng</small></span>
-              </NavLink>
+              </button>
               <button
                 type="button"
                 className="fw-menu-item fw-menu-btn"
                 onClick={() => {
                   setGuide(true);
                   setAccountMenu(false);
+                  accountBtnRef.current?.focus();
                 }}
               >
                 <span className="fw-menu-item-icon">
@@ -318,10 +348,16 @@ export const FanShell = () => {
                 </span>
                 <span className="fw-menu-item-label fw-menu-item-copy">Hướng dẫn VieWorld<small>Hall, My Space, vật phẩm và quyền lợi</small></span>
               </button>
-              <NavLink to="/me?panel=support" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
+              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('support')}>
                 <span className="fw-menu-item-icon"><HelpCircle size={16} /></span>
                 <span className="fw-menu-item-label fw-menu-item-copy">Yêu cầu hỗ trợ<small>Kiểm tra đơn hàng hoặc quyền lợi</small></span>
-              </NavLink>
+              </button>
+              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => {
+                dispatch({ type: 'DEMO_SIGN_OUT' }); setAccountMenu(false); accountBtnRef.current?.focus();
+              }}>
+                <span className="fw-menu-item-icon"><UserRound size={16}/></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Đăng xuất demo<small>Giữ nguyên dữ liệu trên thiết bị này</small></span>
+              </button>
             </div>
 
             <div className="fw-menu-divider" />
@@ -438,12 +474,17 @@ export const FanShell = () => {
         <GlobalNavigation pathname={pathname} artist={navArtist} shopLabel={tenantConfig.labels.shopTitle || 'VieSHOP'} utilities={utilityControls} />
         <main id="main-content" className="fw-main">
           {storageNotice && <StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice} />}
+          <ApplicationHealth />
           {state.lastError && <StatusNotice message={state.lastError.message} type="error" onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })} />}
-          <ErrorBoundary onResetDemoData={resetActiveTenant} onReset={resetActiveTenant}><Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Outlet /></Suspense></ErrorBoundary>
+          <ErrorBoundary resetKey={pathname + search} onResetDemoData={resetActiveTenant} onReset={resetActiveTenant}><Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Outlet /></Suspense></ErrorBoundary>
         </main>
       </div>
       <ResetDrawer isOpen={review} onClose={() => setReview(false)} allowTenantSwitch={false} />
       <WorldGuidePanel isOpen={guide} onClose={() => setGuide(false)} />
+      {utility === 'auth' && <AuthOverlay onClose={() => setUtility(null)}/>}
+      {utility === 'account' && <AccountInfoDialog onClose={() => setUtility(null)}/>}
+      {utility === 'privacy' && <PrivacyDialog onClose={() => setUtility(null)}/>}
+      {utility === 'support' && <SupportDialog onClose={() => setUtility(null)} onGuide={() => { setUtility(null); setGuide(true); }}/>}
       <NotificationOverlay
         isOpen={notifOpen}
         onClose={() => setNotifOpen(false)}

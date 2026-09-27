@@ -18,7 +18,8 @@ export const SupportCaseDetailView: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
   const { state, dispatch } = useApp();
 
-  const supportCase = caseId ? state.supportCases[caseId] : undefined;
+  const candidate = caseId ? state.supportCases[caseId] : undefined;
+  const supportCase = candidate?.fanId === state.fanProfile.id && candidate.tenantId === state.activeTenantId ? candidate : undefined;
 
   const formatVietnamTime = (isoString?: string) => {
     if (!isoString) return '';

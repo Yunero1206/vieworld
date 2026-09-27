@@ -72,11 +72,12 @@ export function FanShopView() {
   const openedHere = useRef(false);
 
   const selectedId = params.get('product');
-  const selected = selectedId ? state.products[selectedId] : undefined;
+  const candidate = selectedId ? state.products[selectedId] : undefined;
+  const selected = candidate?.tenantId === state.activeTenantId ? candidate : undefined;
   const world = worldId ? state.worlds[worldId] : undefined;
   const allProducts = useMemo(() => Object.values(state.products).filter(product => product.tenantId === state.activeTenantId), [state.products, state.activeTenantId]);
   const categories = availableShopCategories(allProducts);
-  const ownOrders = Object.values(state.orders).filter(o => o.fanId === state.fanProfile.id);
+  const ownOrders = Object.values(state.orders).filter(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id);
   const saved = state.fanProfile.savedProductIds || [];
 
   useEffect(() => {

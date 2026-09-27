@@ -55,7 +55,7 @@ Schema thêm optional `ChatMessage.replyToId`, `momentIds`, `AppState.hallReacti
 
 ## Chạy local
 
-Dùng Node.js LTS tương thích Vite 6 và npm. Cài dependency từ lockfile:
+Dùng Node.js 22 LTS và npm (cùng phiên bản major với cấu hình showcase). Cài dependency từ lockfile:
 
 ```sh
 npm ci
@@ -68,10 +68,25 @@ Mở địa chỉ terminal in ra, mặc định `http://localhost:5173`.
 npm run typecheck
 npm test
 npm run build
+npm run check:showcase
 npm run preview
 ```
 
-Nếu config loader gặp lỗi quyền trên môi trường Windows bị giới hạn, thử `npm test -- --configLoader runner` hoặc `npm exec vite -- build --configLoader runner`. Đây là workaround môi trường, không phải yêu cầu của app.
+Nếu config loader gặp lỗi quyền trên môi trường Windows bị giới hạn, thử `npm test -- --configLoader runner` hoặc `npm run build -- --configLoader runner`. Đây là workaround môi trường, không phải yêu cầu của app. `typecheck` chạy `tsc -b` để kiểm tra các project references thật sự, không dùng root `tsc --noEmit` vốn không kiểm tra app này.
+
+## Showcase và một fan journey hoàn chỉnh
+
+Kết quả rà kết nối, lỗi đã sửa, phạm vi QA và checklist trước publish nằm trong [SHOWCASE_AUDIT.md](docs/SHOWCASE_AUDIT.md). Bản hiện tại phù hợp để trình bày **frontend showcase có tương tác demo**, không phải dịch vụ commerce/fandom production; chưa được deploy trong đợt rà này.
+
+Journey được kiểm thử: khách → Explore/Artist World → đăng nhập demo tại chỗ → hội viên/Hall/live → kỷ niệm → Shop scoped → giỏ/thanh toán/nhận digital demo → Collection → chủ động trưng phòng/equip Avatar → Home nhớ đúng destination → đăng xuất/tải lại. RSVP không tự thành tham dự; lưu sản phẩm không tự thành sở hữu; nhận đồ không tự trưng hết vào phòng. Phiên live dùng đồng hồ demo, không chạy theo ngày máy tính.
+
+Digital-only checkout có bước “Nhận vật phẩm digital (Demo)” sau thanh toán; fulfillment idempotent tạo cùng ownership để Collection/Room/Avatar đọc. Đơn vật lý/mixed vẫn giữ luồng giao hàng hiện có. Collection trống có lối sang Shop/cuộc hẹn; trạng thái lọc không ra kết quả có lối xóa bộ lọc. Thông báo capsule mở thẳng mode Kỷ niệm/Capsule; alias `type=memory` cũ vẫn đọc được. Từ chi tiết capsule có thể mở ghi chú riêng đúng object bằng `/me?panel=capsules&capsule=…`; link sang Collection không mở lại overlay ghi chú.
+
+Khi local storage không ghi được, app thông báo thay đổi đang ở bộ nhớ tạm. Khi tab khác ghi state của cùng fan/tenant, tab cũ dừng autosave và cho tải bản sao trước khi tự chọn reload; không tự merge hoặc reload giữa cuộc hẹn. Bản lưu hỏng/không tương thích được giữ ở recovery slot riêng trước khi khởi tạo trạng thái khách. Đây là kiểm tra envelope tối thiểu, không phải migration sâu mọi field hay khôi phục tự động từ IndexedDB.
+
+Error boundary bảo vệ root và route, có lựa chọn phục hồi không cần reset dữ liệu; chuyển sang route khác có thể thoát lỗi cũ. Backup JSON chỉ lấy key VieWorld, vẫn có thể chứa thông tin demo riêng: không nhập PII thật và không chia sẻ file đó công khai. Chưa có UI nhập lại backup. Drawer Room/Collection dùng focus trap, Esc và khóa cuộn nền; màu chữ/nền drawer Room theo light/dark tokens thay vì màu tím legacy.
+
+`render.yaml` chỉ còn static SPA xuất `dist/`; đã bỏ dịch vụ chạy preview như production. [Vite preview chỉ dùng để kiểm tra local](https://vite.dev/guide/static-deploy), không phải server production. Host phải hỗ trợ SPA deep links, đúng MIME cho assets và HTTPS; kiểm tra lại sau deploy theo checklist trong audit. `check:showcase` kiểm tra asset literal và build entry, không thay thế kiểm tra mọi asset động hay đo Core Web Vitals.
 
 ## Kiến trúc và dữ liệu
 
@@ -135,6 +150,22 @@ Spacing section dùng token chung; heading/link/actions wrap trên màn hình h�
 Regression test token text/link trên reading surfaces theo ngưỡng 4.5:1 cho chữ thường của [WCAG 2.2](https://www.w3.org/TR/WCAG22/#contrast-minimum). Đây không phải chứng nhận toàn app đạt WCAG: overlays, ảnh chứa chữ, states, zoom và screen reader vẫn cần kiểm tra riêng. Tôn trọng [reduced motion](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html).
 
 Agency và belonging là nguyên tắc thiết kế, không phải tác động tâm lý đã được chứng minh cho app. Áp dụng tinh thần autonomy/relatedness từ [Self-Determination Theory](https://selfdeterminationtheory.org/theory/) để fan được chọn cách tham gia; không thêm guilt copy, XP hay pressure-driven commerce.
+
+## Tài khoản demo & thông tin riêng
+
+Khách ở lần mở mới bấm icon tài khoản để mở overlay Đăng nhập / Đăng ký. Không ép đăng nhập ngay khi tải Home. Google/Gmail và Facebook **chỉ là lựa chọn mô phỏng**, dùng hồ sơ fan mẫu hiện có; không OAuth, mật khẩu, email xác minh hay tài khoản mạng xã hội thật. Đăng ký demo không tự cấp membership hoặc vật phẩm. Không reset giỏ hàng/phòng/bộ sưu tập khi vào hay đăng xuất demo.
+
+`AppState.demoAccount` là field optional, gồm tenant/fan identity, session demo và `contact`. Bản lưu cũ chưa có field này giữ phiên fan mẫu đang hoạt động; bản lưu mới từ storage adapter bắt đầu với session `null`. Không đổi ID fan hoặc version storage để migration tránh mất quan hệ sở hữu. Hai nhà cung cấp cùng dùng một hồ sơ mẫu, **không phải hai tài khoản độc lập**. Scenario/reset chủ động vẫn nạp fixture có sẵn. Đăng xuất chỉ kết thúc phiên UI, không xóa dữ liệu thiết bị.
+
+“Thông tin tài khoản” mở từ menu Avatar, tách khỏi My Space công khai. Email liên hệ tùy chọn; nơi nhận gồm tên người nhận, điện thoại, quốc gia, tỉnh/thành, địa chỉ; ghi chú giao hàng tùy chọn. Không hỏi ngày sinh, giới tính hay giấy tờ. Cho phép không lưu nơi nhận; nếu bắt đầu điền địa chỉ thì kiểm tra đủ thông tin. Dữ liệu contact không được đưa vào `currentPublicFan`, chat hay card bộ sưu tập, không ghi đè đơn hàng cũ. **Chỉ dùng dữ liệu giả**: localStorage/IndexedDB không phải kho PII bảo mật và người dùng chung máy vẫn có thể đọc; chưa có server account isolation hay checkout address integration.
+
+`UtilityDialog` dùng chung cho auth, thông tin tài khoản, quyền riêng tư, hướng dẫn và hỗ trợ: Be Vietnam Pro, semantic appearance tokens, chiều rộng đọc có giới hạn, body cuộn riêng, header/footer cố định, Esc/focus trap/return focus và khóa nền. Menu mở overlay tại chỗ, không đưa người dùng khỏi world đang ghé. Deep link cũ `/me?panel=privacy` và `/me?panel=support` vẫn dùng cùng component; `/me?panel=account` mở thông tin riêng hoặc auth demo cho khách.
+
+Quyền riêng tư có draft + Hủy/Lưu, tiếp tục dùng key cũ để giữ lựa chọn; cập nhật đồng bộ UI cùng tab, normalize giá trị lưu không hợp lệ. Room guest preview kiểm tra public/users/private trên client; sổ lưu bút có thể tạm ẩn mà không xóa lời nhắn. Dấu hội viên trong My Space không đồng nghĩa quyền Hall hoặc badge chat. Thiết lập này **không thay thế authorization trên server** và hiện còn dùng key privacy chung cho browser demo.
+
+Hướng dẫn là cẩm nang tĩnh, không AI hay nghệ sĩ: tìm từ khóa có/không dấu, ưu tiên title/topic/keyword hơn mô tả, chủ đề tài khoản riêng mới. Nguồn kỹ thuật ở details thay vì chen vào nội dung chính. Hỗ trợ chỉ tạo hồ sơ canonical cho đơn hàng/quyền lợi của đúng fan và tenant, reuse hồ sơ đang mở. Bỏ cam kết phản hồi 24 giờ: không có gửi thật hoặc SLA; yêu cầu tài khoản/kỹ thuật hiện chỉ có hướng dẫn.
+
+Hướng thiết kế dựa trên form ngắn, nhãn rõ và thông báo lỗi/lưu của [W3C WAI Forms](https://www.w3.org/WAI/tutorials/forms/); đăng nhập tùy chọn, social alternatives và thu thập thông tin bổ sung sau từ [NN/G registration/login](https://www.nngroup.com/articles/checklist-registration-login/). Các nguyên tắc UX này không thay thế thiết kế bảo mật production. Trước triển khai thật cần OAuth server-side, session an toàn, CSRF/authorization, bảo vệ/retention dữ liệu liên hệ và dịch vụ hỗ trợ thực.
 
 ## Hiệu năng và offline
 

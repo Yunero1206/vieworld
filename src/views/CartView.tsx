@@ -70,8 +70,9 @@ export function CartView(){
         {cancel?<div><p>Hủy toàn bộ món chưa thanh toán trong lần này?</p><button className="fw-text-button" onClick={()=>{dispatch({type:'CANCEL_CHECKOUT',checkoutId:checkoutId!});setCancel(false);}}>Xác nhận hủy</button><button className="fw-text-button" onClick={()=>setCancel(false)}>Giữ đơn</button></div>:<button className="fw-text-button" onClick={()=>setCancel(true)}>Hủy lần chốt đơn này</button>}
       </div>}
       {paid&&<div className="v5-paid-actions">
+        {!physical && !allFulfilled && <button type="button" className="fw-button" onClick={() => group.filter(order => order.status === 'paid').forEach(order => dispatch({ type: 'SIMULATE_FULFILMENT', orderId: order.id }))}>Nhận vật phẩm digital (Demo)</button>}
         <p role="status"><Check size={17}/>Thanh toán trải nghiệm thành công!</p>
-        <p>{allFulfilled ? 'Đã thêm vào Bộ sưu tập của bạn.' : physical ? 'Đơn đã được ghi nhận; theo dõi bàn giao mô phỏng trong chi tiết đơn. Vật phẩm sẽ vào Bộ sưu tập sau bước này.' : 'Vật phẩm digital sẽ vào Bộ sưu tập và có thể trang bị sau khi đơn được bàn giao mô phỏng.'}</p>
+        <p>{allFulfilled ? 'Đã thêm vào Bộ sưu tập của bạn.' : physical ? 'Đơn đã được ghi nhận; theo dõi bàn giao mô phỏng trong chi tiết đơn. Vật phẩm sẽ vào Bộ sưu tập sau bước này.' : 'Chọn nhận digital để hoàn tất bàn giao mô phỏng. Sau bước này, món đồ mới vào Bộ sưu tập và có thể trang bị; không giao dịch tiền thật.'}</p>
         <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px', marginBottom: '8px'}}>
           <Link to="/me?panel=bag" className="fw-button">Túi đồ & Đơn hàng của tôi</Link>
           {allFulfilled && <Link to="/me?section=collection" className="fw-text-button">Xem trong Bộ sưu tập →</Link>}

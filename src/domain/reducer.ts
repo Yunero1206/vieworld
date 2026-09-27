@@ -13,9 +13,10 @@ import { commerceReducer } from '../world/commerce';
 import { shippingReducer } from '../world/shipping';
 import { historyReducer } from '../world/history';
 import { validHomeDestination } from '../world/homeDestination';
+import { accountReducer, isDemoSignedIn } from '../world/account';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
-  const featureState=commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
+  const featureState=accountReducer(state,action) ?? commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
   if(featureState)return featureState;
   switch (action.type) {
     case 'SAVE_ROOM_DESIGN': {
@@ -56,7 +57,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, hallMessages: { ...state.hallMessages, [action.worldId]: (state.hallMessages?.[action.worldId] || []).map(m => m.id === action.messageId ? { ...m, isReported: true, reportRef: `report-${m.id}` } : m) } };
     }
     case 'TOGGLE_SAVED_PRODUCT': {
-      if (!state.products[action.productId]) return state;
+      if (state.products[action.productId]?.tenantId !== state.activeTenantId) return state;
       const ids = state.fanProfile.savedProductIds || [];
       return { ...state, fanProfile: { ...state.fanProfile, savedProductIds: ids.includes(action.productId) ? ids.filter(id => id !== action.productId) : [...ids, action.productId] } };
     }
@@ -899,9 +900,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
               category: 'capsule',
               sourceAttribution: 'platform',
               title: 'Kỷ vật Moment Capsule đã sẵn sàng!',
-              body: `Moment Capsule ghi nhận sự tham gia của bạn tại "${session.title}" đã được lưu trữ trong My World.`,
+              body: `Kỷ niệm tham dự "${session.title}" đã được giữ trong Bộ sưu tập của bạn.`,
               isRead: false,
-              targetRoute: '/me',
+              targetRoute: '/me?section=collection&mode=memories&type=capsule',
               createdAt: state.demoTime,
               updatedAt: state.demoTime,
             };
@@ -1226,7 +1227,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      */
     case 'UPGRADE_MEMBERSHIP': {
       const world = state.worlds[action.worldId];
-      if (!world) {
+      if (!isDemoSignedIn(state)) return { ...state, lastError: { code: 'DEMO_LOGIN_REQUIRED', message: 'Đăng nhập demo trước khi tham gia hội viên.' } };
+      if (!world || world.tenantId !== state.activeTenantId) {
         return {
           ...state,
           lastError: {
@@ -1238,11 +1240,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
       const fanId = state.fanProfile.id;
       const existingMembership = Object.values(state.memberships).find(
-        (m) => m.worldId === action.worldId && m.fanId === fanId
+        (m) => m.tenantId === state.activeTenantId && m.worldId === action.worldId && m.fanId === fanId
       );
 
       // If already active, idempotent no-op
-      if (existingMembership && existingMembership.status === 'active') {
+      if (existingMembership && existingMembership.status === 'active' && (!existingMembership.expiresAt || Date.parse(existingMembership.expiresAt) > Date.parse(state.demoTime))) {
         return state;
       }
 
@@ -1326,6 +1328,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      * - Invariant: Validates subject existence; returns SUBJECT_NOT_FOUND if subject does not exist.
      */
     case 'OPEN_SUPPORT_CASE': {
+      const subject = action.subjectType === 'order' ? state.orders[action.subjectId] : action.subjectType === 'benefit' ? state.benefits[action.subjectId] : undefined;
+      if (!subject || subject.fanId !== state.fanProfile.id || subject.tenantId !== state.activeTenantId) {
+        return { ...state, lastError: { code: 'SUBJECT_NOT_FOUND', message: 'Chỉ mở yêu cầu cho đơn hàng hoặc quyền lợi của bạn trong không gian này.' } };
+      }
       if (action.subjectType === 'benefit' && !state.benefits[action.subjectId]) {
         return {
           ...state,
@@ -1349,7 +1355,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
 
       const existing = Object.values(state.supportCases).find(
-        (c) => c.subjectId === action.subjectId && c.status !== 'closed' && c.status !== 'resolved'
+        (c) => c.subjectId === action.subjectId && c.subjectType === action.subjectType && c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId && c.status !== 'closed' && c.status !== 'resolved'
       );
 
       if (existing) {

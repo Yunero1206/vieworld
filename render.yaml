@@ -1,22 +1,26 @@
 services:
-  # Cấu hình 1: Web Service (Node.js runtime lắng nghe cổng $PORT)
-  - type: web
-    name: vieworld-web
-    runtime: node
-    plan: free
-    region: singapore
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_VERSION
-        value: 20
-
-  # Cấu hình 2: Static Site (Khuyến nghị cho SPA - Nhanh, CDN toàn cầu & Miễn phí)
+  # Showcase is a static SPA. vite preview is a local verification tool, not a production server.
   - type: web
     name: vieworld-static
     runtime: static
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build && npm run check:showcase
     staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
     routes:
       - type: rewrite
         source: /*

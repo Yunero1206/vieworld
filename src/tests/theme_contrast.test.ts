@@ -8,6 +8,11 @@ const luminance = (hex: string) => {
 };
 const ratio = (a: string, b: string) => (Math.max(luminance(a), luminance(b)) + .05) / (Math.min(luminance(a), luminance(b)) + .05);
 describe('Shared appearance token contrast (not a full page accessibility audit)', () => {
+  it('keeps the room picker reading UI on semantic colors in both themes', () => {
+    expect(css).toContain('.fan-shell .v7-drawer-header h3 { color: var(--ink)');
+    expect(css).toContain('.fan-shell :is(.v7-drawer-eyebrow,.v7-drawer-collection-link,.v7-item-placeholder) { color: var(--primary)');
+    expect(css).toContain('.fan-shell .v7-drawer-empty .fw-text-button { color: var(--primary)');
+  });
   for (const mode of ['light', 'dark']) it(`${mode}: ink, secondary text and links meet 4.5:1 on reading surfaces`, () => {
     const block = css.split(`.fan-shell[data-theme='${mode}'] {`)[1].split('}')[0];
     const token = (name: string) => block.match(new RegExp(`--appearance-${name}:\\s*(#[0-9a-f]{6})`))![1];

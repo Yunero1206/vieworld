@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Send, Flag, Users, Pin } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { canEnterHall } from '../world/merchCatalog';
+import { isDemoSignedIn } from '../world/account';
 import { ARTIST_FANDOM_REGISTRY } from '../data/artistChatConfig';
 
 interface InitialMessage {
@@ -186,7 +187,7 @@ export function HallPanel({ worldId }: { worldId: string }) {
       )}
 
       {/* 4. Live Message Stream */}
-      <div
+      {isMember && <div
         className="v7-chat-stream"
         role="log"
         aria-live="polite"
@@ -280,7 +281,7 @@ export function HallPanel({ worldId }: { worldId: string }) {
           );
         })}
         <div ref={messagesEndRef} />
-      </div>
+      </div>}
 
       {/* 5. Sticky Bottom Chat Input Bar / Gated State */}
       {isMember ? (
@@ -325,9 +326,9 @@ export function HallPanel({ worldId }: { worldId: string }) {
           <button
             type="button"
             className="moments-gated-btn"
-            onClick={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId })}
+            onClick={() => isDemoSignedIn(state) ? dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId }) : window.dispatchEvent(new Event('vieworld-open-auth'))}
           >
-            Tham gia {fandomName} (Demo)
+            {isDemoSignedIn(state) ? `Tham gia ${fandomName} (Demo)` : 'Đăng nhập demo để tiếp tục'}
           </button>
         </div>
       )}

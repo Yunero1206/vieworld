@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "start": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --pretty false",
+    "check:showcase": "node scripts/check-showcase.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"
@@ -34,6 +35,6 @@
     "pngjs": "^7.0.0",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
-    "vitest": "^3.0.5"
+    "vitest": "4.1.11"
   }
 }

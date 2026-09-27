@@ -23,25 +23,25 @@ export const StatusNotice: React.FC<StatusNoticeProps> = ({
         };
       case 'warning':
         return {
-          bg: '#FFF8E6',
-          border: '#FFE29A',
-          text: '#7A4100',
-          icon: <AlertCircle size={18} color="#B45309" aria-hidden="true" />,
+          bg: 'var(--surface-subtle)',
+          border: 'var(--border)',
+          text: 'var(--ink)',
+          icon: <AlertCircle size={18} aria-hidden="true" />,
         };
       case 'success':
         return {
-          bg: '#ECFDF5',
-          border: '#A7F3D0',
-          text: '#065F46',
-          icon: <CheckCircle size={18} color="#059669" aria-hidden="true" />,
+          bg: 'var(--surface-subtle)',
+          border: 'var(--border)',
+          text: 'var(--ink)',
+          icon: <CheckCircle size={18} aria-hidden="true" />,
         };
       case 'info':
       default:
         return {
-          bg: '#EDE9FE',
-          border: '#DDD6FE',
-          text: 'var(--primary)',
-          icon: <Info size={18} color="var(--primary)" aria-hidden="true" />,
+          bg: 'var(--surface-subtle)',
+          border: 'var(--border)',
+          text: 'var(--ink)',
+          icon: <Info size={18} aria-hidden="true" />,
         };
     }
   };

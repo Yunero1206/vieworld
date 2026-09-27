@@ -53,7 +53,7 @@ describe('T10 Acceptance: Notifications, Inbox, and Read States', () => {
       expect(capsuleNotif).toBeDefined();
       expect(capsuleNotif.type).toBe('capsule_ready');
       expect(capsuleNotif.category).toBe('capsule');
-      expect(capsuleNotif.targetRoute).toBe('/me');
+      expect(capsuleNotif.targetRoute).toBe('/me?section=collection&mode=memories&type=capsule');
       expect(capsuleNotif.isRead).toBe(false);
 
       // Calling END_SESSION again is idempotent: does not duplicate notification

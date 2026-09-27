@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -11,6 +11,7 @@ import type { PublicFan } from '../world/community';
 import { RoomGuestbook } from './RoomGuestbook';
 import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
 import { RoomPolaroidModal } from './RoomPolaroidModal';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 interface DisplayRoomSceneProps {
   fan: Pick<PublicFan, 'name' | 'look' | 'accessory' | 'appearance'> & { id?: string };
@@ -321,6 +322,7 @@ export function PersonalDisplayRoom({
   const [isPolaroidOpen, setIsPolaroidOpen] = useState(false);
 
   const lastTriggerButtonRef = useRef<HTMLElement | null>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   const displayed = useMemo(() => displayedItems(state), [state]);
   const allSlotOptions = useMemo(() => displayOptions(state), [state]);
@@ -338,20 +340,6 @@ export function PersonalDisplayRoom({
   const currentSurfaceItems = currentSelection?.itemIds.map(id => displayed.find(item => item.id === id)).filter((item): item is (typeof displayed)[number] => Boolean(item)) || [];
   const currentUnits = currentSurfaceItems.reduce((total, item) => total + itemFootprint(item), 0);
 
-  // Close drawer on Escape and return focus
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setActiveDrawerSlot(null);
-        lastTriggerButtonRef.current?.focus();
-      }
-    };
-    if (activeDrawerSlot) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [activeDrawerSlot]);
-
   const handleSelectSlot = (slot: DisplaySlot) => {
     if (roomMode !== 'edit') return;
     setDrawerNotice('');
@@ -363,6 +351,7 @@ export function PersonalDisplayRoom({
     setActiveDrawerSlot(null);
     lastTriggerButtonRef.current?.focus();
   };
+  useDialogA11y(Boolean(activeDrawerSlot), handleCloseDrawer, drawerRef);
 
   const applySelection = (selection: SurfaceSelection, success: string) => {
     if (!activeDrawerSlot) return;
@@ -485,6 +474,8 @@ export function PersonalDisplayRoom({
       {activeDrawerSlot && (
         <div className="v7-drawer-backdrop" onClick={handleCloseDrawer}>
           <div
+            ref={drawerRef}
+            tabIndex={-1}
             className="v7-slot-picker-drawer"
             onClick={e => e.stopPropagation()}
             role="dialog"
@@ -500,7 +491,6 @@ export function PersonalDisplayRoom({
                 className="v7-drawer-close-btn"
                 onClick={handleCloseDrawer}
                 aria-label="Đóng"
-                autoFocus
               >
                 <X size={18} />
               </button>

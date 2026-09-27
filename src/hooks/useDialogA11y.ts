@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Reusable WCAG 2.2 compliant Dialog & Drawer accessibility hook:
+ * Shared Dialog & Drawer keyboard/focus behavior (not a WCAG certification):
  * - Focuses dialog/first element on open
  * - Traps Tab and Shift+Tab key navigation strictly inside the container
  * - Listens for Escape key to trigger onClose()
@@ -81,13 +81,13 @@ export function useDialogA11y(
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     return () => {
       cancelAnimationFrame(frameId);
-      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = oldOverflow;
       if (previousActiveElementRef.current && previousActiveElementRef.current.isConnected) {
         previousActiveElementRef.current.focus();

@@ -9,7 +9,8 @@ import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
 import { RoomGuestbook } from '../components/RoomGuestbook';
 import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { AvatarRenderer } from '../components/AvatarRenderer';
-import { loadPrivacySettings } from '../world/privacy';
+import { canAccessRoom, loadPrivacySettings } from '../world/privacy';
+import { isDemoSignedIn } from '../world/account';
 
 export function MemberSpaceView() {
   const { state } = useApp();
@@ -24,6 +25,12 @@ export function MemberSpaceView() {
   const own = fanId === state.fanProfile.id;
   const privacySettings = own ? loadPrivacySettings() : undefined;
   const fan = own ? currentPublicFan(state) : DEMO_FANS.find(f => f.id === fanId);
+
+  // This route previews the guest's view; the owner still edits the room at /me.
+  if (own && privacySettings && !canAccessRoom(privacySettings, false, isDemoSignedIn(state))) {
+    return <div className="fw-empty"><h1>{privacySettings.roomVisibility === 'private' ? 'Phòng này chỉ mình bạn xem.' : 'Phòng dành cho người đã đăng nhập.'}</h1>
+      <p>Chế độ khách không thể xem nội dung phòng với lựa chọn hiện tại. Đây là kiểm tra mô phỏng trên trình duyệt.</p><Link to="/me">Quay lại My Space</Link></div>;
+  }
 
   if (!fan) {
     return (

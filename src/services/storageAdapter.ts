@@ -10,6 +10,7 @@
 import { AppState, TenantId } from '../domain/types';
 import { createInitialState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
 import { withMerchCatalog } from '../world/merchCatalog';
+import { freshGuestState } from '../world/account';
 import { idbGet, idbSet, idbDelete, clearTenantAsync, STORE_TENANT_STATE } from './indexedDbAdapter';
 
 export const SCHEMA_VERSION = 1;
@@ -26,8 +27,35 @@ export interface StorageLoadResult {
 const memoryFallbackStore: Record<string, string> = {};
 let memoryFallbackActive = false;
 
-function buildStorageKey(tenantId: TenantId, fanId: string = 'fan-linh'): string {
+export function buildStorageKey(tenantId: TenantId, fanId: string = 'fan-linh'): string {
   return `${STORAGE_KEY_PREFIX}_${tenantId}_${fanId}`;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
+/** Validate the persisted envelope before selectors access its required collections. Optional additions remain optional. */
+export function isPersistedState(value: unknown, tenantId: TenantId, fanId: string): value is AppState {
+  if (!isRecord(value) || value.activeTenantId !== tenantId || !isRecord(value.fanProfile) || value.fanProfile.id !== fanId || typeof value.demoTime !== 'string' || !Number.isFinite(Date.parse(value.demoTime))) return false;
+  const records = ['worlds', 'avatarAssets', 'sessions', 'memberships', 'benefits', 'participations', 'orders', 'supportCases', 'products', 'questions', 'polls', 'capsules', 'notifications'];
+  const lists = ['followedWorldIds', 'rsvpdSessionIds', 'inLobbySessionIds'];
+  return records.every(key => isRecord(value[key])) && lists.every(key => Array.isArray(value[key]));
+}
+
+function preserveRecoveryCopy(key: string, raw: string): void {
+  // One bounded recovery slot per fan, kept out of the normal hydration path.
+  memoryFallbackStore[`${key}_recovery`] = raw;
+  try { window.localStorage.setItem(`${key}_recovery`, raw); } catch { /* Backup remains available for local export. */ }
+}
+
+/** Explicit local download only; never include unrelated browser storage. May contain private demo contact details. */
+export function collectLocalDemoBackup(): Record<string, string> {
+  const dump: Record<string, string> = {};
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key && (key.startsWith('vieworld:') || key.startsWith(`${STORAGE_KEY_PREFIX}_`) || key === 'vieworld_privacy_settings')) dump[key] = window.localStorage.getItem(key) || '';
+    }
+  } catch { /* Memory-only sessions are still exportable. */ }
+  return { ...dump, ...memoryFallbackStore };
 }
 
 /**
@@ -68,7 +96,7 @@ export function saveState(state: AppState): boolean {
   if (!isLocalStorageAvailable() || memoryFallbackActive) {
     memoryFallbackStore[key] = payload;
     memoryFallbackActive = true;
-    return true;
+    return false;
   }
 
   try {
@@ -99,6 +127,7 @@ export function loadState(
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
+        if (!isPersistedState(parsed.state, tenantId, fanId)) throw new Error('Invalid cached state');
         return {
           state: withMerchCatalog(parsed.state),
           isMemoryFallback: true,
@@ -109,7 +138,7 @@ export function loadState(
       }
     }
     return {
-      state: createInitialState(tenantId),
+      state: freshGuestState(createInitialState(tenantId)),
       isMemoryFallback: true,
       notice: 'Chế độ lưu tạm trong bộ nhớ: dữ liệu sẽ không lưu sau khi đóng tab.',
     };
@@ -119,7 +148,7 @@ export function loadState(
     const raw = window.localStorage.getItem(key);
     if (!raw) {
       return {
-        state: createInitialState(tenantId),
+        state: freshGuestState(createInitialState(tenantId)),
         isMemoryFallback: false,
       };
     }
@@ -127,15 +156,16 @@ export function loadState(
     const parsed = JSON.parse(raw);
 
     // Schema version check and basic integrity validation
-    if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION || !parsed.state) {
+    if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION || !isPersistedState(parsed.state, tenantId, fanId)) {
       // Version mismatch or invalid structure: recover with fresh initial state
-      const freshState = createInitialState(tenantId);
-      saveState(freshState);
+      const freshState = freshGuestState(createInitialState(tenantId));
+      preserveRecoveryCopy(key, raw);
+      const durable = saveState(freshState);
       return {
         state: freshState,
-        isMemoryFallback: false,
+        isMemoryFallback: !durable,
         recoveredFromError: true,
-        notice: 'Đã khôi phục dữ liệu mặc định do phiên bản lưu trữ trước đó không tương thích.',
+        notice: 'Đã khôi phục dữ liệu mặc định do dữ liệu cũ thiếu trường hoặc phiên bản không tương thích. Bản gốc được giữ riêng để khôi phục, không dùng làm dữ liệu đang chạy.',
       };
     }
 
@@ -161,9 +191,10 @@ export function loadState(
     };
   } catch {
     // Malformed JSON or read error: recover cleanly without crashing
-    const freshState = createInitialState(tenantId);
+    const freshState = freshGuestState(createInitialState(tenantId));
     try {
-      window.localStorage.removeItem(key);
+      const raw = window.localStorage.getItem(key);
+      if (raw) preserveRecoveryCopy(key, raw);
     } catch {
       // Ignore
     }
@@ -171,7 +202,7 @@ export function loadState(
       state: freshState,
       isMemoryFallback: false,
       recoveredFromError: true,
-      notice: 'Đã phát hiện dữ liệu lưu trữ không hợp lệ. Hệ thống đã khôi phục lại trạng thái ban đầu an toàn.',
+      notice: 'Dữ liệu không đọc được; đã khôi phục lại trạng thái ban đầu. Bản gốc được giữ riêng để kiểm tra/khôi phục.',
     };
   }
 }
@@ -187,7 +218,7 @@ export async function loadStateAsync(
   const key = buildStorageKey(tenantId, fanId);
   try {
     const idbData = await idbGet<AppState>(STORE_TENANT_STATE, key);
-    if (idbData && idbData.activeTenantId === tenantId) {
+    if (isPersistedState(idbData, tenantId, fanId)) {
       return {
         state: withMerchCatalog(idbData),
         isMemoryFallback: false,

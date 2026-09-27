@@ -37,6 +37,7 @@ export const DISPLAY_FIXTURES: { slot: DisplaySlot; label: string; x: number; y:
  */
 export function ownedCollection(s: AppState): DisplayItem[] {
   const products: DisplayItem[] = Object.values(s.products).flatMap(p => {
+    if (p.tenantId !== s.activeTenantId) return [];
     const receipts = Object.values(s.orders).filter(
       o => o.productId === p.id && o.status === 'fulfilled' && o.fanId === s.fanProfile.id && o.tenantId === s.activeTenantId
     );

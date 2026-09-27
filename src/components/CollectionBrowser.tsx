@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Award, MoreHorizontal, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -7,6 +7,7 @@ import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSe
 import { ArchiveCollection } from './ArchiveCollection';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from './SearchCombobox';
+import { useDialogA11y } from '../hooks/useDialogA11y';
 
 type Mode = 'objects' | 'memories';
 const objectCategories = [['all', 'Tất cả'], ['shirt', 'Áo'], ['ticket', 'Vé'], ['disc', 'Đĩa'], ['lightstick', 'Lightstick'], ['other', 'Khác']];
@@ -16,7 +17,7 @@ export function CollectionBrowser() {
   const { state, dispatch } = useApp();
   const [params, setParams] = useSearchParams();
   const rawCategory = params.get('type') || params.get('custom') || 'all';
-  const category = rawCategory === 'achievement' ? 'milestone' : rawCategory;
+  const category = rawCategory === 'achievement' ? 'milestone' : rawCategory === 'memory' ? 'capsule' : rawCategory;
   const mode: Mode = params.get('mode') === 'memories' || memoryCategories.some(([id]) => id !== 'all' && id === category) ? 'memories' : 'objects';
   const [query, setQuery] = useState('');
   const [artist, setArtist] = useState('all');
@@ -26,16 +27,23 @@ export function CollectionBrowser() {
   const [detail, setDetail] = useState<DisplayItem | null>(null);
   const [placing, setPlacing] = useState<DisplayItem | null>(null);
   const [notice, setNotice] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogA11y(Boolean(detail || placing), () => { setDetail(null); setPlacing(null); }, dialogRef);
+  // Detail → placement stays in the same overlay, but its focus target changes.
+  useEffect(() => {
+    if (!detail && !placing) return;
+    const frame = requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [detail, placing]);
   const owned = useMemo(() => ownedCollection(state), [state]);
+  const modeOwned = owned.filter(item => (mode === 'memories') === ['event', 'achievement', 'moment'].includes(item.sourceType || ''));
   const surfaces = useMemo(() => readDisplaySurfaces(state.fanProfile, owned), [state.fanProfile, owned]);
   const categories = mode === 'objects' ? objectCategories : memoryCategories;
   const selectedCategory = categories.some(([id]) => id === category) ? category : 'all';
   const years = [...new Set(owned.map(item => item.collectedAt?.slice(0, 4)).filter((value): value is string => Boolean(value)))].sort().reverse();
   const events = [...new Set(owned.map(item => item.eventName).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, 'vi'));
 
-  const filtered = owned.filter(item => {
-    const memory = ['event', 'achievement', 'moment'].includes(item.sourceType || '');
-    if ((mode === 'memories') !== memory) return false;
+  const filtered = modeOwned.filter(item => {
     if (selectedCategory !== 'all') {
       if (mode === 'objects' && (selectedCategory === 'other' ? ['shirt', 'ticket', 'disc', 'lightstick'].includes(item.slot || '') : item.slot !== selectedCategory)) return false;
       if (mode === 'memories' && (selectedCategory === 'milestone' ? item.sourceType !== 'achievement' : selectedCategory === 'capsule' ? item.category !== 'memory' : selectedCategory === 'concert' ? item.sourceType !== 'event' || item.category === 'memory' : selectedCategory === 'moment' ? item.sourceType !== 'moment' : item.category !== 'fan-project')) return false;
@@ -94,7 +102,7 @@ export function CollectionBrowser() {
     <div className="myspace-collection-tools">
       <SearchCombobox className="myspace-collection-search" value={query} onChange={setQuery}
         label="Tìm trong bộ sưu tập" placeholder={mode === 'objects' ? 'Tìm vật phẩm trong bộ sưu tập…' : 'Tìm một kỷ niệm…'}
-        suggestions={owned.filter(item => (mode === 'memories') === ['event', 'achievement', 'moment'].includes(item.sourceType || '')).map(item => ({ id: item.id, label: item.title, context: [state.worlds[item.worldId || '']?.name, item.eventName].filter(Boolean).join(' · ') || 'Bộ sưu tập của bạn' }))}
+        suggestions={modeOwned.map(item => ({ id: item.id, label: item.title, context: [state.worlds[item.worldId || '']?.name, item.eventName].filter(Boolean).join(' · ') || 'Bộ sưu tập của bạn' }))}
         onSelect={item => { setQuery(item.label); setDetail(owned.find(ownedItem => ownedItem.id === item.id) || null); }} />
       <div className="myspace-collection-filter-row">
         <nav className="myspace-category-chips" aria-label="Danh mục">{categories.map(([id, label]) => <button key={id} type="button" aria-pressed={selectedCategory === id} onClick={() => setCategory(id)}>{label}</button>)}</nav>
@@ -117,9 +125,26 @@ export function CollectionBrowser() {
         <div className="myspace-object-caption"><h3>{item.title}</h3><p>{[state.worlds[item.worldId || '']?.name, item.eventName && item.eventName !== item.title ? item.eventName : undefined, item.collectedAt?.slice(0, 4)].filter(Boolean).join(' · ') || (item.sourceType === 'achievement' ? 'Một dấu mốc của bạn' : 'Bộ sưu tập của bạn')}</p></div>
       </article>)}
     </div>
-    {!filtered.length && <div className="myspace-collection-empty"><p>Chưa có món nào phù hợp với lựa chọn này.</p><button type="button" onClick={() => { setQuery(''); setArtist('all'); setEventName('all'); setYear('all'); setCategory('all'); }}>Xem tất cả</button></div>}
+    {!filtered.length && <div className="myspace-collection-empty">
+      {modeOwned.length ? <><p>Chưa có món nào phù hợp với lựa chọn này.</p><button type="button" onClick={() => { setQuery(''); setArtist('all'); setEventName('all'); setYear('all'); setCategory('all'); }}>Xem tất cả</button></> : mode === 'objects' ? <>
+        <h3>Chưa có vật phẩm đã nhận.</h3><p>Vật phẩm hiện ở đây sau khi được giao trong demo. Đồ đã lưu hay còn trong giỏ chưa phải đồ của bạn.</p>
+        <Link to="/shop">Ghé VieSHOP →</Link><Link to="/me?panel=bag">Kiểm tra đơn đã chốt →</Link>
+      </> : <>
+        <h3>Chưa có kỷ niệm ở đây.</h3><p>Kỷ niệm được giữ lại từ cuộc hẹn bạn đã tham dự; giữ chỗ thôi chưa ghi nhận tham dự.</p>
+        <Link to="/explore">Tìm một cuộc hẹn →</Link>
+      </>}
+    </div>}
     {mode === 'memories' && <details className="myspace-history-details"><summary>Xem lịch sử thẻ & dấu mốc đã ghi nhận</summary><ArchiveCollection/></details>}
-    {detail && <div className="myspace-modal-backdrop" onClick={() => setDetail(null)}><div className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chi tiết ${detail.title}`} onClick={event => event.stopPropagation()}><button className="myspace-modal-close" type="button" onClick={() => setDetail(null)} aria-label="Đóng"><X size={18}/></button><div className="myspace-modal-image">{displayAssetUrl(detail) ? <img src={displayAssetUrl(detail)} alt=""/> : <Award size={54}/>}</div><h2>{detail.title}</h2><p>{state.worlds[detail.worldId || '']?.name || 'Bộ sưu tập của bạn'}{detail.collectedAt ? ` · ${detail.collectedAt.slice(0, 10)}` : ''}</p><p>{detail.detail}</p>{detail.isDisplayCompatible && <button type="button" className="myspace-primary-action" onClick={() => { setPlacing(detail); setDetail(null); }}>{displayedAt(detail.id) ? 'Đổi vị trí trong phòng' : 'Trưng trong phòng'}</button>}</div></div>}
-    {placing && <div className="myspace-modal-backdrop" onClick={() => setPlacing(null)}><div className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chọn chỗ trưng ${placing.title}`} onClick={event => event.stopPropagation()}><button className="myspace-modal-close" type="button" onClick={() => setPlacing(null)} aria-label="Đóng"><X size={18}/></button><h2>Chọn một góc cho {placing.title}</h2><p>Bạn chọn món; phòng tự sắp xếp. Món trong Bộ sưu tập vẫn luôn được giữ.</p><div className="myspace-surface-choices">{DISPLAY_SURFACES.filter(surface => placing.slot && surface.allowedItemTypes.includes(placing.slot)).map(surface => { const count = surfaces[surface.id].itemIds.length; const units = surfaces[surface.id].itemIds.reduce((sum, id) => sum + itemFootprint(owned.find(item => item.id === id) || placing), 0); const full = count >= surface.maxItems || (units + itemFootprint(placing) > surface.capacityUnits && displayedAt(placing.id) !== surface.id); return <button key={surface.id} type="button" disabled={full} onClick={() => place(surface.id, placing)}><strong>{surface.label}</strong><small>{displayedAt(placing.id) === surface.id ? 'Đang ở đây' : full ? 'Khu vực này đã đầy' : `${count}/${surface.maxItems} món`}</small></button>; })}</div>{notice && <p role="status">{notice}</p>}</div></div>}
+    {detail && <div className="myspace-modal-backdrop" onClick={() => setDetail(null)}>
+      <div ref={dialogRef} tabIndex={-1} className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chi tiết ${detail.title}`} onClick={event => event.stopPropagation()}>
+        <button className="myspace-modal-close" type="button" onClick={() => setDetail(null)} aria-label="Đóng"><X size={18}/></button><div className="myspace-modal-image">{displayAssetUrl(detail) ? <img src={displayAssetUrl(detail)} alt=""/> : <Award size={54}/>}</div><h2>{detail.title}</h2><p>{state.worlds[detail.worldId || '']?.name || 'Bộ sưu tập của bạn'}{detail.collectedAt ? ` · ${detail.collectedAt.slice(0, 10)}` : ''}</p><p>{detail.detail}</p>{detail.isDisplayCompatible && <button type="button" className="myspace-primary-action" onClick={() => { setPlacing(detail); setDetail(null); }}>{displayedAt(detail.id) ? 'Đổi vị trí trong phòng' : 'Trưng trong phòng'}</button>}
+        {state.capsules[detail.id] && <Link className="myspace-room-link" to={`/me?panel=capsules&capsule=${encodeURIComponent(detail.id)}`} onClick={() => setDetail(null)}>Ghi chú riêng cho kỷ niệm này →</Link>}
+      </div>
+    </div>}
+    {placing && <div className="myspace-modal-backdrop" onClick={() => setPlacing(null)}>
+      <div ref={dialogRef} tabIndex={-1} className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chọn chỗ trưng ${placing.title}`} onClick={event => event.stopPropagation()}>
+        <button className="myspace-modal-close" type="button" onClick={() => setPlacing(null)} aria-label="Đóng"><X size={18}/></button><h2>Chọn một góc cho {placing.title}</h2><p>Bạn chọn món; phòng tự sắp xếp. Món trong Bộ sưu tập vẫn luôn được giữ.</p><div className="myspace-surface-choices">{DISPLAY_SURFACES.filter(surface => placing.slot && surface.allowedItemTypes.includes(placing.slot)).map(surface => { const count = surfaces[surface.id].itemIds.length; const units = surfaces[surface.id].itemIds.reduce((sum, id) => sum + itemFootprint(owned.find(item => item.id === id) || placing), 0); const full = count >= surface.maxItems || (units + itemFootprint(placing) > surface.capacityUnits && displayedAt(placing.id) !== surface.id); return <button key={surface.id} type="button" disabled={full} onClick={() => place(surface.id, placing)}><strong>{surface.label}</strong><small>{displayedAt(placing.id) === surface.id ? 'Đang ở đây' : full ? 'Khu vực này đã đầy' : `${count}/${surface.maxItems} món`}</small></button>; })}</div>{notice && <p role="status">{notice}</p>}
+      </div>
+    </div>}
   </section>;
 }

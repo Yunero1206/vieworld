@@ -1,4 +1,5 @@
 import { AppState, Product, ProductKind } from '../domain/types';
+import { isDemoSignedIn } from './account';
 
 export const MERCH_IMAGE_ROOT = '/images/merch-v2';
 export const DELIVERY_LABELS = { physical: 'Hàng thật', digital: 'Digital', bundle: 'Hàng thật + Digital' };
@@ -54,11 +55,11 @@ export function withMerchCatalog(state: AppState): AppState {
 }
 
 export function ownsDigitalProduct(state: AppState, product: Product) {
-  return !!product.digitalItemId && Object.values(state.orders).some(o => o.fanId === state.fanProfile.id && o.status === 'fulfilled' && state.products[o.productId]?.digitalItemId === product.digitalItemId);
+  return product.tenantId === state.activeTenantId && !!product.digitalItemId && Object.values(state.orders).some(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id && o.status === 'fulfilled' && state.products[o.productId]?.tenantId === state.activeTenantId && state.products[o.productId]?.digitalItemId === product.digitalItemId);
 }
 
 export function canEnterHall(state: AppState, worldId: string) {
-  return state.worlds[worldId]?.tenantId === state.activeTenantId && Object.values(state.memberships).some(m => m.tenantId === state.activeTenantId && m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
+  return isDemoSignedIn(state) && state.worlds[worldId]?.tenantId === state.activeTenantId && Object.values(state.memberships).some(m => m.tenantId === state.activeTenantId && m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
 }
 
 export const hasActiveMembership = canEnterHall;

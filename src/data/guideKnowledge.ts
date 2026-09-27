@@ -6,7 +6,7 @@
 
 export interface GuideKnowledgeCard {
   id: string;
-  topic: 'membership' | 'benefits' | 'orders' | 'sessions' | 'capsules' | 'support' | 'avatar' | 'tenants';
+  topic: 'membership' | 'benefits' | 'orders' | 'sessions' | 'capsules' | 'support' | 'avatar' | 'tenants' | 'account';
   topicLabel: string;
   title: string;
   description: string;
@@ -44,6 +44,14 @@ export type GuideQueryResult =
     };
 
 export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
+  {
+    id: 'guide-card-account', topic: 'account', topicLabel: 'Tài khoản & riêng tư',
+    title: 'Tài khoản riêng, phòng chia sẻ',
+    description: 'Icon tài khoản mở đăng nhập/đăng ký Google hoặc Facebook mô phỏng, không xin mật khẩu hay kết nối dịch vụ thật. Thông tin tài khoản là nơi lưu email liên hệ và nơi nhận bằng dữ liệu giả, tách khỏi My Space. Quyền riêng tư My Space điều chỉnh ai được ghé phòng, sổ lưu bút và dấu hội viên. Dữ liệu vẫn lưu cục bộ; không dùng thiết bị chung để nhập thông tin thật.',
+    keywords: ['đăng nhập', 'đăng ký', 'gmail', 'facebook', 'google', 'tài khoản', 'email', 'liên hệ', 'địa chỉ', 'giao hàng', 'số điện thoại', 'quyền riêng tư'],
+    actionLink: { to: '/me?panel=account', label: 'Mở thông tin tài khoản riêng' },
+    sourceTitle: 'README · Tài khoản demo & thông tin riêng', updatedAt: '2026-09-27',
+  },
   {
     id: 'guide-card-membership',
     topic: 'membership',
@@ -131,7 +139,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Phiên sự kiện & Sân khấu',
     title: 'Các định dạng sự kiện: Drop-in, Phòng nghe & Live House',
     description:
-      'Sân khấu VieWorld tổ chức các khoảnh khắc giao lưu trực tiếp (Drop-in), phòng nghe đĩa hát chọn lọc (Listening Room) và đại nhạc hội (Live House). Bạn có thể đăng ký giữ chỗ (RSVP) và vào phòng chờ trước giờ phát sóng.',
+      'Chọn cuộc hẹn ở Artist World để mở sân khấu ngay trong Trang chính; shell và các tab giữ nguyên. Nhắc lịch (RSVP) chỉ là lời nhắc, không phải vé hay hội viên. Nhạc phát khi bạn chủ động bật. Chat bên cạnh dùng cùng room Hall và yêu cầu hội viên của đúng nghệ sĩ.',
     keywords: [
       'phiên',
       'session',
@@ -184,7 +192,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Hỗ trợ & Đối soát',
     title: 'Yêu cầu Hỗ trợ khách hàng & Quy trình Đối soát',
     description:
-      'Khi quyền lợi hoặc đơn hàng gặp trục trặc, bạn có thể tạo yêu cầu hỗ trợ. Giải quyết khiếu nại ghi nhận kết quả điều tra độc lập; việc phục hồi dữ liệu gốc đòi hỏi hành động đối soát riêng biệt của điều hành viên để đảm bảo tính toàn vẹn dữ liệu.',
+      'Mở Yêu cầu hỗ trợ từ icon tài khoản, chọn đơn hàng hoặc quyền lợi để tạo hồ sơ demo. Gửi lại cùng vấn đề sẽ mở hồ sơ đang có. Bạn có thể xem trạng thái tại trang chi tiết. Hồ sơ lưu trong trình duyệt, chưa gửi cho đội hỗ trợ; không có cam kết phản hồi. Giải quyết hồ sơ không tự thay đổi quyền lợi hoặc trạng thái giao hàng.',
     keywords: [
       'hỗ trợ',
       'support',
@@ -276,7 +284,7 @@ const INJECTION_PATTERNS = [
 // Patterns for unsupported, private, medical, financial, or artist-opinion topics
 const UNSUPPORTED_PATTERNS: { pattern: RegExp; reason: string }[] = [
   {
-    pattern: /(đời\s+tư|người\s+yêu|bạn\s+gái|bạn\s+trai|yêu\s+ai|kết\s+hôn|ly\s+hôn|gia\s+đình|ở\s+đâu|nhà\s+riêng|số\s+điện\s+thoại|quê\s+ở)/i,
+    pattern: /(đời\s+tư|người\s+yêu|bạn\s+gái|bạn\s+trai|yêu\s+ai|kết\s+hôn|ly\s+hôn|nhà\s+riêng|quê\s+ở|(?:nghệ\s+sĩ|artist).*(?:số\s+điện\s+thoại|gia\s+đình|ở\s+đâu)|(?:số\s+điện\s+thoại|địa\s+chỉ).*(?:nghệ\s+sĩ|artist))/i,
     reason: 'Câu hỏi liên quan đến đời tư hoặc thông tin cá nhân ngoài phạm vi ứng dụng.',
   },
   {
@@ -335,19 +343,22 @@ export function queryWorldGuide(rawQuery: string): GuideQueryResult {
   }
 
   // 3. Local Deterministic Keyword & Semantic Matching
-  const normalized = query.toLowerCase();
+  const normalize = (value: string) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+  const normalized = normalize(query);
   const matchedCards: GuideKnowledgeCard[] = [];
+  const scores = new Map<string, number>();
 
   for (const card of APPROVED_KNOWLEDGE_CARDS) {
-    const titleMatch = card.title.toLowerCase().includes(normalized);
-    const descMatch = card.description.toLowerCase().includes(normalized);
-    const topicMatch = card.topicLabel.toLowerCase().includes(normalized);
+    const titleMatch = normalize(card.title).includes(normalized);
+    const descMatch = normalize(card.description).includes(normalized);
+    const topicMatch = normalize(card.topicLabel).includes(normalized);
     const keywordMatch = card.keywords.some((kw) =>
-      normalized.includes(kw.toLowerCase()) || kw.toLowerCase().includes(normalized)
+      normalized.includes(normalize(kw)) || normalize(kw).includes(normalized)
     );
 
     if (titleMatch || descMatch || topicMatch || keywordMatch) {
       matchedCards.push(card);
+      scores.set(card.id, (titleMatch ? 6 : 0) + (topicMatch ? 4 : 0) + (keywordMatch ? 3 : 0) + (descMatch ? 1 : 0));
     }
   }
 
@@ -356,7 +367,7 @@ export function queryWorldGuide(rawQuery: string): GuideQueryResult {
     return {
       type: 'answered',
       query,
-      cards: matchedCards,
+      cards: matchedCards.sort((a, b) => (scores.get(b.id) || 0) - (scores.get(a.id) || 0)),
     };
   }
 

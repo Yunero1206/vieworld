@@ -1,0 +1,87 @@
+/* Utilities share the app's self-hosted UI type, semantic colors, and a single overlay grammar. */
+.vw-utility-backdrop { position:fixed; inset:0; z-index:1200; background:rgb(8 17 12 / .58); backdrop-filter:blur(5px); display:grid; place-items:center; padding:24px; }
+.vw-utility-dialog { width:min(100%,680px); max-height:calc(100dvh - 48px); display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--appearance-border); border-radius:20px; background:var(--appearance-surface); color:var(--appearance-ink); box-shadow:0 24px 90px rgb(0 0 0 / .22); font:400 14px/1.65 'Be Vietnam Pro',sans-serif; }
+.vw-utility-dialog.is-compact { max-width:480px; }
+.vw-utility-dialog :is(h2,h3,p,small,label,input,select,button,a,legend,summary) { font-family:inherit; }
+.vw-utility-dialog :is(h2,h3,legend,strong) { color:var(--appearance-ink); }
+.vw-utility-dialog :is(button,input,select) { font-size:14px; }
+.vw-utility-dialog button { cursor:pointer; }
+.vw-utility-header { display:flex; gap:20px; justify-content:space-between; padding:24px 28px 20px; border-bottom:1px solid var(--appearance-border); }
+.vw-utility-kicker { display:block; color:var(--appearance-accent); font-size:10px; font-weight:600; letter-spacing:.12em; margin-bottom:6px; }
+.vw-utility-header h2 { font-size:23px; font-weight:600; line-height:1.35; margin:0; letter-spacing:-.025em; }
+.vw-utility-header p { font-size:13px; color:var(--appearance-muted); margin:8px 0 0; }
+.vw-utility-close { flex-shrink:0; width:40px; height:40px; display:grid; place-items:center; border-radius:50%; border:1px solid var(--appearance-border); background:var(--appearance-soft); color:var(--appearance-ink); }
+.vw-utility-body { padding:24px 28px; overflow-y:auto; overscroll-behavior:contain; min-height:0; scrollbar-gutter:stable; }
+.vw-utility-body h3 { font-size:16px; font-weight:600; margin:0 0 10px; }
+.vw-utility-footer { display:flex; gap:12px; justify-content:flex-end; align-items:center; padding:16px 28px; border-top:1px solid var(--appearance-border); flex-wrap:wrap; }
+.vw-utility-footer > span { margin-right:auto; color:var(--appearance-muted); font-size:12px; }
+.vw-utility-dialog :is(.vw-utility-primary,.vw-utility-secondary) { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 18px; border-radius:12px; text-decoration:none; font-weight:600; line-height:1.4; border:1px solid var(--appearance-border); }
+.vw-utility-dialog .vw-utility-primary { background:var(--appearance-accent); color:var(--appearance-surface); border-color:transparent; }
+.vw-utility-dialog .vw-utility-secondary { color:var(--appearance-ink); background:var(--appearance-soft); }
+.vw-utility-dialog :is(button,a,input,select,summary):focus-visible { outline:3px solid var(--appearance-focus) !important; outline-offset:3px !important; }
+.vw-utility-dialog button:disabled { opacity:.5; cursor:not-allowed; }
+.vw-utility-note { display:flex; gap:10px; padding:14px 16px; margin:18px 0; border:1px solid var(--appearance-border); background:var(--appearance-soft); border-radius:12px; font-size:12px; color:var(--appearance-muted); }
+.vw-utility-note:has(> strong) { display:block; }
+.vw-utility-note strong { display:block; font-size:12px; font-weight:600; }
+.vw-utility-note p { margin:5px 0 0; }
+.vw-utility-note svg { flex-shrink:0; color:var(--appearance-accent); margin-top:3px; }
+.vw-utility-muted { color:var(--appearance-muted); font-size:12px; }
+.vw-utility-text { display:inline-flex; align-items:center; gap:8px; min-height:44px; color:var(--appearance-accent); background:none; border:0; padding:8px 0; text-decoration:none; font-weight:600; }
+.vw-utility-error { border-left:3px solid currentColor; padding:10px; color:var(--appearance-ink); font-weight:600; }
+.vw-utility-footer > .vw-utility-error { color:var(--appearance-ink); flex-basis:100%; margin-right:0; }
+.vw-utility-segments { display:flex; gap:4px; background:var(--appearance-soft); padding:4px; border-radius:12px; }
+.vw-utility-segments button { flex:1; min-height:44px; background:transparent; color:var(--appearance-muted); border:0; border-radius:9px; font-weight:500; }
+.vw-utility-segments button[aria-pressed=true] { color:var(--appearance-ink); background:var(--appearance-surface); box-shadow:0 1px 4px rgb(0 0 0 / .06); }
+.vw-auth-intro { margin:20px 0; color:var(--appearance-muted); }
+.vw-auth-providers { display:grid; gap:12px; }
+.vw-auth-providers button { display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid var(--appearance-border); border-radius:12px; background:var(--appearance-surface); color:var(--appearance-ink); font-weight:500; text-align:left; min-height:54px; }
+.vw-auth-providers button:hover { background:var(--appearance-selected); }
+.vw-auth-providers button span { margin-left:auto; font-size:10px; font-weight:400; color:var(--appearance-muted); }
+.vw-provider-f { display:grid; place-items:center; width:21px; height:21px; font-size:22px; }
+.vw-auth-success { text-align:center; padding:12px 0; }
+.vw-auth-success > svg { color:var(--appearance-accent); margin-bottom:14px; }
+.vw-account-form fieldset { border:0; padding:0; margin:24px 0 0; min-width:0; }
+.vw-account-form legend { font-size:16px; font-weight:600; }
+.vw-account-form fieldset > p { margin:4px 0 16px; font-size:12px; color:var(--appearance-muted); }
+.vw-account-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+.vw-account-field { display:grid; gap:8px; font-size:13px; font-weight:500; margin:0 0 16px; color:var(--appearance-ink); }
+.vw-account-field :is(input,select) { width:100%; min-width:0; min-height:44px; padding:10px 12px; color:var(--appearance-ink); background:var(--appearance-surface); border:1px solid var(--appearance-border); border-radius:10px; font-weight:400; }
+.vw-privacy-options { margin:22px 0; }
+.vw-privacy-option { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 0; border-top:1px solid var(--appearance-border); cursor:pointer; }
+.vw-privacy-option strong { display:block; font-size:14px; font-weight:500; }
+.vw-privacy-option small { display:block; color:var(--appearance-muted); font-size:12px; font-weight:400; line-height:1.65; margin-top:5px; }
+.vw-privacy-option input { flex-shrink:0; width:22px; height:22px; accent-color:var(--appearance-accent); }
+.vw-support-shortcuts { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+.vw-support-create > p,.vw-support-history > p { font-size:13px; color:var(--appearance-muted); }
+.vw-support-history { border-top:1px solid var(--appearance-border); margin-top:24px; padding-top:24px; }
+.vw-support-history a { display:flex; gap:16px; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--appearance-border); text-decoration:none; color:var(--appearance-ink); }
+.vw-support-history :is(small,strong) { display:block; }
+.vw-support-history small { font-size:12px; color:var(--appearance-muted); margin-top:4px; overflow-wrap:anywhere; }
+.vw-guide-disclaimer { margin:0 0 16px; font-size:12px; color:var(--appearance-accent); }
+.vw-guide-search { display:flex; align-items:center; gap:8px; }
+.vw-guide-search label { flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding:0 12px; border:1px solid var(--appearance-border); border-radius:12px; background:var(--appearance-soft); }
+.vw-guide-search svg { flex-shrink:0; color:var(--appearance-muted); }
+.vw-guide-search input { width:100%; min-width:0; min-height:44px; background:transparent; color:var(--appearance-ink); border:0; padding:10px 0; }
+.vw-guide-search input::placeholder { color:var(--appearance-muted); opacity:1; }
+.vw-guide-topics { margin:24px 0; }
+.vw-guide-topics > div { display:flex; flex-wrap:wrap; gap:8px; }
+.vw-guide-topics button { min-height:40px; border:1px solid var(--appearance-border); border-radius:10px; padding:9px 12px; background:var(--appearance-surface); color:var(--appearance-ink); font-size:12px; font-weight:500; }
+.vw-guide-topics button[aria-pressed=true] { background:var(--appearance-selected); border-color:var(--appearance-accent); }
+.vw-guide-answer { border-top:1px solid var(--appearance-border); padding:20px 0; }
+.vw-guide-answer > small { color:var(--appearance-accent); }
+.vw-guide-answer h3 { margin-top:6px; }
+.vw-guide-answer p { color:var(--appearance-muted); }
+.vw-guide-answer details { font-size:11px; color:var(--appearance-muted); }
+.vw-guide-answer summary { cursor:pointer; padding:8px 0; }
+@media(max-width:600px) {
+  .vw-utility-backdrop { padding:12px; }
+  .vw-utility-dialog { max-height:calc(100dvh - 24px); border-radius:16px; }
+  .vw-utility-header { padding:20px; gap:12px; }
+  .vw-utility-header h2 { font-size:21px; }
+  .vw-utility-body { padding:20px; }
+  .vw-utility-footer { padding:14px 20px; }
+  .vw-account-grid { grid-template-columns:1fr; }
+  .vw-guide-search { flex-wrap:wrap; }
+  .vw-guide-search label { flex-basis:100%; }
+  .vw-auth-providers button { font-size:13px; padding:12px; gap:8px; }
+}

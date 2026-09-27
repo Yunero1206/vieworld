@@ -4,7 +4,7 @@ import { AppProvider } from './context/AppContext';
 import { useApp } from './context/AppContext';
 import { getCurrentArtistId } from './world/currentArtist';
 import { getExploreMomentById } from './world/exploreRows';
-import { sessionContextUrl } from './world/worldContext';
+import { artistForWorld, sessionContextUrl } from './world/worldContext';
 import { FanShell as AppShell } from './components/FanShell';
 const FanWorldView = lazy(() => import('./views/FanWorldView').then(m => ({default:m.FanWorldView})));
 const FanShopView = lazy(() => import('./views/FanShopView').then(m => ({default:m.FanShopView})));
@@ -25,16 +25,18 @@ const ArtistWorldView=lazy(()=>import('./views/ArtistWorldView').then(m=>({defau
 function LegacyWorldRedirect({ destination = 'home' }: { destination?: 'home' | 'archive' }) {
   const { worldId } = useParams();
   const { search, state } = useLocation();
-  if (!worldId) return <Navigate to="/explore" replace />;
+  const { state: appState } = useApp();
+  const artistId = worldId ? artistForWorld(appState, worldId) : undefined;
+  if (!artistId) return <Navigate to="/explore" replace />;
   const context = new URLSearchParams(search).get('context');
   const momentId = context?.startsWith('explore-moment:') ? context.slice('explore-moment:'.length) : undefined;
-  const path = momentId ? `/artist/${worldId}/moment/${momentId}` : `/artist/${worldId}${destination === 'archive' ? '/archive' : ''}${search}`;
+  const path = momentId ? `/artist/${artistId}/moment/${encodeURIComponent(momentId)}` : `/artist/${artistId}${destination === 'archive' ? '/archive' : ''}${search}`;
   return <Navigate to={path} state={state} replace />;
 }
 function LegacyMomentRedirect() {
   const { momentId } = useParams();
   const { state } = useApp();
-  const artist = Object.values(state.worlds).find(world => world.type === 'artist' && momentId && getExploreMomentById(world.id, momentId));
+  const artist = Object.values(state.worlds).find(world => world.tenantId === state.activeTenantId && world.type === 'artist' && momentId && getExploreMomentById(world.id, momentId));
   return <Navigate to={artist && momentId ? `/artist/${artist.id}/moment/${momentId}` : '/explore'} replace />;
 }
 function LegacyArchiveRedirect() {
@@ -45,10 +47,9 @@ function LegacyArchiveRedirect() {
 function SessionContextRedirect() {
   const { sessionId } = useParams();
   const { state } = useApp();
-  const session = sessionId ? state.sessions[sessionId] : undefined;
-  const world = session ? state.worlds[session.worldId] : undefined;
-  const artistId = world?.type === 'artist' ? world.id
-    : world?.type === 'ip' ? world.linkedWorldIds.find(id => state.worlds[id]?.type === 'artist') : undefined;
+  const candidate = sessionId ? state.sessions[sessionId] : undefined;
+  const session = candidate?.tenantId === state.activeTenantId ? candidate : undefined;
+  const artistId = session ? artistForWorld(state, session.worldId) : undefined;
   return session && artistId
     ? <Navigate to={session.rightsApproved === false ? `/artist/${artistId}` : sessionContextUrl(artistId, session.id)} replace />
     : <SessionView />;

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import '@fontsource/lora/latin-400.css';
 import '@fontsource/lora/latin-500.css';
 import '@fontsource/lora/latin-600.css';
@@ -35,10 +36,11 @@ import './styles/experience.css';
 import './styles/refinement.css';
 import './styles/artist-bulletin.css';
 import './styles/home-inbox.css';
+import './styles/account-utilities.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary><App /></ErrorBoundary>
   </React.StrictMode>
 );
 

@@ -9,6 +9,7 @@ import { getWorldMoments } from '../world/exploreRows';
 import { artistRooms, hallEntries } from '../world/artistPresentation';
 import { DesktopNotificationBoard } from '../components/notifications/DesktopNotificationBoard';
 import { AppProvider } from '../context/AppContext';
+import { saveState } from '../services/storageAdapter';
 import { ArtistHall } from '../views/ArtistHall';
 import { ArtistWorldView } from '../views/ArtistWorldView';
 
@@ -65,7 +66,7 @@ describe('Artist tabs and bulletin refinement',()=>{
     expect(chapters.some(chapter=>chapter.year===2024)).toBe(true);
   });
   it('exposes working reply, emoji, Moment picker, poll and private-letter controls',()=>{
-    const state=createInitialState('vieworld-demo');render(<AppProvider><MemoryRouter><ArtistHall artistId="artist-a" name="Artist A" sessions={Object.values(state.sessions).filter(session=>session.worldId==='artist-a')}/></MemoryRouter></AppProvider>);
+    const state=createInitialState('vieworld-demo');saveState(state);render(<AppProvider><MemoryRouter><ArtistHall artistId="artist-a" name="Artist A" sessions={Object.values(state.sessions).filter(session=>session.worldId==='artist-a')}/></MemoryRouter></AppProvider>);
     const log=screen.getByRole('log',{name:'Tin nhắn trong Hall'});fireEvent.click(within(log).getAllByRole('button',{name:'Trả lời'})[0]);expect(screen.getByRole('button',{name:'Hủy trả lời'})).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'Thêm biểu cảm'}));fireEvent.click(screen.getByRole('button',{name:'Thêm 💙'}));expect(screen.getByRole('textbox',{name:'Gửi lời nhắn trong Hall'})).toHaveValue('💙');
     fireEvent.click(screen.getByRole('button',{name:'Chia sẻ khoảnh khắc'}));expect(screen.getByText('Chọn tối đa 3 khoảnh khắc công khai.')).toBeInTheDocument();

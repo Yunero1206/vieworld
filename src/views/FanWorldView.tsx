@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Check, Disc3, Heart, Music2, Sparkles, CalendarDays, BookOpen, Package, X, HelpCircle } from 'lucide-react';
+import { ArrowRight, Check, Disc3, Heart, Music2, Sparkles, CalendarDays, BookOpen, Package, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { PersonalDisplayRoom } from '../components/DisplayRoom';
@@ -20,8 +20,14 @@ import { ARTIST_FANDOM_REGISTRY, getArtistAvatar } from '../data/artistChatConfi
 import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { displayedItems } from '../world/display';
 import { ownedDigitalLook } from '../world/merchCatalog';
-import { loadPrivacySettings, savePrivacySettings as persistPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
+import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { PrivacyDialog } from '../components/account/PrivacyDialog';
+import { SupportDialog } from '../components/account/SupportDialog';
+import { AccountInfoDialog } from '../components/account/AccountInfoDialog';
+import { AuthOverlay } from '../components/account/AuthOverlay';
+import { isDemoSignedIn } from '../world/account';
+import { WorldGuidePanel } from '../components/WorldGuidePanel';
 
 const panelTitles: Record<string, string> = {
   hall: 'Hall · Gặp những người cùng yêu nhạc', concerts: 'Live Concert · Sân khấu chung', livechat: 'Live Chat · Lời nhắn từ artist',
@@ -81,15 +87,19 @@ export function FanWorldView() {
   const [isPassOpen, setIsPassOpen] = useState(false);
   const [isEditIntroOpen, setIsEditIntroOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [utilityGuide, setUtilityGuide] = useState(false);
 
   const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(loadPrivacySettings);
 
   const introModalRef = useRef<HTMLDivElement>(null);
-  const privacyModalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const refresh = () => setPrivacySettings(loadPrivacySettings());
+    window.addEventListener('vieworld-privacy-changed', refresh);
+    return () => window.removeEventListener('vieworld-privacy-changed', refresh);
+  }, []);
 
   const savePrivacySettings = (next: SpacePrivacySettings) => {
     setPrivacySettings(next);
-    persistPrivacySettings(next);
   };
 
   useEffect(() => {
@@ -120,7 +130,6 @@ export function FanWorldView() {
   };
 
   useDialogA11y(isEditIntroOpen, () => setIsEditIntroOpen(false), introModalRef);
-  useDialogA11y(isPrivacyOpen, handleClosePrivacy, privacyModalRef);
 
   const isRoom = pathname === '/me' || pathname.endsWith('/archive');
   const rawSection = params.get('section');
@@ -208,6 +217,8 @@ export function FanWorldView() {
   const note = ARTIST_NOTES.find(n => n.worldId === world?.id);
   const noteRead = !!note && !!state.fanProfile.worldJourney?.readNoteIds.includes(note.id);
   const capsules = Object.values(state.capsules).filter(c => c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId);
+  const selectedCapsuleId = params.get('capsule');
+  const panelCapsules = selectedCapsuleId ? capsules.filter(c => c.id === selectedCapsuleId) : capsules;
   const savedCapsules = capsules.filter(c => c.isSaved);
   const slots = state.fanProfile.showcaseSlots || [null, null, null];
   const orders = Object.values(state.orders).filter(o => o.fanId === state.fanProfile.id);
@@ -591,126 +602,13 @@ export function FanWorldView() {
       </div>
     )}
 
-    {/* Privacy Settings Modal */}
-    {isPrivacyOpen && (
-      <div className="v7-modal-backdrop" onClick={handleClosePrivacy}>
-        <div
-          ref={privacyModalRef}
-          className="v7-privacy-modal"
-          onClick={e => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Cài đặt quyền riêng tư không gian"
-          tabIndex={-1}
-        >
-          <div className="v7-modal-header">
-            <div>
-              <span className="v7-modal-eyebrow">PRIVACY & CONTROL</span>
-              <h3>Quyền riêng tư không gian</h3>
-            </div>
-            <button
-              type="button"
-              className="v7-modal-close-btn"
-              onClick={handleClosePrivacy}
-              aria-label="Đóng"
-            >
-              <X size={18} />
-            </button>
-          </div>
+    {/* Same utility overlay as the Avatar menu; legacy deep links remain usable. */}
+    {isPrivacyOpen && <PrivacyDialog onClose={handleClosePrivacy} onSave={savePrivacySettings}/>}
+    {panel === 'support' && <SupportDialog onClose={close} onGuide={() => { close(); setUtilityGuide(true); }}/>}
+    {panel === 'account' && (isDemoSignedIn(state) ? <AccountInfoDialog onClose={close}/> : <AuthOverlay onClose={close}/>)}
+    <WorldGuidePanel isOpen={utilityGuide} onClose={() => setUtilityGuide(false)}/>
 
-          <div className="v7-privacy-form">
-            <div className="v7-privacy-field">
-              <label htmlFor="privacy-room-visibility">
-                <strong>Ai có thể ghé phòng</strong>
-              </label>
-              <select
-                id="privacy-room-visibility"
-                value={privacySettings.roomVisibility}
-                onChange={e =>
-                  savePrivacySettings({
-                    ...privacySettings,
-                    roomVisibility: e.target.value as SpacePrivacySettings['roomVisibility'],
-                  })
-                }
-              >
-                <option value="everyone">Tất cả mọi người (Public)</option>
-                <option value="users">Chỉ thành viên VieWorld</option>
-                <option value="private">Chỉ mình tôi (Private)</option>
-              </select>
-              <small>
-                Khách ghé thăm chỉ thấy đúng những món bạn chủ động đưa lên kệ phòng. Không bao giờ thấy toàn bộ kho đồ hay ghi chú riêng.
-              </small>
-            </div>
-
-            <div className="v7-privacy-toggle-row">
-              <label htmlFor="privacy-show-visit-count" style={{ cursor: 'pointer', flex: 1 }}>
-                <strong>Hiện số lượt ghé thăm</strong>
-                <p>Hiển thị số lượt ghé phòng (không dùng để xếp hạng hay đua top).</p>
-              </label>
-              <input
-                id="privacy-show-visit-count"
-                type="checkbox"
-                checked={privacySettings.showVisitCount}
-                onChange={e =>
-                  savePrivacySettings({
-                    ...privacySettings,
-                    showVisitCount: e.target.checked,
-                  })
-                }
-              />
-            </div>
-
-            <div className="v7-privacy-toggle-row">
-              <label htmlFor="privacy-guestbook-enabled" style={{ cursor: 'pointer', flex: 1 }}>
-                <strong>Cho phép dán giấy nhớ (Guestbook)</strong>
-                <p>Cho phép người ghé thăm để lại lời nhắn trên tường lưu bút.</p>
-              </label>
-              <input
-                id="privacy-guestbook-enabled"
-                type="checkbox"
-                checked={privacySettings.guestbookEnabled}
-                onChange={e =>
-                  savePrivacySettings({
-                    ...privacySettings,
-                    guestbookEnabled: e.target.checked,
-                  })
-                }
-              />
-            </div>
-
-            <div className="v7-privacy-toggle-row">
-              <label htmlFor="privacy-membership-signal" style={{ cursor: 'pointer', flex: 1 }}>
-                <strong>Hiện biểu tượng hội viên (◇)</strong>
-                <p>Biểu tượng nhỏ bên cạnh tên khi bạn có quyền lợi hội viên đang hoạt động.</p>
-              </label>
-              <input
-                id="privacy-membership-signal"
-                type="checkbox"
-                checked={privacySettings.showMembershipSignal}
-                onChange={e =>
-                  savePrivacySettings({
-                    ...privacySettings,
-                    showMembershipSignal: e.target.checked,
-                  })
-                }
-              />
-            </div>
-
-            <div className="v7-modal-actions">
-              <button
-                type="button"
-                className="fw-button"
-                onClick={handleClosePrivacy}
-              >
-                Xong
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-
-    {activePanel && <WorldPanel title={panelTitles[activePanel]} onClose={close}>
+    {activePanel && panel !== 'support' && <WorldPanel title={panelTitles[activePanel]} onClose={close}>
       {panel === 'livechat' && <ArtistBroadcast worldId={world.id}/>}
       {panel === 'concerts' && !isShared && <ArtistBroadcast worldId={world.id} format="concert"/>}
       {panel === 'hall' && (isShared ? <><p>Chọn hội của artist bạn muốn ghé. Theo dõi không tự cấp membership.</p>{Object.values(state.worlds).filter(w => w.type === 'artist').map(w=><Link className="fw-destination" key={w.id} to={`/artist/${w.id}/hall`}><Heart/><div><strong>{w.name}</strong><p>Kiểm tra membership và ghé Hall</p></div><ArrowRight/></Link>)}</> : <HallPanel worldId={world.id} />)}
@@ -726,9 +624,11 @@ export function FanWorldView() {
       {panel === 'wardrobe' && <><p className="fw-muted">Chọn một chi tiết của riêng mình. Diện mạo này đồng hành cùng bạn ở mọi không gian nghệ sĩ.</p><FanAvatarCustomizer/><DigitalCloset /></>}
       {panel === 'capsules' && <>
         <p className="fw-muted">Kỷ niệm từ những phiên bạn đã tham dự. Bỏ khỏi kệ vẫn giữ trong bộ sưu tập.</p>
-        <Link className="fw-text-button" to="/me?section=collection&type=ticket">Chọn kỷ niệm công khai trong My Space ↗</Link>
+        <Link className="fw-text-button" to="/me?section=collection&mode=memories&type=capsule">Chọn kỷ niệm để trưng trong My Space ↗</Link>
+        {selectedCapsuleId && <Link className="fw-text-button" to="/me?panel=capsules">Xem tất cả kỷ niệm riêng →</Link>}
+        {selectedCapsuleId && !panelCapsules.length && <p role="status">Kỷ niệm này không có trong bộ sưu tập của bạn.</p>}
         {!capsules.length && <div className="fw-empty"><Sparkles size={35} /><h3>Để dành một chỗ cho đêm đầu tiên.</h3><p>Tham dự một phiên đủ điều kiện để nhận kỷ niệm của riêng bạn.</p><Link className="fw-button" to="/explore">Tìm một cuộc hẹn <ArrowRight size={16} /></Link></div>}
-        {capsules.map(c => <article key={c.id} className="fw-event-row"><small>{state.worlds[c.worldId]?.name}</small><h3>{state.sessions[c.sessionId]?.title || 'Kỷ niệm của bạn'}</h3><form className="fw-keepsake-note" onSubmit={e => { e.preventDefault(); const data = new FormData(e.currentTarget); dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, privateNote: String(data.get('note') || ''), isSaved: c.isSaved }); setSavedNoteId(c.id); }}><label htmlFor={`note-${c.id}`}>Ghi chú riêng</label><textarea id={`note-${c.id}`} name="note" onChange={() => setSavedNoteId(null)} defaultValue={c.privateNote || ''} maxLength={1000} rows={2} /><button className="fw-text-button" type="submit">Giữ ghi chú</button>{savedNoteId === c.id && <small role="status">Đã giữ ghi chú riêng.</small>}</form><div><button className="fw-text-button" onClick={() => dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, isSaved: !c.isSaved })}>{c.isSaved ? 'Bỏ lưu' : 'Lưu kỷ niệm'}</button></div></article>)}
+        {panelCapsules.map(c => <article key={c.id} className="fw-event-row"><small>{state.worlds[c.worldId]?.name}</small><h3>{state.sessions[c.sessionId]?.title || 'Kỷ niệm của bạn'}</h3><form className="fw-keepsake-note" onSubmit={e => { e.preventDefault(); const data = new FormData(e.currentTarget); dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, privateNote: String(data.get('note') || ''), isSaved: c.isSaved }); setSavedNoteId(c.id); }}><label htmlFor={`note-${c.id}`}>Ghi chú riêng</label><textarea id={`note-${c.id}`} name="note" onChange={() => setSavedNoteId(null)} defaultValue={c.privateNote || ''} maxLength={1000} rows={2} /><button className="fw-text-button" type="submit">Giữ ghi chú</button>{savedNoteId === c.id && <small role="status">Đã giữ ghi chú riêng.</small>}</form><div><button className="fw-text-button" onClick={() => dispatch({ type: 'SAVE_CAPSULE', capsuleId: c.id, isSaved: !c.isSaved })}>{c.isSaved ? 'Bỏ lưu' : 'Lưu kỷ niệm'}</button></div></article>)}
       </>}
       {panel === 'showcase' && <>
         <p className="fw-muted">Chỉ chọn những kỷ niệm đã lưu để trưng bày. Quản lý ghi chú trong Bộ sưu tập riêng.</p>
@@ -736,7 +636,7 @@ export function FanWorldView() {
         {slots[slot]&&<button className="fw-text-button" onClick={()=>dispatch({type:'CLEAR_SHOWCASE_SLOT',slotIndex:slot})}>Bỏ kỷ niệm khỏi ô {slot+1}</button>}
         {!savedCapsules.length&&<p>Chưa có kỷ niệm đã lưu để trưng bày.</p>}
         {savedCapsules.map(c=><article className="fw-event-row" key={c.id}><small>{state.worlds[c.worldId]?.name}</small><h3>{state.sessions[c.sessionId]?.title||'Kỷ niệm của bạn'}</h3><button className="fw-button" onClick={()=>dispatch({type:'SET_SHOWCASE_SLOT',slotIndex:slot,capsuleId:c.id})}>{slots[slot]===c.id?'Đang ở ô này':`Đặt vào ô ${slot+1}`}</button></article>)}
-        <Link className="fw-text-button" to="/me?section=collection&panel=capsules">Mở bộ sưu tập riêng →</Link>
+        <Link className="fw-text-button" to="/me?section=collection&mode=memories&type=capsule">Mở bộ sưu tập riêng →</Link>
       </>}
       {panel === 'bag' && <>
         <p className="fw-muted">Những món đồ và đơn hàng đi cùng hành trình của {state.fanProfile.displayName}.</p>
@@ -762,43 +662,6 @@ export function FanWorldView() {
         ))}
       </>}
       {panel === 'membership' && <><p className="fw-muted">Theo dõi là miễn phí. Hội viên và quyền lợi được quản lý riêng cho từng nghệ sĩ; mọi giao dịch ở đây đều là mô phỏng.</p>{Object.values(state.worlds).map(w => <MembershipCard key={w.id} world={w} membership={Object.values(state.memberships).find(m => m.fanId === state.fanProfile.id && m.worldId === w.id)} isFollowed={state.followedWorldIds.includes(w.id)} onToggleFollow={() => dispatch({ type: 'TOGGLE_FOLLOW', worldId: w.id })} onUpgrade={() => dispatch({ type: 'UPGRADE_MEMBERSHIP', worldId: w.id })} />)}{Object.values(state.benefits).filter(b => b.fanId === state.fanProfile.id).map(b => <BenefitCard key={b.id} benefit={b} onClaim={benefitId => dispatch({ type: 'CLAIM_BENEFIT', benefitId })} />)}</>}
-      {panel === 'support' && (
-        <div className="fw-support-content">
-          <p className="fw-muted">
-            VieWorld luôn đồng hành cùng bạn. Bất kỳ thắc mắc nào về quyền lợi hội viên, đơn hàng kỷ niệm hoặc tài khoản đều được hỗ trợ chu đáo.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '18px 0' }}>
-            {Object.values(state.supportCases).filter(c => c.fanId === state.fanProfile.id).length === 0 ? (
-              <div className="fw-empty">
-                <HelpCircle size={36} />
-                <h3>Bạn chưa có hồ sơ hỗ trợ nào đang mở.</h3>
-                <p>Nếu gặp vấn đề với đơn hàng lưu niệm hoặc quyền lợi hội viên, bạn có thể tạo yêu cầu đối soát trực tiếp từ trang chi tiết.</p>
-                <Link className="fw-button" to="/me?panel=bag">
-                  Xem đơn hàng của bạn <ArrowRight size={16} />
-                </Link>
-              </div>
-            ) : (
-              Object.values(state.supportCases)
-                .filter(c => c.fanId === state.fanProfile.id)
-                .map(c => (
-                  <Link className="fw-destination" key={c.id} to={`/support/${c.id}`}>
-                    <HelpCircle />
-                    <div>
-                      <strong>{c.subjectType === 'benefit' ? 'Hỗ trợ đối soát quyền lợi' : 'Hỗ trợ đơn hàng lưu niệm'} · #{c.id}</strong>
-                      <p>Trạng thái: {c.status === 'open' ? 'Đang chờ xử lý' : c.status === 'resolved' ? 'Đã giải quyết' : c.status}</p>
-                    </div>
-                    <ArrowRight size={18} />
-                  </Link>
-                ))
-            )}
-          </div>
-          <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px', marginTop: '14px' }}>
-            <p style={{ fontSize: '12.5px', color: '#64748B', lineHeight: '1.6', margin: 0 }}>
-              💡 <strong>Cần hỗ trợ trực tiếp?</strong> Đội ngũ chăm sóc fandom phản hồi các yêu cầu đối soát trong vòng 24 giờ. Bạn luôn có thể kiểm tra trạng thái tại đây bất cứ lúc nào.
-            </p>
-          </div>
-        </div>
-      )}
     </WorldPanel>}
 
     {isRoom && (

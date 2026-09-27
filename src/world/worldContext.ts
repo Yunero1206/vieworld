@@ -1,4 +1,12 @@
-import type { Session } from '../domain/types';
+import type { AppState, Session } from '../domain/types';
+
+/** Resolve linked programme worlds without inventing another Artist destination. */
+export function artistForWorld(state: AppState, worldId: string): string | undefined {
+  const world = state.worlds[worldId];
+  if (!world || world.tenantId !== state.activeTenantId) return;
+  if (world.type === 'artist') return world.id;
+  return world.linkedWorldIds.find(id => state.worlds[id]?.type === 'artist' && state.worlds[id]?.tenantId === state.activeTenantId);
+}
 
 export type WorldContextType = 'live' | 'event' | 'release' | 'fan_project' | 'drop';
 export type WorldContextPhase = 'upcoming' | 'active' | 'ended';

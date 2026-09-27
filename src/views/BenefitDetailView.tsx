@@ -15,11 +15,12 @@ export const BenefitDetailView: React.FC = () => {
   const { benefitId } = useParams<{ benefitId: string }>();
   const { state, dispatch } = useApp();
 
-  const benefit = benefitId ? state.benefits[benefitId] : undefined;
+  const candidate = benefitId ? state.benefits[benefitId] : undefined;
+  const benefit = candidate?.fanId === state.fanProfile.id && candidate.tenantId === state.activeTenantId ? candidate : undefined;
   const world = benefit ? state.worlds[benefit.worldId] : undefined;
   const membership = benefit
     ? Object.values(state.memberships).find(
-        (m) => m.worldId === benefit.worldId && m.fanId === state.fanProfile.id
+        (m) => m.worldId === benefit.worldId && m.fanId === state.fanProfile.id && m.tenantId === state.activeTenantId
       )
     : undefined;
 
@@ -218,11 +219,11 @@ export const BenefitDetailView: React.FC = () => {
             }}
           >
             {Object.values(state.supportCases).find(
-              (c) => c.subjectId === benefit.id && c.status !== 'closed'
+              (c) => c.subjectType === 'benefit' && c.subjectId === benefit.id && c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId && c.status !== 'closed'
             ) ? (
               (() => {
                 const activeCase = Object.values(state.supportCases).find(
-                  (c) => c.subjectId === benefit.id && c.status !== 'closed'
+                  (c) => c.subjectType === 'benefit' && c.subjectId === benefit.id && c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId && c.status !== 'closed'
                 )!;
                 return (
                   <div

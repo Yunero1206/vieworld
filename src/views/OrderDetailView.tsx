@@ -316,11 +316,11 @@ export const OrderDetailView: React.FC = () => {
           aria-label="Hỗ trợ đơn hàng"
         >
           {Object.values(state.supportCases).find(
-            (c) => c.subjectId === order.id && c.status !== 'closed'
+            (c) => c.subjectType === 'order' && c.subjectId === order.id && c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId && c.status !== 'closed'
           ) ? (
             (() => {
               const activeCase = Object.values(state.supportCases).find(
-                (c) => c.subjectId === order.id && c.status !== 'closed'
+                (c) => c.subjectType === 'order' && c.subjectId === order.id && c.fanId === state.fanProfile.id && c.tenantId === state.activeTenantId && c.status !== 'closed'
               )!;
               return (
                 <div

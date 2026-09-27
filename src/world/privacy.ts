@@ -20,8 +20,10 @@ export function loadPrivacySettings(): SpacePrivacySettings {
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
-        ...DEFAULT_PRIVACY,
-        ...parsed,
+        roomVisibility: ['everyone', 'users', 'private'].includes(parsed?.roomVisibility) ? parsed.roomVisibility : DEFAULT_PRIVACY.roomVisibility,
+        showVisitCount: typeof parsed?.showVisitCount === 'boolean' ? parsed.showVisitCount : DEFAULT_PRIVACY.showVisitCount,
+        guestbookEnabled: typeof parsed?.guestbookEnabled === 'boolean' ? parsed.guestbookEnabled : DEFAULT_PRIVACY.guestbookEnabled,
+        showMembershipSignal: typeof parsed?.showMembershipSignal === 'boolean' ? parsed.showMembershipSignal : DEFAULT_PRIVACY.showMembershipSignal,
       };
     }
   } catch {
@@ -36,6 +38,7 @@ export function savePrivacySettings(settings: SpacePrivacySettings): void {
   } catch {
     // ignore
   }
+  window.dispatchEvent(new Event('vieworld-privacy-changed'));
 }
 
 export function canAccessRoom(

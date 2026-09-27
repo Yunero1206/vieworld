@@ -4,14 +4,14 @@
   "description": "Portable Fan Relationship & Interactive Fandom Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F8F9FA",
-  "theme_color": "#5B46E8",
+  "background_color": "#faf9f5",
+  "theme_color": "#355a46",
   "icons": [
     {
-      "src": "/images/world-v8/plaza.webp",
-      "sizes": "512x512",
-      "type": "image/webp",
-      "purpose": "any maskable"
+      "src": "/images/vieworld-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }

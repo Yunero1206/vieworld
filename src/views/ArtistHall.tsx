@@ -4,6 +4,7 @@ import { ArrowRight, BarChart3, Check, Crown, Gift, Heart, ImagePlus, Mail, Mess
 import { useApp } from '../context/AppContext';
 import type { Session } from '../domain/types';
 import { canEnterHall } from '../world/merchCatalog';
+import { isDemoSignedIn } from '../world/account';
 import { getWorldMoments, getWorldProject, type ExploreMedia } from '../world/exploreRows';
 import { artistRooms, hallEntries } from '../world/artistPresentation';
 import { ARTIST_NOTES } from '../world/fanWorld';
@@ -77,7 +78,7 @@ export function ArtistHall({ artistId, name, sessions }: { artistId: string; nam
             <button className="artist-composer-tool" type="button" aria-label="Chia sẻ khoảnh khắc" aria-expanded={picker==='media'} onClick={()=>setPicker(value=>value==='media'?null:'media')}><ImagePlus size={18}/></button>
             <button className="artist-composer-tool" type="button" aria-label="Thêm biểu cảm" aria-expanded={picker==='emoji'} onClick={()=>setPicker(value=>value==='emoji'?null:'emoji')}><Smile size={18}/></button>
             <button type="submit" disabled={!message.trim()&&!attachments.length} aria-label="Gửi lời nhắn"><Send size={18}/></button></form>
-        </div></> : <div className="artist-hall-gate"><p>Cuộc trò chuyện chỉ dành cho hội viên của {name}. Lời nhắn trong Hall không tự động xuất hiện ở Explore.</p><button type="button" onClick={()=>dispatch({type:'UPGRADE_MEMBERSHIP',worldId:artistId})}>Tham gia hội viên (Demo)</button></div>}
+        </div></> : <div className="artist-hall-gate"><p>Cuộc trò chuyện chỉ dành cho hội viên của {name}. Lời nhắn trong Hall không tự động xuất hiện ở Explore.</p><button type="button" onClick={()=>isDemoSignedIn(state) ? dispatch({type:'UPGRADE_MEMBERSHIP',worldId:artistId}) : window.dispatchEvent(new Event('vieworld-open-auth'))}>{isDemoSignedIn(state) ? 'Tham gia hội viên (Demo)' : 'Đăng nhập demo để tiếp tục'}</button></div>}
       </section>
       <aside className="artist-hall-aside" aria-label="Trong Hall lúc này"><h3>Trong Hall lúc này</h3>
         {(running||note) && <div className="artist-hall-activity"><span className="artist-activity-icon" style={art(moments[0]?.media||selected.media)}/><div><strong>{running ? `${name} đang có mặt trong live mẫu` : `Lời nhắn từ ${name}`}</strong><p>{note?.body || 'Artist chỉ hiện diện khi tham gia trực tiếp.'}</p><Link to={running ? sessionContextUrl(artistId,running.id) : `/artist/${artistId}?context=note:${note?.id}`}>Xem trong world <ArrowRight size={14}/></Link></div></div>}

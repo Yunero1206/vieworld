@@ -1,11 +1,13 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, RotateCcw, Trash2, Download } from 'lucide-react';
+import { collectLocalDemoBackup } from '../services/storageAdapter';
 
 export interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
   onReset?: () => void;
   onResetDemoData?: () => void;
+  resetKey?: string;
 }
 
 export interface ErrorBoundaryState {
@@ -36,6 +38,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
   }
 
+  public componentDidUpdate(previous: ErrorBoundaryProps): void {
+    if (this.state.hasError && previous.resetKey !== this.props.resetKey) this.handleRetry();
+  }
+
   private handleRetry = (): void => {
     this.setState({ hasError: false, errorMessage: '', showResetConfirm: false });
   };
@@ -59,20 +65,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   private handleExportBackup = (): void => {
     if (typeof window === 'undefined') return;
     try {
-      const dump: Record<string, string> = {};
-      for (let i = 0; i < window.localStorage.length; i++) {
-        const key = window.localStorage.key(i);
-        if (key && key.startsWith('vieworld:')) {
-          dump[key] = window.localStorage.getItem(key) || '';
-        }
-      }
+      const dump = collectLocalDemoBackup();
       const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `vieworld-backup-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
       console.warn('Cannot export backup:', e);
     }
@@ -147,7 +147,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             }}
             data-testid="error-boundary-message"
           >
-            Hệ thống đã tự động ngăn cách lỗi. Dữ liệu đơn hàng, tủ đồ và bộ sưu tập của bạn vẫn được lưu trữ an toàn.
+            Một phần giao diện chưa mở được. Thử lại hoặc tải lại trang; thao tác này không chủ động xóa dữ liệu demo. Nếu trình duyệt đang lưu tạm, tải lại có thể làm mất thay đổi chưa lưu.
           </p>
 
           {!this.state.showResetConfirm ? (
@@ -237,6 +237,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               </h3>
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', marginBottom: '14px', lineHeight: 1.5 }}>
                 Thao tác này mang tính phá hủy: toàn bộ đơn hàng mô phỏng đã mua, diện mạo avatar đã lưu và các món trong phòng trưng bày sẽ trở về trạng thái khởi tạo.
+                {' '}Bản xuất dự phòng có thể chứa thông tin liên hệ demo; giữ riêng và lưu ý UI chưa có chức năng nhập lại bản sao.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                 <button

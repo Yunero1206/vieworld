@@ -6,7 +6,7 @@ import { ContextStage } from '../components/ContextStage';
 import { createInitialState } from '../data/fixtures';
 import { saveState } from '../services/storageAdapter';
 import { appReducer } from '../domain/reducer';
-function mount() { const state=createInitialState('vieworld-demo'); return render(<AppProvider><MemoryRouter><ContextStage session={state.sessions['session-dropin-01']} artistId="artist-a" artistName="Artist A" image="/image.png"/></MemoryRouter></AppProvider>); }
+function mount() { const state=createInitialState('vieworld-demo'); if (!localStorage.getItem('vieworld_v1_vieworld-demo_fan-linh')) saveState(state); return render(<AppProvider><MemoryRouter><ContextStage session={state.sessions['session-dropin-01']} artistId="artist-a" artistName="Artist A" image="/image.png"/></MemoryRouter></AppProvider>); }
 describe('Context stage refinement',()=>{
   beforeEach(()=>localStorage.clear());
   it('restores user-triggered lightstick effects without a fake cheer total',()=>{

@@ -312,6 +312,7 @@ export interface DomainError {
  * Consolidated Application State Container
  */
 export interface AppState {
+  demoAccount?: import('../world/account').DemoAccount;
   hallReactions?: Record<string, Record<string, string[]>>;
   artistLetters?: { id: string; worldId: string; fanId: string; text: string; createdAt: string }[];
   cart?: import('../world/commerce').CartLine[];
@@ -344,6 +345,9 @@ export interface AppState {
  * Pure Action Definitions
  */
 export type AppAction =
+  | { type: 'DEMO_SIGN_IN'; provider: import('../world/account').DemoProvider; mode: 'login' | 'register' }
+  | { type: 'DEMO_SIGN_OUT' }
+  | { type: 'SAVE_PRIVATE_CONTACT'; contact: import('../world/account').PrivateContact }
   | { type: 'SET_DISPLAY_SLOT'; slot: 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement'; itemId?: string }
   | { type: 'SET_DISPLAY_SURFACE'; surfaceId: import('../world/display').DisplaySlot; selection: import('../world/displaySurfaces').SurfaceSelection }
   | { type: 'ADVANCE_SHIPMENT'; orderId: string; expectedStage: number }

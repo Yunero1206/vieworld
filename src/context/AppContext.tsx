@@ -2,17 +2,18 @@
  * VieWorld Central Application Context (§4, §5.4 & docs/CONTRACTS.md)
  */
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react';
 import { AppAction, AppState, TenantId } from '../domain/types';
 import { appReducer } from '../domain/reducer';
 import { scenarioPresets, createInitialState } from '../data/fixtures';
-import { loadState, saveState, resetTenantStorage, isMemoryFallbackActive } from '../services/storageAdapter';
+import { loadState, saveState, resetTenantStorage, isMemoryFallbackActive, buildStorageKey } from '../services/storageAdapter';
 
 export interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
   isMemoryFallback: boolean;
   storageNotice: string | null;
+  persistenceConflict: boolean;
   loadScenarioPreset: (key: keyof typeof scenarioPresets) => void;
   resetActiveTenant: () => void;
   dismissNotice: () => void;
@@ -36,6 +37,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 }) => {
   const [isHydrated, setIsHydrated] = useState(disableAutoHydrate || !!initialState);
   const [storageNotice, setStorageNotice] = useState<string | null>(null);
+  const [memoryFallback, setMemoryFallback] = useState(isMemoryFallbackActive());
+  const [persistenceConflict, setPersistenceConflict] = useState(false);
+  const conflictingKey = useRef<string | null>(null);
+  const warnedStorage = useRef(false);
 
   // Initialize reducer with clean state
   const [state, dispatch] = useReducer(appReducer, initialTenantId, (tId) => {
@@ -55,12 +60,34 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
   // Sync to storage on state change
   useEffect(() => {
-    if (isHydrated) {
-      saveState(state);
+    if (isHydrated && conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) {
+      const durable = saveState(state);
+      setMemoryFallback(isMemoryFallbackActive());
+      if (!durable && !warnedStorage.current) {
+        warnedStorage.current = true;
+        setStorageNotice('Trình duyệt không lưu được dữ liệu. Thay đổi hiện chỉ ở tab này và có thể mất khi tải lại/đóng tab. Không dùng dữ liệu liên hệ thật trong demo.');
+      }
     } else {
       setIsHydrated(true);
     }
   }, [state, isHydrated]);
+
+  useEffect(() => {
+    const key = buildStorageKey(state.activeTenantId, state.fanProfile.id);
+    setPersistenceConflict(conflictingKey.current === key);
+    const onStorage = (event: StorageEvent) => {
+      if (event.storageArea !== window.localStorage || event.key !== key || event.newValue === event.oldValue) return;
+      try {
+        // Opening a second tab can rewrite only savedAt. That is not a state conflict.
+        if (event.newValue && event.oldValue && JSON.stringify(JSON.parse(event.newValue).state) === JSON.stringify(JSON.parse(event.oldValue).state)) return;
+      } catch { /* An unreadable external write still requires visible recovery. */ }
+      // Do not silently overwrite a newer state from another tab with this tab's stale snapshot.
+      conflictingKey.current = key;
+      setPersistenceConflict(true);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [state.activeTenantId, state.fanProfile.id]);
 
   const dismissNotice = useCallback(() => {
     setStorageNotice(null);
@@ -72,7 +99,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
       if (presetFn) {
         const scenarioState = presetFn(state.activeTenantId);
         dispatch({ type: 'LOAD_SCENARIO', scenarioState });
-        saveState(scenarioState);
         setStorageNotice(`Đã áp dụng kịch bản thử nghiệm: ${key}`);
       }
     },
@@ -81,17 +107,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
   const resetActiveTenant = useCallback(() => {
     const tenantId = state.activeTenantId;
+    conflictingKey.current = null;
+    setPersistenceConflict(false);
     resetTenantStorage(tenantId);
     const freshState = createInitialState(tenantId);
     dispatch({ type: 'LOAD_SCENARIO', scenarioState: freshState });
-    saveState(freshState);
     setStorageNotice(`Đã thiết lập lại toàn bộ dữ liệu mẫu cho không gian '${tenantId}'.`);
   }, [state.activeTenantId]);
 
   const setTenant = useCallback(
     (targetTenantId: TenantId) => {
       // Save current tenant before switching
-      saveState(state);
+      if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
       // Load target tenant
       const loadResult = loadState(targetTenantId);
       dispatch({ type: 'LOAD_SCENARIO', scenarioState: loadResult.state });
@@ -109,7 +136,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({
       value={{
         state,
         dispatch,
-        isMemoryFallback: isMemoryFallbackActive(),
+        isMemoryFallback: memoryFallback,
+        persistenceConflict,
         storageNotice,
         loadScenarioPreset,
         resetActiveTenant,
