@@ -29,6 +29,7 @@ describe('Fan home and room',()=>{
     expect(screen.queryByText(/Mở presale/)).not.toBeInTheDocument();
   });
   it.each([['/worlds/artist-a','moments'],['/worlds/artist-a/moments','moments'],['/worlds/artist-a/archive','archive'],['/me','myspace']])('%s renders its own room artwork', (path,image)=>{
+    saveState(initial()); // This is the signed-in room journey, not anonymous browsing.
     const {container}=mount(path);if(image==='moments')fireEvent.click(screen.getByRole('button',{name:'Live & Concert'}));if(image==='myspace'){expect(container.querySelector('.v6-room-art')).toHaveAttribute('src','/images/myspace-room-v2.png');expect(screen.getByRole('link',{name:/Về quảng trường/})).toHaveAttribute('href','/');}else expect(container.querySelector('.fw-scene-art')).toBeNull();
   });
   it('saves an edited room without touching orders, memberships or collections',()=>{
@@ -43,6 +44,7 @@ describe('Fan home and room',()=>{
     expect(appReducer(initial(),{type:'SAVE_ROOM_DESIGN',design:raw as RoomDesign}).lastError?.code).toBe('ROOM_DESIGN_INVALID');
   });
   it('adds, moves with keyboard, saves and restores furniture through actual controls',()=>{
+    saveState(initial());
     const view=render(<AppProvider><MemoryRouter><RoomInterior place="myspace" onOpen={()=>{}}/></MemoryRouter></AppProvider>);fireEvent.click(screen.getByRole('button',{name:'Trang trí phòng'}));
     fireEvent.click(screen.getByRole('tab',{name:'Furniture'}));fireEvent.click(screen.getByRole('button',{name:/Thêm bàn gỗ/}));
     fireEvent.keyDown(screen.getByRole('button',{name:'Bàn gỗ · chọn và di chuyển'}),{key:'ArrowRight'});

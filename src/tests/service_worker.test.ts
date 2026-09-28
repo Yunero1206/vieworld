@@ -16,7 +16,7 @@ describe('Offline public cache boundaries', () => {
     const w = worker(); let work: Promise<unknown> | undefined;
     w.listeners.activate({ waitUntil: (p: Promise<unknown>) => { work = p; } });
     await work;
-    expect(w.caches.delete.mock.calls).toEqual([['vieworld-pwa-v1']]);
+    expect(w.caches.delete.mock.calls).toEqual([['vieworld-pwa-v1'], ['vieworld-pwa-v2']]);
   });
   it('does not intercept API, external resources or mutations', () => {
     const w = worker(); const respondWith = vi.fn();

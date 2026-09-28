@@ -50,7 +50,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     description: 'Icon tài khoản mở đăng nhập/đăng ký Google hoặc Facebook mô phỏng, không xin mật khẩu hay kết nối dịch vụ thật. Thông tin tài khoản là nơi lưu email liên hệ và nơi nhận bằng dữ liệu giả, tách khỏi My Space. Quyền riêng tư My Space điều chỉnh ai được ghé phòng, sổ lưu bút và dấu hội viên. Dữ liệu vẫn lưu cục bộ; không dùng thiết bị chung để nhập thông tin thật.',
     keywords: ['đăng nhập', 'đăng ký', 'gmail', 'facebook', 'google', 'tài khoản', 'email', 'liên hệ', 'địa chỉ', 'giao hàng', 'số điện thoại', 'quyền riêng tư'],
     actionLink: { to: '/me?panel=account', label: 'Mở thông tin tài khoản riêng' },
-    sourceTitle: 'README · Tài khoản demo & thông tin riêng', updatedAt: '2026-09-27',
+    sourceTitle: 'VieWorld demo · Tài khoản và quyền riêng tư', updatedAt: '2026-09-27',
   },
   {
     id: 'guide-card-membership',
@@ -74,7 +74,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/me?panel=membership',
       label: 'Xem Hội viên & quyền lợi',
     },
-    sourceTitle: 'docs/CONSTITUTION.md §3 (Follow vs. Membership)',
+    sourceTitle: 'VieWorld demo · Theo dõi và Hội viên',
     updatedAt: '2026-09-09',
   },
   {
@@ -100,7 +100,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/benefits/benefit-early-access-01',
       label: 'Xem chi tiết quyền lợi Mua Sớm',
     },
-    sourceTitle: 'docs/CONTRACTS.md §7.2 (Entitlement Matrix)',
+    sourceTitle: 'VieWorld demo · Điều kiện quyền lợi',
     updatedAt: '2026-09-09',
   },
   {
@@ -130,7 +130,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/shop?artist=artist-a',
       label: 'Mở cửa hàng VieSHOP Artist A',
     },
-    sourceTitle: 'docs/CONSTITUTION.md §3 (Payment vs. Fulfilment)',
+    sourceTitle: 'VieWorld demo · Thanh toán và bàn giao',
     updatedAt: '2026-09-09',
   },
   {
@@ -158,7 +158,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/artist/artist-a',
       label: 'Vào sân khấu sự kiện trực tiếp',
     },
-    sourceTitle: 'docs/CONTRACTS.md §4 (Route Surface & Venues)',
+    sourceTitle: 'VieWorld demo · Sự kiện và phòng chờ',
     updatedAt: '2026-09-09',
   },
   {
@@ -183,7 +183,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/me?section=collection&panel=capsules',
       label: 'Mở kệ kỷ niệm trong phòng',
     },
-    sourceTitle: 'docs/CONSTITUTION.md §3 (Attendance vs. Replay)',
+    sourceTitle: 'VieWorld demo · Tham dự và kỷ niệm',
     updatedAt: '2026-09-09',
   },
   {
@@ -208,7 +208,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/me?panel=support',
       label: 'Mở hỗ trợ trong phòng',
     },
-    sourceTitle: 'docs/DECISIONS.md DEC-008 (Decoupled Support Resolution)',
+    sourceTitle: 'VieWorld demo · Hỗ trợ và đối soát',
     updatedAt: '2026-09-09',
   },
   {
@@ -233,7 +233,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/me?section=avatar',
       label: 'Chỉnh avatar trong My Space',
     },
-    sourceTitle: 'docs/DECISIONS.md DEC-010 (Avatar Asset Governance)',
+    sourceTitle: 'VieWorld demo · Trang phục Avatar',
     updatedAt: '2026-09-09',
   },
   {
@@ -258,7 +258,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
       to: '/me?section=collection',
       label: 'Mở bộ sưu tập trong My Space',
     },
-    sourceTitle: 'docs/CONSTITUTION.md v1.1 (One fan experience)',
+    sourceTitle: 'VieWorld demo · Một trải nghiệm fan',
     updatedAt: '2026-09-11',
   },
 ];

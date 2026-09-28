@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { DisplayRoomScene } from '../components/DisplayRoom';
 import type { DisplayItem } from '../world/display';
 import { currentPublicFan, DEMO_FANS } from '../world/community';
-import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { RoomGuestbook } from '../components/RoomGuestbook';
 import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { AvatarRenderer } from '../components/AvatarRenderer';
@@ -195,7 +195,7 @@ export function MemberSpaceView() {
                 src={
                   item.image.startsWith('shirt')
                     ? '/images/world-v6/shirt-cutout.webp'
-                    : `${MERCH_IMAGE_ROOT}/${item.image}.png`
+                    : merchImageUrl(item.image)
                 }
                 alt={item.title}
               />

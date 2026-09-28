@@ -115,7 +115,7 @@ export const MyRoomScene: React.FC<MyRoomSceneProps> = ({
         {/* 2.5D Matte-Clay Artwork Backdrop with fallback */}
         {!artworkError && (
           <img
-            src="/images/world-redesign/drafts/fan-room-scene-sample.png"
+            src="/images/world-redesign/drafts/fan-room-scene-sample.jpg"
             alt=""
             className="room-backdrop-artwork"
             onError={() => setArtworkError(true)}

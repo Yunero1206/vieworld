@@ -3,10 +3,14 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowRight, ShoppingBag, Lock, Package, Heart, Truck, Monitor, Check, X, SlidersHorizontal, Info } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from '../components/AvatarRenderer';
+import { DisplayRoomScene } from '../components/DisplayRoom';
+import { productRoomPreviewItem } from '../world/display';
+import { isDemoSignedIn } from '../world/account';
 import { WorldPanel } from '../components/WorldPanel';
 import { ProductVisual } from '../components/ProductVisual';
 import { Product } from '../domain/types';
-import { DELIVERY_LABELS, MERCH_IMAGE_ROOT, ownedDigitalLook, ownsDigitalProduct } from '../world/merchCatalog';
+import { DELIVERY_LABELS, ownedDigitalLook, ownsDigitalProduct } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { ORDER_LABELS } from '../world/fanWorld';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from '../components/SearchCombobox';
@@ -30,7 +34,7 @@ function MerchArt({ product, digital = false, eager = false }: { product: Produc
   useEffect(() => setFailed(false), [image]);
   return image && !failed ? (
     <img
-      src={`${MERCH_IMAGE_ROOT}/${image}.png`}
+      src={merchImageUrl(image)}
       alt={`${product.title} · ${digital || product.delivery === 'digital' ? 'minh họa digital' : 'thiết kế hàng thật'} · thiết kế kỷ niệm`}
       loading={eager ? 'eager' : 'lazy'}
       onError={() => setFailed(true)}
@@ -42,6 +46,7 @@ function MerchArt({ product, digital = false, eager = false }: { product: Produc
 
 export function FanShopView() {
   const { state, dispatch } = useApp();
+  const signedIn = isDemoSignedIn(state);
   const tenantConfig = getTenantConfig(state.activeTenantId);
   const shopTitle = tenantConfig.labels.shopTitle || 'VieSHOP';
   const { worldId } = useParams();
@@ -145,8 +150,9 @@ export function FanShopView() {
   const tryProduct = selected && getPreviewCapabilities(selected, allProducts);
   const previewEditionProduct = trying && digitalTwin(trying);
   const previewCapabilities = trying && getPreviewCapabilities(trying, allProducts);
-  const previewLook = previewEditionProduct?.digitalSlot ? { ...ownedDigitalLook(state), [previewEditionProduct.digitalSlot]: previewEditionProduct.digitalItemId } : ownedDigitalLook(state);
-  const owned = !!previewEditionProduct && ownsDigitalProduct(state, previewEditionProduct);
+  const basePreviewLook = signedIn ? ownedDigitalLook(state) : {};
+  const previewLook = previewEditionProduct?.digitalSlot ? { ...basePreviewLook, [previewEditionProduct.digitalSlot]: previewEditionProduct.digitalItemId } : basePreviewLook;
+  const owned = signedIn && !!previewEditionProduct && ownsDigitalProduct(state, previewEditionProduct);
 
   // Group all products into Product Families
   const productFamilies = useMemo(() => {
@@ -495,9 +501,9 @@ export function FanShopView() {
                   <AvatarRenderer
                     role="fan"
                     size="preview"
-                    appearance={state.fanProfile.avatarPreset}
-                    displayName={state.fanProfile.displayName}
-                    accessoryId={tryStance === 'cheer' ? (previewLook.lightstick || 'lightstick-star') : state.fanProfile.wardrobeChoice?.accessoryId}
+                    appearance={signedIn ? state.fanProfile.avatarPreset : 'original'}
+                    displayName={signedIn ? state.fanProfile.displayName : 'Khách'}
+                    accessoryId={signedIn ? state.fanProfile.wardrobeChoice?.accessoryId : undefined}
                     digitalLook={previewLook}
                   />
                 </div>
@@ -521,11 +527,9 @@ export function FanShopView() {
                 </div>
               </>
             ) : (
-              <div className="vw-shop-preview-room">
-                <img src="/images/myspace-room-v2.png" alt="Phòng My Space" />
-                <div className={`vw-shop-preview-object ${trying.category === 'album' ? 'is-album' : trying.category === 'ticket' ? 'is-ticket' : /lightstick/.test(trying.image || '') ? 'is-lightstick' : 'is-clothing'}`}>
-                  <MerchArt product={trying} />
-                </div>
+              <div className="vw-shop-preview-room vw-room-preview-shared">
+                <DisplayRoomScene compact fan={{name:signedIn ? state.fanProfile.displayName : 'Khách',appearance:signedIn ? state.fanProfile.avatarPreset : 'original',look:basePreviewLook,accessory:signedIn ? state.fanProfile.wardrobeChoice?.accessoryId : undefined}}
+                  items={[productRoomPreviewItem(trying)]} onSelect={() => {}}/>
               </div>
             )}
             <p className="fw-muted">Chỉ là hình xem trước. Bản hàng thật không tự mở khóa đồ digital, trừ khi phiên bản đã chọn ghi rõ kèm digital.</p>

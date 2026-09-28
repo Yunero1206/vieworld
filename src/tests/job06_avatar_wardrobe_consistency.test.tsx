@@ -31,6 +31,8 @@ import { WardrobeCustomizer } from '../components/WardrobeCustomizer';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { AvatarStage } from '../components/AvatarStage';
 import { getAccessoryById, getAccessoryName, isFanAccessory } from '../world/assetManifest';
+import { createInitialState } from '../data/fixtures';
+import { saveState } from '../services/storageAdapter';
 
 describe('Job 06 Acceptance: Unified Avatar & Wardrobe Consistency', () => {
   describe('1. Asset Manifest & Defensive Fallbacks', () => {
@@ -191,6 +193,7 @@ describe('Job 06 Acceptance: Unified Avatar & Wardrobe Consistency', () => {
 
   describe('4. Cross-Surface Consistency: "Đổi tủ đồ một lần, các màn thấy cùng một diện mạo"', () => {
     it('synchronizes equipped accessory across AppShell header, MyRoom diorama, and MyWorld profile', async () => {
+      saveState(createInitialState());
       render(
         <MemoryRouter initialEntries={['/me']}>
           <AppProvider>

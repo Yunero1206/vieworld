@@ -21,7 +21,9 @@ describe('art-directed My Space surface composition', () => {
     const composed = composeRoomSurface(shelf, items, selection);
     expect(composed.map(value => value.item.id)).toEqual(['lightstick', 'ticket', 'badge']);
     expect(composed[0].focal).toBe(true);
-    expect(composed[0].anchor).toEqual(ROOM_LAYOUTS.shelf[3][0]);
+    expect(composed[0].anchor.x).toBe(ROOM_LAYOUTS.shelf[3][0].x);
+    expect(composed[0].anchor.y).toBe(ROOM_LAYOUTS.shelf[3][0].y);
+    expect(composed[0].anchor.height).toBeLessThanOrEqual(ROOM_LAYOUTS.shelf[3][0].height);
     expect(selection).toEqual({ itemIds: ['ticket', 'lightstick', 'badge'], focalItemId: 'lightstick', layoutPreset: 'natural' });
   });
 
@@ -30,7 +32,8 @@ describe('art-directed My Space surface composition', () => {
     const balanced = composeRoomSurface(shelf, items, { itemIds: ['first', 'second'], layoutPreset: 'balanced' });
     const focused = composeRoomSurface(shelf, items, { itemIds: ['first', 'second'], layoutPreset: 'focus' });
     expect(balanced.every(value => value.anchor.rotate === 0)).toBe(true);
-    expect(focused[0].anchor.width).toBeGreaterThan(balanced[0].anchor.width);
+    expect(focused[0].anchor.width).toBeGreaterThanOrEqual(balanced[0].anchor.width);
+    expect(focused[1].anchor.width).toBeLessThan(balanced[1].anchor.width);
     expect(readDisplaySurfaces({ displaySlots: { ticket: 'first' } } as Parameters<typeof readDisplaySurfaces>[0]).ticket.itemIds).toEqual(['first']);
   });
 

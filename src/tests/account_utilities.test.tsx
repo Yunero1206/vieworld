@@ -23,10 +23,10 @@ function Probe() { const { state } = useApp(); return <div data-testid="account-
 beforeEach(() => { cleanup(); localStorage.clear(); });
 
 describe('Demo account, no external identity or ownership mutation', () => {
-  it('fresh storage starts as a guest, persisted legacy state remains usable', () => {
+  it('fresh storage and legacy state without an explicit session remain guests, without deleting data', () => {
     expect(isDemoSignedIn(loadState().state)).toBe(false);
-    const legacy = createInitialState(); saveState(legacy);
-    expect(isDemoSignedIn(loadState().state)).toBe(true);
+    const legacy = createInitialState(); delete legacy.demoAccount; saveState(legacy);
+    expect(isDemoSignedIn(loadState().state)).toBe(false);
     expect(loadState().state.fanProfile.id).toBe(legacy.fanProfile.id);
   });
   it.each(['google', 'facebook'] as const)('%s sign-in preserves membership, products, room, cart and history', provider => {

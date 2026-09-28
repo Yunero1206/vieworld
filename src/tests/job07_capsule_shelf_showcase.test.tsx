@@ -279,7 +279,6 @@ describe('Job 07 Acceptance: 3-Slot Capsule Showcase Shelf & Persistence', () =>
         },
         fanProfile: {
           ...baseState.fanProfile,
-          id: 'fan-01',
           showcaseSlots: [null, null, null],
         },
       };
@@ -297,7 +296,7 @@ describe('Job 07 Acceptance: 3-Slot Capsule Showcase Shelf & Persistence', () =>
         id: 'cap-own-01',
         tenantId: 'vieworld-demo',
         version: 1,
-        fanId: 'fan-01',
+        fanId: baseState.fanProfile.id,
         sessionId: 'session-dropin-01',
         worldId: 'artist-a',
         participationId: 'part-own-01',

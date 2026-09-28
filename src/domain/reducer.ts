@@ -16,6 +16,9 @@ import { validHomeDestination } from '../world/homeDestination';
 import { accountReducer, isDemoSignedIn } from '../world/account';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
+  if (!isDemoSignedIn(state) && ['SAVE_ROOM_DESIGN','SET_DISPLAY_SLOT','SET_DISPLAY_SURFACE','SET_AVATAR_PRESET','EQUIP_WARDROBE','EQUIP_DIGITAL_PRODUCT','REMOVE_DIGITAL_SLOT','SET_SHOWCASE_SLOT','CLEAR_SHOWCASE_SLOT','SAVE_CAPSULE','SAVE_PUBLIC_IDENTITY'].includes(action.type)) {
+    return { ...state, lastError: { code: 'DEMO_LOGIN_REQUIRED', message: 'Đăng nhập demo trước khi thay đổi góc riêng của bạn.' } };
+  }
   const featureState=accountReducer(state,action) ?? commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
   if(featureState)return featureState;
   switch (action.type) {

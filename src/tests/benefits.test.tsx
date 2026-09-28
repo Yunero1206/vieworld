@@ -287,6 +287,7 @@ describe('T07 Acceptance: Membership and Eligible Benefits', () => {
 
   describe('2. UI Integration: WorldDetailView & MyWorldView Journeys', () => {
     it('7. Refresh preserves membership and benefit state in localStorage', async () => {
+      saveState(createInitialState());
       // Render application at /me
       const { unmount } = render(
         <AppProvider>

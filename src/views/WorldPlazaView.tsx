@@ -6,8 +6,10 @@ import type { HomeActivity } from '../world/homeOrientation';
 import { getHomeOrientation } from '../world/homeOrientation';
 import { getArtistCover } from '../world/artistVisuals';
 import mySpaceArt from '../assets/home/my-space.webp';
-import productPin from '../assets/home/product-pin.jpg';
+import { isDemoSignedIn } from '../world/account';
+import { merchImageUrl } from '../world/merchImages';
 
+const productPin = '/images/product-pin.jpg';
 const FanWorldView = lazy(() => import('./FanWorldView').then(module => ({ default: module.FanWorldView })));
 
 const filters: { id: 'all' | HomeActivity['category']; label: string }[] = [
@@ -19,7 +21,7 @@ const filters: { id: 'all' | HomeActivity['category']; label: string }[] = [
 ];
 
 function activityImage(activity: HomeActivity) {
-  if (activity.mediaSrc) return activity.mediaSrc;
+  if (activity.mediaSrc) return merchImageUrl(activity.mediaSrc);
   if (activity.category === 'shop') return productPin;
   return getArtistCover(activity.worldId);
 }
@@ -43,7 +45,11 @@ export function WorldPlazaView() {
   const { state } = useApp();
   const [params] = useSearchParams();
   const [filter, setFilter] = useState<(typeof filters)[number]['id']>('all');
-  const { now, recent, upcomingAll, continueWith } = getHomeOrientation(state);
+  const signedIn = isDemoSignedIn(state);
+  const orientation = getHomeOrientation(state);
+  const { now, upcomingAll } = orientation;
+  const recent = signedIn ? orientation.recent : orientation.recent.filter(item => item.category !== 'capsule');
+  const continueWith = signedIn ? orientation.continueWith : { visual: 'space' as const, worldId: undefined, title: 'Tìm một world để ghé chơi', detail: 'Khám phá nghệ sĩ, cuộc hẹn và những câu chuyện — chưa cần đăng nhập.', to: '/explore', action: 'Khám phá' };
   const fanName = state.fanProfile.displayName.trim().split(/\s+/)[0] || 'bạn';
   const demoDate = new Intl.DateTimeFormat('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric',
@@ -53,6 +59,7 @@ export function WorldPlazaView() {
   const featuredImage = continueWith.to.startsWith('/shop') ? productPin : continueWith.to.startsWith('/explore') ? getArtistCover() : continueWith.visual === 'space' ? mySpaceArt : getArtistCover(continueWith.worldId);
 
   useEffect(() => { document.title = 'Home · VieWorld'; }, []);
+  useEffect(() => { if (!signedIn && filter === 'capsule') setFilter('all'); }, [signedIn, filter]);
 
   // Historical panel links still open their original destination.
   if (params.get('panel') || params.get('zone') || params.get('drawer')) return <FanWorldView />;
@@ -60,7 +67,7 @@ export function WorldPlazaView() {
   return <div className="vw-home-editorial">
     <div className="vw-home-layout">
       <header className="vw-home-intro">
-        <h1>Chào {fanName}.</h1>
+        <h1>{signedIn ? `Chào ${fanName}.` : 'Chào bạn, ghé chơi nhé.'}</h1>
         <p>Những gì đáng chú ý, và những điều bạn muốn giữ lại. <span>Dữ liệu mẫu · {demoDate}</span></p>
       </header>
 
@@ -79,7 +86,7 @@ export function WorldPlazaView() {
         <Link className="vw-home-feature-card" to={continueWith.to}>
           <div className="vw-home-feature-image">
             <img src={featuredImage} alt="" fetchPriority="high" />
-            <span>{continueWith.action === 'Ghé lại' ? 'NƠI BẠN VỪA GHÉ' : 'MY SPACE'}</span>
+            <span>{continueWith.action === 'Ghé lại' ? 'NƠI BẠN VỪA GHÉ' : continueWith.to.startsWith('/explore') ? 'KHÁM PHÁ WORLD' : 'MY SPACE'}</span>
           </div>
           <div className="vw-home-feature-copy">
             <span className="vw-home-feature-kicker">{continueWith.visual === 'world' ? 'Artist World' : continueWith.to.startsWith('/shop') ? 'VieSHOP' : continueWith.to.startsWith('/explore') ? 'Explore' : 'My Space'}</span>
@@ -111,9 +118,9 @@ export function WorldPlazaView() {
 
       <section className="vw-home-recent" aria-labelledby="vw-home-recent-title">
         <div className="vw-home-section-row">
-          <div className="vw-home-section-title"><h2 id="vw-home-recent-title">Gần đây</h2><p>Những điều mới và kỷ niệm đã giữ.</p></div>
+          <div className="vw-home-section-title"><h2 id="vw-home-recent-title">Gần đây</h2><p>{signedIn ? 'Những điều mới và kỷ niệm đã giữ.' : 'Những điều vừa diễn ra trong các world.'}</p></div>
           <div className="vw-home-filters" role="group" aria-label="Lọc nội dung gần đây">
-            {filters.map(item => <button key={item.id} type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)}>{item.label}</button>)}
+            {filters.filter(item => signedIn || item.id !== 'capsule').map(item => <button key={item.id} type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)}>{item.label}</button>)}
           </div>
         </div>
         {shownRecent.length ? <div className="vw-home-recent-grid">

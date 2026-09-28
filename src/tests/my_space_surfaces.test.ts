@@ -6,7 +6,7 @@ import { itemFootprint, readDisplaySurfaces, validateSurfaceSelection } from '..
 import { withMerchCatalog } from '../world/merchCatalog';
 
 describe('My Space display surfaces', () => {
-  const shirt = (id: string): DisplayItem => ({ id, slot: 'shirt', title: id, detail: '', isDisplayCompatible: true });
+  const shirt = (id: string): DisplayItem => ({ id, slot: 'shirt', title: id, detail: '', image: 'shirt-digital', isDisplayCompatible: true });
   const ticket = (id: string): DisplayItem => ({ id, slot: 'ticket', title: id, detail: '', isDisplayCompatible: true });
 
   it('migrates legacy single slots to one-item surfaces without mutating the profile', () => {
@@ -22,7 +22,8 @@ describe('My Space display surfaces', () => {
     const profile = createInitialState('vieworld-demo').fanProfile;
     const objects = [shirt('a'), shirt('b'), shirt('c'), shirt('d'), ...Array.from({ length: 6 }, (_, i) => ticket(`t${i}`))];
     expect(itemFootprint(objects[0])).toBe(3);
-    expect(validateSurfaceSelection(profile, 'shirt', { itemIds: ['a', 'b', 'c'] }, objects)).toBeUndefined();
+    expect(validateSurfaceSelection(profile, 'shirt', { itemIds: ['a', 'b'] }, objects)).toBeUndefined();
+    expect(validateSurfaceSelection(profile, 'shirt', { itemIds: ['a', 'b', 'c'] }, objects)).toMatch(/đầy/);
     expect(validateSurfaceSelection(profile, 'shirt', { itemIds: ['a', 'b', 'c', 'd'] }, objects)).toMatch(/đầy/);
     expect(validateSurfaceSelection(profile, 'shirt', { itemIds: ['t0'] }, objects)).toMatch(/không phù hợp/);
     expect(validateSurfaceSelection(profile, 'ticket', { itemIds: ['t0', 't1', 't2', 't3', 't4', 't5'] }, objects)).toMatch(/đầy/);

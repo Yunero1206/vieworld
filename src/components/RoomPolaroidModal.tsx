@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Copy, Check, Download, Camera, Sparkles } from 'lucide-react';
 import { AvatarRenderer } from './AvatarRenderer';
 import { VieWorldLogo } from './VieWorldLogo';
-import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import type { DisplayItem } from '../world/display';
 import { useDialogA11y } from '../hooks/useDialogA11y';
 
@@ -222,7 +222,7 @@ export function RoomPolaroidModal({
                       <span key={item.id} className="v7-polaroid-chip">
                         {item.image && (
                           <img
-                            src={`${MERCH_IMAGE_ROOT}/${item.image}.png`}
+                            src={merchImageUrl(item.image)}
                             alt=""
                             onError={e => {
                               e.currentTarget.style.display = 'none';

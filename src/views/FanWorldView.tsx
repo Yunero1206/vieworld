@@ -28,6 +28,7 @@ import { AccountInfoDialog } from '../components/account/AccountInfoDialog';
 import { AuthOverlay } from '../components/account/AuthOverlay';
 import { isDemoSignedIn } from '../world/account';
 import { WorldGuidePanel } from '../components/WorldGuidePanel';
+import { PersonalSpaceGate } from '../components/account/PersonalSpaceGate';
 
 const panelTitles: Record<string, string> = {
   hall: 'Hall · Gặp những người cùng yêu nhạc', concerts: 'Live Concert · Sân khấu chung', livechat: 'Live Chat · Lời nhắn từ artist',
@@ -51,33 +52,41 @@ const ARTIST_PROMO_BANNERS: Record<string, ArtistPromoBanner> = {
     title: 'Đêm Nhạc Trực Tuyến & Merch Drop Exclusive',
     subtitle: 'Bộ sưu tập áo khoác Varsity, lightstick sao xanh và các sự kiện giao lưu trực tiếp đặc biệt.',
     targetRoute: '/shop',
-    bgImage: '/images/banner-artist-a.jpg',
+    bgImage: '/images/artist-a-cover.jpg',
     gradientOverlay: 'linear-gradient(90deg, rgba(16, 24, 32, 0.92) 0%, rgba(16, 24, 32, 0.7) 55%, rgba(16, 24, 32, 0.25) 100%)',
   },
   'artist-mira': {
     title: 'Bộ Sưu Tập Hoodie & Đĩa Than Vinyl MIRA',
     subtitle: 'Đắm chìm trong không gian âm nhạc Lofi Dream Pop và quà tặng độc quyền dành riêng cho Moonies.',
     targetRoute: '/shop',
-    bgImage: '/images/banner-artist-mira.jpg',
+    bgImage: '/images/mira-cover.jpg',
     gradientOverlay: 'linear-gradient(90deg, rgba(35, 18, 55, 0.92) 0%, rgba(35, 18, 55, 0.7) 55%, rgba(35, 18, 55, 0.25) 100%)',
   },
   'artist-kai': {
     title: 'Áo Bomber Phản Quang & Cyber Pulse Lightstick',
     subtitle: 'Trang bị phụ kiện bùng nổ cho các đêm nhạc EDM và phiên thử nghiệm âm thanh sống động.',
     targetRoute: '/shop',
-    bgImage: '/images/banner-artist-kai.jpg',
+    bgImage: '/images/kai-cover.jpg',
     gradientOverlay: 'linear-gradient(90deg, rgba(12, 22, 36, 0.92) 0%, rgba(12, 22, 36, 0.7) 55%, rgba(12, 22, 36, 0.25) 100%)',
   },
   'neon-sessions': {
     title: 'Tuyển Tập Đĩa Than & Kỷ Vật Neon Prelude',
     subtitle: 'Lắng nghe những bản thu mộc mạc và lưu giữ kỷ vật âm nhạc đặc sắc từ các nghệ sĩ.',
     targetRoute: '/shop',
-    bgImage: '/images/banner-neon-sessions.jpg',
+    bgImage: '/images/neon-sessions-cover.jpg',
     gradientOverlay: 'linear-gradient(90deg, rgba(30, 20, 12, 0.92) 0%, rgba(30, 20, 12, 0.7) 55%, rgba(30, 20, 12, 0.25) 100%)',
   },
 };
 
 export function FanWorldView() {
+  const { pathname, search } = useLocation();
+  const params = new URLSearchParams(search);
+  const panel = params.get('panel') || params.get('zone') || params.get('drawer');
+  const personal = pathname === '/me' || pathname.endsWith('/archive') || ['bag','orders','membership','benefits','capsules','calendar','showcase','account','privacy','wardrobe'].includes(panel || '');
+  return personal ? <PersonalSpaceGate><SignedInFanWorldView/></PersonalSpaceGate> : <SignedInFanWorldView/>;
+}
+
+function SignedInFanWorldView() {
   const { state, dispatch } = useApp();
   const tenantConfig = getTenantConfig(state.activeTenantId);
   const { worldId } = useParams();
@@ -392,7 +401,7 @@ export function FanWorldView() {
             title: `Không Gian Âm Nhạc & Kỷ Vật · ${world.name}`,
             subtitle: 'Đồng hành cùng nghệ sĩ, tham gia sự kiện và lưu giữ những kỷ niệm đáng nhớ.',
             targetRoute: '/shop',
-            bgImage: '/images/banner-artist-a.jpg',
+            bgImage: '/images/artist-a-cover.jpg',
             gradientOverlay: 'linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.75) 55%, rgba(15, 23, 42, 0.3) 100%)',
           };
 

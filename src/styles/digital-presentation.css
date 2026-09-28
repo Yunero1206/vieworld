@@ -1,0 +1,36 @@
+/* Object geometry is authored once, shared by room, shop preview and all viewports. */
+.v6-display-scene .v6-fixture::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 100%; height: 100%; min-width: 44px; min-height: 44px; }
+.v6-display-scene .v6-fixture.occupied:is(:hover,:focus-visible) { transform: translate(-50%,-50%); }
+.v6-display-scene .v6-fixture:focus-visible { outline: 2px solid #355b48; outline-offset: 4px; }
+.v6-display-scene .myspace-surface-composition { flex: 1; }
+.myspace-room-prop > .vw-digital-object-art { width: 100%; height: 100%; display: block; }
+.myspace-room-prop > .vw-prepared-prop { width: 100%; height: 100%; display: block; overflow: visible; }
+.vw-album-display { position: relative; width: 100%; height: 100%; }
+.vw-album-cover { position: absolute; inset: 0 4% 10%; background: #e7dbc3; border: 1px solid #b49a76; box-shadow: 2px 1px 0 #987c56; overflow: hidden; }
+.vw-album-cover > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vw-album-support { position: absolute; inset: 87% 0 0; background: linear-gradient(#b6976b,#7c5b39); border-radius: 2px; box-shadow: 0 3px 3px #47301945; }
+.vw-album-support::before { content: ''; position: absolute; left: 5%; right: 5%; top: -16%; height: 28%; background: #dac099; border-radius: 2px; }
+.vw-room-keepsake { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-width: 0; min-height: 0; box-sizing: border-box; overflow: hidden; background: #f5ead5; border: 2px solid #a78560; border-radius: 2px; box-shadow: 2px 2px 0 #755e4345; }
+.vw-room-keepsake > img { position: absolute; inset: 6%; width: 88%; height: 88%; object-fit: contain; display: block; }
+.vw-room-keepsake.is-disc { border-width: 1px 1px 1px 4px; padding: 0; box-shadow: 3px 1px 0 #e3d9c8,4px 2px 0 #957f65; }
+.vw-room-keepsake.is-achievement { border-radius: 48% 48% 8% 8%; background: linear-gradient(135deg,#f5dfac,#d8b87c); padding: 12%; }
+.myspace-room-prop.is-desk::after,.myspace-room-prop.is-shelf::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -1%; height: 3%; border-radius: 50%; background: #58433033; z-index: -1; }
+.v7-vinyl-spinning .myspace-room-prop img { animation: none; }
+.v6-display-scene .v6-fixture.v7-lightstick-glow { animation: none; filter: none; }
+.v6-fixture.v7-lightstick-glow .is-light-art { animation: vw-prop-light 2s ease-in-out infinite alternate; }
+@keyframes vw-prop-light { to { filter: drop-shadow(0 0 3px var(--prop-glow,#a3c78b)); } }
+.vw-personal-gate { max-width: 560px; margin: clamp(32px,8vh,90px) auto; padding: 32px; text-align: center; color: var(--ink); }
+.vw-personal-gate > p { line-height: 1.65; color: var(--muted); margin: 16px 0 24px; }
+.vw-personal-gate > .fw-button { margin: 8px 16px 16px; }
+.vw-surface-preview { width: 150px; max-width: 100%; margin: 12px auto; background: #efe5d4; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.vw-surface-preview .myspace-surface-composition.is-shelf { background: linear-gradient(to bottom,transparent 0 23%,#b59067 23% 26%,transparent 26% 61%,#b59067 61% 64%,transparent 64% 83%,#b59067 83% 86%,transparent 86%); }
+.vw-surface-preview .myspace-surface-composition.is-rack { border-top: 4px solid #af8b52; }
+.fan-shell .vw-shop-preview-room.vw-room-preview-shared { display: block; background: transparent; padding: 0; overflow: visible; }
+.vw-room-preview-shared .v6-display-scene { border-radius: 14px; }
+.vw-room-preview-shared > .v6-display-scene-wrapper { width: 100%; }
+.vw-equipped-fan { overflow: visible; }
+.fan-shell .myspace-layout-presets button,.fan-shell .myspace-other-surfaces button,.fan-shell .myspace-surface-item-actions button { background: var(--surface-subtle); color: var(--ink); border-color: var(--border); }
+.fan-shell .myspace-layout-presets button[aria-pressed=true] { background: var(--primary); color: var(--on-primary,#fff); }
+.fan-shell .myspace-surface-capacity { color: var(--muted); }
+.fan-shell .myspace-drawer-notice { background: var(--surface-subtle); color: var(--ink); border: 1px solid var(--border); line-height: 1.6; }
+@media(prefers-reduced-motion: reduce) { .v6-display-scene .v6-fixture { transition: none; } .v6-fixture.v7-lightstick-glow .is-light-art { animation: none; } }

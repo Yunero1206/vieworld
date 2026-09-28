@@ -1,5 +1,6 @@
 import type { Product } from '../domain/types';
 import { money } from './commerce';
+import { productDisplaySlot } from './display';
 
 export type ShopCategory = 'all' | 'merch' | 'album' | 'membership';
 export type PreviewCapabilities = { avatar: boolean; room: boolean };
@@ -29,10 +30,7 @@ export function getPreviewCapabilities(product: Product, catalog: Product[]): Pr
   const hasAvatarEdition = !!product.digitalSlot || catalog.some(candidate =>
     (candidate.familyId || candidate.id) === family && !!candidate.digitalSlot,
   );
-  const room = product.category === 'album' || product.category === 'ticket'
-    || product.digitalSlot === 'lightstick' || product.digitalSlot === 'shirt'
-    || /^(shirt|lightstick)/.test(product.image || '')
-    || /-(hoodie|bomber|lightstick)-/.test(product.image || '');
+  const room = Boolean(productDisplaySlot(product));
   return { avatar: hasAvatarEdition, room };
 }
 

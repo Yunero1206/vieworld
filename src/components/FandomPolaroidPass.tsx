@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, Copy, Check, QrCode, Download, AlertCircle } from 'lucide-react';
 import { AvatarRenderer } from './AvatarRenderer';
 import { VieWorldLogo } from './VieWorldLogo';
-import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import type { DisplayItem } from '../world/display';
 import { useDialogA11y } from '../hooks/useDialogA11y';
 import { useApp } from '../context/AppContext';
@@ -215,7 +215,7 @@ export function FandomPolaroidPass({
                     src={
                       it.image?.startsWith('shirt')
                         ? '/images/world-v6/shirt-cutout.webp'
-                        : `${MERCH_IMAGE_ROOT}/${it.image}.png`
+                        : it.image ? merchImageUrl(it.image) : '/images/vieworld-logo.svg'
                     }
                     alt={it.title}
                   />

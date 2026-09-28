@@ -1,6 +1,7 @@
-import type { AppState } from '../domain/types';
+import type { AppState, Product } from '../domain/types';
 import { historyCards, hasHistoryBadge } from './history';
 import { readDisplaySurfaces } from './displaySurfaces';
+import { merchImageUrl } from './merchImages';
 
 export type DisplaySlot = 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement';
 
@@ -11,6 +12,8 @@ export interface DisplayItem {
   detail: string;
   image?: string;
   roomAsset?: string;
+  familyId?: string;
+  digitalItemId?: string;
   footprint?: 1 | 2 | 3;
   worldId?: string;
   collectedAt?: string;
@@ -26,10 +29,25 @@ export interface DisplayItem {
 export const DISPLAY_FIXTURES: { slot: DisplaySlot; label: string; x: number; y: number }[] = [
   { slot: 'shirt', label: 'Áo kỷ niệm', x: 20, y: 41 },
   { slot: 'ticket', label: 'Vé sự kiện', x: 36.5, y: 28 },
-  { slot: 'disc', label: 'Đĩa đang nghe', x: 84.5, y: 48 },
+  { slot: 'disc', label: 'Album trên giá trưng', x: 84.5, y: 48 },
   { slot: 'lightstick', label: 'Ánh sáng fandom', x: 68.5, y: 35.5 },
   { slot: 'achievement', label: 'Cột mốc & Kỷ vật', x: 55.5, y: 27 },
 ];
+
+export function productDisplaySlot(p: Product): DisplaySlot | undefined {
+  if (p.previewCapabilities?.room === false) return undefined;
+  return p.roomSurface || (p.digitalSlot === 'shirt' || /(?:shirt|hoodie|bomber)-/.test(p.image || '') ? 'shirt'
+    : p.digitalSlot === 'lightstick' || /lightstick-/.test(p.image || '') ? 'lightstick'
+    : p.digitalSlot === 'hat' ? 'achievement'
+    : p.category === 'album' ? 'disc' : p.category === 'ticket' ? 'ticket' : undefined);
+}
+
+/** A disposable preview projection; never writes ownership or placement. */
+export function productRoomPreviewItem(p: Product): DisplayItem {
+  return { id: p.id, title: p.title, detail: '', slot: productDisplaySlot(p), image: p.image,
+    roomAsset: p.roomAsset, familyId: p.familyId, digitalItemId: p.digitalItemId,
+    footprint: p.roomFootprint, isDisplayCompatible: Boolean(productDisplaySlot(p)) };
+}
 
 /**
  * Returns complete collection of items owned by the current fan in the active tenant.
@@ -43,12 +61,7 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     );
     if (receipts.length === 0) return [];
     const latestReceipt = receipts.sort((a, b) => (b.fulfilledAt || '').localeCompare(a.fulfilledAt || ''))[0];
-    const slot: DisplaySlot | undefined = p.roomSurface
-      || (p.digitalSlot === 'shirt' || /(?:shirt|hoodie|bomber)-/.test(p.image || '') ? 'shirt'
-      : p.digitalSlot === 'lightstick' || /lightstick-/.test(p.image || '') ? 'lightstick'
-      : p.category === 'album' ? 'disc'
-      : p.category === 'ticket' ? 'ticket'
-      : undefined);
+    const slot = productDisplaySlot(p);
 
     return [{
       id: p.id,
@@ -56,6 +69,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
       title: p.title,
       image: p.image,
       roomAsset: p.roomAsset,
+      familyId: p.familyId,
+      digitalItemId: p.digitalItemId,
       footprint: p.roomFootprint || (/(?:cap)-/.test(p.image || '') ? 1 : undefined),
       worldId: p.worldId,
       collectedAt: latestReceipt?.fulfilledAt,
@@ -132,8 +147,8 @@ export function displayedItems(s: AppState) {
 
 export function displayAssetUrl(item: DisplayItem): string | undefined {
   if (!item.image) return undefined;
-  if (item.image.startsWith('/') || /^https?:\/\//.test(item.image)) return item.image;
-  return `/images/merch-v2/${item.image}.png`;
+  if (/^https?:\/\//.test(item.image)) return item.image;
+  return merchImageUrl(item.image);
 }
 
 /** A prepared transparent prop is optional. Without it the room uses a designed frame/case. */

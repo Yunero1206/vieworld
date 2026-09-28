@@ -1,10 +1,8 @@
 import type { AppState } from '../domain/types';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { selectPublicVoices, type PublicVoice } from './exploreDiscovery';
+import { merchImageUrl } from './merchImages';
 import aConcert from '../assets/home/concert-night.png';
-import aStudio from '../assets/home/neon-cover.jpg';
-import miraCover from '../assets/home/mira-cover.jpg';
-import kaiCover from '../assets/home/kai-cover.jpg';
 import bTriptych from '../assets/explore-demo/artist-b-triptych.jpg';
 import cTriptych from '../assets/explore-demo/artist-c-triptych.jpg';
 import dTriptych from '../assets/explore-demo/artist-d-triptych.jpg';
@@ -34,10 +32,13 @@ export interface ExploreWorldRow {
 }
 
 const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const aStudio = publicAsset('images/neon-sessions-cover.jpg');
+const miraCover = publicAsset('images/mira-cover.jpg');
+const kaiCover = publicAsset('images/kai-cover.jpg');
 const mediaByWorld: Record<string, { avatar: ExploreMedia; moments: [ExploreMedia, ExploreMedia]; titles: [string, string]; kinds?: ['image' | 'video', 'image' | 'video']; freshness: number }> = {
-  'artist-a': { avatar: { src: publicAsset('images/characters-v4/avatar-artist-a.webp') }, moments: [{ src: aConcert }, { src: aStudio }], titles: ['Concert Hà Nội', 'Soundcheck · Neon Sessions'], freshness: 100 },
-  'artist-mira': { avatar: { src: publicAsset('images/characters-v4/avatar-artist-mira.webp') }, moments: [{ src: miraCover }, { src: publicAsset('images/merch-v2/mira-vinyl-physical.png') }], titles: ['Một tối cùng MIRA', 'Kỷ niệm · Luna'], freshness: 90 },
-  'artist-kai': { avatar: { src: publicAsset('images/characters-v4/avatar-artist-kai.webp') }, moments: [{ src: kaiCover }, { src: publicAsset('images/merch-v2/kai-cassette-physical.png') }], titles: ['Nhịp đêm của KAI', 'Kỷ niệm · Pulse'], freshness: 80 },
+  'artist-a': { avatar: { src: publicAsset('images/characters-v4/artist-a.png') }, moments: [{ src: aConcert }, { src: aStudio }], titles: ['Concert Hà Nội', 'Soundcheck · Neon Sessions'], freshness: 100 },
+  'artist-mira': { avatar: { src: publicAsset('images/characters-v4/artist-mira.png') }, moments: [{ src: miraCover }, { src: merchImageUrl('mira-vinyl-physical') }], titles: ['Một tối cùng MIRA', 'Kỷ niệm · Luna'], freshness: 90 },
+  'artist-kai': { avatar: { src: publicAsset('images/characters-v4/artist-kai.png') }, moments: [{ src: kaiCover }, { src: merchImageUrl('kai-cassette-physical') }], titles: ['Nhịp đêm của KAI', 'Kỷ niệm · Pulse'], freshness: 80 },
   'artist-b': { avatar: { src: bTriptych, panel: 0 }, moments: [{ src: bTriptych, panel: 1 }, { src: bTriptych, panel: 2 }], titles: ['B · Live ở sân khấu nhỏ', 'B · Trước giờ diễn'], freshness: 50 },
   'artist-c': { avatar: { src: cTriptych, panel: 0 }, moments: [{ src: cTriptych, panel: 1 }, { src: cTriptych, panel: 2 }], titles: ['C · Đêm ánh tím', 'C · Sau cánh gà'], freshness: 65 },
   'artist-d': { avatar: { src: dTriptych, panel: 0 }, moments: [{ src: dTriptych, panel: 1 }, { src: dTriptych, panel: 2 }], titles: ['D · Buổi diễn acoustic', 'D · Một chiều tập nhạc'], freshness: 50 },
@@ -93,14 +94,14 @@ const EXTENDED_MOMENT_DEFS: ExtendedMomentDef[] = [
   { id: 'artist-c-moment-8', worldId: 'artist-c', title: 'Ánh laser tím kết thúc show', src: cTriptych, panel: 2, kind: 'video' },
 
   // Artist MIRA (6 moments)
-  { id: 'artist-mira-moment-3', worldId: 'artist-mira', title: 'Đĩa than Midnight Reverie lên kệ', src: publicAsset('images/merch-v2/mira-vinyl-physical.png'), kind: 'image' },
+  { id: 'artist-mira-moment-3', worldId: 'artist-mira', title: 'Đĩa than Midnight Reverie lên kệ', src: merchImageUrl('mira-vinyl-physical'), kind: 'image' },
   { id: 'artist-mira-moment-4', worldId: 'artist-mira', title: 'Trà lofi ngắm trăng khuyết', src: miraCover, kind: 'image' },
   { id: 'artist-mira-moment-5', worldId: 'artist-mira', title: 'Ánh tím pastel trong phòng thu', src: miraCover, kind: 'image' },
   { id: 'artist-mira-moment-6', worldId: 'artist-mira', title: 'Hậu trường chụp photobook', src: miraCover, kind: 'video' },
 
   // Artist KAI (6 moments)
   { id: 'artist-kai-moment-3', worldId: 'artist-kai', title: 'Thử thách beatbox cùng fan', src: kaiCover, kind: 'video' },
-  { id: 'artist-kai-moment-4', worldId: 'artist-kai', title: 'Áo khoác bomber neon phản quang', src: publicAsset('images/merch-v2/kai-bomber-physical.png'), kind: 'image' },
+  { id: 'artist-kai-moment-4', worldId: 'artist-kai', title: 'Áo khoác bomber neon phản quang', src: merchImageUrl('kai-bomber-physical'), kind: 'image' },
   { id: 'artist-kai-moment-5', worldId: 'artist-kai', title: 'Dàn synthesizer phòng thí nghiệm', src: kaiCover, kind: 'image' },
   { id: 'artist-kai-moment-6', worldId: 'artist-kai', title: 'Cyber Jam tại phố đi bộ', src: kaiCover, kind: 'video' },
 

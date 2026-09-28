@@ -15,6 +15,8 @@ import { MyWorldView } from '../views/MyWorldView';
 import { WardrobeCustomizer } from '../components/WardrobeCustomizer';
 import { MomentCapsuleCard } from '../components/MomentCapsuleCard';
 import { Capsule, Session, World } from '../domain/types';
+import { createInitialState } from '../data/fixtures';
+import { saveState } from '../services/storageAdapter';
 
 describe('T06 Acceptance: The Signature Loop & My World', () => {
   beforeEach(() => {
@@ -23,6 +25,7 @@ describe('T06 Acceptance: The Signature Loop & My World', () => {
 
   describe('1. Full Signature Loop & Post-Refresh Persistence', () => {
     it('executes: Follow → RSVP → Join Live → Interact → End Session → Save Capsule → My World persists after refresh', async () => {
+      saveState(createInitialState()); // An authenticated journey; guest behavior is covered separately.
       // PHASE 1: Execution of the loop in the application
       const { unmount } = render(
         <AppProvider>

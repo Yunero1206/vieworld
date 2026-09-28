@@ -57,7 +57,7 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
       // Artwork image exists with approved path
       const artwork = screen.getByTestId('world-backdrop-artwork');
       expect(artwork).toBeInTheDocument();
-      expect(artwork).toHaveAttribute('src', '/images/world-redesign/drafts/artist-a-scene-sample.png');
+      expect(artwork).toHaveAttribute('src', '/images/world-redesign/drafts/artist-a-scene-sample.jpg');
       expect(artwork).toHaveClass('diorama-backdrop-artwork');
 
       // HTML/CSS labels remain rendered as code, NOT baked into artwork
@@ -157,7 +157,7 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
       // Room backdrop image is rendered
       const artwork = screen.getByTestId('room-backdrop-artwork');
       expect(artwork).toBeInTheDocument();
-      expect(artwork).toHaveAttribute('src', '/images/world-redesign/drafts/fan-room-scene-sample.png');
+      expect(artwork).toHaveAttribute('src', '/images/world-redesign/drafts/fan-room-scene-sample.jpg');
       expect(artwork).toHaveClass('room-backdrop-artwork');
 
       // Hotspots remain live HTML elements with full accessibility
@@ -304,8 +304,8 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
     });
 
     it('verifies actual file sizes of integrated assets are well below 1.5 MB', () => {
-      const artistScenePath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/artist-a-scene-sample.png');
-      const fanRoomPath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/fan-room-scene-sample.png');
+      const artistScenePath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/artist-a-scene-sample.jpg');
+      const fanRoomPath = path.resolve(__dirname, '../../static/images/world-redesign/drafts/fan-room-scene-sample.jpg');
 
       expect(fs.existsSync(artistScenePath)).toBe(true);
       expect(fs.existsSync(fanRoomPath)).toBe(true);
@@ -320,8 +320,8 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
       expect(totalSize).toBeLessThan(1500 * 1024);
 
       // Log sizes for documentation transparency
-      console.log(`[Job 08 Asset Audit] artist-a-scene-sample.png: ${(artistSceneSize / 1024).toFixed(1)} KB`);
-      console.log(`[Job 08 Asset Audit] fan-room-scene-sample.png: ${(fanRoomSize / 1024).toFixed(1)} KB`);
+      console.log(`[Job 08 Asset Audit] artist-a-scene-sample.jpg: ${(artistSceneSize / 1024).toFixed(1)} KB`);
+      console.log(`[Job 08 Asset Audit] fan-room-scene-sample.jpg: ${(fanRoomSize / 1024).toFixed(1)} KB`);
       console.log(`[Job 08 Asset Audit] Total background bundle size: ${(totalSize / 1024).toFixed(1)} KB (< 1.5 MB target)`);
     });
   });

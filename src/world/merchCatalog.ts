@@ -1,7 +1,6 @@
 import { AppState, Product, ProductKind } from '../domain/types';
 import { isDemoSignedIn } from './account';
 
-export const MERCH_IMAGE_ROOT = '/images/merch-v2';
 export const DELIVERY_LABELS = { physical: 'Hàng thật', digital: 'Digital', bundle: 'Hàng thật + Digital' };
 const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30, kind: 'physical' as ProductKind };
 export const NEW_MERCH: Record<string, Product> = Object.fromEntries([

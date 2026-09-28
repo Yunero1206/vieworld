@@ -1,5 +1,9 @@
-import React, { useId, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { SpeechBubble } from './SpeechBubble';
+import { EquippedFanArt } from './EquippedFanArt';
+import { PreparedPropArt } from './PreparedPropArt';
+import { ItemMotif } from './DigitalObjectArt';
+import { digitalVisual } from '../world/itemVisuals';
 import {
   CharacterRole,
   getAccessoryById,
@@ -60,10 +64,10 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
 
   const getArtistAvatarSrc = () => {
     const key = `${displayName || ''} ${artistId || ''}`.toLowerCase();
-    if (key.includes('mira')) return '/images/characters-v4/avatar-artist-mira.webp';
-    if (key.includes('kai')) return '/images/characters-v4/avatar-artist-kai.webp';
+    if (key.includes('mira')) return '/images/characters-v4/artist-mira.png';
+    if (key.includes('kai')) return '/images/characters-v4/artist-kai.png';
     if (key.includes('neon')) return '/images/characters-v4/avatar-neon-sessions.webp';
-    return '/images/characters-v4/avatar-artist-a.webp';
+    return '/images/characters-v4/artist-a.png';
   };
 
   const characterSrc =
@@ -72,6 +76,12 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
         ? `/images/world-v8/fan-${['wave', 'bob', 'curl'].indexOf(appearance) + 1}.webp`
         : '/images/characters-v4/fan.webp'
       : getArtistAvatarSrc();
+
+  useEffect(() => setImageFailed(false), [characterSrc]);
+  const equippedFan = role === 'fan' && Boolean(digitalVisual(digitalLook?.shirt) || digitalVisual(digitalLook?.hat) || digitalVisual(digitalLook?.lightstick));
+  const fallbackShirt = digitalVisual(digitalLook?.shirt);
+  const fallbackHat = digitalVisual(digitalLook?.hat);
+  const fallbackLight = digitalVisual(digitalLook?.lightstick);
 
   return (
     <div
@@ -101,15 +111,12 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
     >
       {speechText && <SpeechBubble text={speechText} />}
       {!imageFailed ? <>
-        <img className="vx-character-art" src={characterSrc} alt="" draggable={false} decoding="async" onError={()=>setImageFailed(true)}/>
+        {equippedFan ? <EquippedFanArt source={characterSrc} appearance={appearance} look={digitalLook || {}} onError={() => setImageFailed(true)}/> : <img className="vx-character-art" src={characterSrc} alt="" draggable={false} decoding="async" onError={()=>setImageFailed(true)}/>}
         <svg className="vx-character-layers" viewBox="0 0 200 250" fill="none" aria-hidden="true">
-          {(digitalLook?.shirt || (role==='artist'&&outfitId&&outfitId!=='midnight_jacket')) && <g fill={outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'#374151':undefined} data-testid={digitalLook?.shirt?'digital-shirt':outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'fallback-avatar-torso':'artist-outfit'}>
-            <path d="M73 126Q100 139 127 126L137 146L136 183Q100 190 64 183L63 146Z" fill={role==='fan'?(digitalLook?.shirt==='mira-hoodie'?'#c4b5fd':digitalLook?.shirt==='kai-bomber'?'#334155':'#e9e3cd'):outfitId==='festival_hoodie'?'#a66469':outfitId==='acoustic_shirt'?'#dbceb4':'#374151'} stroke="#827762" strokeWidth="1"/>
+          {role==='artist'&&outfitId&&outfitId!=='midnight_jacket' && <g fill={outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'#374151':undefined} data-testid={outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'fallback-avatar-torso':'artist-outfit'}>
+            <path d="M73 126Q100 139 127 126L137 146L136 183Q100 190 64 183L63 146Z" fill={outfitId==='festival_hoodie'?'#a66469':outfitId==='acoustic_shirt'?'#dbceb4':'#374151'} stroke="#827762" strokeWidth="1"/>
             <path d="M82 128Q100 145 118 128" stroke="#fcf7e9" strokeWidth="3"/>
-            {role==='fan'&&<path d="M86 150L89 157H97L91 162L93 170L86 165L79 170L81 162L75 157H83Z" fill={digitalLook?.shirt==='kai-bomber'?'#06b6d4':digitalLook?.shirt==='mira-hoodie'?'#a78bfa':'#57735d'}/>}
           </g>}
-          {digitalLook?.hat&&<g data-testid="digital-hat"><path d="M40 49Q41 5 100 6Q159 7 160 49Q102 67 40 49Z" fill="#698063" stroke="#344b38"/><path d="M40 49Q103 35 166 54Q107 72 40 55Z" fill="#445c46"/></g>}
-          {digitalLook?.lightstick&&<g data-testid="digital-lightstick"><path d="M156 184L159 156" stroke="#849b8b" strokeWidth="5"/><circle cx="160" cy="149" r="10" fill={digitalLook.lightstick==='mira-lightstick'?'#e9d5ff':digitalLook.lightstick==='kai-lightstick'?'#cffafe':'#e5f1e0'} stroke={digitalLook.lightstick==='mira-lightstick'?'#9333ea':digitalLook.lightstick==='kai-lightstick'?'#06b6d4':'#7f9d88'}/><path d="M160 140L163 147H170L165 152L167 159L160 155L153 159L155 152L150 147H157Z" fill={digitalLook.lightstick==='mira-lightstick'?'#a855f7':digitalLook.lightstick==='kai-lightstick'?'#0891b2':'#a9c2a3'}/></g>}
           {accessory?.id==='accessory_classic'&&<g data-testid={role==='artist'?'star-badge-accessory':'preview-accessory-star'}><path d="M120 139L123 145H130L125 150L127 157L120 153L113 157L115 150L110 145H117Z" fill="#e0b465" stroke="#856a3e"/></g>}
           {accessory?.id==='earpiece_glow'&&<g data-testid={role==='artist'?'earpiece-glow-accessory':'preview-accessory-earpiece'}><circle cx="147" cy="99" r="5" fill="#8ec8b4" stroke="#426b5d"/></g>}
           {accessory?.id==='visor_neon'&&<g data-testid={role==='artist'?'visor-neon-accessory':'preview-accessory-visor'}><rect x="59" y="84" width="82" height="20" rx="8" fill="#537e86" fillOpacity=".8" stroke="#c9e8df"/><path d="M67 89H132" stroke="#d7eeed"/></g>}
@@ -168,14 +175,14 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
           {/* Cream Zip Hoodie Torso */}
           <path
             d="M58 206C58 168 76 154 100 154C124 154 142 168 142 206V212H58V206Z"
-            fill={digitalLook?.shirt ? '#eee7d3' : `url(#${svgId}-fanHoodieClay)`}
+            fill={fallbackShirt?.color || `url(#${svgId}-fanHoodieClay)`}
             stroke="#E5E7EB"
             strokeWidth="2.5"
           />
 
           {/* Hoodie Pockets & Zipper Line */}
-          {digitalLook?.shirt && <g data-testid="digital-shirt"><path d="M84 159Q100 170 116 159" stroke="#53664d" strokeWidth="7"/><path d="M76 177L79 183H86L81 188L83 195L76 191L69 195L71 188L66 183H73Z" fill="#53664d"/></g>}
-          {!digitalLook?.shirt && <g><line x1="100" y1="156" x2="100" y2="210" stroke={FAN_CHARACTER_SPEC.palette.hoodieZip} strokeWidth="2.5" strokeLinecap="round" />
+          {fallbackShirt && <g data-testid="digital-shirt" data-visual-id={fallbackShirt.id}><path d="M84 159Q100 170 116 159" stroke={fallbackShirt.accent} strokeWidth="7"/><g transform="translate(79 186) scale(.5)"><ItemMotif visual={fallbackShirt}/></g>{fallbackShirt.kind==='bomber' && <path d="M100 168V210" stroke={fallbackShirt.accent} strokeWidth="2"/>}</g>}
+          {!fallbackShirt && <g><line x1="100" y1="156" x2="100" y2="210" stroke={FAN_CHARACTER_SPEC.palette.hoodieZip} strokeWidth="2.5" strokeLinecap="round" />
           <path d="M72 188Q84 200 96 200" stroke="#CBD5E1" strokeWidth="2" fill="none" strokeLinecap="round" />
           <path d="M128 188Q116 200 104 200" stroke="#CBD5E1" strokeWidth="2" fill="none" strokeLinecap="round" /></g>}
 
@@ -205,8 +212,8 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
           />
 
           {/* Expressive Clay Eyes */}
-          {digitalLook?.hat && <g data-testid="digital-hat"><path d="M53 95Q55 42 99 43Q143 43 147 95Z" fill="#667658" stroke="#34482e" strokeWidth="2"/><path d="M54 94Q108 78 155 103Q102 112 54 101Z" fill="#485c3e"/><path d="M98 56L102 65H112L104 71L107 80L98 74L89 80L92 71L84 65H94Z" fill="#f3ead3"/></g>}
-          {digitalLook?.lightstick && <g data-testid="digital-lightstick" transform="rotate(-12 150 185)"><rect x="147" y="164" width="10" height="44" rx="5" fill="#f5eacc" stroke="#8e936e"/><circle cx="152" cy="149" r="20" fill="#d1fae5" fillOpacity=".8" stroke="#79a18d" strokeWidth="2"/><path d="M152 134L156 144H166L158 151L161 161L152 155L143 161L146 151L138 144H148Z" fill="#53664d"/></g>}
+          {fallbackHat && <g data-testid="digital-hat" data-visual-id={fallbackHat.id}>{fallbackHat.kind==='headband' ? <><path d="M58 91Q58 45 100 45Q142 45 142 91" stroke={fallbackHat.shade} strokeWidth="5"/><g transform="translate(133 60) scale(.55)"><ItemMotif visual={fallbackHat}/></g></> : <svg x="47" y="40" width="107" height="61"><PreparedPropArt visual={fallbackHat}/></svg>}</g>}
+          {fallbackLight && <g data-testid="digital-lightstick" data-visual-id={fallbackLight.id} transform="rotate(-12 150 185)"><svg x="134" y="129" width="35" height="79"><PreparedPropArt visual={fallbackLight}/></svg><ellipse cx="151" cy="190" rx="7" ry="5" fill={FAN_CHARACTER_SPEC.palette.skin}/></g>}
           <ellipse cx="86" cy="106" rx="4.5" ry="6" fill="#1E1B4B" />
           <ellipse cx="114" cy="106" rx="4.5" ry="6" fill="#1E1B4B" />
           <circle cx="88" cy="104" r="1.5" fill="#FFFFFF" />

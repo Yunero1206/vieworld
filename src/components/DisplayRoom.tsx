@@ -1,12 +1,13 @@
-import { useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from './AvatarRenderer';
-import { ownedDigitalLook, MERCH_IMAGE_ROOT } from '../world/merchCatalog';
-import { DISPLAY_FIXTURES, displayedItems, displayOptions, displayAssetUrl, displayRoomAssetUrl, type DisplayItem, type DisplaySlot } from '../world/display';
-import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSelection, type SurfaceSelection, type SurfacePreset } from '../world/displaySurfaces';
-import { composeRoomSurface } from '../world/roomComposition';
+import { ownedDigitalLook } from '../world/merchCatalog';
+import { DISPLAY_FIXTURES, displayedItems, displayOptions, displayAssetUrl, type DisplayItem, type DisplaySlot } from '../world/display';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection, type SurfaceSelection, type SurfacePreset } from '../world/displaySurfaces';
+import { composeRoomSurface, ROOM_SURFACE_BOUNDS } from '../world/roomComposition';
+import { RoomPropVisual } from './RoomPropVisual';
 import type { PublicFan } from '../world/community';
 import { RoomGuestbook } from './RoomGuestbook';
 import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
@@ -29,6 +30,7 @@ interface DisplayRoomSceneProps {
   onToggleEditMode?: () => void;
   isOwner?: boolean;
   showVisitCount?: boolean;
+  compact?: boolean;
   isVisitorMode?: boolean;
   onToggleVisitorMode?: () => void;
   onOpenPrivacy?: () => void;
@@ -40,9 +42,7 @@ export function DisplayRoomScene({
   items,
   surfaces,
   onSelect,
-  isVinylPlaying = false,
   isLightstickActive = true,
-  onToggleVinyl,
   onToggleLightstick,
   heartsCount = 19,
   onLike,
@@ -51,6 +51,7 @@ export function DisplayRoomScene({
   onToggleEditMode,
   isOwner = false,
   showVisitCount = true,
+  compact = false,
   isVisitorMode = false,
   onToggleVisitorMode,
   onOpenPrivacy,
@@ -58,6 +59,7 @@ export function DisplayRoomScene({
 }: DisplayRoomSceneProps) {
   const [ambientFeedback, setAmbientFeedback] = useState<string | null>(null);
   const feedbackTimeout = useRef<number | null>(null);
+  useEffect(() => () => { if (feedbackTimeout.current) window.clearTimeout(feedbackTimeout.current); }, []);
 
   const triggerFeedback = (msg: string) => {
     setAmbientFeedback(msg);
@@ -69,10 +71,7 @@ export function DisplayRoomScene({
     onSelect(slot);
 
     if (!isEditMode) {
-      if (slot === 'disc' && onToggleVinyl) {
-        onToggleVinyl();
-        triggerFeedback(!isVinylPlaying ? '▶ Đang phát mâm đĩa than' : '⏸ Đã dừng mâm đĩa than');
-      } else if (slot === 'lightstick' && onToggleLightstick) {
+      if (slot === 'lightstick' && onToggleLightstick) {
         onToggleLightstick();
         triggerFeedback(!isLightstickActive ? 'Đã bật ánh sáng fandom' : 'Đã tắt ánh sáng fandom');
       } else {
@@ -107,7 +106,7 @@ export function DisplayRoomScene({
       )}
 
       {/* Social & Contextual Toolbar */}
-      <div className="v7-room-social-bar">
+      {!compact && <div className="v7-room-social-bar">
         <div className="v7-social-left">
           {showVisitCount && (
             <span className="v7-visitor-counter">48 lượt ghé thăm</span>
@@ -189,14 +188,14 @@ export function DisplayRoomScene({
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       <div className={`v6-display-scene ${isEditMode ? 'is-edit-mode' : 'is-view-mode'}`}>
         <img
           className="v6-room-art"
           src="/images/myspace-room-v2.png"
-          width="1536"
-          height="864"
+          width="1672"
+          height="941"
           style={{ pointerEvents: 'none' }}
           onError={e => {
             e.currentTarget.style.visibility = 'hidden';
@@ -212,30 +211,32 @@ export function DisplayRoomScene({
             : items.filter(item => item.slot === f.slot);
           const item = surfaceObjects[0];
           const composition = composeRoomSurface(surface, surfaceObjects, selection);
+          const bounds = ROOM_SURFACE_BOUNDS[f.slot];
           const isVinylSlot = f.slot === 'disc';
           const isLightSlot = f.slot === 'lightstick';
-          const spinningClass = isVinylSlot && isVinylPlaying ? 'v7-vinyl-spinning' : '';
           const glowClass = isLightSlot && isLightstickActive ? 'v7-lightstick-glow' : '';
 
           return (
             <button
               id={`fixture-${f.slot}`}
-              className={`v6-fixture v6-fixture-${f.slot} ${item ? 'occupied' : ''} ${spinningClass} ${glowClass} ${
+              className={`v6-fixture v6-fixture-${f.slot} ${item ? 'occupied' : ''} ${glowClass} ${
                 isEditMode ? 'edit-hotspot' : 'view-hotspot'
               }`}
               key={f.slot}
               style={{
-                left: `${f.x}%`,
-                top: `${f.y}%`,
-                minWidth: '44px',
-                minHeight: '44px',
+                left: `${bounds.x}%`,
+                top: `${bounds.y}%`,
+                width: `${bounds.width}%`,
+                height: `${bounds.height}%`,
+                minWidth: 0,
+                minHeight: 0,
                 pointerEvents: 'auto',
               }}
               onClick={() => handleFixtureClick(f.slot)}
               aria-label={`${DISPLAY_SURFACES.find(surface => surface.id === f.slot)?.label}: ${surfaceObjects.length ? surfaceObjects.map(object => object.title).join(', ') : 'chưa trưng bày'}`}
               title={
                 !isEditMode && isVinylSlot
-                  ? isVinylPlaying ? 'Mâm đĩa: Nhấn để dừng nhạc' : 'Mâm đĩa: Nhấn để phát nhạc'
+                  ? 'Album trên giá trưng: Nhấn để xem vật phẩm'
                   : !isEditMode && isLightSlot
                   ? isLightstickActive ? 'Lightstick: Nhấn để tắt sáng' : 'Lightstick: Nhấn để bật sáng'
                   : isEditMode
@@ -246,13 +247,9 @@ export function DisplayRoomScene({
               {surfaceObjects.length ? (
                 <span className="myspace-surface-composition">
                   {composition.map(({ item: object, anchor, focal }) => {
-                    const roomAsset = displayRoomAssetUrl(object);
-                    const sourceAsset = displayAssetUrl(object);
-                    return <span key={object.id} className={`myspace-room-prop ${roomAsset ? 'is-cutout' : `is-${surface.type}`} ${focal ? 'is-focal' : ''}`}
-                      style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, width: `${anchor.width}%`, height: `${anchor.height}%`, zIndex: anchor.z, transform: `translate(-50%, -50%) rotate(${anchor.rotate}deg)` }}>
-                      {roomAsset ? <img src={roomAsset} alt="" loading="lazy" /> : <span className="myspace-room-prop-matte">
-                        {sourceAsset ? <img src={sourceAsset} alt="" loading="lazy" /> : <span className="myspace-room-prop-symbol">✦</span>}
-                      </span>}
+                    return <span key={object.id} className={`myspace-room-prop is-${surface.type} ${focal ? 'is-focal' : ''}`} data-room-item={object.id}
+                      style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, width: `${anchor.width}%`, height: `${anchor.height}%`, zIndex: anchor.z, transformOrigin: `50% ${anchor.pivotY}%`, transform: `translate(-50%, -${anchor.pivotY}%) rotate(${anchor.rotate}deg)` }}>
+                      <RoomPropVisual item={object}/>
                     </span>;
                   })}
                 </span>
@@ -315,7 +312,6 @@ export function PersonalDisplayRoom({
 
   const [roomMode, setRoomMode] = useState<'view' | 'edit' | 'visitor'>('view');
   const [activeDrawerSlot, setActiveDrawerSlot] = useState<DisplaySlot | null>(null);
-  const [isVinylPlaying, setIsVinylPlaying] = useState(false);
   const [isLightstickActive, setIsLightstickActive] = useState(true);
   const [heartsCount, setHeartsCount] = useState(19);
   const [isLiked, setIsLiked] = useState(false);
@@ -332,7 +328,7 @@ export function PersonalDisplayRoom({
   const slotEligibleItems = useMemo(() => {
     if (!activeDrawerSlot) return [];
     const surface = DISPLAY_SURFACES.find(item => item.id === activeDrawerSlot);
-    return allSlotOptions.filter(item => item.slot && surface?.allowedItemTypes.includes(item.slot));
+    return allSlotOptions.filter(item => surface && surfaceSupportsItem(surface, item));
   }, [allSlotOptions, activeDrawerSlot]);
 
   const activeFixtureConfig = DISPLAY_SURFACES.find(f => f.id === activeDrawerSlot);
@@ -395,9 +391,7 @@ export function PersonalDisplayRoom({
         items={displayed}
         surfaces={selections}
         onSelect={handleSelectSlot}
-        isVinylPlaying={isVinylPlaying}
         isLightstickActive={isLightstickActive}
-        onToggleVinyl={() => setIsVinylPlaying(p => !p)}
         onToggleLightstick={() => setIsLightstickActive(p => !p)}
         heartsCount={heartsCount}
         onLike={handleLikeRoom}
@@ -452,11 +446,7 @@ export function PersonalDisplayRoom({
               <div key={item.id} className="v7-visitor-item-card">
                 {item.image && (
                   <img
-                    src={
-                      item.image.startsWith('shirt')
-                        ? '/images/world-v6/shirt-cutout.webp'
-                        : `${MERCH_IMAGE_ROOT}/${item.image}.png`
-                    }
+                    src={displayAssetUrl(item)}
                     alt={item.title}
                   />
                 )}
@@ -499,6 +489,12 @@ export function PersonalDisplayRoom({
             <p className="myspace-surface-capacity">
               {currentSurfaceItems.length}/{activeFixtureConfig?.maxItems || 5} món · {currentUnits}/{activeFixtureConfig?.capacityUnits || 0} sức chứa
             </p>
+            {activeFixtureConfig && currentSurfaceItems.length > activeFixtureConfig.maxItems && <p className="myspace-drawer-notice" role="status">Bố cục cũ được giữ nguyên. Khu vực này hiện phù hợp tối đa {activeFixtureConfig.maxItems} món; bạn có thể cất bớt, không mất món trong Bộ sưu tập.</p>}
+            {activeFixtureConfig && <div className="vw-surface-preview" aria-label="Xem trước khu vực đang chỉnh" style={{aspectRatio:ROOM_SURFACE_BOUNDS[activeFixtureConfig.id].width*1672/(ROOM_SURFACE_BOUNDS[activeFixtureConfig.id].height*941)}}>
+              <div className={`myspace-surface-composition is-${activeFixtureConfig.type}`}>
+                {composeRoomSurface(activeFixtureConfig, currentSurfaceItems, currentSelection).map(({item,anchor}) => <span key={item.id} className={`myspace-room-prop is-${activeFixtureConfig.type}`} style={{left:`${anchor.x}%`,top:`${anchor.y}%`,width:`${anchor.width}%`,height:`${anchor.height}%`,zIndex:anchor.z,transform:`translate(-50%,-${anchor.pivotY}%) rotate(${anchor.rotate}deg)`}}><RoomPropVisual item={item}/></span>)}
+              </div>
+            </div>}
             <div className="myspace-layout-presets" aria-label="Kiểu tự sắp xếp">
               {([['balanced', 'Cân đối'], ['focus', 'Tập trung'], ['natural', 'Tự nhiên']] as [SurfacePreset, string][]).map(([preset, label]) => (
                 <button key={preset} type="button" aria-pressed={currentSelection?.layoutPreset === preset}
@@ -524,7 +520,7 @@ export function PersonalDisplayRoom({
               </div>)}
             </div>}
             {drawerNotice && <p className="myspace-drawer-notice" role="status">{drawerNotice}</p>}
-            {currentSurfaceItems.length >= (activeFixtureConfig?.maxItems || 5) && <p className="myspace-drawer-notice" role="status">Khu vực này đã đầy. Đổi món bằng cách gỡ một món, hoặc chọn chỗ khác.</p>}
+            {(currentSurfaceItems.length >= (activeFixtureConfig?.maxItems || 5) || currentUnits >= (activeFixtureConfig?.capacityUnits || 0)) && <p className="myspace-drawer-notice" role="status">Khu vực này đã đầy. Chọn Đổi món, hoặc chọn chỗ khác bên dưới.</p>}
 
             <div className="v7-slot-candidates-section">
               <span className="v7-slot-section-title">
@@ -558,8 +554,17 @@ export function PersonalDisplayRoom({
                             <Check size={14} /> Đang trưng
                           </span>
                         ) : (
-                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || !canFit} onClick={() => handleApplyItem(item.id)}>
-                            <Plus size={14} /> {canFit ? 'Đặt vào phòng' : 'Khu vực đã đầy'}
+                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || (!canFit && !currentSurfaceItems.length)} onClick={() => {
+                            if (canFit) handleApplyItem(item.id);
+                            else if (currentSelection) {
+                              const replaceId = currentSelection.focalItemId || currentSelection.itemIds[0];
+                              const next = { ...currentSelection, itemIds: currentSelection.itemIds.map(id => id === replaceId ? item.id : id), focalItemId: item.id };
+                              const problem = validateSurfaceSelection(state.fanProfile, activeDrawerSlot, next, allSlotOptions);
+                              if (problem) { setDrawerNotice('Món này chưa vừa chỗ. Cất bớt một món hoặc chọn khu vực khác.'); return; }
+                              applySelection(next, 'Đã đổi món điểm nhấn. Món cũ vẫn ở Bộ sưu tập.');
+                            }
+                          }}>
+                            <Plus size={14} /> {isElsewhere ? 'Đang ở chỗ khác' : canFit ? 'Đặt vào phòng' : 'Đổi món điểm nhấn'}
                           </button>
                         )}
                       </div>

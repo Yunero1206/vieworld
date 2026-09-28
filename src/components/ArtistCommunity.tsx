@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Heart, ArrowRight, Calendar, X, Check, AlertCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ARTIST_NOTES, momentTime } from '../world/fanWorld';
-import { MERCH_IMAGE_ROOT, DELIVERY_LABELS } from '../world/merchCatalog';
+import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { HallPanel } from './HallPanel';
 import { ArtistBroadcast } from './ArtistBroadcast';
 import { getArtistChatMeta, ARTIST_FANDOM_REGISTRY, getArtistAvatar } from '../data/artistChatConfig';
@@ -614,7 +615,7 @@ export function ArtistCommunity({
               >
                 <div className="moments-family-card-img-wrapper">
                   <img
-                    src={`${MERCH_IMAGE_ROOT}/${family.image}.png`}
+                    src={merchImageUrl(family.image)}
                     alt={family.title}
                     className="moments-family-card-img"
                   />

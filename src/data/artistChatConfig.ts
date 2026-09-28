@@ -28,7 +28,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-a',
     artistName: 'Artist A',
     fandomName: 'V-Stars',
-    avatar: '/images/characters-v4/avatar-artist-a.webp',
+    avatar: '/images/characters-v4/artist-a.png',
     companionDays: 128,
     companionDate: 'tháng 5/2026',
     fandomMilestones: [
@@ -48,7 +48,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-mira',
     artistName: 'MIRA',
     fandomName: 'Moonies',
-    avatar: '/images/characters-v4/avatar-artist-mira.webp',
+    avatar: '/images/characters-v4/artist-mira.png',
     companionDays: 210,
     companionDate: 'tháng 2/2026',
     fandomMilestones: [
@@ -68,7 +68,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'artist-kai',
     artistName: 'KAI',
     fandomName: 'Pulse Crew',
-    avatar: '/images/characters-v4/avatar-artist-kai.webp',
+    avatar: '/images/characters-v4/artist-kai.png',
     companionDays: 85,
     companionDate: 'tháng 6/2026',
     fandomMilestones: [
@@ -108,7 +108,7 @@ export const ARTIST_FANDOM_REGISTRY: Record<string, ArtistFandomMeta> = {
     artistId: 'world-mfan-artist-m',
     artistName: 'Artist M',
     fandomName: 'MFan Club',
-    avatar: '/images/characters-v4/avatar-artist-a.webp',
+    avatar: '/images/characters-v4/artist-a.png',
     companionDays: 52,
     companionDate: 'tháng 8/2026',
     fandomMilestones: [
@@ -132,14 +132,14 @@ import dTriptych from '../assets/explore-demo/artist-d-triptych.jpg';
 import eTriptych from '../assets/explore-demo/artist-e-triptych.jpg';
 
 export function getArtistAvatar(worldId?: string | null): string {
-  if (!worldId) return '/images/characters-v4/avatar-artist-a.webp';
+  if (!worldId) return '/images/characters-v4/artist-a.png';
   const id = worldId.toLowerCase();
   const demoPortraits: Record<string, string> = { 'artist-b': bTriptych, 'artist-c': cTriptych, 'artist-d': dTriptych, 'artist-e': eTriptych };
   if (demoPortraits[id]) return demoPortraits[id];
-  if (id.includes('mira')) return '/images/characters-v4/avatar-artist-mira.webp';
-  if (id.includes('kai')) return '/images/characters-v4/avatar-artist-kai.webp';
+  if (id.includes('mira')) return '/images/characters-v4/artist-mira.png';
+  if (id.includes('kai')) return '/images/characters-v4/artist-kai.png';
   if (id.includes('neon')) return '/images/characters-v4/avatar-neon-sessions.webp';
-  return ARTIST_FANDOM_REGISTRY[worldId]?.avatar || '/images/characters-v4/avatar-artist-a.webp';
+  return ARTIST_FANDOM_REGISTRY[worldId]?.avatar || '/images/characters-v4/artist-a.png';
 }
 
 export const SESSION_TO_ARTIST: Record<string, string> = {

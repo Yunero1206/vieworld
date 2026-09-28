@@ -24,9 +24,9 @@ function belongsToFan(state: AppState): boolean {
   return state.demoAccount?.fanId === state.fanProfile.id && state.demoAccount.tenantId === state.activeTenantId;
 }
 
-// Existing persisted prototypes keep their working demo identity. Fresh storage gets an explicit guest session.
+// A populated fan profile is not a login session. Missing/old sessions remain guests.
 export function isDemoSignedIn(state: AppState): boolean {
-  return state.demoAccount === undefined || (belongsToFan(state) && ['google', 'facebook', 'legacy'].includes(state.demoAccount?.session?.provider || ''));
+  return belongsToFan(state) && ['google', 'facebook', 'legacy'].includes(state.demoAccount?.session?.provider || '');
 }
 export function privateContact(state: AppState): PrivateContact {
   return belongsToFan(state) && isDemoSignedIn(state) ? { ...EMPTY_CONTACT, ...state.demoAccount!.contact } : { ...EMPTY_CONTACT };

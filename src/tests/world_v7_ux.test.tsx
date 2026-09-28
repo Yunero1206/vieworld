@@ -8,9 +8,10 @@ import {FanShell} from '../components/FanShell';
 import {filterDisplayItems} from '../world/displayFilter';
 import {displayOptions} from '../world/display';
 import {createInitialState} from '../data/fixtures';
+import {saveState} from '../services/storageAdapter';
 function mount(path:string){return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route element={<FanShell/>}><Route path="/artists" element={<ArtistGalleryView/>}/><Route path="/me" element={<FanWorldView/>}/><Route path="/archive" element={<FanWorldView/>}/><Route path="/moments" element={<FanWorldView/>}/></Route></Routes></MemoryRouter></AppProvider>);}
 describe('v7 fan-first information architecture',()=>{
- beforeEach(()=>localStorage.clear());
+ beforeEach(()=>{localStorage.clear();saveState(createInitialState());});
  it('Home plus four destinations and Explore shows worlds in one list',()=>{const {container}=mount('/artists');expect(within(screen.getByRole('navigation',{name:'Điều hướng chính'})).getAllByRole('link').map(a=>a.textContent)).toEqual(['Home','Explore','Artist A','My Space','VieSHOP']);expect(screen.queryByText('Phạm vi & Giới hạn')).not.toBeInTheDocument();expect(screen.getByRole('heading',{name:/Nổi bật/})).toBeInTheDocument();expect(container.querySelectorAll('.explore-featured-row')).toHaveLength(5);expect(container.querySelector('.v6-artist-hall')).toBeNull();});
  it('legacy archive opens private collection within My Space without a room',()=>{const {container}=mount('/archive');expect(screen.getByRole('heading',{level:1})).toHaveTextContent('My Space');expect(screen.getByRole('button',{name:'Bộ sưu tập riêng'})).toHaveAttribute('aria-pressed','true');expect(container.querySelector('.v6-room-art')).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Phòng trưng bày'}));expect(container.querySelector('.v6-room-art')).not.toBeNull();});
  it('custom deep link provides typed filters without publishing anything',()=>{mount('/me?custom=ticket');expect(screen.getByRole('combobox',{name:'Tìm trong bộ sưu tập'})).toBeInTheDocument();expect(screen.getByRole('button',{name:'Vé'})).toHaveAttribute('aria-pressed','true');expect(screen.getByText('Bộ lọc')).toBeInTheDocument();});

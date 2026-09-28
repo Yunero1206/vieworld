@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Award, MoreHorizontal, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { displayAssetUrl, ownedCollection, type DisplayItem, type DisplaySlot } from '../world/display';
-import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, validateSurfaceSelection } from '../world/displaySurfaces';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection } from '../world/displaySurfaces';
 import { ArchiveCollection } from './ArchiveCollection';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from './SearchCombobox';
@@ -143,7 +143,7 @@ export function CollectionBrowser() {
     </div>}
     {placing && <div className="myspace-modal-backdrop" onClick={() => setPlacing(null)}>
       <div ref={dialogRef} tabIndex={-1} className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chọn chỗ trưng ${placing.title}`} onClick={event => event.stopPropagation()}>
-        <button className="myspace-modal-close" type="button" onClick={() => setPlacing(null)} aria-label="Đóng"><X size={18}/></button><h2>Chọn một góc cho {placing.title}</h2><p>Bạn chọn món; phòng tự sắp xếp. Món trong Bộ sưu tập vẫn luôn được giữ.</p><div className="myspace-surface-choices">{DISPLAY_SURFACES.filter(surface => placing.slot && surface.allowedItemTypes.includes(placing.slot)).map(surface => { const count = surfaces[surface.id].itemIds.length; const units = surfaces[surface.id].itemIds.reduce((sum, id) => sum + itemFootprint(owned.find(item => item.id === id) || placing), 0); const full = count >= surface.maxItems || (units + itemFootprint(placing) > surface.capacityUnits && displayedAt(placing.id) !== surface.id); return <button key={surface.id} type="button" disabled={full} onClick={() => place(surface.id, placing)}><strong>{surface.label}</strong><small>{displayedAt(placing.id) === surface.id ? 'Đang ở đây' : full ? 'Khu vực này đã đầy' : `${count}/${surface.maxItems} món`}</small></button>; })}</div>{notice && <p role="status">{notice}</p>}
+        <button className="myspace-modal-close" type="button" onClick={() => setPlacing(null)} aria-label="Đóng"><X size={18}/></button><h2>Chọn một góc cho {placing.title}</h2><p>Bạn chọn món; phòng tự sắp xếp. Món trong Bộ sưu tập vẫn luôn được giữ.</p><div className="myspace-surface-choices">{DISPLAY_SURFACES.filter(surface => surfaceSupportsItem(surface, placing)).map(surface => { const count = surfaces[surface.id].itemIds.length; const units = surfaces[surface.id].itemIds.reduce((sum, id) => sum + itemFootprint(owned.find(item => item.id === id) || placing), 0); const full = displayedAt(placing.id) !== surface.id && (count >= surface.maxItems || units + itemFootprint(placing) > surface.capacityUnits); return <button key={surface.id} type="button" disabled={full} onClick={() => place(surface.id, placing)}><strong>{surface.label}</strong><small>{displayedAt(placing.id) === surface.id ? 'Đang ở đây' : full ? 'Khu vực này đã đầy' : `${count}/${surface.maxItems} món`}</small></button>; })}</div>{notice && <p role="status">{notice}</p>}
       </div>
     </div>}
   </section>;

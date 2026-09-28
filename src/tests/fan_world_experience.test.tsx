@@ -22,7 +22,7 @@ function mount(path = '/') {
 }
 
 describe('Unified fan world public experience', () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => { localStorage.clear(); saveState(createInitialState()); });
 
   it('has Home plus the four product destinations and no public tenant switch', () => {
     mount();

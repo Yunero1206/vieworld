@@ -274,7 +274,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       expect(displayCandidates.some(i => i.id === 'product-cap-real')).toBe(false);
     });
 
-    it('renders cap in CollectionBrowser "Tất cả" tab with wardrobe link and no display button', () => {
+    it('renders an owned digital cap in collection with a room-display action', () => {
       let state = createInitialState('vieworld-demo');
       state = appReducer(state, {
         type: 'CREATE_ORDER',
@@ -305,7 +305,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       // Collection actions stay contextual: an avatar-only cap is not offered as room decor.
       fireEvent.click(screen.getByRole('button', { name: 'Tùy chọn Nón Everyday Star · Digital' }));
       expect(screen.getByRole('menuitem', { name: 'Xem chi tiết' })).toBeInTheDocument();
-      expect(screen.queryByRole('menuitem', { name: 'Trưng trong phòng' })).not.toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: 'Trưng trong phòng' })).toBeInTheDocument();
     });
   });
 

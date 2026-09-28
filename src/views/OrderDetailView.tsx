@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { OrderTimeline } from '../components/OrderTimeline';
 import { orderAmount } from '../world/commerce';
 import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { getTenantConfig } from '../domain/tenantConfig';
 import {
   CreditCard,
@@ -295,7 +296,7 @@ export const OrderDetailView: React.FC = () => {
 
         {productImage && (
           <section className="v6-order-product">
-            <img src={`/images/merch-v2/${productImage}.png`} alt={productTitle} />
+            <img src={merchImageUrl(productImage)} alt={productTitle} />
             <div>
               <h2>{productTitle}</h2>
               <p>{order.quantity || 1} món{order.optionLabel ? ` · Size ${order.optionLabel}` : ''}</p>

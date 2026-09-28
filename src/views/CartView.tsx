@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Trash2, Check, Package } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { cartFingerprint, cartProblem, money, orderAmount } from '../world/commerce';
-import { DELIVERY_LABELS, MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { ORDER_LABELS } from '../world/fanWorld';
 
 export function CartView(){
@@ -34,7 +35,7 @@ export function CartView(){
     <ol className="v5-checkout-steps" aria-label="Tiến trình mua hàng">{stepLabels.map((v,i)=><li key={i} aria-current={i===activeStepIndex?'step':undefined}><span>{i+1}</span>{v}</li>)}</ol>
     {checkoutId && !group.length ? <div className="fw-empty"><h2>Không tìm thấy lần chốt đơn này.</h2><Link to="/cart" className="fw-button">Về giỏ đồ</Link></div> : !checkoutId&&!cart.length?<div className="fw-empty"><ShoppingBag size={36}/><h2>Giỏ đồ đang nhẹ tênh.</h2><p>Thử đồ ở VieSHOP rồi thêm đúng phiên bản mình thích.</p><Link to="/shop" className="fw-button">Ghé VieSHOP</Link><Link to="/me?panel=bag" className="fw-text-button">Xem đơn đã chốt →</Link></div>:<div className="v5-checkout-layout"><section aria-label="Món đã chọn">
       {(checkoutId?group.map(o=>({key:o.id,productId:o.productId,quantity:o.quantity || 1,optionLabel:o.optionLabel,order:o})):cart.map(l=>({...l,order:undefined}))).map(l=>{const p=state.products[l.productId];return <article className="v5-cart-line" key={l.key}>
-        {p?.image?<img src={`${MERCH_IMAGE_ROOT}/${p.image}.png`} alt={p.title} width="100" height="100"/>:<Package size={40}/>}
+        {p?.image?<img src={merchImageUrl(p.image)} alt={p.title} width="100" height="100"/>:<Package size={40}/>}
         <div><small>{state.worlds[p?.worldId]?.name} · {DELIVERY_LABELS[p?.delivery || 'physical']}</small><h2>{l.order?.productTitle || p?.title || 'Món không còn trong danh mục'}</h2><p>{l.optionLabel?`Size ${l.optionLabel} · `:''}{money(l.order?.unitPriceVND ?? p?.priceVND ?? 0)} / món</p>
           {!checkoutId&&!review?<div className="v5-cart-quantity"><label>Số lượng <select aria-label={`Số lượng ${p?.title}`} value={l.quantity} onChange={e=>dispatch({type:'SET_CART_QUANTITY',key:l.key,quantity:Number(e.target.value)})}>{Array.from({length:p?.delivery==='digital'?1:10},(_,i)=><option key={i} value={i+1}>{i+1}</option>)}</select></label><button className="fw-text-button" onClick={()=>dispatch({type:'SET_CART_QUANTITY',key:l.key,quantity:0})} aria-label={`Bỏ ${p?.title} khỏi giỏ`}><Trash2 size={14}/>Bỏ món</button></div>:<p>Số lượng: {l.quantity}</p>}
           {l.order&&<Link to={`/orders/${l.order.id}`} className="fw-text-button">{ORDER_LABELS[l.order.status]} · Chi tiết & hỗ trợ →</Link>}

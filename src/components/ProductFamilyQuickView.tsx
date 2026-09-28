@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Check, Sparkles } from 'lucide-react';
 import { Product } from '../domain/types';
 import { ProductFamily } from '../world/moments';
-import { MERCH_IMAGE_ROOT, DELIVERY_LABELS } from '../world/merchCatalog';
+import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { useDialogA11y } from '../hooks/useDialogA11y';
 import { useApp } from '../context/AppContext';
 import { checkProductEligibility } from '../world/commerce';
@@ -106,7 +107,7 @@ export function ProductFamilyQuickView({
           {/* Product Image */}
           <div className="moments-drawer-media">
             <img
-              src={`${MERCH_IMAGE_ROOT}/${displayImage}.png`}
+              src={merchImageUrl(displayImage)}
               alt={currentVariant?.title || family.title}
               className="moments-drawer-img"
             />

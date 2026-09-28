@@ -1,11 +1,10 @@
 // VieWorld Service Worker — PWA Offline Caching for My Space and Core Assets
-const CACHE_NAME = 'vieworld-pwa-v2';
+const CACHE_NAME = 'vieworld-pwa-v3';
 const CORE_PRECACHE = [
   '/',
   '/index.html',
   '/manifest.json',
   '/images/myspace-room-v2.png',
-  '/images/world-v8/plaza.webp',
 ];
 
 self.addEventListener('install', (event) => {

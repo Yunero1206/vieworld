@@ -30,7 +30,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
         expect(membershipCard).toBeDefined();
         expect(membershipCard?.title).toContain('Tư cách Hội viên');
         expect(membershipCard?.actionLink.to).toBe('/me?panel=membership');
-        expect(membershipCard?.sourceTitle).toContain('docs/CONSTITUTION.md §3');
+        expect(membershipCard?.sourceTitle).toContain('VieWorld demo · Theo dõi và Hội viên');
         expect(membershipCard?.updatedAt).toBe('2026-09-09');
       }
     });
@@ -132,7 +132,7 @@ describe('T14 Acceptance: Bounded World Guide (Deterministic App Assistance)', (
       const answerCard = answerCards[0];
       expect(answerCard).toBeInTheDocument();
       expect(answerCard).toHaveTextContent('Tư cách Hội viên & Điều kiện nâng cấp');
-      expect(answerCard).toHaveTextContent('docs/CONSTITUTION.md §3');
+      expect(answerCard).toHaveTextContent('VieWorld demo · Theo dõi và Hội viên');
       expect(answerCard).toHaveTextContent('2026-09-09');
 
       // Verify valid navigation link to actual app object

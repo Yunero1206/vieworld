@@ -70,7 +70,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
         <div className="diorama-backdrop" aria-hidden="true">
           {isArtist && !artworkError && (
             <img
-              src="/images/world-redesign/drafts/artist-a-scene-sample.png"
+              src="/images/world-redesign/drafts/artist-a-scene-sample.jpg"
               alt=""
               className="diorama-backdrop-artwork"
               onError={() => setArtworkError(true)}

@@ -64,13 +64,13 @@ export const FanShell = () => {
     const label = artist ? `${artist.name} · ${pathname.endsWith('/hall') ? 'Hall' : pathname.endsWith('/archive') ? 'Kho lưu trữ' : pathname.includes('/moment/') ? 'Khoảnh khắc' : 'Artist World'}`
       : pathname === '/' || pathname === '/worlds' ? 'Home' : pathname.startsWith('/shop') ? 'VieSHOP' : pathname.startsWith('/me') ? 'My Space' : pathname.startsWith('/explore') ? 'Explore' : pathname.startsWith('/cart') || pathname.startsWith('/checkout') ? 'Giỏ hàng demo' : 'Bản trải nghiệm';
     document.title = `${label} — VieWorld`;
-  }, [pathname, state.worlds]);
+  }, [pathname, state.worlds, signedIn]);
   useEffect(() => {
     const openAuth = () => { setAccountMenu(false); setMobileMenu(false); setUtility('auth'); };
     window.addEventListener('vieworld-open-auth', openAuth);
     return () => window.removeEventListener('vieworld-open-auth', openAuth);
   }, []);
-  const personalNotifications = Object.values(state.notifications || {}).filter(n => n.tenantId === state.activeTenantId && n.fanId === state.fanProfile.id);
+  const personalNotifications = signedIn ? Object.values(state.notifications || {}).filter(n => n.tenantId === state.activeTenantId && n.fanId === state.fanProfile.id) : [];
   const unread = personalNotifications.filter(n => !n.isRead).length;
 
   const notificationsList: DisplayNotification[] = personalNotifications
@@ -93,8 +93,8 @@ export const FanShell = () => {
 
   useEffect(() => {
     const to = pathname + search;
-    if (validHomeDestination(state, to)) dispatch({ type: 'REMEMBER_FAN_DESTINATION', to });
-  }, [pathname, search, state.activeTenantId, dispatch]);
+    if (signedIn && validHomeDestination(state, to)) dispatch({ type: 'REMEMBER_FAN_DESTINATION', to });
+  }, [pathname, search, state.activeTenantId, signedIn, dispatch]);
   useEffect(() => {
     setMobileMenu(false);
     setAccountMenu(false);

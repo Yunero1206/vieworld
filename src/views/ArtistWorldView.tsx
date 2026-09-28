@@ -2,7 +2,7 @@ import { useEffect, useMemo, type CSSProperties } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart, MoreHorizontal, Play, ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { MERCH_IMAGE_ROOT } from '../world/merchCatalog';
+import { merchImageUrl } from '../world/merchImages';
 import { ARTIST_NOTES, momentTime } from '../world/fanWorld';
 import { selectPublicVoices } from '../world/exploreDiscovery';
 import { getExploreMomentById, getWorldProject, getWorldMoments, type ExploreMedia } from '../world/exploreRows';
@@ -120,7 +120,7 @@ export function ArtistWorldView() {
           {sessions.filter(session => session.status === 'ended').slice(0, Math.min(2, Math.max(0, 5 - moments.length - (note ? 1 : 0)))).map(session => <Link key={session.id} to={sessionContextUrl(artistId, session.id)}><span style={{ backgroundImage: `url("${image}")` }} /><strong>{session.title}</strong></Link>)}</ArtistVisualRail>
       </section>
       <section className="artist-home-section" aria-labelledby="artist-products-heading"><div className="artist-world-section-head"><h2 id="artist-products-heading">Gần {world.name} hơn một chút</h2><Link to={`/shop?artist=${artistId}`}>VieSHOP của {world.name} <ArrowRight size={17} /></Link></div>
-        {products.length ? <ArtistVisualRail label="Vật phẩm trong world" className="artist-home-products">{products.map(product => <Link key={product.id} to={`/shop?artist=${artistId}&product=${product.id}`}><img src={`${MERCH_IMAGE_ROOT}/${product.image}.png`} alt="" loading="lazy" /><span><strong>{product.title}</strong><small>{productPrice(product).current}{productBadge(product) ? ` · ${productBadge(product)}` : ''}</small></span><ShoppingBag size={15} /></Link>)}</ArtistVisualRail>
+        {products.length ? <ArtistVisualRail label="Vật phẩm trong world" className="artist-home-products">{products.map(product => <Link key={product.id} to={`/shop?artist=${artistId}&product=${product.id}`}><img src={product.image ? merchImageUrl(product.image) : '/images/vieworld-logo.svg'} alt="" loading="lazy" /><span><strong>{product.title}</strong><small>{productPrice(product).current}{productBadge(product) ? ` · ${productBadge(product)}` : ''}</small></span><ShoppingBag size={15} /></Link>)}</ArtistVisualRail>
           : <p className="artist-world-empty">Chưa có sản phẩm nào được mở trong VieSHOP của {world.name}.</p>}
       </section>
       <section className="artist-home-section artist-home-deeper" aria-label="Khám phá sâu hơn trong world">
