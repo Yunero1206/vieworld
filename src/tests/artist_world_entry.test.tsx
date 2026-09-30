@@ -50,7 +50,7 @@ describe('Artist World entry boundary', () => {
 
   it('uses top-shell search and never exposes unconsented fan voices in Explore', () => {
     mount('/');
-    const input = screen.getByRole('combobox', { name: 'Tìm nghệ sĩ, world, sự kiện, capsule' });
+    const input = screen.getByRole('combobox', { name: 'Tìm nghệ sĩ, sự kiện và kỷ niệm' });
     fireEvent.change(input, { target: { value: 'artist a' } });
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();

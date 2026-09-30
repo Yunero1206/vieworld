@@ -9,7 +9,7 @@ import { isDemoSignedIn } from '../world/account';
 import { WorldPanel } from '../components/WorldPanel';
 import { ProductVisual } from '../components/ProductVisual';
 import { Product } from '../domain/types';
-import { DELIVERY_LABELS, ownedDigitalLook, ownsDigitalProduct } from '../world/merchCatalog';
+import { DELIVERY_LABELS, DELIVERY_SUMMARIES, ownedDigitalLook, ownsDigitalProduct, productDisplayTitle } from '../world/merchCatalog';
 import { merchImageUrl } from '../world/merchImages';
 import { ORDER_LABELS } from '../world/fanWorld';
 import { matchesVietnameseQuery } from '../utils/textSearch';
@@ -35,7 +35,7 @@ function MerchArt({ product, digital = false, eager = false }: { product: Produc
   return image && !failed ? (
     <img
       src={merchImageUrl(image)}
-      alt={`${product.title} · ${digital || product.delivery === 'digital' ? 'minh họa digital' : 'thiết kế hàng thật'} · thiết kế kỷ niệm`}
+      alt={`${productDisplayTitle(product.title)}, ${digital || product.delivery === 'digital' ? 'bản số' : 'bản vật lý'}`}
       loading={eager ? 'eager' : 'lazy'}
       onError={() => setFailed(true)}
     />
@@ -234,7 +234,7 @@ export function FanShopView() {
         <div className="fw-shop-story-copy">
           <p className="fw-eyebrow">{heroName}</p>
           <h1>Ngoài đời. Trong world.<br /><em>Vẫn là điều mình thích.</em></h1>
-          <p>Những món gắn với âm nhạc và kỷ niệm — chọn đúng phiên bản bạn muốn mang về.</p>
+          <p>Những món gắn với âm nhạc và kỷ niệm. Chọn phiên bản hợp với bạn.</p>
           <button type="button" className="fw-hero-discover" onClick={() => document.getElementById('shop-catalog')?.scrollIntoView({ behavior: 'smooth' })}>
             Khám phá bộ sưu tập <ArrowRight size={17} />
           </button>
@@ -260,7 +260,7 @@ export function FanShopView() {
               aria-label="Bộ lọc sản phẩm"
             >
               <SlidersHorizontal size={16} />
-              <span>Bộ lọc</span>
+              <span>Lọc</span>
               {activeFilterCount > 0 && <span className="fw-filter-count">({activeFilterCount})</span>}
             </button>
 
@@ -319,7 +319,7 @@ export function FanShopView() {
           )}
 
           <div className="fw-catalog-meta">
-            <p className="fw-catalog-count">{filteredFamilies.length} thiết kế · Giá và tồn kho mô phỏng</p>
+            <p className="fw-catalog-count">{filteredFamilies.length} món <span>· Bản trải nghiệm</span></p>
             <Link to="/me?section=collection" className="vw-shop-owned-link">Đồ của tôi <ArrowRight size={14}/></Link>
           </div>
 
@@ -355,10 +355,8 @@ export function FanShopView() {
                       <MerchArt product={repProduct} />
                       {badge && <span className="fw-product-delivery-pill">{badge}</span>}
                     </div>
-                    <small className="fw-product-subline">
-                      {fam.artistName}{repProduct.batchLabel && repProduct.releaseType !== 'pre_order' && !repProduct.previewOnly ? ` · ${repProduct.batchLabel}` : ''}
-                    </small>
-                    <h2>{delivery === 'all' ? fam.title : repProduct.title}</h2>
+                    <small className="fw-product-subline">{fam.artistName}</small>
+                    <h2>{productDisplayTitle(delivery === 'all' ? fam.title : repProduct.title)}</h2>
                     {fam.previewOnly ? <strong>Xem thông tin</strong> : <p className="vw-shop-card-price">{price.compareAt && <del>{price.compareAt}</del>}<strong>{price.current}</strong></p>}
                   </button>
                   <div className="fw-product-extra">
@@ -399,12 +397,12 @@ export function FanShopView() {
           onClick={() => setShowFormatModal(true)}
         >
           <Info size={15} />
-          <span>Hàng thật, Digital và Duo khác nhau thế nào? →</span>
+          <span>Bản vật lý và bản số khác nhau thế nào?</span>
         </button>
       </div>
 
       <footer className="fw-shop-footnote">
-        {shopTitle} · Không gian lưu giữ quà lưu niệm và vật phẩm đồng hành cùng nghệ sĩ. Trong giai đoạn trải nghiệm, hình ảnh đóng vai trò bản dựng ý tưởng (concept preview); không thu tiền hay phát hành vé thương mại ngoài đời thực.
+        Đây là bản trải nghiệm. Hình ảnh minh họa ý tưởng; VieSHOP chưa thu tiền hay giao hàng thật.
       </footer>
 
       {/* Filter Drawer Modal */}
@@ -436,21 +434,22 @@ export function FanShopView() {
 
             <div className="fw-filter-group"><h3>Tình trạng</h3><div className="fw-filter-chip-grid">{[['all', 'Tất cả'], ['available', 'Có thể chọn'], ['sold-out', 'Hết hàng'], ['concept', 'Concept']].map(([key, label]) => <button key={key} type="button" className={`fw-filter-select-chip ${availability === key ? 'is-selected' : ''}`} onClick={() => updateParam('availability', key, 'all')}>{label}</button>)}</div></div>
 
-            <div className="vw-shop-filter-options"><label><input type="checkbox" checked={preorderOnly} onChange={event => updateParam('preorder', event.target.checked ? 'true' : 'false', 'false')}/>Chỉ xem pre-order</label><label><input type="checkbox" checked={previewOnly} onChange={event => updateParam('preview', event.target.checked ? 'true' : 'false', 'false')}/>Có thể thử trong My Space</label></div>
+            <div className="vw-shop-filter-options"><label><input type="checkbox" checked={preorderOnly} onChange={event => updateParam('preorder', event.target.checked ? 'true' : 'false', 'false')}/>Chỉ món đặt trước</label><label><input type="checkbox" checked={previewOnly} onChange={event => updateParam('preview', event.target.checked ? 'true' : 'false', 'false')}/>Có thể thử trong My Space</label></div>
 
             <div className="vw-shop-filter-price"><label>Giá từ (₫)<input type="number" min="0" step="10000" value={params.get('min') || ''} onChange={event => updateParam('min', event.target.value, '')}/></label><label>Đến (₫)<input type="number" min="0" step="10000" value={params.get('max') || ''} onChange={event => updateParam('max', event.target.value, '')}/></label></div>
 
             <label className="vw-shop-filter-sort">Sắp xếp<select aria-label="Sắp xếp sản phẩm" value={sort} onChange={event => setSort(event.target.value)}><option value="featured">Nổi bật</option><option value="low">Giá tăng dần</option><option value="high">Giá giảm dần</option></select></label>
 
             <div className="fw-filter-group">
-              <h3>Hình thức nhận sản phẩm</h3>
+              <h3>Phiên bản</h3>
+              <p className="fw-filter-hint">Bạn muốn món đồ ngoài đời, trong VieWorld hay cả hai?</p>
               <div className="fw-filter-chip-grid">
                 <button
                   type="button"
                   className={`fw-filter-select-chip ${delivery === 'all' ? 'is-selected' : ''}`}
                   onClick={() => setDelivery('all')}
                 >
-                  Mọi phiên bản
+                  Tất cả
                 </button>
                 {Object.entries(DELIVERY_LABELS).map(([k, lbl]) => (
                   <button
@@ -532,81 +531,90 @@ export function FanShopView() {
                   items={[productRoomPreviewItem(trying)]} onSelect={() => {}}/>
               </div>
             )}
-            <p className="fw-muted">Chỉ là hình xem trước. Bản hàng thật không tự mở khóa đồ digital, trừ khi phiên bản đã chọn ghi rõ kèm digital.</p>
+            <p className="fw-muted">Đây là hình xem trước. Chỉ phiên bản ghi rõ kèm vật phẩm số mới mở khóa trong My Space.</p>
             {previewTab === 'avatar' && owned && previewEditionProduct && <button type="button" className="fw-button" onClick={() => dispatch({ type: 'EQUIP_DIGITAL_PRODUCT', productId: previewEditionProduct.id })}><Check size={16}/>Mặc và lưu</button>}
             <button type="button" className="fw-text-button" onClick={() => setFittingDrawerOpen(false)}>Quay lại món đồ</button>
           </div>
         </WorldPanel>
       )}
 
-      {/* Format Explainer Modal */}
+      {/* A short, shared explanation of what each edition contains. */}
       {showFormatModal && (
-        <WorldPanel title="Hình thức sản phẩm tại VieSHOP" onClose={() => setShowFormatModal(false)}>
+        <WorldPanel title="Chọn phiên bản" onClose={() => setShowFormatModal(false)}>
           <div className="fw-format-explainer-modal">
             <div className="fw-format-card">
               <div className="fw-format-card-header">
                 <Truck size={20} className="fw-format-icon" />
                 <div>
-                  <h3>Hàng thật (Physical)</h3>
-                  <small>Giao nhận tận nơi theo tiến độ sản xuất</small>
+                  <h3>Bản vật lý</h3>
+                  <small>Món đồ ngoài đời</small>
                 </div>
               </div>
-              <p>Áo thun, nón vải, đĩa CD/Vinyl, băng cassette và lightstick chính thức được gia công và gửi tận nơi theo từng đợt đặt trước hoặc sẵn kho. Không tự động mở khóa trang phục digital cho avatar.</p>
+              <p>Áo, album hoặc lightstick để cầm và trưng bày. Không tự mở khóa vật phẩm trong VieWorld.</p>
             </div>
 
             <div className="fw-format-card">
               <div className="fw-format-card-header">
                 <Monitor size={20} className="fw-format-icon" />
                 <div>
-                  <h3>Digital (Kỹ thuật số)</h3>
-                  <small>Vật phẩm 2.5D cho avatar VieWorld</small>
+                  <h3>Bản số</h3>
+                  <small>Dùng trong VieWorld</small>
                 </div>
               </div>
-              <p>Vật phẩm kỹ thuật số thiết kế riêng cho không gian VieWorld. Kích hoạt trực tiếp vào Tủ đồ cá nhân My Space và hiển thị khi bạn tham gia các buổi Live, Concert hoặc dạo quanh thế giới. Không giao hàng vật lý.</p>
+              <p>Vật phẩm cho avatar hoặc căn phòng của bạn. Không có món đồ được giao ngoài đời.</p>
             </div>
 
             <div className="fw-format-card">
               <div className="fw-format-card-header">
                 <Package size={20} className="fw-format-icon" />
                 <div>
-                  <h3>Gói Duo Set (Hàng thật + Digital)</h3>
-                  <small>Trọn vẹn ngoài đời thực & trong world</small>
+                  <h3>Cả hai</h3>
+                  <small>Một món ngoài đời, một vật phẩm trong VieWorld</small>
                 </div>
               </div>
-              <p>Combo gồm cả sản phẩm vật lý nhận qua giao nhận thực tế VÀ mở khóa ngay phiên bản trang phục kỹ thuật số tương ứng cho avatar của bạn trong VieWorld.</p>
+              <p>Gồm bản vật lý và bản số tương ứng. Xem từng sản phẩm để biết món số dùng được ở đâu.</p>
             </div>
+            <p className="fw-muted">VieSHOP hiện là bản trải nghiệm, chưa thu tiền hay giao hàng thật.</p>
           </div>
         </WorldPanel>
       )}
 
       {/* Product Detail Modal */}
       {selectedId && !fittingDrawerOpen && (
-        <WorldPanel title={selected?.title || 'Không tìm thấy món đồ'} onClose={close}>
+        <WorldPanel title={selected ? productDisplayTitle(selected.title) : 'Không tìm thấy món đồ'} onClose={close} variant="product">
           {selected ? (
-            <>
-              <div className="fw-product-photo-tabs">
+            <div className="fw-product-detail-layout">
+              <div className="fw-product-detail-media">
+              {selected.digitalImage && selected.delivery !== 'digital' && <div className="fw-product-photo-tabs" aria-label="Xem ảnh sản phẩm">
                 <button
                   aria-pressed={!digitalPhoto}
                   onClick={() => setDigitalPhoto(false)}
                 >
-                  {selected.delivery === 'digital' ? 'Ảnh vật phẩm digital' : 'Ảnh hàng thật'}
+                  Ảnh sản phẩm
                 </button>
-                {selected.digitalImage && selected.delivery !== 'digital' && (
-                  <button
-                    aria-pressed={digitalPhoto}
-                    onClick={() => setDigitalPhoto(true)}
-                  >
-                    Bản digital tương ứng
-                  </button>
-                )}
-              </div>
+                <button
+                  aria-pressed={digitalPhoto}
+                  onClick={() => setDigitalPhoto(true)}
+                >
+                  Ảnh trong My Space
+                </button>
+              </div>}
 
               <div className="fw-product-detail-art">
                 <MerchArt product={selected} digital={digitalPhoto} />
               </div>
-              <small className="fw-muted">Hình minh họa của phiên bản đang chọn; bản digital được thể hiện riêng với hàng thật.</small>
+              <small className="fw-muted">{digitalPhoto ? 'Hình xem trước trong My Space; quyền sử dụng tùy phiên bản bạn chọn.' : 'Hình minh họa phiên bản đang chọn.'}</small>
+              </div>
+
+              <div className="fw-product-detail-info">
+              <p className="fw-eyebrow">{state.worlds[selected.worldId]?.name}{selected.releaseType === 'pre_order' ? ' · Đặt trước' : ''}</p>
+              <p className="fw-product-edition">{DELIVERY_LABELS[selected.delivery || 'physical']} <span>{DELIVERY_SUMMARIES[selected.delivery || 'physical']}</span></p>
+
+              <h3 className="fw-product-price">{selected.previewOnly ? 'Ý tưởng · Chưa mở bán' : <>{productPrice(selected).compareAt && <del className="vw-shop-old-price">{productPrice(selected).compareAt}</del>}{productPrice(selected).current}</>}</h3>
 
               {variants.length > 1 && (
+                <section className="fw-product-detail-section">
+                <h3>Chọn phiên bản</h3>
                 <div className="fw-variant-selector" aria-label="Chọn phiên bản sản phẩm">
                   {variants.map(p => (
                     <button
@@ -614,40 +622,26 @@ export function FanShopView() {
                       aria-pressed={p.id === selected.id}
                       onClick={() => openProduct(p.id)}
                     >
-                      {DELIVERY_LABELS[p.delivery || 'physical']}
+                      <strong>{DELIVERY_LABELS[p.delivery || 'physical']}</strong>
+                      <small>{productPrice(p).current}</small>
                     </button>
                   ))}
                 </div>
+                </section>
               )}
 
-              <p className="fw-eyebrow">
-                {state.worlds[selected.worldId]?.name} / {DELIVERY_LABELS[selected.delivery || 'physical']}
-                {selected.releaseType === 'pre_order' ? ' · PRE-ORDER' : ''}
-              </p>
-
-              <h3 className="fw-product-price">{selected.previewOnly ? 'Concept · Chưa mở bán' : <>{productPrice(selected).compareAt && <del className="vw-shop-old-price">{productPrice(selected).compareAt}</del>}{productPrice(selected).current}</>}</h3>
-
-              {/* Fulfillment clarity badge */}
+              {/* Fulfillment is tied to the selected edition, not to every photo. */}
               <div className="fw-fulfillment-badge">
                 {selected.delivery === 'physical' && (
-                  <p><Truck size={15} /><span>{selected.estimatedShipping || 'Xem thông tin giao nhận khi chốt đơn.'}{selected.batchLabel ? ` (${selected.batchLabel})` : ''}</span></p>
+                  <p><Truck size={16} /><span>{selected.estimatedShipping || 'Thông tin giao nhận có trong đơn.'}</span></p>
                 )}
                 {selected.delivery === 'digital' && (
-                  <p><Monitor size={15} /><span>Kích hoạt ngay vào My Space & Tủ đồ cá nhân sau khi xác nhận</span></p>
+                  <p><Monitor size={16} /><span>Vào My Space sau khi đơn được xác nhận. Không giao hàng.</span></p>
                 )}
                 {selected.delivery === 'bundle' && (
-                  <p><Package size={15} /><span>Giao hàng vật lý + Mở khóa trang phục digital cho avatar</span></p>
+                  <p><Package size={16} /><span>Bản vật lý theo đơn. Bản số vào My Space sau khi xác nhận.</span></p>
                 )}
               </div>
-
-              {selected.description && <p>{selected.description}</p>}
-
-              <h3>Bạn nhận được</h3>
-              <ul className="fw-includes">
-                {(selected.includes || ['1 món merchandise vật lý trong bản mô phỏng', 'Không kèm vật phẩm digital']).map(item => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
 
               {selected.sizes && (
                 <label className="fw-size-select">
@@ -665,7 +659,7 @@ export function FanShopView() {
                 </label>
               )}
 
-              {tryProduct && (tryProduct.avatar || tryProduct.room) && <button type="button" className="fw-text-button vw-shop-detail-preview" onClick={() => { setTrying(selected); setPreviewTab(tryProduct.avatar ? 'avatar' : 'room'); setFittingDrawerOpen(true); }}>Thử trong My Space · không mua <ArrowRight size={16}/></button>}
+              {tryProduct && (tryProduct.avatar || tryProduct.room) && <button type="button" className="fw-text-button vw-shop-detail-preview" onClick={() => { setTrying(selected); setPreviewTab(tryProduct.avatar ? 'avatar' : 'room'); setFittingDrawerOpen(true); }}>Thử trong My Space <ArrowRight size={16}/></button>}
 
               {!selected.previewOnly && unavailable && <p>Món này hiện đã hết hàng.</p>}
 
@@ -675,33 +669,44 @@ export function FanShopView() {
                 </p>
               )}
 
-              {selected.previewOnly ? <p className="vw-shop-concept-note">Đây là thiết kế concept để xem trước, chưa thể thêm vào giỏ.{selected.category === 'membership' && <> <Link to="/me?panel=membership">Xem chương trình hội viên →</Link></>}</p> : (
+              {selected.previewOnly ? <p className="vw-shop-concept-note">Đây là ý tưởng để xem trước, chưa mở bán.{selected.category === 'membership' && <> <Link to="/me?panel=membership">Xem hội viên →</Link></>}</p> : (
                 <button
                   className="fw-button fw-buy"
                   onClick={buy}
                   disabled={!!unavailable || locked || !!(selected.sizes && !size)}
                 >
-                  {unavailable ? 'Hết hàng' : locked ? 'Chưa đủ điều kiện' : selected.sizes && !size ? 'Chọn kích cỡ trước' : 'Thêm vào giỏ đồ'}
+                  {unavailable ? 'Hết hàng' : locked ? 'Chưa đủ điều kiện' : selected.sizes && !size ? 'Chọn kích cỡ trước' : 'Thêm vào giỏ'}
                   <ShoppingBag size={18} />
                 </button>
               )}
 
               {added && !state.lastError && (
                 <p role="status" className="v5-added">
-                  Đã thêm vào giỏ đồ. <Link to="/cart">Xem giỏ & chốt đơn →</Link>
+                  Đã thêm vào giỏ. <Link to="/cart">Xem giỏ →</Link>
                 </p>
               )}
 
               {state.lastError && <p role="alert">{state.lastError.message}</p>}
 
+              <details className="fw-product-includes" open>
+                <summary>Phiên bản này gồm</summary>
+                <ul className="fw-includes">
+                  {(selected.includes || ['1 món đồ ngoài đời', 'Không kèm vật phẩm trong VieWorld']).map(item => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </details>
+
+              {selected.description && <p>{selected.description}</p>}
+
               <p className="fw-muted">
-                Giao dịch thử nghiệm, không thu tiền thật. Vật phẩm chỉ vào Bộ sưu tập sau khi đơn được bàn giao.
+                Bản trải nghiệm, không thu tiền. Món đồ vào Bộ sưu tập khi đơn hoàn tất.
               </p>
 
               <details className="fw-product-terms">
-                <summary>Giao nhận, đổi trả & quyền sử dụng</summary>
+                <summary>Giao nhận và quyền sử dụng</summary>
                 <p>
-                  Hướng dẫn trải nghiệm: Trong phiên bản thử nghiệm, bạn không cần nhập thông tin thẻ hay địa chỉ thực tế. Vật phẩm digital sẽ được thêm vào tủ đồ ngay khi nhận; vật phẩm vật lý được mô phỏng theo dõi qua hành trình đơn hàng {shopTitle}.
+                  Bản trải nghiệm không cần thẻ hay địa chỉ thật. Bản số vào My Space khi nhận; đơn vật lý chỉ mô phỏng hành trình giao hàng.
                 </p>
               </details>
 
@@ -715,7 +720,8 @@ export function FanShopView() {
                   <ArrowRight />
                 </Link>
               ))}
-            </>
+              </div>
+            </div>
           ) : (
             <p>Món này không còn trong danh mục. Đóng để tiếp tục xem cửa hàng.</p>
           )}

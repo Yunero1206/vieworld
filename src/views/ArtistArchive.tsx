@@ -13,8 +13,8 @@ export function ArtistArchive({artistId,name,moments,sessions}:{artistId:string;
   const {state}=useApp();
   const [params,setParams]=useSearchParams();
   const [recentExpanded,setRecentExpanded]=useState(false);
-  const filters=['Tất cả','Sự kiện','Era','Capsule','Fan project'];
-  const filter=filters.includes(params.get('filter')||'') ? params.get('filter')! : 'Tất cả';
+  const filters=[['Tất cả','Tất cả'],['Sự kiện','Sự kiện'],['Era','Thời kỳ'],['Capsule','Kỷ niệm'],['Fan project','Dự án fan']] as const;
+  const filter=filters.some(([value])=>value===params.get('filter')) ? params.get('filter')! : 'Tất cả';
   const returnTo=`/artist/${artistId}/archive${params.size ? `?${params}` : ''}`;
   const chapters=useMemo(()=>artistArchiveChapters(state,artistId,moments,sessions),[state.demoTime,state.activeTenantId,state.capsules,state.fanProfile.id,artistId,moments,sessions]);
   const filtered=chapters.filter(chapter=>filter==='Tất cả'||chapter.kind===filter);
@@ -23,13 +23,13 @@ export function ArtistArchive({artistId,name,moments,sessions}:{artistId:string;
   return <div className="artist-world-body artist-archive-page">
     <header className="artist-inner-heading"><div><h2>Kho lưu trữ</h2><p>Những chương đã ở lại cùng {name}.</p></div></header>
     <div className="artist-archive-layout"><div className="artist-archive-timeline">
-      <div className="artist-archive-filters" role="group" aria-label="Lọc chương trong kho lưu trữ">{filters.map(item=><button key={item} type="button" aria-pressed={filter===item} onClick={()=>setParams(item==='Tất cả'?{}:{filter:item},{replace:true})}>{item}</button>)}</div>
+      <div className="artist-archive-filters" role="group" aria-label="Lọc chương trong kho lưu trữ">{filters.map(([value,label])=><button key={value} type="button" aria-pressed={filter===value} onClick={()=>setParams(value==='Tất cả'?{}:{filter:value},{replace:true})}>{label}</button>)}</div>
       {years.length ? years.map(year=><section className="artist-archive-year" key={year} aria-labelledby={`artist-archive-${year}`}>
         <header><h3 id={`artist-archive-${year}`}>{year}</h3><p>{year===Number(state.demoTime.slice(0,4))?'Những hành trình đang tiếp diễn.':'Một năm của những gặp gỡ.'}</p><small>{filtered.filter(chapter=>chapter.year===year).length} chương</small></header>
         <ArtistVisualRail label={`Các chương năm ${year}`} className="artist-archive-chapters">{filtered.filter(chapter=>chapter.year===year).map(chapter=><details className="artist-chapter" key={chapter.id} open={params.get('chapter')===chapter.id}>
-          <summary onClick={event=>{event.preventDefault();setParams(previous=>{const next=new URLSearchParams(previous);if(next.get('chapter')===chapter.id)next.delete('chapter');else next.set('chapter',chapter.id);return next;},{replace:true});}}><span className="artist-chapter-cover" style={mediaStyle(chapter.media)}/><span className="artist-chapter-shade"/><span className="artist-chapter-label"><small>{chapter.kind}{chapter.private?' · Riêng tư':chapter.demo?' · Minh họa':''}</small><h4>{chapter.title}</h4><span>{chapter.momentIds.length ? `${chapter.momentIds.length} khoảnh khắc` : 'Chương kỷ niệm'}<ChevronRight size={17}/></span></span></summary>
+          <summary onClick={event=>{event.preventDefault();setParams(previous=>{const next=new URLSearchParams(previous);if(next.get('chapter')===chapter.id)next.delete('chapter');else next.set('chapter',chapter.id);return next;},{replace:true});}}><span className="artist-chapter-cover" style={mediaStyle(chapter.media)}/><span className="artist-chapter-shade"/><span className="artist-chapter-label"><small>{filters.find(([value])=>value===chapter.kind)?.[1] || chapter.kind}{chapter.private?' · Riêng tư':chapter.demo?' · Minh họa':''}</small><h4>{chapter.title}</h4><span>{chapter.momentIds.length ? `${chapter.momentIds.length} khoảnh khắc` : 'Chương kỷ niệm'}<ChevronRight size={17}/></span></span></summary>
           <div className="artist-chapter-content"><p>{chapter.detail}</p>{chapter.momentIds.map(id=>{const moment=moments.find(item=>item.id===id);return moment&&<Link key={id} to={moment.targetUrl} state={{fromArtist:returnTo}}><span style={mediaStyle(moment.media)}/>{moment.title}<ArrowRight size={14}/></Link>;})}{chapter.to&&<Link to={chapter.to} state={{fromArtist:returnTo}}>Mở ngữ cảnh <ArrowRight size={14}/></Link>}
-            {!chapter.to&&!chapter.momentIds.length&&<small>Chương minh họa chưa có media được liên kết.</small>}</div>
+            {!chapter.to&&!chapter.momentIds.length&&<small>Chương minh họa chưa có hình hoặc video.</small>}</div>
         </details>)}</ArtistVisualRail>
       </section>) : <p className="artist-world-empty">Chưa có chương nào thuộc nhóm này.</p>}
     </div><aside className="artist-archive-side">

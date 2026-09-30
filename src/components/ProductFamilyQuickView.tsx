@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Check, Sparkles } from 'lucide-react';
 import { Product } from '../domain/types';
 import { ProductFamily } from '../world/moments';
-import { DELIVERY_LABELS } from '../world/merchCatalog';
+import { DELIVERY_LABELS, productDisplayTitle } from '../world/merchCatalog';
 import { merchImageUrl } from '../world/merchImages';
 import { useDialogA11y } from '../hooks/useDialogA11y';
 import { useApp } from '../context/AppContext';
@@ -91,7 +91,7 @@ export function ProductFamilyQuickView({
             <span className="moments-drawer-eyebrow">
               {family.variantCount > 1 ? `${family.variantCount} phiên bản` : 'Phiên bản chính thức'}
             </span>
-            <h2 className="moments-drawer-title">{family.title}</h2>
+            <h2 className="moments-drawer-title">{productDisplayTitle(family.title)}</h2>
           </div>
           <button
             type="button"
@@ -129,7 +129,7 @@ export function ProductFamilyQuickView({
             <div className="moments-variant-options" role="radiogroup" aria-label="Phiên bản sản phẩm">
               {family.variants.map(v => {
                 const isSelected = v.id === currentVariant.id;
-                const label = DELIVERY_LABELS[v.delivery || 'physical'] || 'Hàng thật';
+                const label = DELIVERY_LABELS[v.delivery || 'physical'] || 'Bản vật lý';
                 return (
                   <button
                     key={v.id}
@@ -179,14 +179,14 @@ export function ProductFamilyQuickView({
           {/* Digital / Bundle Notes */}
           {isDigital && (
             <div className="moments-drawer-note moments-note-digital">
-              <span>Trang phục & phụ kiện kích hoạt trực tiếp vào My Space sau xác nhận. Tương thích với avatar VieWorld.</span>
+              <span>Vật phẩm vào My Space khi nhận. Không có món đồ giao ngoài đời.</span>
             </div>
           )}
 
           {isBundle && (
             <div className="moments-drawer-note moments-note-bundle" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
               <Sparkles size={16} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
-              <span><strong>Kèm vật phẩm digital:</strong> Hàng vật lý và phiên bản dùng trong My Space. Vật phẩm được thêm vào Bộ sưu tập khi đơn hoàn tất.</span>
+              <span><strong>Gồm hai bản:</strong> Món đồ ngoài đời và vật phẩm dùng trong My Space. Cả hai vào Bộ sưu tập khi đơn hoàn tất.</span>
             </div>
           )}
 

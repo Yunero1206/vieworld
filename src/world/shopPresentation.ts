@@ -7,9 +7,9 @@ export type PreviewCapabilities = { avatar: boolean; room: boolean };
 
 export const SHOP_CATEGORY_LABELS: Record<ShopCategory, string> = {
   all: 'Tất cả',
-  merch: 'Merch & Lightstick',
-  album: 'Album / CD',
-  membership: 'Pass & Membership',
+  merch: 'Vật phẩm',
+  album: 'Album & đĩa',
+  membership: 'Vé & hội viên',
 };
 
 export function shopCategory(product: Product): ShopCategory {
@@ -43,10 +43,10 @@ export function previewEdition(product: Product, catalog: Product[]): Product | 
 export function productBadge(product: Product): string | undefined {
   if (product.previewOnly) return 'Concept';
   if (!product.isAvailable || product.stockCount <= 0) return 'Hết hàng';
-  if (product.releaseType === 'pre_order') return 'Pre-order';
-  if (product.category === 'membership') return 'Membership';
-  if (product.delivery === 'bundle') return 'Kèm digital';
-  if (product.delivery === 'physical' && product.digitalItemId) return 'Kèm digital';
+  if (product.releaseType === 'pre_order') return 'Đặt trước';
+  if (product.category === 'membership') return 'Hội viên';
+  if (product.delivery === 'bundle') return 'Kèm bản số';
+  if (product.delivery === 'physical' && product.digitalItemId) return 'Kèm bản số';
   // A separately sold digital edition is not a free companion.
   return undefined;
 }

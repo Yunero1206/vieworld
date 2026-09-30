@@ -913,6 +913,45 @@ export function createInitialState(tenantId: TenantId = 'vieworld-demo'): AppSta
   };
 }
 
+/** A new local demo profile starts with the shared world catalog, not Linh's fan data. */
+export function createFreshFanState(tenantId: TenantId, fanId: string, displayName: string): AppState {
+  const base = createInitialState(tenantId);
+  return {
+    ...base,
+    memberships: {},
+    benefits: {},
+    participations: {},
+    orders: {},
+    supportCases: {},
+    capsules: {},
+    notifications: {},
+    followedWorldIds: [],
+    rsvpdSessionIds: [],
+    inLobbySessionIds: [],
+    cart: [],
+    ticketArchive: [],
+    artistLetters: [],
+    hallReactions: {},
+    fanProfile: {
+      id: fanId,
+      tenantId,
+      version: 1,
+      updatedAt: base.demoTime,
+      username: fanId,
+      displayName,
+      role: 'fan',
+      avatarUrl: '',
+      showcaseSlots: [null, null, null],
+    },
+    demoAccount: {
+      tenantId,
+      fanId,
+      session: null,
+      contact: { email: '', recipient: '', phone: '', country: 'Việt Nam', city: '', address: '', deliveryNote: '' },
+    },
+  };
+}
+
 /**
  * Required Named Scenario Presets (§5.4 & §5 of Implementation Plan)
  */

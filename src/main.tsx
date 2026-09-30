@@ -23,7 +23,6 @@ import './styles/fandom-cheer.css';
 import './styles/explore.css';
 import './styles/moments.css';
 import './styles/notification-board.css';
-import './styles/home.css';
 import './styles/navigation-rail.css';
 import './styles/editorial-pages.css';
 import './styles/explore-world-list.css';
@@ -38,6 +37,8 @@ import './styles/artist-bulletin.css';
 import './styles/home-inbox.css';
 import './styles/account-utilities.css';
 import './styles/digital-presentation.css';
+import './styles/shop-detail.css';
+import './styles/plaza-home.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

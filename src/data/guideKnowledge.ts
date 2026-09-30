@@ -47,7 +47,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
   {
     id: 'guide-card-account', topic: 'account', topicLabel: 'Tài khoản & riêng tư',
     title: 'Tài khoản riêng, phòng chia sẻ',
-    description: 'Icon tài khoản mở đăng nhập/đăng ký Google hoặc Facebook mô phỏng, không xin mật khẩu hay kết nối dịch vụ thật. Thông tin tài khoản là nơi lưu email liên hệ và nơi nhận bằng dữ liệu giả, tách khỏi My Space. Quyền riêng tư My Space điều chỉnh ai được ghé phòng, sổ lưu bút và dấu hội viên. Dữ liệu vẫn lưu cục bộ; không dùng thiết bị chung để nhập thông tin thật.',
+    description: 'Icon tài khoản cho tạo hồ sơ demo riêng hoặc chọn hồ sơ đã lưu trên thiết bị. Google/Facebook chỉ mô phỏng giao diện, không xác minh danh tính hay kết nối dịch vụ thật. Mỗi hồ sơ có My Space, bộ sưu tập, đơn hàng và quyền riêng tư riêng; hồ sơ mới không nhận dữ liệu mẫu của Linh. Thông tin liên hệ và nơi nhận chỉ nên là dữ liệu giả. Ai dùng chung trình duyệt có thể mở các hồ sơ demo; không có đồng bộ hoặc bảo vệ tài khoản thật.',
     keywords: ['đăng nhập', 'đăng ký', 'gmail', 'facebook', 'google', 'tài khoản', 'email', 'liên hệ', 'địa chỉ', 'giao hàng', 'số điện thoại', 'quyền riêng tư'],
     actionLink: { to: '/me?panel=account', label: 'Mở thông tin tài khoản riêng' },
     sourceTitle: 'VieWorld demo · Tài khoản và quyền riêng tư', updatedAt: '2026-09-27',

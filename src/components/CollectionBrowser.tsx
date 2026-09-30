@@ -11,7 +11,7 @@ import { useDialogA11y } from '../hooks/useDialogA11y';
 
 type Mode = 'objects' | 'memories';
 const objectCategories = [['all', 'Tất cả'], ['shirt', 'Áo'], ['ticket', 'Vé'], ['disc', 'Đĩa'], ['lightstick', 'Lightstick'], ['other', 'Khác']];
-const memoryCategories = [['all', 'Tất cả'], ['concert', 'Concert'], ['fan-project', 'Fan project'], ['capsule', 'Capsule'], ['moment', 'Khoảnh khắc'], ['milestone', 'Dấu mốc']];
+const memoryCategories = [['all', 'Tất cả'], ['concert', 'Buổi diễn'], ['fan-project', 'Dự án fan'], ['capsule', 'Kỷ niệm riêng'], ['moment', 'Khoảnh khắc'], ['milestone', 'Dấu mốc']];
 
 export function CollectionBrowser() {
   const { state, dispatch } = useApp();

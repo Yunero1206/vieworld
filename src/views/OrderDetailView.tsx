@@ -145,7 +145,7 @@ export const OrderDetailView: React.FC = () => {
                   {DELIVERY_LABELS[deliveryType]}{order.optionLabel ? ` · Size ${order.optionLabel}` : ''}
                   {estimatedShipping ? ` · ${estimatedShipping}` : ''}
                   <br/>
-                  {deliveryType === 'digital' ? 'Vật phẩm avatar · Không giao hàng ngoài đời' : deliveryType === 'bundle' ? 'Gồm hàng thật và digital · Bàn giao demo xác nhận cả hai phần' : 'Chỉ hàng thật · Không tự kèm quyền sở hữu digital'}
+                  {deliveryType === 'digital' ? 'Dùng trong VieWorld, không giao ngoài đời.' : deliveryType === 'bundle' ? 'Gồm món đồ ngoài đời và vật phẩm trong VieWorld.' : 'Chỉ có món đồ ngoài đời, không kèm bản số.'}
                 </p>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
                   Không gian: <strong>{world ? world.name : order.worldId}</strong> · Mã định danh yêu cầu: <code>{order.requestId}</code>
@@ -287,7 +287,7 @@ export const OrderDetailView: React.FC = () => {
                   <span>Đã ghi nhận quyền sở hữu</span>
                 </span>
                 <Link to={digitalSlot ? '/me?panel=wardrobe' : '/me?panel=bag'} className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)', padding: '8px 14px' }}>
-                  {digitalSlot ? 'Mở tủ đồ digital' : 'Xem đồ đã nhận'}
+                  {digitalSlot ? 'Mở tủ đồ' : 'Xem đồ đã nhận'}
                 </Link>
               </div>
             )}
@@ -302,7 +302,7 @@ export const OrderDetailView: React.FC = () => {
               <p>{order.quantity || 1} món{order.optionLabel ? ` · Size ${order.optionLabel}` : ''}</p>
               {estimatedShipping && <p style={{ fontSize: '13px', color: 'var(--muted)', margin: '4px 0' }}>{estimatedShipping}</p>}
               <p>Tiền hàng: {orderAmount(order, state).toLocaleString('vi-VN')} ₫</p>
-              <p>{deliveryType === 'digital' ? 'Giao digital: không tính phí vận chuyển' : 'Phí giao hàng mẫu: 0 ₫ · chưa thu tiền thật'}</p>
+              <p>{deliveryType === 'digital' ? 'Bản số vào My Space, không có phí giao hàng.' : 'Phí giao hàng mô phỏng: 0 ₫. Chưa thu tiền thật.'}</p>
               <strong>Tổng thanh toán: {orderAmount(order, state).toLocaleString('vi-VN')} ₫</strong>
             </div>
           </section>

@@ -5,6 +5,7 @@ import { AppProvider } from '../context/AppContext';
 import { createInitialState } from '../data/fixtures';
 import { FanShopView } from '../views/FanShopView';
 import { availableShopCategories, getPreviewCapabilities, productBadge, productPrice } from '../world/shopPresentation';
+import { DELIVERY_LABELS, productDisplayTitle } from '../world/merchCatalog';
 
 const state = () => createInitialState('vieworld-demo');
 function mount(path: string) {
@@ -31,6 +32,23 @@ describe('VieSHOP storefront presentation', () => {
     expect(productPrice({ ...product, priceVND: 420000, compareAtPriceVND: 450000 }).compareAt).toMatch(/^450\.000/);
   });
 
+  it('uses one set of short edition labels without changing product IDs or names', () => {
+    expect(DELIVERY_LABELS).toEqual({ physical: 'Bản vật lý', digital: 'Bản số', bundle: 'Cả hai' });
+    expect(productDisplayTitle('Áo Star Club · Digital')).toBe('Áo Star Club');
+    expect(state().products['product-star-shirt-digital'].title).toBe('Áo Star Club · Digital');
+  });
+
+  it('opens product details in a centered reading layout with explicit editions', () => {
+    mount('/shop?product=product-star-shirt-real');
+    const detail = screen.getByRole('dialog');
+    expect(detail).toHaveClass('fw-panel-product');
+    expect(detail.querySelector('.fw-product-detail-layout')).toBeInTheDocument();
+    const editionChoices = detail.querySelector('.fw-variant-selector') as HTMLElement;
+    expect(within(editionChoices).getByRole('button', { name: /Bản vật lý/ })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(within(editionChoices).getByRole('button', { name: /Bản số/ }));
+    expect(within(detail).getByText(/Không giao hàng/)).toBeInTheDocument();
+  });
+
   it('keeps artist entry scoped and makes removing that scope explicit', () => {
     mount('/shop?artist=artist-mira');
     expect(screen.getByRole('button', { name: 'Bỏ lọc nghệ sĩ MIRA' })).toBeInTheDocument();
@@ -47,7 +65,7 @@ describe('VieSHOP storefront presentation', () => {
     expect(within(card).queryByRole('button', { name: 'Thử trong My Space' })).not.toBeInTheDocument();
     fireEvent.click(heading.closest('button')!);
     const detail = screen.getByRole('dialog');
-    expect(within(detail).getByText(/Concept · Chưa mở bán/)).toBeInTheDocument();
+    expect(within(detail).getByText(/Ý tưởng · Chưa mở bán/)).toBeInTheDocument();
     expect(within(detail).queryByRole('button', { name: /Thêm vào giỏ/ })).not.toBeInTheDocument();
   });
 });

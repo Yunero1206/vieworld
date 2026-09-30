@@ -118,7 +118,7 @@ describe('Job 01: Shell CSS & Streamlined Navigation', () => {
       const demoBanners = screen.getAllByLabelText(/Thông báo phiên bản thử nghiệm/i);
       expect(demoBanners.length).toBeGreaterThan(0);
       expect(screen.getAllByText('DEMO')[0]).toBeInTheDocument();
-      expect(screen.getByText(/Bản thử nghiệm · Dữ liệu và tương tác mô phỏng/i)).toBeInTheDocument();
+      expect(screen.getByText(/Bản thử nghiệm\. Không thanh toán thật\. Dữ liệu mô phỏng/i)).toBeInTheDocument();
 
       // Tenant switcher selector is rendered and functional
       const tenantSelect = screen.getByTestId('tenant-switcher-select');

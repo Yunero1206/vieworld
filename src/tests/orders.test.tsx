@@ -432,7 +432,7 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       // INVARIANT: Fulfilment button now visible, but NOT yet fulfilled
       const fulfillBtn = screen.getByTestId('advance-shipment-btn');
       expect(fulfillBtn).toBeInTheDocument();
-      expect(screen.getByText(/Thanh toán không đồng nghĩa đã nhận đồ/i)).toBeInTheDocument();
+      expect(screen.getByText(/Vật phẩm vào Bộ sưu tập khi đơn hoàn tất/i)).toBeInTheDocument();
 
       // Step 5: Click "Mô phỏng: Xác nhận bàn giao vật phẩm"
       for(let stage=0;stage<5;stage++)fireEvent.click(screen.getByTestId('advance-shipment-btn'));

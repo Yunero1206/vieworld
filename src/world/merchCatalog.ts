@@ -1,7 +1,17 @@
 import { AppState, Product, ProductKind } from '../domain/types';
 import { isDemoSignedIn } from './account';
 
-export const DELIVERY_LABELS = { physical: 'Hàng thật', digital: 'Digital', bundle: 'Hàng thật + Digital' };
+/** Labels describe what the fan receives, not a second kind of store inventory. */
+export const DELIVERY_LABELS = { physical: 'Bản vật lý', digital: 'Bản số', bundle: 'Cả hai' };
+export const DELIVERY_SUMMARIES = {
+  physical: 'Món đồ ngoài đời',
+  digital: 'Vật phẩm dùng trong VieWorld',
+  bundle: 'Món đồ ngoài đời và vật phẩm trong VieWorld',
+};
+
+export function productDisplayTitle(title: string): string {
+  return title.replace(/\s*·\s*(Digital|Duo(?: Set)?)$/i, '');
+}
 const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30, kind: 'physical' as ProductKind };
 export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-star-shirt-real', familyId: 'star-shirt', title: 'Áo Star Club', priceVND: 390000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', roomAsset: '/images/world-v6/shirt-cutout.webp', digitalImage: 'shirt-digital', description: 'Áo cotton màu kem, cổ olive và ngôi sao thêu nhỏ. Bản mẫu thiết kế, không phải ảnh hàng đã sản xuất.', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', 'Không kèm trang phục avatar'] },

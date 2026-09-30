@@ -94,8 +94,8 @@ describe('Unified fan world public experience', () => {
     const product = Object.values(state.products).find(p => !p.requiredBenefitId)!;
     saveState(state);
     mount(`/shop?product=${product.id}`);
-    fireEvent.click(screen.getByRole('button', { name: /Thêm vào giỏ đồ/ }));
-    expect(screen.getByRole('link',{name:'Xem giỏ & chốt đơn →'})).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Thêm vào giỏ/ }));
+    expect(screen.getByRole('link',{name:'Xem giỏ →'})).toBeInTheDocument();
     const restored = loadState('vieworld-demo', state.fanProfile.id).state;
     const created = Object.values(restored.orders).filter(o => o.requestId?.startsWith('shop-'));
     expect(created).toHaveLength(0);

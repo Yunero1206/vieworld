@@ -71,12 +71,12 @@ export function ContextStage({ session, artistId, artistName, image }: { session
       <div className="artist-context-actions">
         {context.phase === 'upcoming' && <button type="button" onClick={() => dispatch({ type: 'TOGGLE_RSVP', sessionId: session.id })}>{isRsvpd ? <Check size={16} /> : <CalendarDays size={16} />}{isRsvpd ? 'Đã nhắc mình' : 'Nhắc mình (RSVP)'}</button>}
         {context.phase === 'active' && session.status === 'running' && <button type="button" disabled={participated} onClick={() => dispatch({ type: 'JOIN_LIVE_SESSION', sessionId: session.id })}>{participated ? <Check size={16} /> : undefined}{participated ? 'Đã ghi nhận tham dự' : 'Tham dự trực tiếp'}</button>}
-        {session.status === 'paused' && <span>Buổi live đang tạm dừng. Hãy đợi artist quay lại.</span>}
+        {session.status === 'paused' && <span>Buổi phát đang tạm dừng. Hãy đợi nghệ sĩ quay lại.</span>}
         {context.phase === 'ended' && replayAvailable && <button type="button" onClick={() => dispatch({ type: 'WATCH_REPLAY', sessionId: session.id })}>Ghi nhận xem lại</button>}
-        {context.phase === 'ended' && !replayAvailable && <span>Bản phát lại chưa khả dụng; kỷ niệm vẫn được giữ trong Kho lưu trữ.</span>}
+        {context.phase === 'ended' && !replayAvailable && <span>Chưa có bản xem lại. Kỷ niệm vẫn ở Kho lưu trữ.</span>}
         {session.format === 'concert' && session.setlist?.length ? <details><summary>Chương trình biểu diễn</summary><ul>{session.setlist.map((entry, index) => <li key={index}>{entry.title}</li>)}</ul></details> : null}
       </div>
-      <p className="artist-context-honesty">Bản demo không tự phát media và không giả lập artist đang hiện diện khi họ vắng mặt.</p>
+      <p className="artist-context-honesty">Bản mẫu không tự phát âm thanh hay giả lập nghệ sĩ đang có mặt.</p>
     </div><ContextHall artistId={artistId} artistName={artistName} roomId={context.hallRoomId || session.id} /></div>
   </section>;
 }

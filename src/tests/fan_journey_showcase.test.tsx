@@ -74,7 +74,7 @@ describe('One fan, one connected journey — showcase', () => {
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01']}><Routes><Route element={<FanShell/>}><Route path="/artist/:artistId/hall" element={<ArtistWorldView/>}/></Route></Routes></MemoryRouter></AppProvider>);
     expect(screen.queryByRole('log')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập demo để tiếp tục' }));
-    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục với Google/ }));
+    fireEvent.click(screen.getByRole('button', { name: /mô phỏng Google/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Tiếp tục từ đây' }));
     fireEvent.click(screen.getByRole('button', { name: 'Tham gia hội viên (Demo)' }));
     expect(screen.getByRole('log', { name: 'Tin nhắn trong Hall' })).toBeVisible();
@@ -101,13 +101,13 @@ describe('One fan, one connected journey — showcase', () => {
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/shop?artist=artist-a&product=product-star-shirt-digital']}><Routes>
       <Route path="/shop" element={<FanShopView/>}/><Route path="/cart" element={<CartView/>}/><Route path="/checkout/:checkoutId" element={<CartView/>}/><Route path="/me" element={<FanWorldView/>}/>
     </Routes></MemoryRouter></AppProvider>);
-    fireEvent.click(screen.getByRole('button', { name: 'Thêm vào giỏ đồ' }));
-    fireEvent.click(screen.getByRole('link', { name: 'Xem giỏ & chốt đơn →' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Thêm vào giỏ' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Xem giỏ →' }));
     fireEvent.click(screen.getByRole('button', { name: 'Kiểm tra đơn →' })); fireEvent.click(screen.getByRole('checkbox'));
-    fireEvent.click(screen.getByRole('button', { name: 'Chốt đơn · sang thanh toán' }));
-    fireEvent.click(screen.getByRole('button', { name: /Thanh toán mô phỏng/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Chốt đơn' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Thanh toán thử 45/ }));
     expect(ownedCollection(loadState().state)).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: 'product-star-shirt-digital' })]));
-    fireEvent.click(screen.getByRole('button', { name: 'Nhận vật phẩm digital (Demo)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Nhận bản số' }));
     expect(screen.getByText('Đã thêm vào Bộ sưu tập của bạn.')).toBeVisible();
     fireEvent.click(screen.getByRole('link', { name: 'Xem trong Bộ sưu tập →' }));
     expect(screen.getByRole('heading', { name: 'Áo Star Club · Digital' })).toBeVisible();

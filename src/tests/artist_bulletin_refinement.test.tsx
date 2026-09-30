@@ -82,7 +82,7 @@ describe('Artist tabs and bulletin refinement',()=>{
     fireEvent.click(screen.getByRole('link',{name:'Concert Hà Nội'}));
     fireEvent.click(screen.getByRole('link',{name:'Quay lại world'}));
     expect(container.querySelector('.artist-chapter[open]')).not.toBeNull();
-    fireEvent.click(screen.getByRole('button',{name:'Era'}));
+    fireEvent.click(screen.getByRole('button',{name:'Thời kỳ'}));
     expect(screen.queryByRole('heading',{name:'Concert Hà Nội 2026'})).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'Xem tất cả'}));
     expect(container.querySelectorAll('.artist-archive-recent a').length).toBeGreaterThan(3);

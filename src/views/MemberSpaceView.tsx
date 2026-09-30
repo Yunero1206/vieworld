@@ -23,7 +23,7 @@ export function MemberSpaceView() {
   const [isPassOpen, setIsPassOpen] = useState(false);
 
   const own = fanId === state.fanProfile.id;
-  const privacySettings = own ? loadPrivacySettings() : undefined;
+  const privacySettings = own ? loadPrivacySettings(state.activeTenantId, state.fanProfile.id) : undefined;
   const fan = own ? currentPublicFan(state) : DEMO_FANS.find(f => f.id === fanId);
 
   // This route previews the guest's view; the owner still edits the room at /me.

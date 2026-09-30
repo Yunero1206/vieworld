@@ -308,7 +308,7 @@ export function PersonalDisplayRoom({
   privacySettings?: SpacePrivacySettings;
 }) {
   const { state, dispatch } = useApp();
-  const privacy = propPrivacy || loadPrivacySettings();
+  const privacy = propPrivacy || loadPrivacySettings(state.activeTenantId, state.fanProfile.id);
 
   const [roomMode, setRoomMode] = useState<'view' | 'edit' | 'visitor'>('view');
   const [activeDrawerSlot, setActiveDrawerSlot] = useState<DisplaySlot | null>(null);

@@ -88,7 +88,7 @@ describe('World v2: ownership and access contracts',()=>{
     expect(screen.queryByRole('navigation',{name:'Các nơi trong thế giới'})).not.toBeInTheDocument();
   });
   it('shop filters physical-only albums and saves a design without creating an order',()=>{
-    mount('/shop');fireEvent.click(screen.getByRole('button',{name:'Album / CD'}));
+    mount('/shop');fireEvent.click(screen.getByRole('button',{name:'Album & đĩa'}));
     expect(screen.getByRole('heading',{name:'First Notes · CD Album'})).toBeInTheDocument();
     expect(screen.queryByRole('heading',{name:'Áo Star Club'})).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'Lưu First Notes · CD Album'}));

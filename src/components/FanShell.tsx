@@ -16,7 +16,8 @@ import { NotificationPreferencesModal } from './notifications/NotificationPrefer
 import { mapDomainToDisplay } from './notifications/notificationHelper';
 import { DisplayNotification } from './notifications/notification.types';
 import { ArtistNavAvatar, GlobalNavigation } from './GlobalNavigation';
-import { artistIdFromPath, getCurrentArtistId, setCurrentArtistId } from '../world/currentArtist';
+import { artistIdFromPath, setCurrentArtistId } from '../world/currentArtist';
+import { preferredPlazaArtist } from '../world/plazaState';
 import { useAppearance } from '../hooks/useAppearance';
 import { SearchCombobox } from './SearchCombobox';
 import { globalSearchSuggestions } from '../world/searchDiscovery';
@@ -148,7 +149,7 @@ export const FanShell = () => {
   }, [mobileMenu, accountMenu]);
 
   const routeArtistId = artistIdFromPath(pathname);
-  const currentArtistId = routeArtistId && state.worlds[routeArtistId]?.type === 'artist' ? routeArtistId : getCurrentArtistId(state);
+  const currentArtistId = routeArtistId && state.worlds[routeArtistId]?.type === 'artist' ? routeArtistId : preferredPlazaArtist(state)?.id;
   const artistContext = currentArtistId ? state.worlds[currentArtistId] : undefined;
   const inArtistWorld = Boolean(routeArtistId && state.worlds[routeArtistId]?.type === 'artist');
   useEffect(() => {
@@ -237,7 +238,7 @@ export const FanShell = () => {
         </NavLink>
 
         <SearchCombobox className="fw-global-search" value={searchQuery} onChange={setSearchQuery}
-          suggestions={searchSuggestions} label="Tìm nghệ sĩ, world, sự kiện, capsule" placeholder="Tìm nghệ sĩ, world, sự kiện…"
+          suggestions={searchSuggestions} label="Tìm nghệ sĩ, sự kiện và kỷ niệm" placeholder="Tìm nghệ sĩ, sự kiện, kỷ niệm…"
           onSelect={item => { setSearchQuery(''); if (item.target) navigate(item.target); }}
           onSubmit={query => navigate(query ? `/explore?q=${encodeURIComponent(query)}` : '/explore')} />
         <span className="fw-header-phrase" aria-hidden="true">For the moments that stay</span>
@@ -308,12 +309,12 @@ export const FanShell = () => {
               <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
               <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('account')}>
                 <span className="fw-menu-item-icon"><UserRound size={16}/></span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Thông tin tài khoản<small>Liên hệ & nơi nhận · chỉ bạn xem</small></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Thông tin tài khoản<small>Liên hệ, địa chỉ nhận hàng</small></span>
               </button>
               <button type="button" className="fw-menu-item fw-menu-btn" onClick={toggleAppearance}
                 aria-label={appearance === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
                 <span className="fw-menu-item-icon">{appearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Giao diện<small>{appearance === 'dark' ? 'Tối · chuyển sang sáng' : 'Sáng · chuyển sang tối'}</small></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Giao diện<small>{appearance === 'dark' ? 'Đang tối. Bật giao diện sáng' : 'Đang sáng. Bật giao diện tối'}</small></span>
               </button>
               <button
                 type="button"
@@ -332,7 +333,7 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <Shield size={16} />
                 </span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Quyền riêng tư<small>Ai được ghé phòng và xem góc riêng</small></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Quyền riêng tư<small>Chọn ai được ghé phòng</small></span>
               </button>
               <button
                 type="button"
@@ -346,7 +347,7 @@ export const FanShell = () => {
                 <span className="fw-menu-item-icon">
                   <HelpCircle size={16} />
                 </span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Hướng dẫn VieWorld<small>Hall, My Space, vật phẩm và quyền lợi</small></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Hướng dẫn VieWorld<small>Hall, My Space và quyền lợi</small></span>
               </button>
               <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('support')}>
                 <span className="fw-menu-item-icon"><HelpCircle size={16} /></span>
@@ -356,7 +357,7 @@ export const FanShell = () => {
                 dispatch({ type: 'DEMO_SIGN_OUT' }); setAccountMenu(false); accountBtnRef.current?.focus();
               }}>
                 <span className="fw-menu-item-icon"><UserRound size={16}/></span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Đăng xuất demo<small>Giữ nguyên dữ liệu trên thiết bị này</small></span>
+                <span className="fw-menu-item-label fw-menu-item-copy">Đăng xuất<small>Dữ liệu vẫn ở trên thiết bị này</small></span>
               </button>
             </div>
 
@@ -481,7 +482,7 @@ export const FanShell = () => {
       </div>
       <ResetDrawer isOpen={review} onClose={() => setReview(false)} allowTenantSwitch={false} />
       <WorldGuidePanel isOpen={guide} onClose={() => setGuide(false)} />
-      {utility === 'auth' && <AuthOverlay onClose={() => setUtility(null)}/>}
+      {utility === 'auth' && <AuthOverlay onClose={() => setUtility(null)} appearance={appearance} onToggleAppearance={toggleAppearance}/>}
       {utility === 'account' && <AccountInfoDialog onClose={() => setUtility(null)}/>}
       {utility === 'privacy' && <PrivacyDialog onClose={() => setUtility(null)}/>}
       {utility === 'support' && <SupportDialog onClose={() => setUtility(null)} onGuide={() => { setUtility(null); setGuide(true); }}/>}

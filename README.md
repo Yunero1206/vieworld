@@ -36,7 +36,7 @@ npm run check:showcase
 
 My Space có ba tab **Phòng của tôi / Bộ sưu tập / Avatar**. Room dùng các mặt trưng bày và bố cục chuẩn bị sẵn, có giới hạn số món/sức chứa; không kéo thả tự do theo pixel. Ảnh sản phẩm trong Shop và cách thể hiện trong Room/Avatar là hai lớp presentation của cùng một sản phẩm/quyền, không phải ba bản sao dữ liệu.
 
-Icon tài khoản mở đăng nhập/đăng ký demo. Google và Facebook là lựa chọn mô phỏng trên một hồ sơ mẫu, **không OAuth thật**. Khách vẫn có thể xem nội dung công khai, nhưng không được nhìn My Space cá nhân hoặc được chào bằng tên của fan mẫu. Không nhập thông tin liên hệ, địa chỉ hay dữ liệu thanh toán thật vào bản demo.
+Icon tài khoản mở đăng nhập/đăng ký demo. Bạn có thể tạo nhiều hồ sơ riêng trên cùng trình duyệt; phòng, sổ lưu bút, bộ sưu tập, đơn hàng và thiết lập riêng được lưu theo ID hồ sơ. Hồ sơ Linh là dữ liệu mẫu cũ và không tự gán cho hồ sơ mới. Google/Facebook chỉ là lựa chọn giao diện, **không OAuth thật, không xác minh danh tính và không đồng bộ giữa thiết bị**. Ai dùng chung trình duyệt cũng có thể mở các hồ sơ demo đã lưu. Khách vẫn xem được nội dung công khai, nhưng không thấy My Space cá nhân. Không nhập thông tin liên hệ, địa chỉ hay thanh toán thật vào bản demo.
 
 ## Source và dữ liệu
 

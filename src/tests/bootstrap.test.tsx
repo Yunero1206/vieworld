@@ -18,11 +18,11 @@ describe('P00 Bootstrap & Prototype Honesty Acceptance Checks', () => {
 
     // Verify required honesty copy (§2.2)
     expect(
-      screen.getByText(/Bản thử nghiệm · Dữ liệu và tương tác mô phỏng/i)
+      screen.getByText(/Bản thử nghiệm\. Không thanh toán thật\. Dữ liệu mô phỏng/i)
     ).toBeInTheDocument();
 
     // Verify link to about-demo
-    const aboutLink = screen.getByRole('link', { name: /Phạm vi & Giới hạn/i });
+    const aboutLink = screen.getByRole('link', { name: /Tìm hiểu thêm/i });
     expect(aboutLink).toHaveAttribute('href', '/about-demo');
   });
 

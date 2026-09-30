@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { loadPrivacySettings, savePrivacySettings, type SpacePrivacySettings } from '../../world/privacy';
 import { UtilityDialog } from './UtilityDialog';
+import { useApp } from '../../context/AppContext';
 
 export function PrivacyDialog({ onClose, onSave }: { onClose: () => void; onSave?: (settings: SpacePrivacySettings) => void }) {
-  const [draft, setDraft] = useState(loadPrivacySettings);
+  const { state } = useApp();
+  const [draft, setDraft] = useState(() => loadPrivacySettings(state.activeTenantId, state.fanProfile.id));
   const toggles: { key: 'showVisitCount' | 'guestbookEnabled' | 'showMembershipSignal'; label: string; description: string }[] = [
     { key: 'showVisitCount', label: 'Hiện lượt ghé phòng', description: 'Một lời chào nhỏ, không dùng để xếp hạng fan.' },
     { key: 'guestbookEnabled', label: 'Hiện sổ lưu bút', description: 'Tắt để tạm ẩn sổ và dừng nhận lời nhắn. Những lời nhắn đã có không bị xóa.' },
@@ -11,7 +13,7 @@ export function PrivacyDialog({ onClose, onSave }: { onClose: () => void; onSave
   ];
   return <UtilityDialog title="Quyền riêng tư My Space" subtitle="Chọn cách chia sẻ phòng của bạn, không phải toàn bộ bộ sưu tập." onClose={onClose}
     testId="space-privacy-dialog" footer={<><button className="vw-utility-secondary" onClick={onClose}>Hủy</button><button className="vw-utility-primary" onClick={() => {
-      savePrivacySettings(draft); onSave?.(draft); onClose();
+      savePrivacySettings(draft, state.activeTenantId, state.fanProfile.id); onSave?.(draft); onClose();
     }}>Lưu lựa chọn</button></>}>
     <label className="vw-account-field" htmlFor="privacy-room-visibility">Ai có thể ghé phòng
       <select id="privacy-room-visibility" value={draft.roomVisibility} onChange={e => setDraft({ ...draft, roomVisibility: e.target.value as SpacePrivacySettings['roomVisibility'] })}>

@@ -12,11 +12,14 @@ export const DEFAULT_PRIVACY: SpacePrivacySettings = {
   showMembershipSignal: true,
 };
 
-const STORAGE_KEY = 'vieworld_privacy_settings';
+const LEGACY_STORAGE_KEY = 'vieworld_privacy_settings';
+const storageKey = (tenantId: string, fanId: string) => `vieworld:privacy:${tenantId}:${fanId}`;
 
-export function loadPrivacySettings(): SpacePrivacySettings {
+export function loadPrivacySettings(tenantId = 'vieworld-demo', fanId = 'fan-linh'): SpacePrivacySettings {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    // The old unscoped setting belongs only to the original Linh demo profile.
+    const saved = localStorage.getItem(storageKey(tenantId, fanId)) ||
+      (tenantId === 'vieworld-demo' && fanId === 'fan-linh' ? localStorage.getItem(LEGACY_STORAGE_KEY) : null);
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
@@ -32,9 +35,9 @@ export function loadPrivacySettings(): SpacePrivacySettings {
   return DEFAULT_PRIVACY;
 }
 
-export function savePrivacySettings(settings: SpacePrivacySettings): void {
+export function savePrivacySettings(settings: SpacePrivacySettings, tenantId = 'vieworld-demo', fanId = 'fan-linh'): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    localStorage.setItem(storageKey(tenantId, fanId), JSON.stringify(settings));
   } catch {
     // ignore
   }

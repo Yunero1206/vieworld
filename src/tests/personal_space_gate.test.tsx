@@ -31,7 +31,7 @@ describe('Guest identity and display regression',()=>{
     render(<AppProvider initialState={guest}><MemoryRouter><PersonalSpaceGate><PrivateTestContent/></PersonalSpaceGate></MemoryRouter></AppProvider>);
     expect(screen.queryByText('PRIVATE ROOM')).toBeNull();
     fireEvent.click(screen.getByRole('button',{name:'Đăng nhập / Đăng ký'}));
-    fireEvent.click(screen.getByRole('button',{name:/Tiếp tục với Google/}));
+    fireEvent.click(screen.getByRole('button',{name:/mô phỏng Google/}));
     expect(screen.getByText('PRIVATE ROOM')).toBeVisible();
     const next=loadState().state;
     expect(next.orders).toEqual(guest.orders); expect(next.fanProfile).toEqual(guest.fanProfile);
@@ -45,7 +45,7 @@ describe('Guest identity and display regression',()=>{
     const guest=freshGuestState(createInitialState());
     guest.fanProfile.displayName='PRIVATE NAME';
     render(<AppProvider initialState={guest}><MemoryRouter><WorldPlazaView/></MemoryRouter></AppProvider>);
-    expect(screen.getByRole('heading',{level:1})).toHaveTextContent('Chào bạn');
+    expect(screen.getByRole('heading',{level:1})).toHaveTextContent('Quảng trường VieWorld');
     expect(document.body.textContent).not.toContain('PRIVATE NAME');
   });
   it('preserves legacy ownership but never interprets a profile alone as login',()=>{

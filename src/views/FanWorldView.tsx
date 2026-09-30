@@ -98,14 +98,15 @@ function SignedInFanWorldView() {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [utilityGuide, setUtilityGuide] = useState(false);
 
-  const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(loadPrivacySettings);
+  const [privacySettings, setPrivacySettings] = useState<SpacePrivacySettings>(() => loadPrivacySettings(state.activeTenantId, state.fanProfile.id));
 
   const introModalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const refresh = () => setPrivacySettings(loadPrivacySettings());
+    const refresh = () => setPrivacySettings(loadPrivacySettings(state.activeTenantId, state.fanProfile.id));
+    refresh();
     window.addEventListener('vieworld-privacy-changed', refresh);
     return () => window.removeEventListener('vieworld-privacy-changed', refresh);
-  }, []);
+  }, [state.activeTenantId, state.fanProfile.id]);
 
   const savePrivacySettings = (next: SpacePrivacySettings) => {
     setPrivacySettings(next);

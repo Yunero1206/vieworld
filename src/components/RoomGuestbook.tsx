@@ -16,6 +16,7 @@ export interface StickyNote {
 }
 
 import { EXPANDED_GUESTBOOK_NOTES } from '../data/expandedUniverse';
+import { isDemoSignedIn } from '../world/account';
 
 const DEFAULT_NOTES: Record<string, StickyNote[]> = EXPANDED_GUESTBOOK_NOTES;
 
@@ -29,19 +30,32 @@ const STICKER_PRESETS = [
 
 const COLOR_PRESETS: StickyNote['color'][] = ['yellow', 'pink', 'mint', 'purple'];
 
+export function guestbookStorageKey(tenantId: string, fanId: string): string {
+  return `vieworld:guestbook:${tenantId}:${fanId}`;
+}
+
+function readGuestbook(storageKey: string, tenantId: string, fanId: string): StickyNote[] {
+  try {
+    const saved = localStorage.getItem(storageKey) ||
+      (tenantId === 'vieworld-demo' && fanId === 'fan-linh' ? localStorage.getItem(`vieworld_guestbook_${fanId}`) : null);
+    if (saved) {
+      const parsed: unknown = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed as StickyNote[];
+    }
+  } catch { /* Damaged or unavailable local storage: show demo/default state. */ }
+  return DEFAULT_NOTES[fanId] || [];
+}
+
+/** Keyed remount prevents notes from the previous account being written to a new room. */
 export function RoomGuestbook({ fanId, isOwner }: { fanId: string; isOwner: boolean }) {
   const { state } = useApp();
-  const storageKey = `vieworld_guestbook_${fanId}`;
+  const storageKey = guestbookStorageKey(state.activeTenantId, fanId);
+  return <GuestbookContents key={storageKey} fanId={fanId} isOwner={isOwner} storageKey={storageKey} tenantId={state.activeTenantId} />;
+}
 
-  const [notes, setNotes] = useState<StickyNote[]>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
-    return DEFAULT_NOTES[fanId] || [];
-  });
+function GuestbookContents({ fanId, isOwner, storageKey, tenantId }: { fanId: string; isOwner: boolean; storageKey: string; tenantId: string }) {
+  const { state } = useApp();
+  const [notes, setNotes] = useState<StickyNote[]>(() => readGuestbook(storageKey, tenantId, fanId));
 
   const [isComposing, setIsComposing] = useState(false);
   const [noteText, setNoteText] = useState('');
@@ -58,7 +72,7 @@ export function RoomGuestbook({ fanId, isOwner }: { fanId: string; isOwner: bool
 
   const handleAddNote = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteText.trim()) return;
+    if (!isDemoSignedIn(state) || !noteText.trim()) return;
 
     const newNote: StickyNote = {
       id: `note-${Date.now()}`,
@@ -106,7 +120,9 @@ export function RoomGuestbook({ fanId, isOwner }: { fanId: string; isOwner: bool
           </p>
         </div>
 
-        {!isOwner ? (
+        {!isOwner && !isDemoSignedIn(state) ? (
+          <button className="v7-add-note-btn" onClick={() => window.dispatchEvent(new Event('vieworld-open-auth'))}>Đăng nhập để viết lời nhắn</button>
+        ) : !isOwner ? (
           <button
             className="v7-add-note-btn"
             onClick={() => setIsComposing(!isComposing)}

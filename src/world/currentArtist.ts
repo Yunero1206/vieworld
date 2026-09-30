@@ -1,8 +1,12 @@
 import type { AppState } from '../domain/types';
 
-const storageKey = (tenantId: string) => `vieworld:current-artist:${tenantId}`;
+const storageKey = (tenantId: string, fanId: string) => `vieworld:current-artist:${tenantId}:${fanId}`;
 export const featuredArtistIds = ['artist-a', 'artist-mira', 'artist-kai', 'artist-c', 'artist-b'];
 const memorySelection = new Map<string, string>();
+
+export function resetCurrentArtistSelections(tenantId: string): void {
+  for (const key of memorySelection.keys()) if (key.startsWith(`vieworld:current-artist:${tenantId}:`)) memorySelection.delete(key);
+}
 
 function isArtist(state: AppState, id: string | undefined | null): id is string {
   return Boolean(id && state.worlds[id]?.type === 'artist' && state.worlds[id]?.tenantId === state.activeTenantId);
@@ -11,7 +15,8 @@ function isArtist(state: AppState, id: string | undefined | null): id is string 
 /** The last visited artist wins. The fallback is chosen only once and persisted. */
 export function getCurrentArtistId(state: AppState): string | undefined {
   let stored: string | null = null;
-  try { stored = localStorage.getItem(storageKey(state.activeTenantId)); } catch { stored = memorySelection.get(state.activeTenantId) || null; }
+  const key = storageKey(state.activeTenantId, state.fanProfile.id);
+  try { stored = localStorage.getItem(key) || (state.fanProfile.id === 'fan-linh' ? localStorage.getItem(`vieworld:current-artist:${state.activeTenantId}`) : null); } catch { stored = memorySelection.get(key) || null; }
   if (isArtist(state, stored)) return stored;
   const last = state.fanProfile.worldJourney?.lastWorldId;
   const followed = state.followedWorldIds.find(id => isArtist(state, id));
@@ -24,8 +29,9 @@ export function getCurrentArtistId(state: AppState): string | undefined {
 
 export function setCurrentArtistId(state: AppState, artistId: string): void {
   if (!isArtist(state, artistId)) return;
-  memorySelection.set(state.activeTenantId, artistId);
-  try { localStorage.setItem(storageKey(state.activeTenantId), artistId); } catch { /* private storage */ }
+  const key = storageKey(state.activeTenantId, state.fanProfile.id);
+  memorySelection.set(key, artistId);
+  try { localStorage.setItem(key, artistId); } catch { /* private storage */ }
 }
 
 export function artistIdFromPath(pathname: string): string | undefined {

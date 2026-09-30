@@ -1,0 +1,277 @@
+.vw-plaza-home {
+  width: min(100%, 1580px);
+  min-height: calc(100vh - 76px);
+  margin: 0 auto;
+  padding: clamp(10px, 1.4vw, 22px) clamp(10px, 2vw, 30px) 24px;
+  color: var(--ink);
+}
+
+.vw-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.vw-plaza-scene { position: relative; isolation: isolate; }
+
+.vw-plaza-visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1672 / 941;
+  overflow: hidden;
+  border: 1px solid rgba(93, 111, 92, .28);
+  border-radius: clamp(16px, 2.1vw, 30px);
+  background: #dce9d6 url('/images/home-plaza/plaza-light.jpg') center / cover no-repeat;
+  box-shadow: 0 20px 52px rgba(44, 65, 51, .12);
+}
+
+.fan-shell[data-theme='dark'] .vw-plaza-visual {
+  border-color: rgba(174, 205, 180, .22);
+  background-color: #13251f;
+  background-image: url('/images/home-plaza/plaza-evening.jpg');
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .3);
+}
+
+.vw-plaza-places { position: absolute; inset: 0; z-index: 5; }
+
+/* These hit areas follow the five painted signboards in the 1672 × 941 scene. */
+.vw-plaza-place,
+.vw-plaza-stage-sign {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #395446;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .86);
+  transition: color .16s ease, filter .16s ease, transform .16s ease;
+}
+
+.fan-shell[data-theme='dark'] .vw-plaza-place,
+.fan-shell[data-theme='dark'] .vw-plaza-stage-sign {
+  color: #e7e3cd;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, .75);
+}
+
+.vw-plaza-place > span {
+  font: 750 clamp(12px, 1.1vw, 18px)/1 var(--font-sans);
+  letter-spacing: -.018em;
+}
+
+.vw-plaza-place:hover,
+.vw-plaza-stage-sign:hover {
+  color: var(--primary);
+  filter: drop-shadow(0 2px 5px rgba(45, 83, 61, .22));
+  transform: translateY(-1px);
+}
+
+.vw-plaza-place:focus-visible,
+.vw-plaza-stage-sign:focus-visible,
+.vw-plaza-avatar:focus-visible,
+.vw-plaza-guest:focus-visible {
+  outline: 3px solid var(--appearance-focus);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.vw-plaza-place--explore { left: 17.7%; top: 3.25%; width: 17.1%; height: 5.8%; }
+.vw-plaza-place--myspace { right: 17.6%; top: 3.25%; width: 17.1%; height: 5.8%; }
+.vw-plaza-place--artist { right: 9.4%; top: 34.1%; width: 15.2%; height: 5.8%; }
+.vw-plaza-place--shop { left: 40.4%; top: 63.6%; width: 19.2%; height: 5.8%; }
+
+.vw-plaza-stage-sign {
+  left: 10.3%;
+  top: 34.1%;
+  z-index: 7;
+  width: 16.1%;
+  height: 5.8%;
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 2px;
+  padding: 0 1%;
+}
+
+.vw-plaza-stage-sign small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #b24249;
+  font-size: clamp(6px, .52vw, 8px);
+  font-weight: 850;
+  letter-spacing: .08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.vw-plaza-stage-sign small i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.vw-plaza-stage-sign strong {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font: 700 clamp(8px, .82vw, 13px)/1.15 var(--font-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vw-plaza-stage-ambience {
+  position: absolute;
+  left: 10.2%;
+  top: 40%;
+  z-index: 2;
+  width: 16%;
+  height: 17%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+.vw-plaza-stage-ambience.is-live {
+  opacity: 1;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 205, 128, .23), transparent 66%);
+}
+
+.vw-plaza-stage-ambience i {
+  position: absolute;
+  bottom: 18%;
+  left: 42%;
+  width: 2px;
+  height: 18%;
+  border-radius: 99px;
+  background: #f4ba64;
+  transform-origin: bottom;
+  animation: vw-plaza-eq 1.35s ease-in-out infinite alternate;
+}
+.vw-plaza-stage-ambience i:nth-child(2) { left: 50%; height: 28%; animation-delay: -.42s; }
+.vw-plaza-stage-ambience i:nth-child(3) { left: 58%; height: 21%; animation-delay: -.78s; }
+
+@keyframes vw-plaza-eq {
+  from { transform: scaleY(.55); opacity: .55; }
+  to { transform: scaleY(1.15); opacity: 1; }
+}
+
+.vw-plaza-crowd {
+  position: absolute;
+  left: 15.6%;
+  top: 53.2%;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 10.5%;
+  pointer-events: none;
+}
+
+.vw-plaza-crowd span {
+  display: grid;
+  width: clamp(13px, 1.4vw, 22px);
+  aspect-ratio: 1;
+  margin-left: clamp(-4px, -.24vw, -2px);
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 50%;
+  background: hsl(calc(128 + var(--crowd-index) * 32) 25% calc(34% + var(--crowd-index) * 3%));
+  color: white;
+  font-size: clamp(5px, .48vw, 8px);
+  font-weight: 800;
+  box-shadow: 0 3px 7px rgba(34, 42, 34, .24);
+  transform: translateY(calc((var(--crowd-index) % 2) * 3px));
+}
+
+.vw-plaza-presence {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  z-index: 4;
+  transform: translateX(-50%);
+}
+
+.vw-plaza-avatar,
+.vw-plaza-guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #32443a;
+  text-decoration: none;
+}
+
+.vw-plaza-avatar .avatar-renderer { filter: drop-shadow(0 8px 6px rgba(46, 47, 38, .18)); }
+.vw-plaza-avatar > span,
+.vw-plaza-guest > span {
+  margin-top: -6px;
+  padding: 4px 10px;
+  border: 1px solid rgba(74, 91, 75, .28);
+  border-radius: 999px;
+  background: rgba(255, 254, 246, .9);
+  font-size: 10px;
+  font-weight: 750;
+  box-shadow: 0 5px 12px rgba(62, 66, 52, .13);
+}
+
+.vw-plaza-guest {
+  gap: 4px;
+  min-width: 58px;
+  min-height: 58px;
+  padding: 12px 9px 7px;
+  border-radius: 50%;
+  background: rgba(255, 254, 246, .88);
+  box-shadow: 0 8px 18px rgba(56, 62, 51, .14);
+}
+.vw-plaza-guest > span { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; }
+
+.vw-plaza-mobile-places { display: none; }
+
+@media (max-width: 1080px) {
+  .vw-plaza-avatar .avatar-renderer { width: 82px !important; height: 98px !important; }
+}
+
+@media (max-width: 760px) {
+  .vw-plaza-home { min-height: 0; padding: 10px 10px 92px; }
+  .vw-plaza-visual { border-radius: 16px; }
+  .vw-plaza-places { display: none; }
+  .vw-plaza-presence { top: 42%; }
+  .vw-plaza-avatar .avatar-renderer { width: 52px !important; height: 63px !important; }
+  .vw-plaza-avatar > span { margin-top: -4px; padding: 2px 7px; font-size: 7px; }
+  .vw-plaza-guest { min-width: 42px; min-height: 42px; padding: 7px 6px 4px; }
+  .vw-plaza-guest svg { width: 15px; }
+  .vw-plaza-guest > span { font-size: 7px; }
+  .vw-plaza-stage-sign { left: 8.8%; width: 19%; }
+  .vw-plaza-stage-sign small { display: none; }
+  .vw-plaza-stage-sign strong { font-size: clamp(6px, 1.65vw, 10px); }
+  .vw-plaza-mobile-places {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 9px;
+  }
+  .vw-plaza-mobile-places .vw-plaza-place {
+    position: static;
+    min-height: 46px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    text-shadow: none;
+  }
+  .vw-plaza-mobile-places .vw-plaza-place > span { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vw-plaza-stage-ambience i { animation: none; }
+  .vw-plaza-place,
+  .vw-plaza-stage-sign { transition: none; }
+}

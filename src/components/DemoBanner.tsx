@@ -8,10 +8,10 @@ export const DemoBanner: React.FC = () => {
       <div className="demo-banner-content">
         <span className="demo-badge" aria-label="Chế độ thử nghiệm">DEMO</span>
         <AlertCircle size={16} aria-hidden="true" />
-        <strong>Bản thử nghiệm · Dữ liệu và tương tác mô phỏng</strong>
+        <strong>Bản thử nghiệm. Không thanh toán thật. Dữ liệu mô phỏng.</strong>
       </div>
       <Link to="/about-demo" className="demo-banner-link" id="demo-banner-about-link">
-        Phạm vi & Giới hạn
+        Tìm hiểu thêm
       </Link>
     </aside>
   );

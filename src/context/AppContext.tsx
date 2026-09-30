@@ -5,8 +5,9 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react';
 import { AppAction, AppState, TenantId } from '../domain/types';
 import { appReducer } from '../domain/reducer';
-import { scenarioPresets, createInitialState } from '../data/fixtures';
-import { loadState, saveState, resetTenantStorage, isMemoryFallbackActive, buildStorageKey } from '../services/storageAdapter';
+import { scenarioPresets, createInitialState, createFreshFanState } from '../data/fixtures';
+import { loadState, saveState, resetTenantStorage, isMemoryFallbackActive, buildStorageKey, getActiveFanId, setActiveFanId, listLocalDemoProfiles, type LocalDemoProfile } from '../services/storageAdapter';
+import type { DemoProvider } from '../world/account';
 
 export interface AppContextValue {
   state: AppState;
@@ -18,6 +19,9 @@ export interface AppContextValue {
   resetActiveTenant: () => void;
   dismissNotice: () => void;
   setTenant: (tenantId: TenantId) => void;
+  localProfiles: () => LocalDemoProfile[];
+  registerDemoProfile: (displayName: string, provider: DemoProvider) => string | null;
+  signInDemoProfile: (fanId: string, provider: DemoProvider) => string | null;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -50,7 +54,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     if (disableAutoHydrate) {
       return createInitialState(tId);
     }
-    const loadResult = loadState(tId);
+    const loadResult = loadState(tId, getActiveFanId(tId));
     if (loadResult.notice) {
       // Defer notice setting until after initial render
       setTimeout(() => setStorageNotice(loadResult.notice || null), 0);
@@ -95,6 +99,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
   const loadScenarioPreset = useCallback(
     (key: keyof typeof scenarioPresets) => {
+      if (state.fanProfile.id !== createInitialState(state.activeTenantId).fanProfile.id) {
+        setStorageNotice('Kịch bản mẫu chỉ áp dụng cho hồ sơ mẫu của không gian này; hồ sơ riêng của bạn được giữ nguyên.');
+        return;
+      }
       const presetFn = scenarioPresets[key];
       if (presetFn) {
         const scenarioState = presetFn(state.activeTenantId);
@@ -102,7 +110,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         setStorageNotice(`Đã áp dụng kịch bản thử nghiệm: ${key}`);
       }
     },
-    [state.activeTenantId]
+    [state.activeTenantId, state.fanProfile.id]
   );
 
   const resetActiveTenant = useCallback(() => {
@@ -120,7 +128,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
       // Save current tenant before switching
       if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
       // Load target tenant
-      const loadResult = loadState(targetTenantId);
+      const loadResult = loadState(targetTenantId, getActiveFanId(targetTenantId));
       dispatch({ type: 'LOAD_SCENARIO', scenarioState: loadResult.state });
       if (loadResult.notice) {
         setStorageNotice(loadResult.notice);
@@ -130,6 +138,36 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     },
     [state]
   );
+
+  const localProfiles = useCallback(() => listLocalDemoProfiles(state.activeTenantId), [state.activeTenantId]);
+  const registerDemoProfile = useCallback((displayName: string, provider: DemoProvider): string | null => {
+    const name = displayName.trim().replace(/\s+/g, ' ');
+    if (name.length < 2 || name.length > 60 || /[\u0000-\u001f]/.test(name)) return 'Tên hiển thị cần từ 2–60 ký tự.';
+    const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const fanId = `fan-local-${randomId}`;
+    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
+    const next = appReducer(createFreshFanState(state.activeTenantId, fanId, name), { type: 'DEMO_SIGN_IN', provider, mode: 'register' });
+    saveState(next);
+    setActiveFanId(state.activeTenantId, fanId);
+    conflictingKey.current = null;
+    setPersistenceConflict(false);
+    dispatch({ type: 'LOAD_SCENARIO', scenarioState: next });
+    return null;
+  }, [state]);
+
+  const signInDemoProfile = useCallback((fanId: string, provider: DemoProvider): string | null => {
+    if (!listLocalDemoProfiles(state.activeTenantId).some(profile => profile.fanId === fanId)) return 'Hồ sơ này không còn trên thiết bị.';
+    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
+    const loaded = loadState(state.activeTenantId, fanId);
+    if (loaded.state.fanProfile.id !== fanId) return 'Không đọc được hồ sơ đã chọn.';
+    const next = appReducer(loaded.state, { type: 'DEMO_SIGN_IN', provider, mode: 'login' });
+    saveState(next);
+    setActiveFanId(state.activeTenantId, fanId);
+    conflictingKey.current = null;
+    setPersistenceConflict(false);
+    dispatch({ type: 'LOAD_SCENARIO', scenarioState: next });
+    return null;
+  }, [state]);
 
   return (
     <AppContext.Provider
@@ -143,6 +181,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         resetActiveTenant,
         dismissNotice,
         setTenant,
+        localProfiles,
+        registerDemoProfile,
+        signInDemoProfile,
       }}
     >
       {children}

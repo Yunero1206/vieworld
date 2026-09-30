@@ -8,13 +8,58 @@
  */
 
 import { AppState, TenantId } from '../domain/types';
-import { createInitialState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
+import { createInitialState, createFreshFanState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
 import { withMerchCatalog } from '../world/merchCatalog';
 import { freshGuestState } from '../world/account';
+import { resetCurrentArtistSelections } from '../world/currentArtist';
 import { idbGet, idbSet, idbDelete, clearTenantAsync, STORE_TENANT_STATE } from './indexedDbAdapter';
 
 export const SCHEMA_VERSION = 1;
 export const STORAGE_KEY_PREFIX = 'vieworld_v1';
+const ACTIVE_FAN_PREFIX = 'vieworld:active-fan:';
+const activeFanMemory = new Map<TenantId, string>();
+
+export interface LocalDemoProfile { fanId: string; displayName: string }
+
+/** Local profiles are a device-only demo picker, never an authentication provider. */
+export function listLocalDemoProfiles(tenantId: TenantId): LocalDemoProfile[] {
+  const prefix = `${STORAGE_KEY_PREFIX}_${tenantId}_`;
+  const profiles: LocalDemoProfile[] = [];
+  try {
+    for (let index = 0; index < window.localStorage.length; index++) {
+      const key = window.localStorage.key(index);
+      if (!key?.startsWith(prefix) || key.endsWith('_recovery')) continue;
+      try {
+        const fanId = key.slice(prefix.length);
+        const raw = window.localStorage.getItem(key);
+        if (!raw) continue;
+        const state = JSON.parse(raw).state;
+        if (isPersistedState(state, tenantId, fanId) && typeof state.fanProfile.displayName === 'string') profiles.push({ fanId, displayName: state.fanProfile.displayName });
+      } catch { /* One damaged profile must not hide the others. */ }
+    }
+  } catch { /* Storage may be blocked or one profile may be malformed. */ }
+  for (const [key, raw] of Object.entries(memoryFallbackStore)) {
+    if (!key.startsWith(prefix) || key.endsWith('_recovery')) continue;
+    try {
+      const fanId = key.slice(prefix.length);
+      const state = JSON.parse(raw).state;
+      if (isPersistedState(state, tenantId, fanId) && typeof state.fanProfile.displayName === 'string' && !profiles.some(profile => profile.fanId === fanId)) profiles.push({ fanId, displayName: state.fanProfile.displayName });
+    } catch { /* Ignore a malformed in-memory copy. */ }
+  }
+  return profiles.sort((a, b) => a.displayName.localeCompare(b.displayName, 'vi'));
+}
+
+export function getActiveFanId(tenantId: TenantId): string {
+  let fanId = activeFanMemory.get(tenantId);
+  try { fanId = window.localStorage.getItem(`${ACTIVE_FAN_PREFIX}${tenantId}`) || fanId; } catch { /* Memory fallback. */ }
+  return fanId && listLocalDemoProfiles(tenantId).some(profile => profile.fanId === fanId)
+    ? fanId : createInitialState(tenantId).fanProfile.id;
+}
+
+export function setActiveFanId(tenantId: TenantId, fanId: string): void {
+  activeFanMemory.set(tenantId, fanId);
+  try { window.localStorage.setItem(`${ACTIVE_FAN_PREFIX}${tenantId}`, fanId); } catch { /* Memory fallback. */ }
+}
 
 export interface StorageLoadResult {
   state: AppState;
@@ -52,7 +97,7 @@ export function collectLocalDemoBackup(): Record<string, string> {
   try {
     for (let i = 0; i < window.localStorage.length; i++) {
       const key = window.localStorage.key(i);
-      if (key && (key.startsWith('vieworld:') || key.startsWith(`${STORAGE_KEY_PREFIX}_`) || key === 'vieworld_privacy_settings')) dump[key] = window.localStorage.getItem(key) || '';
+      if (key && (key.startsWith('vieworld:') || key.startsWith(`${STORAGE_KEY_PREFIX}_`) || key.startsWith('vieworld_guestbook_') || key === 'vieworld_privacy_settings')) dump[key] = window.localStorage.getItem(key) || '';
     }
   } catch { /* Memory-only sessions are still exportable. */ }
   return { ...dump, ...memoryFallbackStore };
@@ -119,6 +164,11 @@ export function loadState(
   fanId: string = 'fan-linh'
 ): StorageLoadResult {
   const key = buildStorageKey(tenantId, fanId);
+  const freshForFan = () => {
+    const baseline = createInitialState(tenantId);
+    return freshGuestState(fanId === baseline.fanProfile.id
+      ? baseline : createFreshFanState(tenantId, fanId, 'Fan mới'));
+  };
   const fallbackAvailable = isLocalStorageAvailable() && !memoryFallbackActive;
 
   if (!fallbackAvailable) {
@@ -138,7 +188,7 @@ export function loadState(
       }
     }
     return {
-      state: freshGuestState(createInitialState(tenantId)),
+      state: freshForFan(),
       isMemoryFallback: true,
       notice: 'Chế độ lưu tạm trong bộ nhớ: dữ liệu sẽ không lưu sau khi đóng tab.',
     };
@@ -148,7 +198,7 @@ export function loadState(
     const raw = window.localStorage.getItem(key);
     if (!raw) {
       return {
-        state: freshGuestState(createInitialState(tenantId)),
+        state: freshForFan(),
         isMemoryFallback: false,
       };
     }
@@ -158,7 +208,7 @@ export function loadState(
     // Schema version check and basic integrity validation
     if (!parsed || parsed.schemaVersion !== SCHEMA_VERSION || !isPersistedState(parsed.state, tenantId, fanId)) {
       // Version mismatch or invalid structure: recover with fresh initial state
-      const freshState = freshGuestState(createInitialState(tenantId));
+      const freshState = freshForFan();
       preserveRecoveryCopy(key, raw);
       const durable = saveState(freshState);
       return {
@@ -191,7 +241,7 @@ export function loadState(
     };
   } catch {
     // Malformed JSON or read error: recover cleanly without crashing
-    const freshState = freshGuestState(createInitialState(tenantId));
+    const freshState = freshForFan();
     try {
       const raw = window.localStorage.getItem(key);
       if (raw) preserveRecoveryCopy(key, raw);
@@ -236,6 +286,9 @@ export async function loadStateAsync(
  */
 export function resetTenantStorage(tenantId: TenantId): void {
   const prefix = `${STORAGE_KEY_PREFIX}_${tenantId}`;
+  activeFanMemory.delete(tenantId);
+  resetCurrentArtistSelections(tenantId);
+  try { window.localStorage.removeItem(`${ACTIVE_FAN_PREFIX}${tenantId}`); } catch { /* Memory fallback. */ }
 
   // Reset in-memory entries for this tenant
   Object.keys(memoryFallbackStore).forEach((key) => {
@@ -258,9 +311,16 @@ export function resetTenantStorage(tenantId: TenantId): void {
 
   try {
     const keysToRemove: string[] = [];
+    const personalPrefixes = [
+      `${STORAGE_KEY_PREFIX}_${tenantId}_`,
+      `vieworld:privacy:${tenantId}:`,
+      `vieworld:guestbook:${tenantId}:`,
+      `vieworld:current-artist:${tenantId}:`,
+    ];
     for (let i = 0; i < window.localStorage.length; i++) {
       const k = window.localStorage.key(i);
-      if (k && k.startsWith(prefix)) {
+      if (k && (personalPrefixes.some(item => k.startsWith(item)) ||
+        (tenantId === 'vieworld-demo' && (k === 'vieworld_privacy_settings' || k.startsWith('vieworld_guestbook_') || k === 'vieworld:current-artist:vieworld-demo')))) {
         keysToRemove.push(k);
       }
     }

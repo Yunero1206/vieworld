@@ -43,8 +43,9 @@ describe('Demo account, no external identity or ownership mutation', () => {
     render(<AppProvider initialState={freshGuestState(createInitialState())}><AuthOverlay onClose={vi.fn()}/><Probe/></AppProvider>);
     fireEvent.click(screen.getByRole('button', { name: 'Đăng ký' }));
     expect(screen.queryByLabelText(/mật khẩu/i)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /Tiếp tục với Facebook/ }));
-    expect(screen.getByRole('status')).toHaveTextContent('hồ sơ demo');
+    fireEvent.change(screen.getByLabelText('Tên hiển thị trong VieWorld'), { target: { value: 'Fan mới' } });
+    fireEvent.click(screen.getByRole('button', { name: /mô phỏng Facebook/ }));
+    expect(screen.getByRole('status')).toHaveTextContent('góc của Fan mới');
     expect(screen.getByTestId('account-probe')).toHaveTextContent('"signedIn":true');
     expect(fetch).not.toHaveBeenCalled(); fetch.mockRestore();
   });
@@ -53,6 +54,8 @@ describe('Demo account, no external identity or ownership mutation', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập hoặc đăng ký VieWorld' }));
     expect(screen.getByTestId('demo-auth-overlay')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Chuyển sang giao diện tối' }));
+    expect(screen.getByTestId('app-container')).toHaveAttribute('data-theme', 'dark');
     fireEvent.click(screen.getByRole('button', { name: 'Để sau, tiếp tục khám phá' }));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -97,11 +100,11 @@ describe('Contact is private, minimal, validated and separate from public My Spa
 
 describe('Consistent utility overlays and truthful privacy/support', () => {
   it('privacy is a cancellable draft and retains existing values', () => {
-    const close = vi.fn(); render(<PrivacyDialog onClose={close}/>);
+    const close = vi.fn(); render(<AppProvider initialState={createInitialState()}><PrivacyDialog onClose={close}/></AppProvider>);
     fireEvent.change(screen.getByLabelText('Ai có thể ghé phòng'), { target: { value: 'private' } });
     expect(loadPrivacySettings().roomVisibility).toBe('everyone');
     fireEvent.click(screen.getByRole('button', { name: 'Hủy' })); expect(close).toHaveBeenCalledOnce();
-    cleanup(); render(<PrivacyDialog onClose={close}/>);
+    cleanup(); render(<AppProvider initialState={createInitialState()}><PrivacyDialog onClose={close}/></AppProvider>);
     fireEvent.change(screen.getByLabelText('Ai có thể ghé phòng'), { target: { value: 'private' } });
     fireEvent.click(screen.getByRole('button', { name: 'Lưu lựa chọn' }));
     expect(loadPrivacySettings().roomVisibility).toBe('private');

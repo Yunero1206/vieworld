@@ -3,7 +3,7 @@ import { Sliders, RefreshCw, Layers, AlertCircle, X, Check } from 'lucide-react'
 import { useApp } from '../context/AppContext';
 import { ConfirmDialog } from './ConfirmDialog';
 import { TenantId } from '../domain/types';
-import { scenarioPresets } from '../data/fixtures';
+import { scenarioPresets, createInitialState } from '../data/fixtures';
 
 export interface ResetDrawerProps {
   isOpen: boolean;
@@ -57,6 +57,7 @@ export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose, allow
     { key: 'sessionDisconnected', label: '5. Mất Kết Nối (Session Disconnected)', desc: 'Nghệ sĩ bị mất kết nối, kiểm chứng trạng thái hiện diện trung thực.' },
     { key: 'replayExpired', label: '6. Replay Hết Hạn (Replay Expired)', desc: 'Phiên đã kết thúc và thời hạn xem lại bản ghi đã hết.' },
   ];
+  const isSampleProfile = state.fanProfile.id === createInitialState(state.activeTenantId).fanProfile.id;
 
   const handleApplyScenario = (key: keyof typeof scenarioPresets) => {
     setConfirmAction({ type: 'scenario', scenarioKey: key });
@@ -189,12 +190,14 @@ export const ResetDrawer: React.FC<ResetDrawerProps> = ({ isOpen, onClose, allow
             <Layers size={16} color="var(--primary)" />
             <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: '700' }}>Kịch bản mẫu (§5.4)</h3>
           </div>
+          {!isSampleProfile && <p className="fw-muted">Kịch bản chỉ thay đổi hồ sơ mẫu. Chuyển về hồ sơ mẫu để thử; góc riêng của bạn không bị ghi đè.</p>}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {scenarios.map((sc) => (
               <button
                 key={sc.key}
                 type="button"
                 onClick={() => handleApplyScenario(sc.key)}
+                disabled={!isSampleProfile}
                 id={`scenario-btn-${sc.key}`}
                 style={{
                   textAlign: 'left',

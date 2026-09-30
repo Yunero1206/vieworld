@@ -181,7 +181,7 @@ export function ArtistCommunity({
       quantity,
     });
 
-    const label = DELIVERY_LABELS[product.delivery || 'physical'] || 'Hàng thật';
+    const label = DELIVERY_LABELS[product.delivery || 'physical'] || 'Bản vật lý';
     setCartToast({
       message: `Đã thêm ${quantity > 1 ? `${quantity}x ` : ''}${product.title} (${label}) vào giỏ hàng`,
       visible: true,
@@ -549,21 +549,21 @@ export function ArtistCommunity({
                 className={`moments-filter-chip ${deliveryFilter === 'physical' ? 'active' : ''}`}
                 onClick={() => setDeliveryFilter('physical')}
               >
-                Hàng thật
+                {DELIVERY_LABELS.physical}
               </button>
               <button
                 type="button"
                 className={`moments-filter-chip ${deliveryFilter === 'digital' ? 'active' : ''}`}
                 onClick={() => setDeliveryFilter('digital')}
               >
-                Digital
+                {DELIVERY_LABELS.digital}
               </button>
               <button
                 type="button"
                 className={`moments-filter-chip ${deliveryFilter === 'bundle' ? 'active' : ''}`}
                 onClick={() => setDeliveryFilter('bundle')}
               >
-                Bundle
+                {DELIVERY_LABELS.bundle}
               </button>
             </div>
 
@@ -637,7 +637,7 @@ export function ArtistCommunity({
                       const digitalVar = family.variants.find(v => v.delivery === 'digital');
                       const physicalVar = family.variants.find(v => v.delivery === 'physical');
                       if (digitalVar && physicalVar) {
-                        return `Digital ${digitalVar.priceVND.toLocaleString('vi-VN')} ₫ · Hàng thật ${physicalVar.priceVND.toLocaleString('vi-VN')} ₫`;
+                        return `Bản số ${digitalVar.priceVND.toLocaleString('vi-VN')} ₫ · Bản vật lý ${physicalVar.priceVND.toLocaleString('vi-VN')} ₫`;
                       }
                       return `${family.minPriceVND.toLocaleString('vi-VN')} – ${family.maxPriceVND.toLocaleString('vi-VN')} ₫`;
                     })()}

@@ -413,7 +413,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       expect(searchBox.value).toBe('ao');
 
       // Merch category button is selected
-      const merchTab = screen.getByRole('button', { name: 'Merch & Lightstick' });
+      const merchTab = screen.getByRole('button', { name: 'Vật phẩm' });
       expect(merchTab).toHaveAttribute('aria-pressed', 'true');
 
       // Product "Áo Star Club" matches and is shown
@@ -430,7 +430,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       expect(within(dialog).getByRole('heading', { level: 2, name: 'Áo Star Club' })).toBeInTheDocument();
 
       // Close product panel
-      const closeBtn = screen.getByRole('button', { name: 'Đóng và về không gian' });
+      const closeBtn = within(dialog).getByRole('button', { name: 'Đóng' });
       fireEvent.click(closeBtn);
 
       // Panel is closed, search input and category are still retained
@@ -532,8 +532,8 @@ describe('Review Fixes & UX Regression Suite', () => {
         </AppProvider>
       );
 
-      // Pre-order badge is shown on pre-order items
-      expect(screen.getAllByText('Pre-order').length).toBeGreaterThan(0);
+      // Order timing is stated in Vietnamese on pre-order items.
+      expect(screen.getAllByText('Đặt trước').length).toBeGreaterThan(0);
 
       // Click product to open detail
       const starShirtBtn = screen.getByRole('heading', { name: 'Áo Star Club' }).closest('button');
@@ -543,7 +543,7 @@ describe('Review Fixes & UX Regression Suite', () => {
       // Detail modal opens with shipping estimate
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
-      expect(within(dialog).getByText(/Dự kiến giao hàng: Tháng 10\/2026 \(Đợt 1\)/i)).toBeInTheDocument();
+      expect(within(dialog).getByText(/Dự kiến giao hàng: Tháng 10\/2026/i)).toBeInTheDocument();
     });
 
     it('FanShell and FanShop dynamically adapt to MFan partner configuration (Tenant Portability)', () => {

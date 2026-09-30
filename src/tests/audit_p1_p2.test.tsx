@@ -282,13 +282,13 @@ describe('Audit P1 & P2 Quality Verification Suite', () => {
       );
 
       // Select QR payment method
-      fireEvent.click(screen.getByRole('button', { name: /Quét MoMo \/ VNPay QR/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Xem QR mẫu/i }));
 
       // Demo sandbox tag must be visible
-      expect(screen.getByText('Mã QR thanh toán mô phỏng (Demo Sandbox)')).toBeInTheDocument();
+      expect(screen.getByText('QR minh họa, không thể thanh toán')).toBeInTheDocument();
 
       // CTA button must not claim real payment was verified
-      const confirmBtn = screen.getByRole('button', { name: /Xác nhận thanh toán thử nghiệm \(Demo\) · Không trừ tiền thật/i });
+      const confirmBtn = screen.getByRole('button', { name: /Xác nhận giao dịch thử/i });
       expect(confirmBtn).toBeInTheDocument();
     });
   });

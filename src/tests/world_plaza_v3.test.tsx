@@ -10,23 +10,42 @@ import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
 import { DEFAULT_ROOM, RoomDesign, validRoomDesign } from '../world/places';
 import { loadState, saveState } from '../services/storageAdapter';
+import { freshGuestState } from '../world/account';
+import { selectPlazaState } from '../world/plazaState';
 const initial=()=>createInitialState('vieworld-demo');
 function mount(path='/'){return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<WorldPlazaView/>}/><Route path="/worlds/:worldId" element={<FanWorldView/>}/><Route path="/worlds/:worldId/moments" element={<FanWorldView/>}/><Route path="/worlds/:worldId/archive" element={<FanWorldView/>}/><Route path="/moments" element={<FanWorldView/>}/><Route path="/archive" element={<FanWorldView/>}/><Route path="/me" element={<FanWorldView/>}/></Routes></MemoryRouter></AppProvider>);}
 const read=()=>loadState('vieworld-demo',initial().fanProfile.id).state;
 describe('Fan home and room',()=>{
   beforeEach(()=>localStorage.clear());
-  it('starts with a brief orientation and a contextual way back, not an artist room',()=>{
-    const state=appReducer(initial(),{type:'VISIT_FAN_WORLD',worldId:'neon-sessions'});saveState(state);mount();
-    expect(screen.getByRole('heading',{level:1}).textContent).toContain('Chào Linh.');
-    expect(screen.getByRole('region',{name:'Gần đây'})).toBeInTheDocument();
-    expect(screen.getByRole('region',{name:'Khoảnh khắc sắp tới'})).toBeInTheDocument();
-    expect(screen.getByRole('link',{name:/Trở lại với Neon Sessions/})).toHaveAttribute('href','/explore');
+  it('opens as an uncluttered place-led plaza',()=>{
+    let state=appReducer(initial(),{type:'VISIT_FAN_WORLD',worldId:'artist-a'});
+    state=appReducer(state,{type:'REMEMBER_FAN_DESTINATION',to:'/artist/artist-a/hall'});saveState(state);mount();
+    expect(screen.getByRole('heading',{level:1})).toHaveTextContent('Quảng trường VieWorld');
+    expect(screen.getByRole('region',{name:'Các nơi trong quảng trường VieWorld'})).toBeInTheDocument();
+    expect(screen.getAllByRole('link',{name:'Explore'}).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link',{name:'Artist World'}).length).toBeGreaterThan(0);
+    expect(screen.queryByText('Ghé lại')).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
   it('links a real live session without claiming extra activity',()=>{
     mount();
-    expect(screen.getByRole('link',{name:/Artist A: Drop-in Trò chuyện đầu tuần/})).toHaveAttribute('href','/sessions/session-dropin-01');
+    expect(screen.getByRole('link',{name:/Đang phát:/})).toHaveAttribute('href',expect.stringMatching(/^\/sessions\//));
+    expect(screen.queryByText('Sắp diễn ra')).not.toBeInTheDocument();
     expect(screen.queryByText(/Mở presale/)).not.toBeInTheDocument();
+  });
+  it('never borrows Linh’s identity or a random artist for a guest',()=>{
+    const guest=freshGuestState(initial());guest.followedWorldIds=[];guest.fanProfile.worldJourney=undefined;
+    render(<AppProvider initialState={guest}><MemoryRouter><WorldPlazaView/></MemoryRouter></AppProvider>);
+    expect(screen.queryByText('Linh')).not.toBeInTheDocument();
+    expect(screen.getByRole('link',{name:'Đăng nhập để tạo góc riêng'})).toHaveTextContent('Khách');
+    expect(screen.getAllByRole('link',{name:'Artist World'}).every(link=>link.getAttribute('href')==='/explore')).toBe(true);
+  });
+  it('publishes no more than one active and one upcoming session with approved rights',()=>{
+    const plaza=selectPlazaState(initial());
+    expect(plaza.primary?.id).toBe('session-dropin-01');
+    expect(plaza.primary?.statusLabel).toBe('Đang phát');
+    expect(plaza.next?.id).toBe('session-a-album-drop');
+    expect([plaza.primary,plaza.next].filter(Boolean)).toHaveLength(2);
   });
   it.each([['/worlds/artist-a','moments'],['/worlds/artist-a/moments','moments'],['/worlds/artist-a/archive','archive'],['/me','myspace']])('%s renders its own room artwork', (path,image)=>{
     saveState(initial()); // This is the signed-in room journey, not anonymous browsing.
