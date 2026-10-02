@@ -84,7 +84,8 @@ describe('Artist tabs and bulletin refinement',()=>{
     expect(container.querySelector('.artist-chapter[open]')).not.toBeNull();
     fireEvent.click(screen.getByRole('button',{name:'Thời kỳ'}));
     expect(screen.queryByRole('heading',{name:'Concert Hà Nội 2026'})).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button',{name:'Xem tất cả'}));
-    expect(container.querySelectorAll('.artist-archive-recent a').length).toBeGreaterThan(3);
+    fireEvent.click(screen.getByRole('button',{name:'Tất cả'}));
+    expect(screen.getByRole('heading',{name:'Về Artist A'})).toBeInTheDocument();
+    expect(container.querySelector('.artist-archive-recent')).toBeNull();
   });
 });

@@ -1,504 +1,94 @@
-import { ownedDigitalLook } from '../world/merchCatalog';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Compass, ShoppingBag, ShoppingCart, UserRound, Menu, X, Music2, HelpCircle, LayoutDashboard, FlaskConical, Shield, Ticket, Heart, ChevronRight, BellRing, Sun, Moon } from 'lucide-react';
-import { StatusNotice } from './StatusNotice';
-import { ResetDrawer } from './ResetDrawer';
-import { WorldGuidePanel } from './WorldGuidePanel';
-import { ErrorBoundary } from './ErrorBoundary';
-import { AvatarRenderer } from './AvatarRenderer';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ChevronRight, Heart, HelpCircle, LogOut, Settings, ShoppingBag, Ticket } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { getTenantConfig } from '../domain/tenantConfig';
-import { VieWorldLogo } from './VieWorldLogo';
-import { NotificationBell } from './notifications/NotificationBell';
-import { NotificationOverlay } from './notifications/NotificationOverlay';
-import { NotificationPreferencesModal } from './notifications/NotificationPreferencesModal';
-import { mapDomainToDisplay } from './notifications/notificationHelper';
-import { DisplayNotification } from './notifications/notification.types';
-import { ArtistNavAvatar, GlobalNavigation } from './GlobalNavigation';
+import { isDemoSignedIn } from '../world/account';
+import { ownedDigitalLook } from '../world/merchCatalog';
+import { membershipWorldsForFan, purchaseGroupsForFan } from '../world/personalSelectors';
 import { artistIdFromPath, setCurrentArtistId } from '../world/currentArtist';
 import { preferredPlazaArtist } from '../world/plazaState';
-import { useAppearance } from '../hooks/useAppearance';
-import { SearchCombobox } from './SearchCombobox';
-import { globalSearchSuggestions } from '../world/searchDiscovery';
 import { validHomeDestination } from '../world/homeDestination';
-import { isDemoSignedIn } from '../world/account';
-import { AuthOverlay } from './account/AuthOverlay';
-import { AccountInfoDialog } from './account/AccountInfoDialog';
-import { PrivacyDialog } from './account/PrivacyDialog';
-import { SupportDialog } from './account/SupportDialog';
+import { useAppearance } from '../hooks/useAppearance';
+import { AvatarRenderer } from './AvatarRenderer';
+import { GlobalNavigation } from './GlobalNavigation';
+import { VieWorldIcon } from './VieWorldIcon';
+import { StatusNotice } from './StatusNotice';
 import { ApplicationHealth } from './ApplicationHealth';
+import { ErrorBoundary } from './ErrorBoundary';
+import { AuthOverlay } from './account/AuthOverlay';
+import { NotificationOverlay } from './notifications/NotificationOverlay';
+import { mapDomainToDisplay } from './notifications/notificationHelper';
 
-export const FanShell = () => {
-  const { state, dispatch, storageNotice, dismissNotice, resetActiveTenant } = useApp();
-  const tenantConfig = getTenantConfig(state.activeTenantId);
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [accountMenu, setAccountMenu] = useState(false);
-  const [utility, setUtility] = useState<'auth' | 'account' | 'privacy' | 'support' | null>(null);
-  const signedIn = isDemoSignedIn(state);
-  const [guide, setGuide] = useState(false);
-  const [review, setReview] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifPrefsOpen, setNotifPrefsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const mobileMenuRef = useRef<HTMLElement>(null);
-  const mobileMenuBtnRef = useRef<HTMLButtonElement>(null);
-  const accountRef = useRef<HTMLElement>(null);
-  const accountBtnRef = useRef<HTMLButtonElement>(null);
-  const bellBtnRef = useRef<HTMLButtonElement>(null);
-  function openUtility(value: NonNullable<typeof utility>) {
-    accountBtnRef.current?.focus();
-    setAccountMenu(false); setMobileMenu(false); setUtility(value);
-  }
-
-  const { appearance, toggleAppearance } = useAppearance();
-
-  const navigate = useNavigate();
-  const searchSuggestions = useMemo(() => globalSearchSuggestions(state), [state.worlds, state.sessions, state.products, state.activeTenantId]);
-  const cartCount = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
-
-  const { pathname, search } = useLocation();
-  useEffect(() => {
-    const artistId = artistIdFromPath(pathname);
-    const artist = artistId && state.worlds[artistId];
-    const label = artist ? `${artist.name} · ${pathname.endsWith('/hall') ? 'Hall' : pathname.endsWith('/archive') ? 'Kho lưu trữ' : pathname.includes('/moment/') ? 'Khoảnh khắc' : 'Artist World'}`
-      : pathname === '/' || pathname === '/worlds' ? 'Home' : pathname.startsWith('/shop') ? 'VieSHOP' : pathname.startsWith('/me') ? 'My Space' : pathname.startsWith('/explore') ? 'Explore' : pathname.startsWith('/cart') || pathname.startsWith('/checkout') ? 'Giỏ hàng demo' : 'Bản trải nghiệm';
-    document.title = `${label} — VieWorld`;
-  }, [pathname, state.worlds, signedIn]);
-  useEffect(() => {
-    const openAuth = () => { setAccountMenu(false); setMobileMenu(false); setUtility('auth'); };
-    window.addEventListener('vieworld-open-auth', openAuth);
-    return () => window.removeEventListener('vieworld-open-auth', openAuth);
-  }, []);
-  const personalNotifications = signedIn ? Object.values(state.notifications || {}).filter(n => n.tenantId === state.activeTenantId && n.fanId === state.fanProfile.id) : [];
-  const unread = personalNotifications.filter(n => !n.isRead).length;
-
-  const notificationsList: DisplayNotification[] = personalNotifications
-    .sort((a, b) => new Date(b.createdAt || b.updatedAt).getTime() - new Date(a.createdAt || a.updatedAt).getTime())
-    .map(mapDomainToDisplay);
-
-  const handleSelectNotification = (item: DisplayNotification) => {
-    if (!item.read) {
-      dispatch({ type: 'MARK_NOTIFICATION_READ', notificationId: item.id });
-    }
-    setNotifOpen(false);
-    if (item.targetRoute) {
-      navigate(item.targetRoute);
-    }
-  };
-
-  const handleMarkAllNotificationsRead = () => {
-    dispatch({ type: 'MARK_ALL_NOTIFICATIONS_READ' });
-  };
-
-  useEffect(() => {
-    const to = pathname + search;
-    if (signedIn && validHomeDestination(state, to)) dispatch({ type: 'REMEMBER_FAN_DESTINATION', to });
-  }, [pathname, search, state.activeTenantId, signedIn, dispatch]);
-  useEffect(() => {
-    setMobileMenu(false);
-    setAccountMenu(false);
-    window.scrollTo?.(0, 0);
-  }, [pathname]);
-  useEffect(() => {
-    if (pathname === '/explore' || pathname === '/artists') setSearchQuery(new URLSearchParams(search).get('q') || '');
-  }, [pathname, search]);
-
-  useEffect(() => {
-    if (!accountMenu) return;
-    const timer = window.setTimeout(() => accountRef.current?.querySelector<HTMLElement>('a,button')?.focus(), 0);
-    return () => window.clearTimeout(timer);
-  }, [accountMenu]);
-
-  useEffect(() => {
-    const handleOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        mobileMenu &&
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(target) &&
-        mobileMenuBtnRef.current &&
-        !mobileMenuBtnRef.current.contains(target)
-      ) {
-        setMobileMenu(false);
-      }
-      if (
-        accountMenu &&
-        accountRef.current &&
-        !accountRef.current.contains(target) &&
-        accountBtnRef.current &&
-        !accountBtnRef.current.contains(target)
-      ) {
-        setAccountMenu(false);
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (accountMenu) accountBtnRef.current?.focus();
-        setMobileMenu(false);
-        setAccountMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [mobileMenu, accountMenu]);
-
-  const routeArtistId = artistIdFromPath(pathname);
-  const currentArtistId = routeArtistId && state.worlds[routeArtistId]?.type === 'artist' ? routeArtistId : preferredPlazaArtist(state)?.id;
-  const artistContext = currentArtistId ? state.worlds[currentArtistId] : undefined;
-  const inArtistWorld = Boolean(routeArtistId && state.worlds[routeArtistId]?.type === 'artist');
-  useEffect(() => {
-    if (inArtistWorld && currentArtistId) setCurrentArtistId(state, currentArtistId);
-  }, [inArtistWorld, currentArtistId, state.activeTenantId]);
-  const navArtist = artistContext?.type === 'artist' ? { id: artistContext.id, name: artistContext.name } : undefined;
-
-  const utilityControls = (
-    <div className="fw-header-tools">
-          {/* Permanent Cart Access */}
-          <NavLink
-            to="/cart"
-            className="fw-icon fw-cart-btn"
-            aria-label={`Giỏ hàng${cartCount > 0 ? `, ${cartCount} món` : ''}`}
-          >
-            <ShoppingCart size={19} />
-            <span className="fw-nav-label">Giỏ hàng</span>
-            {cartCount > 0 && <i>{cartCount}</i>}
-          </NavLink>
-
-          <NotificationBell
-            ref={bellBtnRef}
-            unreadCount={unread}
-            isOpen={notifOpen}
-            onClick={() => setNotifOpen(!notifOpen)}
-          />
-
-          {/* Desktop & Mobile Avatar Menu Button */}
-          <button
-            ref={accountBtnRef}
-            type="button"
-            className={`fw-profile-btn ${accountMenu ? 'active' : ''}`}
-            aria-label={signedIn ? `Tài khoản của ${state.fanProfile.displayName}` : 'Đăng nhập hoặc đăng ký VieWorld'}
-            aria-controls="fan-account-menu"
-            aria-expanded={accountMenu}
-            onClick={() => {
-              if (signedIn) setAccountMenu(!accountMenu);
-              else openUtility('auth');
-              setMobileMenu(false);
-            }}
-          >
-            {signedIn ? <AvatarRenderer
-              role="fan"
-              digitalLook={ownedDigitalLook(state)}
-              size="sm"
-              accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
-              appearance={state.fanProfile.avatarPreset}
-              displayName={state.fanProfile.displayName}
-            /> : <UserRound size={24} aria-hidden="true"/>}
-            <span className="fw-nav-label">{signedIn ? 'Tài khoản' : 'Đăng nhập'}</span>
-          </button>
-
-          {/* Mobile-only Hamburger Menu Button */}
-          <button
-            ref={mobileMenuBtnRef}
-            type="button"
-            className="fw-icon fw-mobile-menu-btn"
-            aria-label={mobileMenu ? 'Đóng menu' : 'Mở menu'}
-            aria-expanded={mobileMenu}
-            onClick={() => {
-              setMobileMenu(!mobileMenu);
-              setAccountMenu(false);
-            }}
-          >
-            {mobileMenu ? <X size={19} /> : <Menu size={19} />}
-          </button>
-        </div>
-  );
-
-  return (
-    <div
-      className="fan-shell"
-      data-testid="app-container"
-      data-tenant={state.activeTenantId}
-      data-artist-world={inArtistWorld ? 'true' : undefined}
-      data-theme={appearance}
-    >
-      <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">Chuyển đến nội dung chính</a>
-      <header className="fw-header">
-        <NavLink to="/" className="fw-brand" aria-label={`${tenantConfig.labels.brandName} — về thế giới`}>
-          <VieWorldLogo size={32} className="fw-brand-logo" />
-          <div className="fw-brand-info">
-            <span className="fw-brand-title">{tenantConfig.labels.brandName}</span>
-            <small>{state.activeTenantId === 'vieworld-demo' ? 'một thế giới, cùng nhau' : tenantConfig.tagline}</small>
-          </div>
-        </NavLink>
-
-        <SearchCombobox className="fw-global-search" value={searchQuery} onChange={setSearchQuery}
-          suggestions={searchSuggestions} label="Tìm nghệ sĩ, sự kiện và kỷ niệm" placeholder="Tìm nghệ sĩ, sự kiện, kỷ niệm…"
-          onSelect={item => { setSearchQuery(''); if (item.target) navigate(item.target); }}
-          onSubmit={query => navigate(query ? `/explore?q=${encodeURIComponent(query)}` : '/explore')} />
-        <span className="fw-header-phrase" aria-hidden="true">For the moments that stay</span>
-
-        {/* Account Menu Popover */}
-        {accountMenu && (
-          <nav
-            ref={accountRef}
-            id="fan-account-menu"
-            className="fw-menu fw-account-menu-popover"
-            aria-label="Tài khoản và tiện ích"
-            onKeyDown={e => {
-              if (e.key === 'Escape') {
-                setAccountMenu(false);
-                accountBtnRef.current?.focus();
-              }
-            }}
-          >
-            <NavLink
-              to="/me"
-              className="fw-menu-profile-card fw-menu-profile-link"
-              aria-label={`Mở My Space của ${state.fanProfile.displayName}`}
-              onClick={() => setAccountMenu(false)}
-            >
-              <div className="fw-menu-avatar-wrap">
-                <AvatarRenderer
-                  role="fan"
-                  digitalLook={ownedDigitalLook(state)}
-                  size="sm"
-                  accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
-                  appearance={state.fanProfile.avatarPreset}
-                  displayName={state.fanProfile.displayName}
-                />
-              </div>
-              <div className="fw-menu-profile-meta">
-                <strong className="fw-menu-profile-name">{state.fanProfile.displayName}</strong>
-                <span className="fw-menu-profile-sub">Góc riêng của bạn · My Space</span>
-              </div>
-              <ChevronRight className="fw-menu-profile-arrow" size={18} aria-hidden="true" />
-            </NavLink>
-
-            <div className="fw-menu-group">
-              <span className="fw-menu-group-title">Dành cho fan</span>
-              <NavLink to="/explore?scope=following" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Heart size={16} />
-                </span>
-                <span className="fw-menu-item-label">Đang theo dõi</span>
-                <span className="fw-menu-count-badge fw-menu-count-neutral">{state.followedWorldIds.length}</span>
-              </NavLink>
-              <NavLink to="/me?panel=pass" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Ticket size={16} />
-                </span>
-                <span className="fw-menu-item-label">Fandom Pass</span>
-              </NavLink>
-              <NavLink to="/me?panel=bag" className="fw-menu-item" onClick={() => setAccountMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <ShoppingBag size={16} />
-                </span>
-                <span className="fw-menu-item-label">Túi đồ &amp; đơn hàng</span>
-              </NavLink>
-            </div>
-
-            <div className="fw-menu-divider" />
-
-            <div className="fw-menu-group">
-              <span className="fw-menu-group-title">Tài khoản &amp; hỗ trợ</span>
-              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('account')}>
-                <span className="fw-menu-item-icon"><UserRound size={16}/></span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Thông tin tài khoản<small>Liên hệ, địa chỉ nhận hàng</small></span>
-              </button>
-              <button type="button" className="fw-menu-item fw-menu-btn" onClick={toggleAppearance}
-                aria-label={appearance === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
-                <span className="fw-menu-item-icon">{appearance === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Giao diện<small>{appearance === 'dark' ? 'Đang tối. Bật giao diện sáng' : 'Đang sáng. Bật giao diện tối'}</small></span>
-              </button>
-              <button
-                type="button"
-                className="fw-menu-item fw-menu-btn"
-                onClick={() => {
-                  setNotifPrefsOpen(true);
-                  setAccountMenu(false);
-                }}
-              >
-                <span className="fw-menu-item-icon">
-                  <BellRing size={16} />
-                </span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Cài đặt thông báo<small>Cuộc hẹn, kỷ niệm và đơn hàng</small></span>
-              </button>
-              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('privacy')}>
-                <span className="fw-menu-item-icon">
-                  <Shield size={16} />
-                </span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Quyền riêng tư<small>Chọn ai được ghé phòng</small></span>
-              </button>
-              <button
-                type="button"
-                className="fw-menu-item fw-menu-btn"
-                onClick={() => {
-                  setGuide(true);
-                  setAccountMenu(false);
-                  accountBtnRef.current?.focus();
-                }}
-              >
-                <span className="fw-menu-item-icon">
-                  <HelpCircle size={16} />
-                </span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Hướng dẫn VieWorld<small>Hall, My Space và quyền lợi</small></span>
-              </button>
-              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => openUtility('support')}>
-                <span className="fw-menu-item-icon"><HelpCircle size={16} /></span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Yêu cầu hỗ trợ<small>Kiểm tra đơn hàng hoặc quyền lợi</small></span>
-              </button>
-              <button type="button" className="fw-menu-item fw-menu-btn" onClick={() => {
-                dispatch({ type: 'DEMO_SIGN_OUT' }); setAccountMenu(false); accountBtnRef.current?.focus();
-              }}>
-                <span className="fw-menu-item-icon"><UserRound size={16}/></span>
-                <span className="fw-menu-item-label fw-menu-item-copy">Đăng xuất<small>Dữ liệu vẫn ở trên thiết bị này</small></span>
-              </button>
-            </div>
-
-            <div className="fw-menu-divider" />
-
-            <details className="fw-menu-demo-tools">
-              <summary>Công cụ bản thử nghiệm</summary>
-              <div className="fw-menu-utility-row" aria-label="Công cụ bản thử nghiệm">
-              <NavLink to="/studio" onClick={() => setAccountMenu(false)}>
-                <LayoutDashboard size={14} />
-                <span>Studio</span>
-              </NavLink>
-              <button
-                type="button"
-                onClick={() => {
-                  setReview(true);
-                  setAccountMenu(false);
-                }}
-              >
-                <FlaskConical size={14} />
-                <span>Kịch bản demo</span>
-              </button>
-              </div>
-            </details>
-          </nav>
-        )}
-
-        {/* Mobile-only Global Navigation Popover */}
-        {mobileMenu && (
-          <nav
-            ref={mobileMenuRef}
-            className="fw-menu fw-mobile-nav-popover"
-            aria-label="Điều hướng di động"
-            onKeyDown={e => {
-              if (e.key === 'Escape') setMobileMenu(false);
-            }}
-          >
-            <div className="fw-menu-group">
-              <span className="fw-menu-group-title">Điều hướng</span>
-              <NavLink to="/" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Compass size={16} />
-                </span>
-                <span className="fw-menu-item-label">Home</span>
-              </NavLink>
-              <NavLink to="/explore" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <Music2 size={16} />
-                </span>
-                <span className="fw-menu-item-label">Explore</span>
-              </NavLink>
-              {artistContext && <NavLink to={`/artist/${artistContext.id}`} className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon"><ArtistNavAvatar artist={{ id: artistContext.id, name: artistContext.name }} /></span>
-                <span className="fw-menu-item-label">{artistContext.name}</span>
-              </NavLink>}
-              <NavLink to="/me" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon"><UserRound size={16} /></span>
-                <span className="fw-menu-item-label">My Space</span>
-              </NavLink>
-              <NavLink to="/shop" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <ShoppingBag size={16} />
-                </span>
-                <span className="fw-menu-item-label">VieSHOP</span>
-              </NavLink>
-              <NavLink to="/cart" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <ShoppingCart size={16} />
-                </span>
-                <span className="fw-menu-item-label">Giỏ hàng ({cartCount})</span>
-              </NavLink>
-            </div>
-
-            <div className="fw-menu-divider" />
-
-            <div className="fw-menu-group">
-              <span className="fw-menu-group-title">Hệ thống & Hỗ trợ</span>
-              <NavLink to="/studio" className="fw-menu-item" onClick={() => setMobileMenu(false)}>
-                <span className="fw-menu-item-icon">
-                  <LayoutDashboard size={16} />
-                </span>
-                <span className="fw-menu-item-label">Studio người tổ chức</span>
-              </NavLink>
-              <button
-                type="button"
-                className="fw-menu-item fw-menu-btn"
-                onClick={() => {
-                  setGuide(true);
-                  setMobileMenu(false);
-                }}
-              >
-                <span className="fw-menu-item-icon">
-                  <HelpCircle size={16} />
-                </span>
-                <span className="fw-menu-item-label">Trợ giúp</span>
-              </button>
-              <button
-                type="button"
-                className="fw-menu-item fw-menu-btn"
-                onClick={() => {
-                  setReview(true);
-                  setMobileMenu(false);
-                }}
-              >
-                <span className="fw-menu-item-icon">
-                  <FlaskConical size={16} />
-                </span>
-                <span className="fw-menu-item-label">Kịch bản thử nghiệm</span>
-              </button>
-            </div>
-          </nav>
-        )}
-      </header>
-      <div className="fw-site-frame">
-        <GlobalNavigation pathname={pathname} artist={navArtist} shopLabel={tenantConfig.labels.shopTitle || 'VieSHOP'} utilities={utilityControls} />
-        <main id="main-content" className="fw-main">
-          {storageNotice && <StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice} />}
-          <ApplicationHealth />
-          {state.lastError && <StatusNotice message={state.lastError.message} type="error" onDismiss={() => dispatch({ type: 'CLEAR_ERROR' })} />}
-          <ErrorBoundary resetKey={pathname + search} onResetDemoData={resetActiveTenant} onReset={resetActiveTenant}><Suspense fallback={<p className="vx-loading" role="status">Đang mở một góc của thế giới…</p>}><Outlet /></Suspense></ErrorBoundary>
-        </main>
-      </div>
-      <ResetDrawer isOpen={review} onClose={() => setReview(false)} allowTenantSwitch={false} />
-      <WorldGuidePanel isOpen={guide} onClose={() => setGuide(false)} />
-      {utility === 'auth' && <AuthOverlay onClose={() => setUtility(null)} appearance={appearance} onToggleAppearance={toggleAppearance}/>}
-      {utility === 'account' && <AccountInfoDialog onClose={() => setUtility(null)}/>}
-      {utility === 'privacy' && <PrivacyDialog onClose={() => setUtility(null)}/>}
-      {utility === 'support' && <SupportDialog onClose={() => setUtility(null)} onGuide={() => { setUtility(null); setGuide(true); }}/>}
-      <NotificationOverlay
-        isOpen={notifOpen}
-        onClose={() => setNotifOpen(false)}
-        notifications={notificationsList}
-        onSelectNotification={handleSelectNotification}
-        onMarkAllAsRead={handleMarkAllNotificationsRead}
-        returnFocusRef={bellBtnRef}
-      />
-      <NotificationPreferencesModal
-        isOpen={notifPrefsOpen}
-        onClose={() => setNotifPrefsOpen(false)}
-        returnFocusRef={accountBtnRef}
-      />
-    </div>
-  );
-};
+export function FanShell() {
+  const {state,dispatch,storageNotice,dismissNotice,resetActiveTenant}=useApp();
+  const signedIn=isDemoSignedIn(state);
+  const {appearance,toggleAppearance}=useAppearance();
+  const {pathname,search}=useLocation();
+  const navigate=useNavigate();
+  const [accountOpen,setAccountOpen]=useState(false);
+  const [authOpen,setAuthOpen]=useState(false);
+  const [inboxOpen,setInboxOpen]=useState(false);
+  const accountRef=useRef<HTMLElement>(null);
+  const triggerRef=useRef<HTMLButtonElement|null>(null);
+  const bellRef=useRef<HTMLButtonElement>(null);
+  const inboxReturnRef=useRef<HTMLElement|null>(null);
+  const notifications=signedIn?Object.values(state.notifications).filter(n=>n.tenantId===state.activeTenantId&&n.fanId===state.fanProfile.id):[];
+  const unread=notifications.filter(n=>!n.isRead).length;
+  const routeArtist=artistIdFromPath(pathname);
+  const artist=routeArtist&&state.worlds[routeArtist]?.type==='artist'?state.worlds[routeArtist]:preferredPlazaArtist(state);
+  const memberships=membershipWorldsForFan(state).filter(m=>m.active).length;
+  const orders=purchaseGroupsForFan(state).filter(g=>g.open).length;
+  const followCount=state.followedWorldIds.filter(id=>state.worlds[id]?.tenantId===state.activeTenantId).length;
+  const avatar=<AvatarRenderer role="fan" size="sm" appearance={state.fanProfile.avatarPreset} digitalLook={ownedDigitalLook(state)} displayName={state.fanProfile.displayName}/>;
+  function accountClick(button:HTMLButtonElement){triggerRef.current=button;if(signedIn)setAccountOpen(v=>!v);else setAuthOpen(true);}
+  function inbox(){inboxReturnRef.current=accountOpen?triggerRef.current:bellRef.current;setAccountOpen(false);if(signedIn)setInboxOpen(true);else setAuthOpen(true);}
+  useEffect(()=>{
+    const open=()=>{setAccountOpen(false);setAuthOpen(true);};
+    window.addEventListener('vieworld-open-auth',open);
+    return()=>window.removeEventListener('vieworld-open-auth',open);
+  },[]);
+  useEffect(()=>{setAccountOpen(false);window.scrollTo?.(0,0);},[pathname]);
+  useEffect(()=>{
+    const pageTitles:Record<string,string>={'/':'Home','/explore':'Explore','/shop':'VieSHOP','/me':'My Space','/memberships':'Hội viên & quyền lợi','/orders':'Đơn hàng','/account/settings':'Cài đặt & riêng tư','/account/help':'Trợ giúp'};
+    const title=artist&&routeArtist?artist.name:pageTitles[pathname];
+    document.title=title?`${title} · VieWorld`:'VieWorld';
+    if(routeArtist&&artist)setCurrentArtistId(state,artist.id);
+    if(signedIn&&validHomeDestination(state,pathname+search))dispatch({type:'REMEMBER_FAN_DESTINATION',to:pathname+search});
+  },[pathname,search,signedIn,state.activeTenantId]);
+  useEffect(()=>{
+    if(!accountOpen)return;
+    const timer=window.setTimeout(()=>accountRef.current?.querySelector<HTMLElement>('a,button')?.focus(),0);
+    const outside=(e:PointerEvent)=>{if(!accountRef.current?.contains(e.target as Node)&&!triggerRef.current?.contains(e.target as Node))setAccountOpen(false);};
+    const key=(e:KeyboardEvent)=>{if(e.key==='Escape'){setAccountOpen(false);triggerRef.current?.focus();}};
+    document.addEventListener('pointerdown',outside);document.addEventListener('keydown',key);
+    return()=>{clearTimeout(timer);document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',key);};
+  },[accountOpen]);
+  const utilities=<div className="fw-header-tools">
+    <button ref={bellRef} className="fw-icon" onClick={inbox} aria-label={`Thông báo, ${unread} chưa đọc`}><VieWorldIcon name="bell"/><span className="fw-nav-label">Thông báo</span>{unread>0&&<i>{unread>99?'99+':unread}</i>}</button>
+    <button className="fw-profile-btn" onClick={e=>accountClick(e.currentTarget)} aria-expanded={accountOpen} aria-controls="fan-account-menu" aria-label={signedIn?'Tài khoản':'Đăng nhập'}>{signedIn?avatar:<VieWorldIcon name="account"/>}<span className="fw-nav-label">{signedIn?'Tài khoản':'Đăng nhập'}</span></button>
+  </div>;
+  return <div className="fan-shell presence-shell" data-testid="app-container" data-theme={appearance} data-tenant={state.activeTenantId}>
+    <a href="#main-content" className="skip-link">Chuyển đến nội dung chính</a>
+    <GlobalNavigation pathname={pathname} artist={artist?{id:artist.id,name:artist.name}:undefined} utilities={utilities}
+      accountControl={<button className={accountOpen?'active':''} onClick={e=>accountClick(e.currentTarget)} aria-expanded={accountOpen} aria-controls="fan-account-menu" aria-label={`Tài khoản${unread?', '+unread+' thông báo chưa đọc':''}`}>{signedIn?avatar:<VieWorldIcon name="account" size={24}/>} {unread>0&&<i aria-hidden="true">{unread>99?'99+':unread}</i>}</button>}/>
+    {accountOpen&&<nav id="fan-account-menu" ref={accountRef} className="presence-account" aria-label="Tài khoản">
+      <Link to="/me" className="presence-account-profile" onClick={()=>setAccountOpen(false)}>{avatar}<span><strong>{state.fanProfile.displayName}</strong><small>Vào My Space</small></span><ChevronRight size={18}/></Link>
+      <button className="presence-mobile-only" onClick={inbox}><VieWorldIcon name="bell" size={20}/>Thông báo<span className="presence-count">{unread||''}</span></button>
+      <Link to="/explore?scope=following" onClick={()=>setAccountOpen(false)}><Heart size={19}/>Đang theo dõi<span className="presence-count">{followCount||''}</span></Link>
+      <Link to="/memberships"><Ticket size={19}/>Hội viên & quyền lợi<span className="presence-count">{memberships||''}</span></Link>
+      <Link to="/orders"><ShoppingBag size={19}/>Đơn hàng<span className="presence-count">{orders||''}</span></Link>
+      <hr/><Link to="/account/settings"><Settings size={19}/>Cài đặt & riêng tư</Link><Link to="/account/help"><HelpCircle size={19}/>Trợ giúp</Link><hr/>
+      <button onClick={()=>{dispatch({type:'DEMO_SIGN_OUT'});setAccountOpen(false);triggerRef.current?.focus();}}><LogOut size={19}/>Đăng xuất</button>
+      {import.meta.env.DEV&&<details><summary>Công cụ demo</summary><Link to="/studio">Studio</Link></details>}
+    </nav>}
+    <main id="main-content" className="fw-main">
+      {storageNotice&&<StatusNotice message={storageNotice} type="info" onDismiss={dismissNotice}/>}<ApplicationHealth/>
+      {state.lastError&&<StatusNotice message={state.lastError.message} type="error" onDismiss={()=>dispatch({type:'CLEAR_ERROR'})}/>}
+      <ErrorBoundary resetKey={pathname+search} onReset={resetActiveTenant} onResetDemoData={resetActiveTenant}><Suspense fallback={<p role="status">Đang mở…</p>}><Outlet/></Suspense></ErrorBoundary>
+    </main>
+    {authOpen&&<AuthOverlay onClose={()=>setAuthOpen(false)} appearance={appearance} onToggleAppearance={toggleAppearance}/>}
+    <NotificationOverlay isOpen={inboxOpen} onClose={()=>setInboxOpen(false)} notifications={notifications.sort((a,b)=>(b.createdAt||b.updatedAt).localeCompare(a.createdAt||a.updatedAt)).map(mapDomainToDisplay)}
+      onSelectNotification={item=>{dispatch({type:'MARK_NOTIFICATION_READ',notificationId:item.id});setInboxOpen(false);if(item.targetRoute)navigate(item.targetRoute);}}
+      onMarkAllAsRead={()=>dispatch({type:'MARK_ALL_NOTIFICATIONS_READ'})} returnFocusRef={inboxReturnRef}/>
+  </div>;
+}

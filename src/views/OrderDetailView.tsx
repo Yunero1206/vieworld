@@ -73,11 +73,11 @@ export const OrderDetailView: React.FC = () => {
   }
 
   return (
-    <div className="container" style={{ padding: '24px 20px 60px 20px' }}>
+    <div className="presence-utility presence-order-detail">
       {/* Breadcrumb Navigation */}
-      <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <Link
-          to="/me?panel=bag"
+          to="/orders"
           className="btn btn-secondary"
           style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
           id="order-back-to-myworld-btn"
@@ -100,7 +100,7 @@ export const OrderDetailView: React.FC = () => {
         {/* Header */}
         <header>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontWeight: '700' }}>
+            <span className="tag" style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--primary)', fontWeight: '700' }}>
               CHI TIẾT ĐƠN HÀNG {tenantConfig.labels.shopTitle.toUpperCase()}
             </span>
             <span className="demo-badge">DEMO</span>
@@ -122,11 +122,12 @@ export const OrderDetailView: React.FC = () => {
           data-testid="order-receipt-summary"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
               <div
                 style={{
                   width: '48px',
                   height: '48px',
+                  flexShrink: 0,
                   borderRadius: 'var(--radius-md)',
                   backgroundColor: 'var(--bg)',
                   display: 'flex',
@@ -137,7 +138,7 @@ export const OrderDetailView: React.FC = () => {
               >
                 <Receipt size={24} />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: '0 0 4px 0' }}>
                   {productTitle}
                 </h3>
@@ -148,7 +149,7 @@ export const OrderDetailView: React.FC = () => {
                   {deliveryType === 'digital' ? 'Dùng trong VieWorld, không giao ngoài đời.' : deliveryType === 'bundle' ? 'Gồm món đồ ngoài đời và vật phẩm trong VieWorld.' : 'Chỉ có món đồ ngoài đời, không kèm bản số.'}
                 </p>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                  Không gian: <strong>{world ? world.name : order.worldId}</strong> · Mã định danh yêu cầu: <code>{order.requestId}</code>
+                  Không gian: <strong>{world ? world.name : 'VieWorld'}</strong>
                 </div>
               </div>
             </div>
@@ -160,37 +161,22 @@ export const OrderDetailView: React.FC = () => {
                 <span
                   className="tag"
                   style={{
-                    backgroundColor: '#FEF3C7',
-                    color: '#B45309',
+                    backgroundColor: 'var(--appearance-soft)',
+                    color: 'var(--appearance-accent)',
                     fontWeight: '700',
                     padding: '6px 12px',
                     borderRadius: 'var(--radius-md)',
                   }}
                   data-testid="order-status-badge"
                 >
-                  Chờ thanh toán (Pending)
+                  Chờ thanh toán
                 </span>
               )}
               {order.status === 'paid' && (
                 <span
                   className="tag"
                   style={{
-                    backgroundColor: '#DCFCE7',
-                    color: '#15803D',
-                    fontWeight: '700',
-                    padding: '6px 12px',
-                    borderRadius: 'var(--radius-md)',
-                  }}
-                  data-testid="order-status-badge"
-                >
-                  Đã thanh toán (Paid)
-                </span>
-              )}
-              {order.status === 'fulfilled' && (
-                <span
-                  className="tag"
-                  style={{
-                    backgroundColor: '#EDE9FE',
+                    backgroundColor: 'var(--appearance-soft)',
                     color: 'var(--primary)',
                     fontWeight: '700',
                     padding: '6px 12px',
@@ -198,7 +184,22 @@ export const OrderDetailView: React.FC = () => {
                   }}
                   data-testid="order-status-badge"
                 >
-                  Đã bàn giao (Fulfilled)
+                  Đã thanh toán
+                </span>
+              )}
+              {order.status === 'fulfilled' && (
+                <span
+                  className="tag"
+                  style={{
+                    backgroundColor: 'var(--appearance-soft)',
+                    color: 'var(--primary)',
+                    fontWeight: '700',
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                  data-testid="order-status-badge"
+                >
+                  Đã bàn giao
                 </span>
               )}
             </div>
@@ -207,7 +208,7 @@ export const OrderDetailView: React.FC = () => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
               gap: '16px',
               padding: '16px',
               backgroundColor: 'var(--bg)',
@@ -222,8 +223,8 @@ export const OrderDetailView: React.FC = () => {
             </div>
 
             <div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'block' }}>Số lượng: {order.quantity || 1} · Nguồn đặt hàng</span>
-              <code style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)' }}>{order.sourceRef}</code>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'block' }}>Số lượng</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)' }}>{order.quantity || 1} món</span>
             </div>
 
             <div>
@@ -233,6 +234,12 @@ export const OrderDetailView: React.FC = () => {
               </span>
             </div>
           </div>
+
+          <details className="presence-diagnostics">
+            <summary>Thông tin đối chiếu demo</summary>
+            <p>Mã yêu cầu: <code>{order.requestId}</code></p>
+            <p>Nguồn đặt hàng: <code>{order.sourceRef}</code></p>
+          </details>
 
           {/* Interactive Simulation Action */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
@@ -282,11 +289,11 @@ export const OrderDetailView: React.FC = () => {
 
             {order.status === 'fulfilled' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: 'var(--text-xs)', color: '#15803D', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--primary)', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   <CheckCircle2 size={16} />
                   <span>Đã ghi nhận quyền sở hữu</span>
                 </span>
-                <Link to={digitalSlot ? '/me?panel=wardrobe' : '/me?panel=bag'} className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)', padding: '8px 14px' }}>
+                <Link to={digitalSlot ? `/me?section=avatar&tab=${digitalSlot === 'shirt' ? 'outfit' : 'accessories'}` : '/me?section=collection'} className="btn btn-secondary" style={{ fontSize: 'var(--text-xs)', padding: '8px 14px' }}>
                   {digitalSlot ? 'Mở tủ đồ' : 'Xem đồ đã nhận'}
                 </Link>
               </div>
@@ -340,12 +347,12 @@ export const OrderDetailView: React.FC = () => {
                       <strong style={{ fontSize: 'var(--text-sm)' }}>
                         Đang có hồ sơ hỗ trợ cho đơn hàng này
                       </strong>
-                      <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontSize: '11px', fontWeight: '700' }}>
-                        {activeCase.status.toUpperCase()}
+                      <span className="tag" style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--primary)', fontSize: '11px', fontWeight: '700' }}>
+                        {{ open: 'Đã lưu yêu cầu', acknowledged: 'Đã ghi nhận', investigating: 'Đang kiểm tra', resolved: 'Đã có kết quả' }[activeCase.status as 'open' | 'acknowledged' | 'investigating' | 'resolved']}
                       </span>
                     </div>
                     <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                      Mã hồ sơ: <code>{activeCase.id}</code> · {activeCase.nextAction}
+                      Yêu cầu được lưu trên thiết bị, chưa gửi đến đội hỗ trợ.
                     </div>
                   </div>
                   <Link
@@ -367,7 +374,7 @@ export const OrderDetailView: React.FC = () => {
                   Cần hỗ trợ hoặc thắc mắc về đơn hàng này?
                 </strong>
                 <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                  Gửi yêu cầu hỗ trợ mô phỏng để đội ngũ kiểm tra trạng thái đơn hàng.
+                  Tạo yêu cầu thử, lưu trên thiết bị. Chưa gửi đến đội hỗ trợ.
                 </p>
               </div>
               <button

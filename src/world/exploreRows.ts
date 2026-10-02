@@ -1,7 +1,9 @@
 import type { AppState } from '../domain/types';
-import { matchesVietnameseQuery } from '../utils/textSearch';
+import { isDemoSignedIn } from './account';
+import { matchesVietnameseQuery, normalizeVietnameseText } from '../utils/textSearch';
 import { selectPublicVoices, type PublicVoice } from './exploreDiscovery';
 import { merchImageUrl } from './merchImages';
+import { artistForWorld } from './worldContext';
 import aConcert from '../assets/home/concert-night.png';
 import bTriptych from '../assets/explore-demo/artist-b-triptych.jpg';
 import cTriptych from '../assets/explore-demo/artist-c-triptych.jpg';
@@ -182,21 +184,29 @@ export function selectExploreRows(state: AppState, query = ''): ExploreWorldRow[
     .filter(world => world.tenantId === state.activeTenantId && world.type === 'artist' && mediaByWorld[world.id])
     .filter(world => {
       if (!query.trim()) return true;
-      const publicContexts = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved !== false && (session.worldId === world.id || state.worlds[session.worldId]?.linkedWorldIds.includes(world.id))).map(session => session.title);
-      const products = Object.values(state.products).filter(product => product.tenantId === state.activeTenantId && product.worldId === world.id).map(product => product.title);
-      return matchesVietnameseQuery(`${world.name} ${world.description} ${getWorldMoments(world.id).map(moment => moment.title).join(' ')} ${projects[world.id]?.title || ''} ${publicContexts.join(' ')} ${products.join(' ')}`, query);
+      const publicContexts = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved === true && session.mediaStatus !== 'expired' && session.mediaStatus !== 'missing' && session.status !== 'cancelled' && artistForWorld(state, session.worldId) === world.id).map(session => session.title);
+      return matchesVietnameseQuery(`${world.name} ${world.description} ${getWorldMoments(world.id).map(moment => moment.title).join(' ')} ${projects[world.id]?.title || ''} ${publicContexts.join(' ')}`, query);
     })
     .map(world => {
       const media = mediaByWorld[world.id];
-      const owned = Object.values(state.sessions).filter(session => session.worldId === world.id && session.rightsApproved !== false);
+      // Artist cross-links are recommendations, not shared ownership of their activities.
+      // Programme worlds still resolve to their canonical artist through artistForWorld.
+      const owned = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && artistForWorld(state, session.worldId) === world.id && session.rightsApproved === true && session.mediaStatus !== 'missing' && session.mediaStatus !== 'expired' && session.status !== 'cancelled');
       const activity = owned.some(session => session.status === 'running') ? 4 : owned.some(session => session.status === 'open') ? 3 : owned.some(session => session.status === 'scheduled' && session.scheduledStartTime >= state.demoTime) ? 2 : 0;
       // Popularity is intentionally absent. Equally fresh demo worlds rotate daily instead of locking the same five in place.
       const rotationIndex = demoRotation.indexOf(world.id);
       const rotation = rotationIndex < 0 ? 0 : (4 - ((rotationIndex + day) % 4)) * 3;
-      const score = activity * 100 + Number(state.followedWorldIds.includes(world.id)) * 20 + media.freshness + rotation;
-      return { world, media, score };
+      const score = activity * 100 + Number(isDemoSignedIn(state) && state.followedWorldIds.includes(world.id)) * 20 + media.freshness + rotation;
+      const normalized=normalizeVietnameseText(query);
+      const artistName=normalizeVietnameseText(world.name);
+      const matchedSessions=owned.filter(s=>s.status!=='cancelled' && matchesVietnameseQuery(s.title,query));
+      const relevance=!normalized?0:artistName===normalized?6:artistName.startsWith(normalized)?5
+        :matchedSessions.some(s=>['running','open','paused'].includes(s.status))?4
+        :matchedSessions.some(s=>s.status==='scheduled' && Date.parse(s.scheduledStartTime)>=Date.parse(state.demoTime))?3
+        :getWorldMoments(world.id).some(m=>matchesVietnameseQuery(m.title,query)) || (projects[world.id] && matchesVietnameseQuery(projects[world.id].title,query))?2:1;
+      return { world, media, score, relevance };
     })
-    .sort((a, b) => b.score - a.score || a.world.name.localeCompare(b.world.name, 'vi'));
+    .sort((a, b) => b.relevance - a.relevance || b.score - a.score || a.world.name.localeCompare(b.world.name, 'vi'));
 
   return candidates.map(({ world, media }, index) => ({
     world_id: world.id,

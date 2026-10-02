@@ -29,7 +29,7 @@ export interface DisplayItem {
 export const DISPLAY_FIXTURES: { slot: DisplaySlot; label: string; x: number; y: number }[] = [
   { slot: 'shirt', label: 'Áo kỷ niệm', x: 20, y: 41 },
   { slot: 'ticket', label: 'Vé sự kiện', x: 36.5, y: 28 },
-  { slot: 'disc', label: 'Album trên giá trưng', x: 84.5, y: 48 },
+  { slot: 'disc', label: 'Album trên giá trưng', x: 73, y: 42 },
   { slot: 'lightstick', label: 'Ánh sáng fandom', x: 68.5, y: 35.5 },
   { slot: 'achievement', label: 'Cột mốc & Kỷ vật', x: 55.5, y: 27 },
 ];

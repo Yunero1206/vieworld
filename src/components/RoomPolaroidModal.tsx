@@ -27,7 +27,6 @@ export function RoomPolaroidModal({
   digitalLook,
   accessoryId,
   mood,
-  companionDays = 128,
   items,
   fanId,
 }: RoomPolaroidModalProps) {
@@ -60,7 +59,7 @@ export function RoomPolaroidModal({
       canvas.width = 720;
       canvas.height = 960;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) { setDownloading(false); return; }
 
       // Pure white Polaroid card background
       ctx.fillStyle = '#FFFFFF';
@@ -131,7 +130,7 @@ export function RoomPolaroidModal({
 
       ctx.fillStyle = '#5B46E8';
       ctx.font = 'bold 18px "Be Vietnam Pro", sans-serif';
-      ctx.fillText(`Đồng hành cùng VieWorld: ${companionDays} ngày`, 72, 692);
+      ctx.fillText('Góc riêng trong VieWorld', 72, 692);
 
       // Footer Watermark & URL
       ctx.fillStyle = '#94A3B8';
@@ -241,7 +240,7 @@ export function RoomPolaroidModal({
               <div className="v7-polaroid-footer-row">
                 <span className="v7-polaroid-companion-tag">
                   <Sparkles size={12} />
-                  <span>{companionDays} ngày đồng hành</span>
+                  <span>Góc riêng trong VieWorld</span>
                 </span>
                 <span className="v7-polaroid-date-stamp">
                   {new Date().toLocaleDateString('vi-VN')}

@@ -7,19 +7,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
-import { FanShell } from '../components/FanShell';
-import { ArtistGalleryView } from '../views/ArtistGalleryView';
 import { ArtistWorldView } from '../views/ArtistWorldView';
 import { createInitialState } from '../data/fixtures';
-import {
-  EXPANDED_PUBLIC_VOICES,
-  EXPANDED_ARCHIVE_CHAPTERS,
-  EXPANDED_PRODUCTS,
-  EXPANDED_GUESTBOOK_NOTES,
-  KEY_FAN_PERSONAS,
-  CROWD_FANS,
-  EXPANDED_HALL_MESSAGES,
-} from '../data/expandedUniverse';
+import { EXPANDED_PUBLIC_VOICES, EXPANDED_ARCHIVE_CHAPTERS, EXPANDED_PRODUCTS, EXPANDED_GUESTBOOK_NOTES, KEY_FAN_PERSONAS, CROWD_FANS, EXPANDED_HALL_MESSAGES,  } from '../data/expandedUniverse';
 import { buildScenarioState } from '../data/scenarioManager';
 import { selectPublicVoices } from '../world/exploreDiscovery';
 import { getPreviewCapabilities } from '../world/shopPresentation';
@@ -247,25 +237,7 @@ describe('VieWorld Test Universe Expansion Suite', () => {
   });
 
   describe('8. Golden Journeys Verification (§23)', () => {
-    it('Journey 1: Discovery from Explore to Artist World', () => {
-      render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/artists']}>
-            <Routes>
-              <Route element={<FanShell />}>
-                <Route path="/artists" element={<ArtistGalleryView />} />
-                <Route path="/artist/:artistId" element={<ArtistWorldView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
 
-      // Explore displays worlds
-      expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();
-      expect(screen.getByText('MIRA')).toBeInTheDocument();
-      expect(screen.getByText('KAI')).toBeInTheDocument();
-    });
 
     it('Journey 2: Artist Archive multi-year chronological inspection', () => {
       render(

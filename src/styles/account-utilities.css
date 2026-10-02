@@ -41,6 +41,21 @@
 .vw-auth-success { text-align:center; padding:12px 0; }
 .vw-auth-success > svg { color:var(--appearance-accent); margin-bottom:14px; }
 .vw-account-form fieldset { border:0; padding:0; margin:24px 0 0; min-width:0; }
+.vw-utility-body > .vw-utility-note:first-child { margin-top:0; }
+.vw-account-form fieldset { margin-top:18px; }
+.vw-account-form .vw-account-field { margin-bottom:12px; }
+.vw-notification-options { display:grid; }
+.vw-notification-option { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--appearance-border); }
+.vw-notification-option:first-child { padding-top:0; }
+.vw-notification-option:last-child { border:0; padding-bottom:0; }
+.vw-notification-option > svg { flex:0 0 20px; color:var(--appearance-accent); }
+.vw-notification-option > div { flex:1; min-width:0; }
+.vw-notification-option strong { font-size:14px; font-weight:500; }
+.vw-notification-option p { margin:4px 0 0; font-size:12px; line-height:1.6; color:var(--appearance-muted); }
+.vw-notification-option .vw-switch { flex-shrink:0; height:44px; }
+.vw-notification-option .vw-slider { top:10px; bottom:10px; background:var(--appearance-border); }
+.vw-notification-option .vw-switch input:checked + .vw-slider { background:var(--appearance-accent); }
+.vw-notification-option .vw-switch input:focus-visible + .vw-slider { outline-color:var(--appearance-focus); }
 .vw-account-form legend { font-size:16px; font-weight:600; }
 .vw-account-form fieldset > p { margin:4px 0 16px; font-size:12px; color:var(--appearance-muted); }
 .vw-account-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
@@ -81,6 +96,7 @@
   .vw-utility-body { padding:20px; }
   .vw-utility-footer { padding:14px 20px; }
   .vw-account-grid { grid-template-columns:1fr; }
+  .vw-utility-dialog :is(input:not([type=checkbox]):not([type=radio]),select,textarea) { font-size:16px; }
   .vw-guide-search { flex-wrap:wrap; }
   .vw-guide-search label { flex-basis:100%; }
   .vw-auth-providers button { font-size:13px; padding:12px; gap:8px; }

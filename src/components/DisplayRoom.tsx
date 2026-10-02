@@ -1,18 +1,19 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera, MoreHorizontal } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from './AvatarRenderer';
 import { ownedDigitalLook } from '../world/merchCatalog';
 import { DISPLAY_FIXTURES, displayedItems, displayOptions, displayAssetUrl, type DisplayItem, type DisplaySlot } from '../world/display';
-import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection, type SurfaceSelection, type SurfacePreset } from '../world/displaySurfaces';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection, type SurfaceSelection } from '../world/displaySurfaces';
 import { composeRoomSurface, ROOM_SURFACE_BOUNDS } from '../world/roomComposition';
+import {CatalogItemArt,hasCatalogItemArt} from './CatalogItemArt';
 import { RoomPropVisual } from './RoomPropVisual';
 import type { PublicFan } from '../world/community';
-import { RoomGuestbook } from './RoomGuestbook';
 import { loadPrivacySettings, type SpacePrivacySettings } from '../world/privacy';
 import { RoomPolaroidModal } from './RoomPolaroidModal';
 import { useDialogA11y } from '../hooks/useDialogA11y';
+import { matchesVietnameseQuery } from '../utils/textSearch';
 
 interface DisplayRoomSceneProps {
   fan: Pick<PublicFan, 'name' | 'look' | 'accessory' | 'appearance'> & { id?: string };
@@ -35,6 +36,9 @@ interface DisplayRoomSceneProps {
   onToggleVisitorMode?: () => void;
   onOpenPrivacy?: () => void;
   onOpenPolaroid?: () => void;
+  onOpenAvatar?: () => void;
+  onOpenGuestbook?: () => void;
+  previewItemId?: string;
 }
 
 export function DisplayRoomScene({
@@ -44,18 +48,21 @@ export function DisplayRoomScene({
   onSelect,
   isLightstickActive = true,
   onToggleLightstick,
-  heartsCount = 19,
+  heartsCount = 0,
   onLike,
   isLiked = false,
   isEditMode = false,
   onToggleEditMode,
   isOwner = false,
-  showVisitCount = true,
+  showVisitCount = false,
   compact = false,
   isVisitorMode = false,
   onToggleVisitorMode,
   onOpenPrivacy,
   onOpenPolaroid,
+  onOpenAvatar,
+  onOpenGuestbook,
+  previewItemId,
 }: DisplayRoomSceneProps) {
   const [ambientFeedback, setAmbientFeedback] = useState<string | null>(null);
   const feedbackTimeout = useRef<number | null>(null);
@@ -71,11 +78,11 @@ export function DisplayRoomScene({
     onSelect(slot);
 
     if (!isEditMode) {
-      if (slot === 'lightstick' && onToggleLightstick) {
+      const it = surfaces ? items.find(i => surfaces[slot].itemIds.includes(i.id)) : items.find(i => i.slot === slot);
+      if (slot === 'lightstick' && it && onToggleLightstick) {
         onToggleLightstick();
         triggerFeedback(!isLightstickActive ? 'Đã bật ánh sáng fandom' : 'Đã tắt ánh sáng fandom');
       } else {
-        const it = surfaces ? items.find(i => surfaces[slot].itemIds.includes(i.id)) : items.find(i => i.slot === slot);
         if (it) {
           triggerFeedback(`Đang trưng: ${it.title}`);
         }
@@ -109,7 +116,7 @@ export function DisplayRoomScene({
       {!compact && <div className="v7-room-social-bar">
         <div className="v7-social-left">
           {showVisitCount && (
-            <span className="v7-visitor-counter">48 lượt ghé thăm</span>
+            <span className="v7-visitor-counter">Phòng minh họa</span>
           )}
           <button
             type="button"
@@ -151,6 +158,7 @@ export function DisplayRoomScene({
                   )}
                 </button>
               )}
+              <details className="presence-room-tools"><summary aria-label="Tùy chọn phòng"><MoreHorizontal size={20}/></summary><div>
               {onToggleVisitorMode && (
                 <button
                   type="button"
@@ -185,6 +193,7 @@ export function DisplayRoomScene({
                   <span>Quyền riêng tư</span>
                 </button>
               )}
+              </div></details>
             </div>
           )}
         </div>
@@ -214,7 +223,7 @@ export function DisplayRoomScene({
           const bounds = ROOM_SURFACE_BOUNDS[f.slot];
           const isVinylSlot = f.slot === 'disc';
           const isLightSlot = f.slot === 'lightstick';
-          const glowClass = isLightSlot && isLightstickActive ? 'v7-lightstick-glow' : '';
+          const glowClass = isLightSlot && item && isLightstickActive ? 'v7-lightstick-glow' : '';
 
           return (
             <button
@@ -235,9 +244,9 @@ export function DisplayRoomScene({
               onClick={() => handleFixtureClick(f.slot)}
               aria-label={`${DISPLAY_SURFACES.find(surface => surface.id === f.slot)?.label}: ${surfaceObjects.length ? surfaceObjects.map(object => object.title).join(', ') : 'chưa trưng bày'}`}
               title={
-                !isEditMode && isVinylSlot
+                !isEditMode && isVinylSlot && item
                   ? 'Album trên giá trưng: Nhấn để xem vật phẩm'
-                  : !isEditMode && isLightSlot
+                  : !isEditMode && isLightSlot && item
                   ? isLightstickActive ? 'Lightstick: Nhấn để tắt sáng' : 'Lightstick: Nhấn để bật sáng'
                   : isEditMode
                   ? `Chỉnh sửa vị trí ${f.label}`
@@ -247,7 +256,7 @@ export function DisplayRoomScene({
               {surfaceObjects.length ? (
                 <span className="myspace-surface-composition">
                   {composition.map(({ item: object, anchor, focal }) => {
-                    return <span key={object.id} className={`myspace-room-prop is-${surface.type} ${focal ? 'is-focal' : ''}`} data-room-item={object.id}
+                    return <span key={object.id} className={`myspace-room-prop is-${surface.type} ${focal ? 'is-focal' : ''} ${object.id===previewItemId?'is-ghost':''}`} data-room-item={object.id}
                       style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, width: `${anchor.width}%`, height: `${anchor.height}%`, zIndex: anchor.z, transformOrigin: `50% ${anchor.pivotY}%`, transform: `translate(-50%, -${anchor.pivotY}%) rotate(${anchor.rotate}deg)` }}>
                       <RoomPropVisual item={object}/>
                     </span>;
@@ -266,7 +275,7 @@ export function DisplayRoomScene({
           );
         })}
 
-        <div className="v6-room-avatar">
+        <button type="button" className="v6-room-avatar" onClick={onOpenAvatar} disabled={!onOpenAvatar} aria-label="Đổi diện mạo avatar">
           <AvatarRenderer
             appearance={fan.appearance}
             role="fan"
@@ -276,7 +285,8 @@ export function DisplayRoomScene({
             accessoryId={fan.accessory}
           />
           <span>{fan.name}</span>
-        </div>
+        </button>
+        {onOpenGuestbook&&!isEditMode&&<button type="button" className="presence-room-guestbook-trigger" onClick={onOpenGuestbook} aria-label="Sổ lưu bút"><img src="/images/presence-guestbook-table.webp" alt="" width="420" height="420"/><span>Sổ lưu bút</span></button>}
       </div>
 
       {/* Accessible semantic fallback for screen readers and keyboard navigation */}
@@ -299,7 +309,7 @@ export function DisplayRoomScene({
 }
 
 export function PersonalDisplayRoom({
-  onOpen: _onOpen,
+  onOpen,
   onOpenPrivacy,
   privacySettings: propPrivacy,
 }: {
@@ -308,12 +318,13 @@ export function PersonalDisplayRoom({
   privacySettings?: SpacePrivacySettings;
 }) {
   const { state, dispatch } = useApp();
+  const [roomParams,setRoomParams]=useSearchParams();
   const privacy = propPrivacy || loadPrivacySettings(state.activeTenantId, state.fanProfile.id);
 
   const [roomMode, setRoomMode] = useState<'view' | 'edit' | 'visitor'>('view');
   const [activeDrawerSlot, setActiveDrawerSlot] = useState<DisplaySlot | null>(null);
   const [isLightstickActive, setIsLightstickActive] = useState(true);
-  const [heartsCount, setHeartsCount] = useState(19);
+  const [heartsCount, setHeartsCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPolaroidOpen, setIsPolaroidOpen] = useState(false);
 
@@ -324,27 +335,47 @@ export function PersonalDisplayRoom({
   const allSlotOptions = useMemo(() => displayOptions(state), [state]);
   const selections = useMemo(() => readDisplaySurfaces(state.fanProfile, allSlotOptions), [state.fanProfile, allSlotOptions]);
   const [drawerNotice, setDrawerNotice] = useState('');
+  const [preview,setPreview]=useState<{slot:DisplaySlot;selection:SurfaceSelection;from?:DisplaySlot}|null>(null);
+  const [ghost,setGhost]=useState<typeof preview>(null);
+  const [itemQuery,setItemQuery]=useState('');
+  const projectPreview=(value:typeof preview)=>value?{...selections,...(value.from?{[value.from]:{...selections[value.from],itemIds:selections[value.from].itemIds.filter(id=>!value.selection.itemIds.includes(id))}}:{}),[value.slot]:value.selection}:selections;
+  const selectedSurfaces=projectPreview(preview);
+  const previewSurfaces=projectPreview(ghost||preview);
+  useEffect(()=>{
+    const itemId=roomParams.get('place');const slot=roomParams.get('surface') as DisplaySlot;
+    const surface=DISPLAY_SURFACES.find(s=>s.id===slot);const item=allSlotOptions.find(i=>i.id===itemId);
+    if(!item||!surface||!surfaceSupportsItem(surface,item)||selections[slot].itemIds.includes(item.id))return;
+    const from=DISPLAY_SURFACES.find(s=>s.id!==slot&&selections[s.id].itemIds.includes(item.id))?.id;
+    const selection={...selections[slot],itemIds:[...selections[slot].itemIds,item.id]};
+    const profile=from?{...state.fanProfile,displaySurfaces:{...selections,[from]:{...selections[from],itemIds:selections[from].itemIds.filter(id=>id!==item.id)}}}:state.fanProfile;
+    const problem=validateSurfaceSelection(profile,slot,selection,allSlotOptions);
+    setActiveDrawerSlot(slot);if(problem){setDrawerNotice(problem);return;}
+    setPreview({slot,selection,from});setDrawerNotice('Xem thử trong phòng. Chọn Đặt ở đây để lưu.');
+  },[roomParams.get('place'),roomParams.get('surface')]);
+
 
   const slotEligibleItems = useMemo(() => {
     if (!activeDrawerSlot) return [];
     const surface = DISPLAY_SURFACES.find(item => item.id === activeDrawerSlot);
-    return allSlotOptions.filter(item => surface && surfaceSupportsItem(surface, item));
-  }, [allSlotOptions, activeDrawerSlot]);
+    return allSlotOptions.filter(item => surface && surfaceSupportsItem(surface, item)&&matchesVietnameseQuery(item.title,itemQuery));
+  }, [allSlotOptions, activeDrawerSlot,itemQuery]);
 
   const activeFixtureConfig = DISPLAY_SURFACES.find(f => f.id === activeDrawerSlot);
-  const currentSelection = activeDrawerSlot ? selections[activeDrawerSlot] : undefined;
-  const currentSurfaceItems = currentSelection?.itemIds.map(id => displayed.find(item => item.id === id)).filter((item): item is (typeof displayed)[number] => Boolean(item)) || [];
+  const currentSelection = activeDrawerSlot ? selectedSurfaces[activeDrawerSlot] : undefined;
+  const currentSurfaceItems = currentSelection?.itemIds.map(id => allSlotOptions.find(item => item.id === id)).filter((item): item is (typeof displayed)[number] => Boolean(item)) || [];
   const currentUnits = currentSurfaceItems.reduce((total, item) => total + itemFootprint(item), 0);
 
-  const handleSelectSlot = (slot: DisplaySlot) => {
-    if (roomMode !== 'edit') return;
+  const handleSelectSlot = (slot: DisplaySlot, trigger?: HTMLElement) => {
+    if(roomMode==='visitor')return;
+    if(slot==='shirt'&&roomMode==='view'){onOpen('wardrobe');return;}
+    setPreview(null);setGhost(null);setItemQuery('');
     setDrawerNotice('');
-    lastTriggerButtonRef.current = document.getElementById(`fixture-${slot}`);
+    lastTriggerButtonRef.current = trigger || document.getElementById(`fixture-${slot}`);
     setActiveDrawerSlot(slot);
   };
 
   const handleCloseDrawer = () => {
-    setActiveDrawerSlot(null);
+    setActiveDrawerSlot(null);setPreview(null);setGhost(null);if(roomParams.has('place'))setRoomParams({},{replace:true});
     lastTriggerButtonRef.current?.focus();
   };
   useDialogA11y(Boolean(activeDrawerSlot), handleCloseDrawer, drawerRef);
@@ -353,13 +384,27 @@ export function PersonalDisplayRoom({
     if (!activeDrawerSlot) return;
     const problem = validateSurfaceSelection(state.fanProfile, activeDrawerSlot, selection, allSlotOptions);
     if (problem) { setDrawerNotice(`${problem} Đổi món hoặc chọn chỗ khác.`); return; }
-    dispatch({ type: 'SET_DISPLAY_SURFACE', surfaceId: activeDrawerSlot, selection });
-    setDrawerNotice(success);
+    setPreview({slot:activeDrawerSlot,selection});
+    setGhost(null);
+    setDrawerNotice('Xem thử trong phòng. Chọn Đặt ở đây để lưu.');
+    void success;
   };
 
   const handleApplyItem = (itemId: string) => {
     if (!currentSelection) return;
     applySelection({ ...currentSelection, itemIds: [...currentSelection.itemIds, itemId], focalItemId: currentSelection.focalItemId || itemId }, 'Đã đặt món vào phòng.');
+  };
+
+  const previewCandidate=(itemId:string):typeof preview=>{
+    if(!activeDrawerSlot||!currentSelection||currentSelection.itemIds.includes(itemId))return null;
+    const item=allSlotOptions.find(i=>i.id===itemId);
+    if(!item||Object.entries(selections).some(([id,s])=>id!==activeDrawerSlot&&s.itemIds.includes(itemId)))return null;
+    const canFit=currentSurfaceItems.length<(activeFixtureConfig?.maxItems||0)&&currentUnits+itemFootprint(item)<=(activeFixtureConfig?.capacityUnits||0);
+    const replaceId=currentSelection.focalItemId||currentSelection.itemIds[0];
+    const selection=canFit?{...currentSelection,itemIds:[...currentSelection.itemIds,itemId],focalItemId:currentSelection.focalItemId||itemId}
+      :{...currentSelection,itemIds:currentSelection.itemIds.map(id=>id===replaceId?itemId:id),focalItemId:itemId};
+    if(!selection.itemIds.includes(itemId)||validateSurfaceSelection(state.fanProfile,activeDrawerSlot,selection,allSlotOptions))return null;
+    return {slot:activeDrawerSlot,selection,from:preview?.from};
   };
 
   const handleRemoveItem = (itemId: string) => {
@@ -379,7 +424,7 @@ export function PersonalDisplayRoom({
   const isVisitorMode = roomMode === 'visitor';
 
   return (
-    <section className="v6-personal-room" aria-label="My Space — năm vị trí trưng bày">
+    <section className="v6-personal-room" data-preview-state={ghost?'hover':preview?'selected':undefined} aria-label="My Space — năm vị trí trưng bày">
       <DisplayRoomScene
         fan={{
           id: state.fanProfile.id,
@@ -388,8 +433,9 @@ export function PersonalDisplayRoom({
           accessory: state.fanProfile.wardrobeChoice?.accessoryId,
           appearance: state.fanProfile.avatarPreset,
         }}
-        items={displayed}
-        surfaces={selections}
+        items={allSlotOptions}
+        surfaces={previewSurfaces}
+        previewItemId={ghost?.selection.itemIds.find(id=>!currentSelection?.itemIds.includes(id))}
         onSelect={handleSelectSlot}
         isLightstickActive={isLightstickActive}
         onToggleLightstick={() => setIsLightstickActive(p => !p)}
@@ -404,10 +450,12 @@ export function PersonalDisplayRoom({
         onToggleVisitorMode={() => setRoomMode(m => (m === 'visitor' ? 'view' : 'visitor'))}
         onOpenPrivacy={onOpenPrivacy}
         onOpenPolaroid={() => setIsPolaroidOpen(true)}
+        onOpenAvatar={!isVisitorMode?()=>onOpen('avatar'):undefined}
+        onOpenGuestbook={privacy.guestbookEnabled&&!isVisitorMode?()=>onOpen('guestbook'):undefined}
       />
 
-      {isEditMode && <nav className="myspace-mobile-surfaces" aria-label="Chọn khu vực trưng bày">
-        {DISPLAY_SURFACES.map(surface => <button key={surface.id} type="button" onClick={() => handleSelectSlot(surface.id)}>
+      {!isVisitorMode && <nav className="myspace-mobile-surfaces" aria-label="Chọn khu vực trưng bày">
+        {DISPLAY_SURFACES.map(surface => <button key={surface.id} type="button" onClick={event => handleSelectSlot(surface.id, event.currentTarget)}>
           <strong>{surface.label}</strong><small>{selections[surface.id].itemIds.length}/{surface.maxItems} món</small>
         </button>)}
       </nav>}
@@ -444,7 +492,7 @@ export function PersonalDisplayRoom({
           <div className="v7-visitor-items-grid">
             {displayed.map(item => (
               <div key={item.id} className="v7-visitor-item-card">
-                {item.image && (
+                {hasCatalogItemArt(item.id) ? <CatalogItemArt id={item.id} title={item.title}/> : item.image && (
                   <img
                     src={displayAssetUrl(item)}
                     alt={item.title}
@@ -490,31 +538,13 @@ export function PersonalDisplayRoom({
               {currentSurfaceItems.length}/{activeFixtureConfig?.maxItems || 5} món · {currentUnits}/{activeFixtureConfig?.capacityUnits || 0} sức chứa
             </p>
             {activeFixtureConfig && currentSurfaceItems.length > activeFixtureConfig.maxItems && <p className="myspace-drawer-notice" role="status">Bố cục cũ được giữ nguyên. Khu vực này hiện phù hợp tối đa {activeFixtureConfig.maxItems} món; bạn có thể cất bớt, không mất món trong Bộ sưu tập.</p>}
-            {activeFixtureConfig && <div className="vw-surface-preview" aria-label="Xem trước khu vực đang chỉnh" style={{aspectRatio:ROOM_SURFACE_BOUNDS[activeFixtureConfig.id].width*1672/(ROOM_SURFACE_BOUNDS[activeFixtureConfig.id].height*941)}}>
-              <div className={`myspace-surface-composition is-${activeFixtureConfig.type}`}>
-                {composeRoomSurface(activeFixtureConfig, currentSurfaceItems, currentSelection).map(({item,anchor}) => <span key={item.id} className={`myspace-room-prop is-${activeFixtureConfig.type}`} style={{left:`${anchor.x}%`,top:`${anchor.y}%`,width:`${anchor.width}%`,height:`${anchor.height}%`,zIndex:anchor.z,transform:`translate(-50%,-${anchor.pivotY}%) rotate(${anchor.rotate}deg)`}}><RoomPropVisual item={item}/></span>)}
-              </div>
-            </div>}
-            <div className="myspace-layout-presets" aria-label="Kiểu tự sắp xếp">
-              {([['balanced', 'Cân đối'], ['focus', 'Tập trung'], ['natural', 'Tự nhiên']] as [SurfacePreset, string][]).map(([preset, label]) => (
-                <button key={preset} type="button" aria-pressed={currentSelection?.layoutPreset === preset}
-                  onClick={() => currentSelection && applySelection({ ...currentSelection, layoutPreset: preset }, 'Đã sắp lại khu vực.')}>
-                  {label}
-                </button>
-              ))}
-              <button type="button" onClick={() => currentSelection && applySelection({
-                ...currentSelection,
-                itemIds: currentSelection.itemIds.length > 1 ? [...currentSelection.itemIds.slice(1), currentSelection.itemIds[0]] : currentSelection.itemIds,
-              }, 'Đã sắp lại các món.')}>Sắp lại ↻</button>
-            </div>
+            <label className="presence-room-search">Tìm trong khu vực<input value={itemQuery} onChange={e=>setItemQuery(e.target.value)} placeholder="Tên vật phẩm…"/></label>
             {currentSurfaceItems.length > 0 && <div className="v7-slot-current-section">
               <span className="v7-slot-section-title">Đang trưng bày</span>
               {currentSurfaceItems.map(item => <div className="v7-slot-current-card" key={item.id}>
-                <div className="v7-drawer-item-media">{displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" /> : <span className="v6-trophy">✦</span>}</div>
-                <div className="v7-drawer-item-info"><strong>{item.title}</strong><small>{itemFootprint(item)} sức chứa</small></div>
+                <div className="v7-drawer-item-media">{hasCatalogItemArt(item.id)?<CatalogItemArt id={item.id} title={item.title}/>:displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" /> : <span className="v6-trophy">✦</span>}</div>
+                <div className="v7-drawer-item-info"><strong>{item.title}</strong><small>Trong bộ sưu tập</small></div>
                 <div className="myspace-surface-item-actions">
-                  <button type="button" aria-pressed={currentSelection?.focalItemId === item.id}
-                    onClick={() => currentSelection && applySelection({ ...currentSelection, focalItemId: item.id }, 'Đã đặt làm điểm nhấn.')}>Đặt làm điểm nhấn</button>
                   <button type="button" onClick={() => handleRemoveItem(item.id)}>Gỡ khỏi phòng</button>
                 </div>
               </div>)}
@@ -538,7 +568,7 @@ export function PersonalDisplayRoom({
                       className={`v7-drawer-item-card ${isCurrent ? 'selected' : ''}`}
                     >
                       <div className="v7-drawer-item-media">
-                        {displayAssetUrl(item) ? (
+                        {hasCatalogItemArt(item.id)?<CatalogItemArt id={item.id} title={item.title}/>:displayAssetUrl(item) ? (
                           <img src={displayAssetUrl(item)} alt={item.title} />
                         ) : (
                           <div className="v7-item-placeholder">✦</div>
@@ -554,7 +584,7 @@ export function PersonalDisplayRoom({
                             <Check size={14} /> Đang trưng
                           </span>
                         ) : (
-                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || (!canFit && !currentSurfaceItems.length)} onClick={() => {
+                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || (!canFit && !currentSurfaceItems.length)} onMouseEnter={()=>setGhost(previewCandidate(item.id))} onMouseLeave={()=>setGhost(null)} onFocus={()=>setGhost(previewCandidate(item.id))} onBlur={()=>setGhost(null)} onClick={() => {
                             if (canFit) handleApplyItem(item.id);
                             else if (currentSelection) {
                               const replaceId = currentSelection.focalItemId || currentSelection.itemIds[0];
@@ -583,9 +613,10 @@ export function PersonalDisplayRoom({
               </div>
             </div>
 
+            {preview&&<div className="presence-room-preview-confirm"><button onClick={()=>{if(preview.from)dispatch({type:'SET_DISPLAY_SURFACE',surfaceId:preview.from,selection:selectedSurfaces[preview.from]});dispatch({type:'SET_DISPLAY_SURFACE',surfaceId:preview.slot,selection:preview.selection});if(roomParams.has('place'))setRoomParams({},{replace:true});setPreview(null);setGhost(null);setDrawerNotice('Đã lưu trong phòng.');}}>Đặt ở đây</button><button onClick={()=>{setPreview(null);setGhost(null);setDrawerNotice('');}}>Hủy xem thử</button></div>}
             <div className="v7-drawer-footer">
               <div className="myspace-other-surfaces" aria-label="Chọn chỗ khác">
-                {DISPLAY_SURFACES.filter(surface => surface.id !== activeDrawerSlot).map(surface => <button key={surface.id} type="button" onClick={() => { setDrawerNotice(''); setActiveDrawerSlot(surface.id); }}>{surface.label}</button>)}
+                {DISPLAY_SURFACES.filter(surface => surface.id !== activeDrawerSlot).map(surface => <button key={surface.id} type="button" onClick={() => { setDrawerNotice('');setPreview(null);setGhost(null);setItemQuery(''); setActiveDrawerSlot(surface.id); }}>{surface.label}</button>)}
               </div>
               <Link
                 to={`/me?section=collection&type=${activeDrawerSlot}`}
@@ -599,27 +630,6 @@ export function PersonalDisplayRoom({
         </div>
       )}
 
-      {/* Guestbook Section */}
-      {privacy.guestbookEnabled ? (
-        <RoomGuestbook fanId={state.fanProfile.id} isOwner={!isVisitorMode} />
-      ) : (
-        <div
-          className="v7-guestbook-disabled-note"
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            color: 'var(--muted)',
-            fontSize: '13px',
-            background: 'var(--surface)',
-            borderRadius: 'var(--radius-lg)',
-            margin: '20px 0',
-            border: '1px dashed var(--border)',
-          }}
-        >
-          <p>Chủ phòng đã tạm ẩn sổ lưu bút.</p>
-        </div>
-      )}
-
       <RoomPolaroidModal
         isOpen={isPolaroidOpen}
         onClose={() => setIsPolaroidOpen(false)}
@@ -628,7 +638,7 @@ export function PersonalDisplayRoom({
         digitalLook={ownedDigitalLook(state)}
         accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
         mood={state.fanProfile.publicIdentity?.mood}
-        companionDays={128}
+        companionDays={0}
         items={displayed}
         fanId={state.fanProfile.id}
       />

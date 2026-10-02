@@ -1,6 +1,7 @@
 import type { Product } from '../domain/types';
 import { money } from './commerce';
 import { productDisplaySlot } from './display';
+import { hasAvatarFit } from './avatarFit';
 
 export type ShopCategory = 'all' | 'merch' | 'album' | 'membership';
 export type PreviewCapabilities = { avatar: boolean; room: boolean };
@@ -24,20 +25,16 @@ export function availableShopCategories(products: Product[]): ShopCategory[] {
 }
 
 export function getPreviewCapabilities(product: Product, catalog: Product[]): PreviewCapabilities {
-  if (product.previewCapabilities) return { avatar: !!product.previewCapabilities.avatar, room: !!product.previewCapabilities.room };
   if (product.category === 'membership') return { avatar: false, room: false };
-  const family = product.familyId || product.id;
-  const hasAvatarEdition = !!product.digitalSlot || catalog.some(candidate =>
-    (candidate.familyId || candidate.id) === family && !!candidate.digitalSlot,
-  );
+  const hasAvatarEdition = product.previewCapabilities?.avatar !== false && !!previewEdition(product,catalog);
   const room = Boolean(productDisplaySlot(product));
   return { avatar: hasAvatarEdition, room };
 }
 
 export function previewEdition(product: Product, catalog: Product[]): Product | undefined {
-  if (product.digitalSlot) return product;
+  if (product.digitalSlot && hasAvatarFit(product.digitalItemId)) return product;
   const family = product.familyId || product.id;
-  return catalog.find(candidate => (candidate.familyId || candidate.id) === family && !!candidate.digitalSlot);
+  return catalog.find(candidate => (candidate.familyId || candidate.id) === family && !!candidate.digitalSlot && hasAvatarFit(candidate.digitalItemId));
 }
 
 export function productBadge(product: Product): string | undefined {
@@ -45,8 +42,6 @@ export function productBadge(product: Product): string | undefined {
   if (!product.isAvailable || product.stockCount <= 0) return 'Hết hàng';
   if (product.releaseType === 'pre_order') return 'Đặt trước';
   if (product.category === 'membership') return 'Hội viên';
-  if (product.delivery === 'bundle') return 'Kèm bản số';
-  if (product.delivery === 'physical' && product.digitalItemId) return 'Kèm bản số';
   // A separately sold digital edition is not a free companion.
   return undefined;
 }

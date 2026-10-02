@@ -9,5 +9,5 @@ export function membershipTenure(member: Membership | undefined, now: string): n
   return Math.max(0, (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth() - Number(end.getUTCDate() < start.getUTCDate()));
 }
 export function memberForChat(state: AppState, artistId: string, fanId: string) {
-  return Object.values(state.memberships).find(member => member.tenantId === state.activeTenantId && member.worldId === artistId && member.fanId === fanId);
+  return Object.values(state.memberships).filter(member => member.tenantId === state.activeTenantId && member.worldId === artistId && member.fanId === fanId).sort((a,b)=>Number(membershipTenure(b,state.demoTime)!==null)-Number(membershipTenure(a,state.demoTime)!==null)||b.updatedAt.localeCompare(a.updatedAt))[0];
 }

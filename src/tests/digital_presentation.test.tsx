@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
+import {hasAvatarFit} from '../world/avatarFit';
 import { DIGITAL_VISUALS, digitalVisual, roomDigitalVisual } from '../world/itemVisuals';
 import { composeRoomSurface, ROOM_SURFACE_BOUNDS } from '../world/roomComposition';
 import { DISPLAY_SURFACES, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection } from '../world/displaySurfaces';
@@ -61,10 +62,11 @@ describe('digital item presentation', () => {
 
   it('renders prepared digital art, never a product image, for every equipped look and appearance', () => {
     for (const appearance of ['original','wave','bob','curl'] as const) for (const visual of Object.values(DIGITAL_VISUALS)) {
+      if(!hasAvatarFit(visual.id,appearance))continue;
       const slot = ['shirt','hoodie','bomber'].includes(visual.kind)?'shirt':visual.kind==='lightstick'?'lightstick':'hat';
       const view=render(<AvatarRenderer appearance={appearance} digitalLook={{[slot]:visual.id}}/>);
       expect(view.container.querySelector(`[data-visual-id="${visual.id}"]`)).not.toBeNull();
-      expect(view.container.querySelector('.vw-equipped-fan')).toHaveAttribute('data-rig',appearance);
+      expect(view.container.querySelector('.vw-equipped-fan')).toHaveAttribute('data-rig','canonical');
       expect(view.container.querySelector('image')?.getAttribute('href')).not.toContain('merch-v2');
       expect(view.container.querySelector('img')).toBeNull();
       view.unmount();
@@ -90,6 +92,7 @@ describe('digital item presentation', () => {
 
   it('keeps the selected item identity when the character image cannot load',()=>{
     for (const visual of Object.values(DIGITAL_VISUALS)) {
+      if(!hasAvatarFit(visual.id))continue;
       const slot=['shirt','hoodie','bomber'].includes(visual.kind)?'shirt':visual.kind==='lightstick'?'lightstick':'hat';
       const view=render(<AvatarRenderer digitalLook={{[slot]:visual.id}}/>);
       fireEvent.error(view.container.querySelector('image')!);

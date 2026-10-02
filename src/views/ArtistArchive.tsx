@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -12,8 +12,7 @@ function mediaStyle(media:ExploreMedia) { return {backgroundImage:`url("${media.
 export function ArtistArchive({artistId,name,moments,sessions}:{artistId:string;name:string;moments:ExploreMoment[];sessions:Session[]}) {
   const {state}=useApp();
   const [params,setParams]=useSearchParams();
-  const [recentExpanded,setRecentExpanded]=useState(false);
-  const filters=[['Tất cả','Tất cả'],['Sự kiện','Sự kiện'],['Era','Thời kỳ'],['Capsule','Kỷ niệm'],['Fan project','Dự án fan']] as const;
+  const filters=[['Tất cả','Tất cả'],['Sự kiện','Sự kiện'],['Era','Thời kỳ'],['Fan project','Dự án fan']] as const;
   const filter=filters.some(([value])=>value===params.get('filter')) ? params.get('filter')! : 'Tất cả';
   const returnTo=`/artist/${artistId}/archive${params.size ? `?${params}` : ''}`;
   const chapters=useMemo(()=>artistArchiveChapters(state,artistId,moments,sessions),[state.demoTime,state.activeTenantId,state.capsules,state.fanProfile.id,artistId,moments,sessions]);
@@ -33,7 +32,7 @@ export function ArtistArchive({artistId,name,moments,sessions}:{artistId:string;
         </details>)}</ArtistVisualRail>
       </section>) : <p className="artist-world-empty">Chưa có chương nào thuộc nhóm này.</p>}
     </div><aside className="artist-archive-side">
-      <section className="artist-archive-recent"><header><h3>Mới được giữ lại</h3>{moments.length>3&&<button type="button" onClick={()=>setRecentExpanded(value=>!value)} aria-expanded={recentExpanded}>{recentExpanded?'Thu gọn':'Xem tất cả'}</button>}</header>{(recentExpanded?moments:moments.slice(0,3)).map(moment=><Link key={moment.id} to={moment.targetUrl} state={{fromArtist:returnTo}}><span style={mediaStyle(moment.media)}/><div><small>{moment.kind==='video'?'VIDEO':'KHOẢNH KHẮC'}</small><strong>{moment.title}</strong></div><ArrowRight size={15}/></Link>)}</section>
+      <section className="artist-archive-about"><header><h3>Về {name}</h3></header><p>{state.worlds[artistId]?.description}</p><Link to={`/artist/${artistId}`}>Vào Artist World <ArrowRight size={16}/></Link><small>Hồ sơ minh họa trong VieWorld.</small></section>
       {note&&<blockquote className="artist-archive-quote" style={{backgroundImage:`linear-gradient(180deg,rgba(10,18,25,.9),rgba(10,18,25,.55)),url("${moments[0]?.media.src}")`}}><p>“{note.body}”</p><footer>— {name} · Lời nhắn mẫu</footer></blockquote>}
     </aside></div>
   </div>;

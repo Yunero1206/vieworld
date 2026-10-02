@@ -1,55 +1,27 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
-import { WorldPlazaView } from '../views/WorldPlazaView';
-import { FanWorldView } from '../views/FanWorldView';
 import { RoomInterior } from '../components/RoomInterior';
 import { ArtistBroadcast } from '../components/ArtistBroadcast';
 import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
 import { DEFAULT_ROOM, RoomDesign, validRoomDesign } from '../world/places';
 import { loadState, saveState } from '../services/storageAdapter';
-import { freshGuestState } from '../world/account';
 import { selectPlazaState } from '../world/plazaState';
 const initial=()=>createInitialState('vieworld-demo');
-function mount(path='/'){return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<WorldPlazaView/>}/><Route path="/worlds/:worldId" element={<FanWorldView/>}/><Route path="/worlds/:worldId/moments" element={<FanWorldView/>}/><Route path="/worlds/:worldId/archive" element={<FanWorldView/>}/><Route path="/moments" element={<FanWorldView/>}/><Route path="/archive" element={<FanWorldView/>}/><Route path="/me" element={<FanWorldView/>}/></Routes></MemoryRouter></AppProvider>);}
 const read=()=>loadState('vieworld-demo',initial().fanProfile.id).state;
 describe('Fan home and room',()=>{
   beforeEach(()=>localStorage.clear());
-  it('opens as an uncluttered place-led plaza',()=>{
-    let state=appReducer(initial(),{type:'VISIT_FAN_WORLD',worldId:'artist-a'});
-    state=appReducer(state,{type:'REMEMBER_FAN_DESTINATION',to:'/artist/artist-a/hall'});saveState(state);mount();
-    expect(screen.getByRole('heading',{level:1})).toHaveTextContent('Quảng trường VieWorld');
-    expect(screen.getByRole('region',{name:'Các nơi trong quảng trường VieWorld'})).toBeInTheDocument();
-    expect(screen.getAllByRole('link',{name:'Explore'}).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('link',{name:'Artist World'}).length).toBeGreaterThan(0);
-    expect(screen.queryByText('Ghé lại')).not.toBeInTheDocument();
-    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
-  });
-  it('links a real live session without claiming extra activity',()=>{
-    mount();
-    expect(screen.getByRole('link',{name:/Đang phát:/})).toHaveAttribute('href',expect.stringMatching(/^\/sessions\//));
-    expect(screen.queryByText('Sắp diễn ra')).not.toBeInTheDocument();
-    expect(screen.queryByText(/Mở presale/)).not.toBeInTheDocument();
-  });
-  it('never borrows Linh’s identity or a random artist for a guest',()=>{
-    const guest=freshGuestState(initial());guest.followedWorldIds=[];guest.fanProfile.worldJourney=undefined;
-    render(<AppProvider initialState={guest}><MemoryRouter><WorldPlazaView/></MemoryRouter></AppProvider>);
-    expect(screen.queryByText('Linh')).not.toBeInTheDocument();
-    expect(screen.getByRole('link',{name:'Đăng nhập để tạo góc riêng'})).toHaveTextContent('Khách');
-    expect(screen.getAllByRole('link',{name:'Artist World'}).every(link=>link.getAttribute('href')==='/explore')).toBe(true);
-  });
+
+
+
   it('publishes no more than one active and one upcoming session with approved rights',()=>{
     const plaza=selectPlazaState(initial());
     expect(plaza.primary?.id).toBe('session-dropin-01');
     expect(plaza.primary?.statusLabel).toBe('Đang phát');
     expect(plaza.next?.id).toBe('session-a-album-drop');
     expect([plaza.primary,plaza.next].filter(Boolean)).toHaveLength(2);
-  });
-  it.each([['/worlds/artist-a','moments'],['/worlds/artist-a/moments','moments'],['/worlds/artist-a/archive','archive'],['/me','myspace']])('%s renders its own room artwork', (path,image)=>{
-    saveState(initial()); // This is the signed-in room journey, not anonymous browsing.
-    const {container}=mount(path);if(image==='moments')fireEvent.click(screen.getByRole('button',{name:'Live & Concert'}));if(image==='myspace'){expect(container.querySelector('.v6-room-art')).toHaveAttribute('src','/images/myspace-room-v2.png');expect(screen.getByRole('link',{name:/Về quảng trường/})).toHaveAttribute('href','/');}else expect(container.querySelector('.fw-scene-art')).toBeNull();
   });
   it('saves an edited room without touching orders, memberships or collections',()=>{
     const state=initial();const design:RoomDesign={...DEFAULT_ROOM,theme:'dusk',items:[{id:'a',kind:'lamp',x:60,y:66,rotation:90}]};

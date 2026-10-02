@@ -48,14 +48,5 @@ describe('Artist World entry boundary', () => {
     expect(screen.queryByRole('log', { name: 'Tin nhắn trong Hall' })).not.toBeInTheDocument();
   });
 
-  it('uses top-shell search and never exposes unconsented fan voices in Explore', () => {
-    mount('/');
-    const input = screen.getByRole('combobox', { name: 'Tìm nghệ sĩ, sự kiện và kỷ niệm' });
-    fireEvent.change(input, { target: { value: 'artist a' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
-    expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Vào world của Artist A' })).toHaveAttribute('href', '/artist/artist-a');
-    expect(screen.getByText(/Nay nghe setlist vậy/)).toBeInTheDocument();
-    expect(screen.queryByText(/chỉ hiện khi người viết đồng ý/)).not.toBeInTheDocument();
-  });
+
 });

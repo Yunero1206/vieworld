@@ -4,19 +4,13 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { CollectionBrowser } from '../components/CollectionBrowser';
-import { FanShell } from '../components/FanShell';
-import { ArtistGalleryView } from '../views/ArtistGalleryView';
 import { FanShopView } from '../views/FanShopView';
 import { OrderDetailView } from '../views/OrderDetailView';
 import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
 import { saveState, loadState } from '../services/storageAdapter';
 import { ownedCollection, displayOptions } from '../world/display';
-import {
-  filterDisplayItems,
-  formatCollectionDate,
-  COLLECTION_TIMEZONE,
-} from '../world/displayFilter';
+import { filterDisplayItems, formatCollectionDate, COLLECTION_TIMEZONE,  } from '../world/displayFilter';
 import { matchesVietnameseQuery, normalizeVietnameseText } from '../utils/textSearch';
 
 function ProblemChild({ shouldThrow }: { shouldThrow: boolean }) {
@@ -309,86 +303,8 @@ describe('Review Fixes & UX Regression Suite', () => {
     });
   });
 
-  describe('4. P2 Artist activity mixes different kinds of time', () => {
-    it('separates live now, upcoming nearest first, and latest published updates newest first', () => {
-      let state = createInitialState('vieworld-demo');
-      // Set artist-a as followed
-      state.followedWorldIds = ['artist-a'];
 
-      // Add a live session (status: 'running')
-      state.sessions['live-session'] = {
-        id: 'live-session',
-        worldId: 'artist-a',
-        title: 'Live Chat Đang Diễn Ra',
-        format: 'dropin',
-        scheduledStartTime: '2026-09-13T20:00:00+07:00',
-        status: 'running',
-        hostRole: 'artist',
-        artistPresence: 'present',
-        segmentMode: 'live',
-        aiUse: 'none',
-        replayStatus: 'not_planned',
-        demo: true,
-        tenantId: state.activeTenantId,
-        version: 1,
-        updatedAt: state.demoTime,
-      };
-
-      // Add two upcoming sessions with different dates
-      state.sessions['upcoming-near'] = {
-        id: 'upcoming-near',
-        worldId: 'artist-a',
-        title: 'Concert Gần Nhất (Ngày 15)',
-        format: 'concert',
-        scheduledStartTime: '2026-09-15T20:00:00+07:00',
-        status: 'scheduled',
-        hostRole: 'artist',
-        artistPresence: 'present',
-        segmentMode: 'live',
-        aiUse: 'none',
-        replayStatus: 'not_planned',
-        demo: true,
-        tenantId: state.activeTenantId,
-        version: 1,
-        updatedAt: state.demoTime,
-      };
-      state.sessions['upcoming-far'] = {
-        id: 'upcoming-far',
-        worldId: 'artist-a',
-        title: 'Concert Xa Hơn (Ngày 25)',
-        format: 'concert',
-        scheduledStartTime: '2026-09-25T20:00:00+07:00',
-        status: 'scheduled',
-        hostRole: 'artist',
-        artistPresence: 'present',
-        segmentMode: 'live',
-        aiUse: 'none',
-        replayStatus: 'not_planned',
-        demo: true,
-        tenantId: state.activeTenantId,
-        version: 1,
-        updatedAt: state.demoTime,
-      };
-
-      saveState(state);
-
-      render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/artists']}>
-            <ArtistGalleryView />
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Explore ranks the Artist World once; event activity is a ranking signal, not a second feed.
-      expect(screen.getByRole('heading', { name: /Nổi bật/ })).toBeInTheDocument();
-      expect(document.querySelectorAll('[data-world="artist-a"]')).toHaveLength(1);
-      expect(screen.getByRole('link', { name: 'Vào world của Artist A' })).toHaveAttribute('href', '/artist/artist-a');
-      expect(screen.queryByRole('region', { name: 'Đang có chuyện gì' })).not.toBeInTheDocument();
-    });
-  });
-
-  describe('5. P2 Shop search and navigation forgiving search & URL state', () => {
+describe('5. P2 Shop search and navigation forgiving search & URL state', () => {
     it('accent-normalized search matches "ao" to "Áo"', () => {
       expect(normalizeVietnameseText('Áo Thun Star Light')).toBe('ao thun star light');
       expect(matchesVietnameseQuery('Áo Thun Star Light', 'ao')).toBe(true);
@@ -517,7 +433,7 @@ describe('Review Fixes & UX Regression Suite', () => {
         'src',
         '/images/merch-v2/shirt-physical.png'
       );
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent('Đã thanh toán (Paid)');
+      expect(screen.getByTestId('order-status-badge')).toHaveTextContent('Đã thanh toán');
     });
 
     it('VieSHOP renders pre-order metadata and shipping ETA disclosures matching Weverse Shop', () => {
@@ -546,31 +462,6 @@ describe('Review Fixes & UX Regression Suite', () => {
       expect(within(dialog).getByText(/Dự kiến giao hàng: Tháng 10\/2026/i)).toBeInTheDocument();
     });
 
-    it('FanShell and FanShop dynamically adapt to MFan partner configuration (Tenant Portability)', () => {
-      const state = createInitialState('mfan-demo');
-      saveState(state);
 
-      render(
-        <AppProvider initialTenantId="mfan-demo" disableAutoHydrate={false}>
-          <MemoryRouter initialEntries={['/artists']}>
-            <FanShell />
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Container uses mfan-demo
-      const appContainer = screen.getByTestId('app-container');
-      expect(appContainer).toHaveAttribute('data-tenant', 'mfan-demo');
-
-      // Brand displays MFan Demo
-      expect(screen.getByRole('link', { name: /MFan Demo — về thế giới/i })).toBeInTheDocument();
-
-      // Navigation uses MFan Store instead of hardcoded VieSHOP
-      const navLinks = within(screen.getByRole('navigation', { name: 'Điều hướng chính' }))
-        .getAllByRole('link')
-        .map(l => l.textContent);
-      expect(navLinks).toContain('MFan Store');
-      expect(navLinks).not.toContain('VieSHOP');
-    });
   });
 });

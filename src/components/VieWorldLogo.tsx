@@ -15,6 +15,13 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
   tagline,
   brandName = 'VieWorld',
 }) => {
+  // Desktop and mobile navigation coexist in the DOM. SVG paint servers must
+  // not resolve to the hidden copy of the logo at the other breakpoint.
+  const instanceId = React.useId().replace(/:/g, '');
+  const vGradient = `${instanceId}-v`;
+  const orbitGradient = `${instanceId}-orbit`;
+  const starGradient = `${instanceId}-star`;
+  const glowFilter = `${instanceId}-glow`;
   return (
     <div className={`vieworld-brandmark ${className}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
       <svg
@@ -29,27 +36,27 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
       >
         <defs>
           {/* Main "V" Gradient */}
-          <linearGradient id="vwVGrad" x1="50" y1="20" x2="50" y2="85" gradientUnits="userSpaceOnUse">
+          <linearGradient id={vGradient} x1="50" y1="20" x2="50" y2="85" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#559972" />
             <stop offset="35%" stopColor="#3C7B57" />
             <stop offset="100%" stopColor="#224834" />
           </linearGradient>
 
           {/* Celestial Orbit Ring Gradient */}
-          <linearGradient id="vwOrbitGrad" x1="20" y1="35" x2="85" y2="60" gradientUnits="userSpaceOnUse">
+          <linearGradient id={orbitGradient} x1="20" y1="35" x2="85" y2="60" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#75A88E" />
             <stop offset="50%" stopColor="#A4CBB7" />
             <stop offset="100%" stopColor="#709E86" />
           </linearGradient>
 
           {/* Golden Fandom Star Gradient */}
-          <linearGradient id="vwStarGold" x1="50" y1="22" x2="50" y2="46" gradientUnits="userSpaceOnUse">
+          <linearGradient id={starGradient} x1="50" y1="22" x2="50" y2="46" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#FFE082" />
             <stop offset="100%" stopColor="#E2A638" />
           </linearGradient>
 
           {/* Subtle Glow Filter */}
-          <filter id="vwSoftGlow" x="35" y="15" width="30" height="36" filterUnits="userSpaceOnUse">
+          <filter id={glowFilter} x="35" y="15" width="30" height="36" filterUnits="userSpaceOnUse">
             <feGaussianBlur stdDeviation="1.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
@@ -58,7 +65,7 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
         {/* 1. Orbit Ring - Back Segment */}
         <path
           d="M 24 57 C 22 50 30 38 48 34 C 66 30 80 34 83 40"
-          stroke="url(#vwOrbitGrad)"
+          stroke={`url(#${orbitGradient})`}
           strokeWidth="3.5"
           strokeLinecap="round"
           opacity="0.85"
@@ -80,7 +87,7 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
              C 35 84 31 79 28 72
              L 21 39
              C 19 31 24 24 33 24 Z"
-          fill="url(#vwVGrad)"
+          fill={`url(#${vGradient})`}
         />
 
         {/* Right Arm of V (Overlapping at bottom apex) */}
@@ -92,7 +99,7 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
              C 41 84 38 80 41 74
              L 59 33
              C 61 28 64 24 68 24 Z"
-          fill="url(#vwVGrad)"
+          fill={`url(#${vGradient})`}
         />
 
         {/* Bottom V Rounded Apex Blend */}
@@ -106,7 +113,7 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
         {/* 4. Orbit Ring - Front Segment */}
         <path
           d="M 83 40 C 86 46 78 57 58 63 C 39 68 25 65 24 57"
-          stroke="url(#vwOrbitGrad)"
+          stroke={`url(#${orbitGradient})`}
           strokeWidth="3.5"
           strokeLinecap="round"
         />
@@ -128,8 +135,8 @@ export const VieWorldLogo: React.FC<VieWorldLogoProps> = ({
              Q 50.8 35 50 43
              Q 49.2 35 42 34
              Q 49.2 33 50 25 Z"
-          fill="url(#vwStarGold)"
-          filter="url(#vwSoftGlow)"
+          fill={`url(#${starGradient})`}
+          filter={`url(#${glowFilter})`}
         />
         <circle cx="50" cy="34" r="1.2" fill="#FFFBE6" />
 

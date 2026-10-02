@@ -3,6 +3,7 @@ import { SpeechBubble } from './SpeechBubble';
 import { EquippedFanArt } from './EquippedFanArt';
 import { PreparedPropArt } from './PreparedPropArt';
 import { ItemMotif } from './DigitalObjectArt';
+import { compatibleDigitalLook } from '../world/avatarFit';
 import { digitalVisual } from '../world/itemVisuals';
 import {
   CharacterRole,
@@ -60,7 +61,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
   const defaultLabel =
     role === 'artist'
       ? `Avatar 2D Nghệ sĩ ${displayName}`
-      : `Avatar 2D của ${displayName}${accessory ? ` (Đang đeo: ${accessory.name})` : ''}`;
+      : `Avatar 2D của ${displayName}`;
 
   const getArtistAvatarSrc = () => {
     const key = `${displayName || ''} ${artistId || ''}`.toLowerCase();
@@ -78,8 +79,9 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
       : getArtistAvatarSrc();
 
   useEffect(() => setImageFailed(false), [characterSrc]);
-  const equippedFan = role === 'fan' && Boolean(digitalVisual(digitalLook?.shirt) || digitalVisual(digitalLook?.hat) || digitalVisual(digitalLook?.lightstick));
-  const fallbackShirt = digitalVisual(digitalLook?.shirt);
+  const fittedLook = compatibleDigitalLook(digitalLook || {}, appearance);
+  const equippedFan = role === 'fan';
+  const fallbackShirt = digitalVisual(fittedLook.shirt);
   const fallbackHat = digitalVisual(digitalLook?.hat);
   const fallbackLight = digitalVisual(digitalLook?.lightstick);
 
@@ -111,15 +113,15 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
     >
       {speechText && <SpeechBubble text={speechText} />}
       {!imageFailed ? <>
-        {equippedFan ? <EquippedFanArt source={characterSrc} appearance={appearance} look={digitalLook || {}} onError={() => setImageFailed(true)}/> : <img className="vx-character-art" src={characterSrc} alt="" draggable={false} decoding="async" onError={()=>setImageFailed(true)}/>}
+        {equippedFan ? <EquippedFanArt source={characterSrc} appearance={appearance} look={fittedLook} onError={() => setImageFailed(true)}/> : <img className="vx-character-art" src={characterSrc} alt="" draggable={false} decoding="async" onError={()=>setImageFailed(true)}/>}
         <svg className="vx-character-layers" viewBox="0 0 200 250" fill="none" aria-hidden="true">
           {role==='artist'&&outfitId&&outfitId!=='midnight_jacket' && <g fill={outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'#374151':undefined} data-testid={outfitId&&!['midnight_jacket','festival_hoodie','acoustic_shirt'].includes(outfitId)?'fallback-avatar-torso':'artist-outfit'}>
             <path d="M73 126Q100 139 127 126L137 146L136 183Q100 190 64 183L63 146Z" fill={outfitId==='festival_hoodie'?'#a66469':outfitId==='acoustic_shirt'?'#dbceb4':'#374151'} stroke="#827762" strokeWidth="1"/>
             <path d="M82 128Q100 145 118 128" stroke="#fcf7e9" strokeWidth="3"/>
           </g>}
-          {accessory?.id==='accessory_classic'&&<g data-testid={role==='artist'?'star-badge-accessory':'preview-accessory-star'}><path d="M120 139L123 145H130L125 150L127 157L120 153L113 157L115 150L110 145H117Z" fill="#e0b465" stroke="#856a3e"/></g>}
-          {accessory?.id==='earpiece_glow'&&<g data-testid={role==='artist'?'earpiece-glow-accessory':'preview-accessory-earpiece'}><circle cx="147" cy="99" r="5" fill="#8ec8b4" stroke="#426b5d"/></g>}
-          {accessory?.id==='visor_neon'&&<g data-testid={role==='artist'?'visor-neon-accessory':'preview-accessory-visor'}><rect x="59" y="84" width="82" height="20" rx="8" fill="#537e86" fillOpacity=".8" stroke="#c9e8df"/><path d="M67 89H132" stroke="#d7eeed"/></g>}
+          {role==='artist'&&accessory?.id==='accessory_classic'&&<g data-testid={role==='artist'?'star-badge-accessory':'preview-accessory-star'}><path d="M120 139L123 145H130L125 150L127 157L120 153L113 157L115 150L110 145H117Z" fill="#e0b465" stroke="#856a3e"/></g>}
+          {role==='artist'&&accessory?.id==='earpiece_glow'&&<g data-testid={role==='artist'?'earpiece-glow-accessory':'preview-accessory-earpiece'}><circle cx="147" cy="99" r="5" fill="#8ec8b4" stroke="#426b5d"/></g>}
+          {role==='artist'&&accessory?.id==='visor_neon'&&<g data-testid={role==='artist'?'visor-neon-accessory':'preview-accessory-visor'}><rect x="59" y="84" width="82" height="20" rx="8" fill="#537e86" fillOpacity=".8" stroke="#c9e8df"/><path d="M67 89H132" stroke="#d7eeed"/></g>}
         </svg>
       </> : role === 'fan' ? (
         /* FAN AVATAR: 2.5D Matte-Clay Miniature (per approved fan-character-sheet.png) */

@@ -7,6 +7,7 @@ import { getExploreMomentById } from './world/exploreRows';
 import { artistForWorld, sessionContextUrl } from './world/worldContext';
 import { FanShell as AppShell } from './components/FanShell';
 import { PersonalSpaceGate } from './components/account/PersonalSpaceGate';
+const PersonalUtilityView=lazy(()=>import('./views/PersonalUtilityView').then(m=>({default:m.PersonalUtilityView})));
 const FanWorldView = lazy(() => import('./views/FanWorldView').then(m => ({default:m.FanWorldView})));
 const FanShopView = lazy(() => import('./views/FanShopView').then(m => ({default:m.FanShopView})));
 import { WorldPlazaView } from './views/WorldPlazaView';
@@ -81,6 +82,10 @@ export const App: React.FC = () => {
             <Route path="worlds/:worldId/shop" element={<FanShopView />} />
             <Route path="sessions/:sessionId" element={<SessionContextRedirect />} />
             <Route path="me" element={<FanWorldView />} />
+            <Route path="memberships" element={<PersonalSpaceGate><PersonalUtilityView/></PersonalSpaceGate>}/>
+            <Route path="orders" element={<PersonalSpaceGate><PersonalUtilityView/></PersonalSpaceGate>}/>
+            <Route path="account/settings" element={<PersonalSpaceGate><PersonalUtilityView/></PersonalSpaceGate>}/>
+            <Route path="account/help" element={<PersonalUtilityView/>}/>
             <Route path="benefits/:benefitId" element={<PersonalSpaceGate><BenefitDetailView /></PersonalSpaceGate>} />
             <Route path="orders/:orderId" element={<PersonalSpaceGate><OrderDetailView /></PersonalSpaceGate>} />
             <Route path="support/:caseId" element={<PersonalSpaceGate><SupportCaseDetailView /></PersonalSpaceGate>} />

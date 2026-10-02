@@ -1,5 +1,5 @@
 import { normalizeVietnameseText } from './textSearch';
-export interface SearchSuggestion { id: string; label: string; context: string; target?: string; keywords?: string }
+export interface SearchSuggestion { id: string; label: string; context: string; target?: string; keywords?: string; group?: string; image?: string }
 export function rankSuggestions(items: SearchSuggestion[], query: string, limit = 6) {
   const q = normalizeVietnameseText(query);
   const seen = new Set<string>();

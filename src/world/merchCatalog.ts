@@ -1,8 +1,9 @@
 import { AppState, Product, ProductKind } from '../domain/types';
+import { hasAvatarFit } from './avatarFit';
 import { isDemoSignedIn } from './account';
 
 /** Labels describe what the fan receives, not a second kind of store inventory. */
-export const DELIVERY_LABELS = { physical: 'Bản vật lý', digital: 'Bản số', bundle: 'Cả hai' };
+export const DELIVERY_LABELS = { physical: 'Ngoài đời', digital: 'Trong VieWorld', bundle: 'Cả hai' };
 export const DELIVERY_SUMMARIES = {
   physical: 'Món đồ ngoài đời',
   digital: 'Vật phẩm dùng trong VieWorld',
@@ -78,7 +79,7 @@ export function ownedDigitalLook(state: AppState) {
   const look: NonNullable<AppState['fanProfile']['digitalLook']> = {};
   for (const slot of ['shirt', 'hat', 'lightstick'] as const) {
     const item = state.fanProfile.digitalLook?.[slot];
-    if (item && Object.values(state.products).some(p => p.digitalSlot === slot && p.digitalItemId === item && ownsDigitalProduct(state,p))) look[slot] = item;
+    if (item && hasAvatarFit(item,state.fanProfile.avatarPreset) && Object.values(state.products).some(p => p.digitalSlot === slot && p.digitalItemId === item && ownsDigitalProduct(state,p))) look[slot] = item;
   }
   return look;
 }

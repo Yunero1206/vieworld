@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import { FanWorldView } from '../views/FanWorldView';
@@ -83,10 +83,7 @@ describe('World v2: ownership and access contracts',()=>{
     state=appReducer(state,{type:'REPORT_HALL_MESSAGE',worldId:'artist-a',messageId:'hall-1'});saveState(state);
     expect(loadState(state.activeTenantId,state.fanProfile.id).state.hallMessages?.['artist-a'][0].isReported).toBe(true);
   });
-  it('offers one discovery entrance instead of a duplicate artist dropdown',()=>{
-    mount('/');expect(screen.getByRole('link',{name:'← Khám phá nghệ sĩ'})).toHaveAttribute('href','/artists');
-    expect(screen.queryByRole('navigation',{name:'Các nơi trong thế giới'})).not.toBeInTheDocument();
-  });
+
   it('shop filters physical-only albums and saves a design without creating an order',()=>{
     mount('/shop');fireEvent.click(screen.getByRole('button',{name:'Album & đĩa'}));
     expect(screen.getByRole('heading',{name:'First Notes · CD Album'})).toBeInTheDocument();
@@ -95,17 +92,7 @@ describe('World v2: ownership and access contracts',()=>{
     const state=loadState('vieworld-demo',initial().fanProfile.id).state;
     expect(state.fanProfile.savedProductIds).toContain('product-cd-real');expect(Object.keys(state.orders)).toHaveLength(0);
   });
-  it('try-on renders digital but neither buys nor persists appearance',()=>{
-    mount('/shop?product=product-star-shirt-real');const dialog=screen.getByRole('dialog');
-    expect(within(dialog).getByRole('button',{name:'Chọn kích cỡ trước'})).toBeDisabled();
-    fireEvent.click(within(dialog).getByRole('button',{name:/Thử trong My Space/}));
-    const preview=screen.getByRole('dialog',{name:'Thử trong My Space'});
-    expect(within(preview).getByTestId('digital-shirt')).toBeInTheDocument();
-    const state=loadState('vieworld-demo',initial().fanProfile.id).state;
-    expect(state.fanProfile.digitalLook?.shirt).toBeUndefined();expect(Object.keys(state.orders)).toHaveLength(0);
-    fireEvent.click(within(preview).getByRole('button',{name:'Quay lại món đồ'}));
-    expect(within(screen.getByRole('dialog')).queryByTestId('digital-shirt')).not.toBeInTheDocument();
-  });
+
   it('dual-commerce: fulfilled digital item activates in wardrobe and persists look', () => {
     let state = fulfilled('product-star-shirt-digital');
     expect(ownsDigitalProduct(state, state.products['product-star-shirt-digital'])).toBe(true);

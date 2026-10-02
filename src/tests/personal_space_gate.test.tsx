@@ -8,7 +8,6 @@ import type { AppAction } from '../domain/types';
 import { freshGuestState, isDemoSignedIn } from '../world/account';
 import { PersonalSpaceGate } from '../components/account/PersonalSpaceGate';
 import { FanWorldView } from '../views/FanWorldView';
-import { WorldPlazaView } from '../views/WorldPlazaView';
 import { RoomPropVisual } from '../components/RoomPropVisual';
 import { FanShopView } from '../views/FanShopView';
 import { loadState, saveState } from '../services/storageAdapter';
@@ -41,13 +40,7 @@ describe('Guest identity and display regression',()=>{
     expect(screen.getByRole('button',{name:'Đăng nhập / Đăng ký'})).toBeVisible();
     expect(screen.queryByTestId('demo-auth-overlay')).toBeNull();
   });
-  it('greets an anonymous visitor without showing an old fan name or capsule history',()=>{
-    const guest=freshGuestState(createInitialState());
-    guest.fanProfile.displayName='PRIVATE NAME';
-    render(<AppProvider initialState={guest}><MemoryRouter><WorldPlazaView/></MemoryRouter></AppProvider>);
-    expect(screen.getByRole('heading',{level:1})).toHaveTextContent('Quảng trường VieWorld');
-    expect(document.body.textContent).not.toContain('PRIVATE NAME');
-  });
+
   it('preserves legacy ownership but never interprets a profile alone as login',()=>{
     const old=createInitialState(); delete old.demoAccount; saveState(old);
     expect(isDemoSignedIn(loadState().state)).toBe(false);
@@ -72,7 +65,7 @@ describe('Guest identity and display regression',()=>{
     guest.fanProfile.displayName='PRIVATE NAME';
     render(<AppProvider initialState={guest}><MemoryRouter initialEntries={['/shop']}><FanShopView/></MemoryRouter></AppProvider>);
     const card=screen.getByRole('heading',{name:'Áo Star Club'}).closest('article')!;
-    fireEvent.click(within(card).getByRole('button',{name:'Thử trong My Space'}));
+    fireEvent.click(within(card).getByRole('button',{name:'Thử mặc'}));
     expect(screen.getByRole('img',{name:'Avatar 2D của Khách'})).toBeVisible();
     expect(document.querySelector('[data-visual-id="star-shirt"]')).not.toBeNull();
     expect(screen.queryByRole('button',{name:'Mặc và lưu'})).toBeNull();

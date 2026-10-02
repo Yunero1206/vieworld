@@ -5,16 +5,24 @@ export { rankSuggestions, type SearchSuggestion } from '../utils/searchSuggestio
 
 
 /** Local, manual-selection autocomplete. Typing never opens a destination automatically. */
-export function SearchCombobox({ value, onChange, suggestions, onSelect, onSubmit, label, placeholder, className = '' }: {
+export function SearchCombobox({ value, onChange, suggestions, onSelect, onSubmit, label, placeholder, className = '', groups }: {
   value: string; onChange: (value: string) => void; suggestions: SearchSuggestion[];
   onSelect: (item: SearchSuggestion) => void; onSubmit?: (query: string) => void;
   label: string; placeholder: string; className?: string;
+  groups?: { id: string; label: string; limit?: number }[];
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-  const results = useMemo(() => rankSuggestions(suggestions, value), [suggestions, value]);
+  const results = useMemo(() => groups ? groups.flatMap(group => rankSuggestions(suggestions.filter(item => item.group === group.id), value, group.limit || 3)) : rankSuggestions(suggestions, value), [suggestions, value, groups]);
   const choose = (item: SearchSuggestion) => { setOpen(false); setActive(-1); onSelect(item); };
+  const option = (item: SearchSuggestion) => {
+    const index = results.indexOf(item);
+    return <li id={`${id}-${index}`} key={item.id} role="option" aria-selected={index === active}
+      onMouseDown={event => event.preventDefault()} onClick={() => choose(item)} onMouseMove={() => setActive(index)}>
+      {item.image ? <img src={item.image} alt=""/> : <Search size={15} aria-hidden="true"/>}<div><strong>{item.label}</strong><span>{item.context}</span></div>
+    </li>;
+  };
   return <div className={`vw-search-combobox ${className}`} onBlur={event => {
     if (!event.currentTarget.contains(event.relatedTarget)) { setOpen(false); setActive(-1); }
   }}>
@@ -35,12 +43,9 @@ export function SearchCombobox({ value, onChange, suggestions, onSelect, onSubmi
       {onSubmit && <button type="button" aria-label="Tìm kiếm" onClick={() => { setOpen(false); onSubmit(value.trim()); }}><Search size={17}/></button>}
     </div>
     <span className="sr-only" role="status">{open ? `${results.length} gợi ý. Dùng phím lên xuống để chọn.` : ''}</span>
-    {open && <div className="vw-search-dropdown"><small>{value.trim() ? 'Gợi ý phù hợp' : 'Bạn có thể bắt đầu từ'}</small>
+    {open && <div className={`vw-search-dropdown${groups ? ' is-grouped' : ''}`}><small>{value.trim() ? 'Gợi ý phù hợp' : 'Bạn có thể bắt đầu từ'}</small>
       <ul id={`${id}-list`} role="listbox" aria-label={`Gợi ý ${label.toLocaleLowerCase('vi')}`}>
-        {results.map((item, index) => <li id={`${id}-${index}`} key={item.id} role="option" aria-selected={index === active}
-          onMouseDown={event => event.preventDefault()} onClick={() => choose(item)} onMouseMove={() => setActive(index)}>
-          <Search size={15} aria-hidden="true"/><div><strong>{item.label}</strong><span>{item.context}</span></div>
-        </li>)}
+        {groups ? groups.map(group => <li key={group.id} role="presentation" className="presence-search-group"><span className="presence-search-group-title">{group.label}</span><ul role="group" aria-label={group.label}>{results.filter(item => item.group === group.id).map(option)}</ul>{!results.some(item => item.group === group.id) && <small>Chưa có gợi ý.</small>}</li>) : results.map(option)}
       </ul>
       {!results.length && <p role="status">Chưa có gợi ý phù hợp. Thử tên hoặc từ khóa khác.</p>}
       {onSubmit && value.trim() && <button type="button" className="vw-search-all" onClick={() => { setOpen(false); onSubmit(value.trim()); }}>Tìm “{value.trim()}” →</button>}

@@ -98,6 +98,9 @@ export interface Membership extends BaseRecord {
 }
 
 export interface Benefit extends BaseRecord {
+  availableFrom?: string;
+  expiresAt?: string;
+  target?: { type: 'product_family' | 'session' | 'archive_replay' | 'fan_project'; id: string } | { type: 'artist_hall'; worldId: string };
   fanId: string;
   worldId: string;
   title: string;
@@ -149,6 +152,7 @@ export interface SupportCase extends BaseRecord {
 export type FanRole = 'fan' | 'artist' | 'operator';
 
 export interface FanProfile extends BaseRecord {
+  sharing?: { communityPresenceEnabled: boolean; hallPublicProjectionEnabled: boolean };
   avatarPreset?: 'original' | 'wave' | 'bob' | 'curl';
   displaySlots?: Partial<Record<'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement', string>>;
   displaySurfaces?: Partial<Record<import('../world/display').DisplaySlot, import('../world/displaySurfaces').SurfaceSelection>>;
@@ -345,6 +349,8 @@ export interface AppState {
  * Pure Action Definitions
  */
 export type AppAction =
+  | { type: 'SET_FAN_SHARING'; communityPresenceEnabled: boolean; hallPublicProjectionEnabled: boolean }
+  | { type: 'SET_HALL_PUBLIC_CONSENT'; worldId: string; messageId: string; consent: boolean }
   | { type: 'DEMO_SIGN_IN'; provider: import('../world/account').DemoProvider; mode: 'login' | 'register' }
   | { type: 'DEMO_SIGN_OUT' }
   | { type: 'SAVE_PRIVATE_CONTACT'; contact: import('../world/account').PrivateContact }

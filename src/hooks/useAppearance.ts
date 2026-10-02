@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type Appearance = 'light' | 'dark';
 export const APPEARANCE_KEY = 'vieworld:appearance';
+const APPEARANCE_EVENT = 'vieworld-appearance-change';
 
 export function readAppearance(): Appearance {
   try { return localStorage.getItem(APPEARANCE_KEY) === 'dark' ? 'dark' : 'light'; }
@@ -20,8 +21,22 @@ export function useAppearance() {
     const sync = (event: StorageEvent) => {
       if (event.key === APPEARANCE_KEY) setAppearance(readAppearance());
     };
+    const syncHere = (event: Event) => {
+      const next = (event as CustomEvent<Appearance>).detail;
+      if (next === 'light' || next === 'dark') setAppearance(next);
+    };
     window.addEventListener('storage', sync);
-    return () => window.removeEventListener('storage', sync);
+    window.addEventListener(APPEARANCE_EVENT, syncHere);
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener(APPEARANCE_EVENT, syncHere);
+    };
   }, []);
-  return { appearance, toggleAppearance: () => setAppearance(current => current === 'light' ? 'dark' : 'light') };
+  const toggleAppearance = () => {
+    const next: Appearance = appearance === 'light' ? 'dark' : 'light';
+    setAppearance(next);
+    // Storage events do not fire in the window that made the change.
+    window.dispatchEvent(new CustomEvent(APPEARANCE_EVENT, { detail: next }));
+  };
+  return { appearance, toggleAppearance };
 }

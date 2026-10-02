@@ -52,7 +52,7 @@ describe('Demo account, no external identity or ownership mutation', () => {
   it('avatar opens overlay for guests without changing the page', () => {
     render(<AppProvider initialState={freshGuestState(createInitialState())}><MemoryRouter initialEntries={['/shop']}><FanShell/></MemoryRouter></AppProvider>);
     expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập hoặc đăng ký VieWorld' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập' }));
     expect(screen.getByTestId('demo-auth-overlay')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: 'Chuyển sang giao diện tối' }));
     expect(screen.getByTestId('app-container')).toHaveAttribute('data-theme', 'dark');

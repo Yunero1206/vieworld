@@ -24,8 +24,6 @@ import { AppShell } from '../components/AppShell';
 import { SupportCaseDetailView } from '../views/SupportCaseDetailView';
 import { BenefitDetailView } from '../views/BenefitDetailView';
 import { OrderDetailView } from '../views/OrderDetailView';
-import { MyWorldView } from '../views/MyWorldView';
-import { ShopView } from '../views/ShopView';
 import { saveState } from '../services/storageAdapter';
 
 describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () => {
@@ -212,7 +210,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
   });
 
   describe('2. UI Integration & End-to-End Journeys', () => {
-    it('1. Open support from BenefitDetailView → View Case → Resolve → Reconcile → Verify in My World & Shop', () => {
+    it('1. Open support → expand demo tools → resolve → reconcile → verify the canonical benefit detail', () => {
       const { unmount } = render(
         <AppProvider disableAutoHydrate={true}>
           <MemoryRouter initialEntries={['/benefits/benefit-early-access-01']}>
@@ -220,8 +218,6 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
               <Route path="/" element={<AppShell />}>
                 <Route path="benefits/:benefitId" element={<BenefitDetailView />} />
                 <Route path="support/:caseId" element={<SupportCaseDetailView />} />
-                <Route path="me" element={<MyWorldView />} />
-                <Route path="worlds/:worldId/shop" element={<ShopView />} />
               </Route>
             </Routes>
           </MemoryRouter>
@@ -251,6 +247,9 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
       expect(screen.getByText(/Không đưa ra cam kết thời gian phản hồi giả định/i)).toBeInTheDocument();
 
       // 4. Operator Simulates Resolve
+      const simulationTools = screen.getByText('Công cụ mô phỏng hỗ trợ').closest('details')!;
+      expect(simulationTools).not.toHaveAttribute('open');
+      fireEvent.click(screen.getByText('Công cụ mô phỏng hỗ trợ'));
       const resolveBtn = screen.getByTestId('operator-resolve-btn');
       fireEvent.click(resolveBtn);
 
@@ -259,7 +258,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
       expect(screen.getByTestId('case-resolution-box')).toBeInTheDocument();
 
       // INVARIANT: Benefit is STILL pending!
-      expect(screen.getByTestId('benefit-subject-status')).toHaveTextContent(/Trạng thái hiện tại:\s*PENDING/i);
+      expect(screen.getByTestId('benefit-subject-status')).toHaveTextContent(/Trạng thái hiện tại:\s*Chưa mở/i);
 
       // 5. Operator clicks Separate Reconciliation Action
       const reconcileBtn = screen.getByTestId('reconcile-benefit-btn');
@@ -269,22 +268,9 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
       // Source data now reconciled: status becomes eligible!
       expect(screen.getByText(/Nguồn dữ liệu đã được đối soát: Trạng thái quyền lợi hiện là ELIGIBLE/i)).toBeInTheDocument();
 
-      // 6. Navigate to My World (/me)
-      const myWorldLink = screen.getByRole('link', { name: /Quay lại My World/i });
-      fireEvent.click(myWorldLink);
-
-      // In My World, switch to "Hỗ trợ & Đối soát" tab
-      const supportTab = screen.getByRole('tab', { name: /Hỗ trợ & Đối soát/i });
-      fireEvent.click(supportTab);
-
-      // Case is listed in My World
-      expect(screen.getByRole('heading', { level: 2, name: /Hồ sơ hỗ trợ & Đối soát/i })).toBeInTheDocument();
-      expect(screen.getByTestId('support-cases-list')).toBeInTheDocument();
-      expect(screen.getByText(/Đã có kết luận/i)).toBeInTheDocument();
-
-      // Check "Quyền lợi & Hội viên" tab in My World: benefit is now eligible!
-      const benefitsTab = screen.getByRole('tab', { name: /Quyền lợi & Hội viên/i });
-      fireEvent.click(benefitsTab);
+      // 6. The user-facing recovery returns to Help, not the retired My World hub.
+      expect(screen.getByRole('link', { name: /Quay lại Trợ giúp/i })).toHaveAttribute('href', '/account/help');
+      fireEvent.click(screen.getByRole('link', { name: 'Chi tiết quyền lợi' }));
       expect(screen.getByTestId('benefit-status-benefit-early-access-01')).toHaveTextContent(/Đủ điều kiện/i);
 
       unmount();
@@ -340,7 +326,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
       expect(screen.getByText(/Hỗ trợ đơn hàng lưu niệm/i)).toBeInTheDocument();
       expect(screen.getByText(/Mã tham chiếu đối tượng:/i)).toBeInTheDocument();
       expect(screen.getByText(/Trạng thái đơn:/i)).toBeInTheDocument();
-      expect(screen.getByText(/PAID/i)).toBeInTheDocument();
+      expect(screen.getByText(/Đang chuẩn bị hàng/i)).toBeInTheDocument();
     });
 
     it('3. Navigating to non-existent support case ID renders recoverable error state', () => {
@@ -358,7 +344,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
 
       // Recoverable not-found UI
       expect(screen.getByText(/Không tìm thấy hồ sơ hỗ trợ/i)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Về My World/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Về Trợ giúp/i })).toHaveAttribute('href', '/account/help');
       expect(screen.getByRole('link', { name: /Khám phá Worlds/i })).toBeInTheDocument();
     });
   });

@@ -38,7 +38,7 @@ import './styles/home-inbox.css';
 import './styles/account-utilities.css';
 import './styles/digital-presentation.css';
 import './styles/shop-detail.css';
-import './styles/plaza-home.css';
+import './styles/presence.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

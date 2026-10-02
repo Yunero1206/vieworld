@@ -13,7 +13,7 @@ export const ROOM_SURFACE_BOUNDS: Record<DisplaySlot, { x: number; y: number; wi
   ticket: { x: 36.5, y: 28, width: 14, height: 20 },
   achievement: { x: 55.5, y: 30.5, width: 15, height: 26 },
   lightstick: { x: 68.5, y: 33, width: 4.2, height: 19 },
-  disc: { x: 84.5, y: 48, width: 18, height: 22 },
+  disc: { x: 73, y: 42, width: 18, height: 22 },
 };
 const a = (x: number, y: number, width: number, height: number, rotate = 0, z = 1, pivotY = 100): RoomAnchor => ({ x, y, width, height, rotate, z, pivotY });
 type Layouts = Record<1 | 2 | 3 | 4 | 5, RoomAnchor[]>;

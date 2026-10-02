@@ -23,6 +23,7 @@ export function CartView(){
   const problem=cartProblem(state);
   const paid=group.length>0&&group.every(o=>['paid','fulfilled'].includes(o.status));
   const allFulfilled=group.length>0&&group.every(o=>o.status==='fulfilled');
+  const avatarSlot=group.map(o=>o.digitalSlot || state.products[o.productId]?.digitalSlot).find(Boolean);
   const cancelled=group.length>0&&group.every(o=>o.status==='cancelled');
   const pendingGroup=group.length>0&&group.every(o=>o.status==='pending');
   const physical=checkoutId?group.some(o=>state.products[o.productId]?.delivery!=='digital'):cart.some(l=>state.products[l.productId]?.delivery!=='digital');
@@ -77,8 +78,8 @@ export function CartView(){
         <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px', marginBottom: '8px'}}>
           <Link to="/me?panel=bag" className="fw-button">Túi đồ & Đơn hàng của tôi</Link>
           {allFulfilled && <Link to="/me?section=collection" className="fw-text-button">Xem trong Bộ sưu tập →</Link>}
-          {allFulfilled && group.some(o => state.products[o.productId]?.digitalSlot) && (
-            <Link to="/me?section=avatar" className="fw-text-button" style={{textDecoration: 'underline'}}>Thử trên Avatar →</Link>
+          {allFulfilled && avatarSlot && (
+            <Link to={`/me?section=avatar&tab=${avatarSlot === 'shirt' ? 'outfit' : 'accessories'}`} className="fw-text-button" style={{textDecoration: 'underline'}}>Thử trên Avatar →</Link>
           )}
           {group.find(o => state.products[o.productId]?.delivery !== 'digital') && (
             <Link to={`/orders/${group.find(o => state.products[o.productId]?.delivery !== 'digital')!.id}`} className="fw-text-button" style={{textDecoration: 'underline'}}>Theo dõi đơn →</Link>

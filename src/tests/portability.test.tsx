@@ -18,7 +18,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import { AppShell } from '../components/AppShell';
@@ -206,7 +206,8 @@ describe('T15 Acceptance: External Tenant Portability & Isolation (MFan & FanMe)
       const recoveryCard = screen.getByTestId('benefit-not-found-recovery');
       expect(recoveryCard).toBeInTheDocument();
       expect(recoveryCard).toHaveTextContent('Không tìm thấy quyền lợi');
-      expect(recoveryCard).toHaveTextContent('benefit-early-access-01');
+      expect(recoveryCard).not.toHaveTextContent('benefit-early-access-01');
+      expect(within(recoveryCard).getByRole('link', { name: 'Về Hội viên & quyền lợi' })).toHaveAttribute('href', '/memberships');
     });
 
     it('safely renders session recovery card when accessing a VieWorld-specific session in MFan demo', () => {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Award, MoreHorizontal, X } from 'lucide-react';
+import {CatalogItemArt,hasCatalogItemArt} from './CatalogItemArt';
 import { useApp } from '../context/AppContext';
 import { displayAssetUrl, ownedCollection, type DisplayItem, type DisplaySlot } from '../world/display';
 import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection } from '../world/displaySurfaces';
@@ -14,17 +15,19 @@ const objectCategories = [['all', 'Tất cả'], ['shirt', 'Áo'], ['ticket', 'V
 const memoryCategories = [['all', 'Tất cả'], ['concert', 'Buổi diễn'], ['fan-project', 'Dự án fan'], ['capsule', 'Kỷ niệm riêng'], ['moment', 'Khoảnh khắc'], ['milestone', 'Dấu mốc']];
 
 export function CollectionBrowser() {
+  const navigate=useNavigate();
   const { state, dispatch } = useApp();
   const [params, setParams] = useSearchParams();
   const rawCategory = params.get('type') || params.get('custom') || 'all';
   const category = rawCategory === 'achievement' ? 'milestone' : rawCategory === 'memory' ? 'capsule' : rawCategory;
-  const mode: Mode = params.get('mode') === 'memories' || memoryCategories.some(([id]) => id !== 'all' && id === category) ? 'memories' : 'objects';
+  const mode: Mode = params.get('panel')==='capsules' || params.get('mode') === 'memories' || memoryCategories.some(([id]) => id !== 'all' && id === category) ? 'memories' : 'objects';
   const [query, setQuery] = useState('');
   const [artist, setArtist] = useState('all');
   const [eventName, setEventName] = useState('all');
   const [year, setYear] = useState('all');
   const [menuId, setMenuId] = useState<string | null>(null);
   const [detail, setDetail] = useState<DisplayItem | null>(null);
+  const [noteSaved,setNoteSaved]=useState(false);
   const [placing, setPlacing] = useState<DisplayItem | null>(null);
   const [notice, setNotice] = useState('');
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -36,6 +39,7 @@ export function CollectionBrowser() {
     return () => cancelAnimationFrame(frame);
   }, [detail, placing]);
   const owned = useMemo(() => ownedCollection(state), [state]);
+  useEffect(()=>{const capsuleId=params.get('capsule');if(capsuleId){const capsule=owned.find(item=>item.id===capsuleId);if(capsule)setDetail(capsule);}},[params.get('capsule'),owned]);
   const modeOwned = owned.filter(item => (mode === 'memories') === ['event', 'achievement', 'moment'].includes(item.sourceType || ''));
   const surfaces = useMemo(() => readDisplaySurfaces(state.fanProfile, owned), [state.fanProfile, owned]);
   const categories = mode === 'objects' ? objectCategories : memoryCategories;
@@ -55,15 +59,16 @@ export function CollectionBrowser() {
   });
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') { setMenuId(null); setDetail(null); setPlacing(null); } };
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' && !detail && !placing) { setMenuId(null); setDetail(null); setPlacing(null); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [detail,placing]);
 
   function setCategory(value: string, nextMode: Mode = mode) {
     const next = new URLSearchParams(params);
     next.set('section', 'collection');
     next.delete('custom');
+    next.delete('panel');
     if (nextMode === 'memories') next.set('mode', 'memories'); else next.delete('mode');
     if (value === 'all') next.delete('type'); else next.set('type', value);
     setParams(next, { replace: true });
@@ -87,10 +92,7 @@ export function CollectionBrowser() {
     const profile = oldId ? { ...state.fanProfile, displaySurfaces: { ...surfaces, [oldId]: { ...surfaces[oldId], itemIds: surfaces[oldId].itemIds.filter(value => value !== item.id) } } } : state.fanProfile;
     const problem = validateSurfaceSelection(profile, id, selection, owned);
     if (problem) { setNotice(problem); return; }
-    if (oldId) remove(item);
-    dispatch({ type: 'SET_DISPLAY_SURFACE', surfaceId: id, selection });
-    setPlacing(null); setMenuId(null);
-    setNotice(`Đã trưng ${item.title} ở ${DISPLAY_SURFACES.find(surface => surface.id === id)?.label}.`);
+    navigate(`/me?place=${encodeURIComponent(item.id)}&surface=${id}`);
   }
 
   return <section className="myspace-collection" aria-label="Bộ sưu tập riêng">
@@ -118,7 +120,7 @@ export function CollectionBrowser() {
     <div className={`myspace-collection-grid ${mode === 'memories' ? 'is-memories' : ''}`}>
       {filtered.map(item => <article className={`myspace-object-card ${item.sourceType === 'achievement' ? 'is-milestone' : ''}`} key={item.id}>
         <div className="myspace-object-image">
-          {displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" loading="lazy"/> : <div className="myspace-keepsake-emblem"><Award size={36}/><span>Dấu mốc</span></div>}
+          {hasCatalogItemArt(item.id)?<CatalogItemArt id={item.id} title={item.title}/>:displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" loading="lazy"/> : <div className="myspace-keepsake-emblem"><Award size={36}/><span>Dấu mốc</span></div>}
           <button className="myspace-object-menu-trigger" type="button" aria-label={`Tùy chọn ${item.title}`} aria-expanded={menuId === item.id} onClick={() => setMenuId(menuId === item.id ? null : item.id)}><MoreHorizontal size={19}/></button>
           {menuId === item.id && <div className="myspace-object-menu" role="menu"><button type="button" role="menuitem" onClick={() => { setDetail(item); setMenuId(null); }}>Xem chi tiết</button>{item.isDisplayCompatible && <button type="button" role="menuitem" onClick={() => { setPlacing(item); setMenuId(null); }}>{displayedAt(item.id) ? 'Đổi vị trí' : 'Trưng trong phòng'}</button>}{displayedAt(item.id) && <><Link to="/me" role="menuitem" onClick={() => setMenuId(null)}>Xem trong phòng</Link><button type="button" role="menuitem" onClick={() => remove(item)}>Gỡ khỏi phòng</button></>}</div>}
         </div>
@@ -128,7 +130,7 @@ export function CollectionBrowser() {
     {!filtered.length && <div className="myspace-collection-empty">
       {modeOwned.length ? <><p>Chưa có món nào phù hợp với lựa chọn này.</p><button type="button" onClick={() => { setQuery(''); setArtist('all'); setEventName('all'); setYear('all'); setCategory('all'); }}>Xem tất cả</button></> : mode === 'objects' ? <>
         <h3>Chưa có vật phẩm đã nhận.</h3><p>Vật phẩm hiện ở đây sau khi được giao trong demo. Đồ đã lưu hay còn trong giỏ chưa phải đồ của bạn.</p>
-        <Link to="/shop">Ghé VieSHOP →</Link><Link to="/me?panel=bag">Kiểm tra đơn đã chốt →</Link>
+        <Link to="/shop">Ghé VieSHOP →</Link><Link to="/orders">Kiểm tra đơn đã chốt →</Link>
       </> : <>
         <h3>Chưa có kỷ niệm ở đây.</h3><p>Kỷ niệm được giữ lại từ cuộc hẹn bạn đã tham dự; giữ chỗ thôi chưa ghi nhận tham dự.</p>
         <Link to="/explore">Tìm một cuộc hẹn →</Link>
@@ -137,8 +139,8 @@ export function CollectionBrowser() {
     {mode === 'memories' && <details className="myspace-history-details"><summary>Xem lịch sử thẻ & dấu mốc đã ghi nhận</summary><ArchiveCollection/></details>}
     {detail && <div className="myspace-modal-backdrop" onClick={() => setDetail(null)}>
       <div ref={dialogRef} tabIndex={-1} className="myspace-modal" role="dialog" aria-modal="true" aria-label={`Chi tiết ${detail.title}`} onClick={event => event.stopPropagation()}>
-        <button className="myspace-modal-close" type="button" onClick={() => setDetail(null)} aria-label="Đóng"><X size={18}/></button><div className="myspace-modal-image">{displayAssetUrl(detail) ? <img src={displayAssetUrl(detail)} alt=""/> : <Award size={54}/>}</div><h2>{detail.title}</h2><p>{state.worlds[detail.worldId || '']?.name || 'Bộ sưu tập của bạn'}{detail.collectedAt ? ` · ${detail.collectedAt.slice(0, 10)}` : ''}</p><p>{detail.detail}</p>{detail.isDisplayCompatible && <button type="button" className="myspace-primary-action" onClick={() => { setPlacing(detail); setDetail(null); }}>{displayedAt(detail.id) ? 'Đổi vị trí trong phòng' : 'Trưng trong phòng'}</button>}
-        {state.capsules[detail.id] && <Link className="myspace-room-link" to={`/me?panel=capsules&capsule=${encodeURIComponent(detail.id)}`} onClick={() => setDetail(null)}>Ghi chú riêng cho kỷ niệm này →</Link>}
+        <button className="myspace-modal-close" type="button" onClick={() => setDetail(null)} aria-label="Đóng"><X size={18}/></button><div className="myspace-modal-image">{hasCatalogItemArt(detail.id)?<CatalogItemArt id={detail.id} title={detail.title}/>:displayAssetUrl(detail) ? <img src={displayAssetUrl(detail)} alt=""/> : <Award size={54}/>}</div><h2>{detail.title}</h2><p>{state.worlds[detail.worldId || '']?.name || 'Bộ sưu tập của bạn'}{detail.collectedAt ? ` · ${detail.collectedAt.slice(0, 10)}` : ''}</p><p>{detail.detail}</p>{detail.isDisplayCompatible && <button type="button" className="myspace-primary-action" onClick={() => { setPlacing(detail); setDetail(null); }}>{displayedAt(detail.id) ? 'Đổi vị trí trong phòng' : 'Trưng trong phòng'}</button>}
+        {state.capsules[detail.id]&&<form onSubmit={e=>{e.preventDefault();const form=new FormData(e.currentTarget);dispatch({type:'SAVE_CAPSULE',capsuleId:detail.id,privateNote:String(form.get('note')||''),isSaved:state.capsules[detail.id].isSaved});setNoteSaved(true);}}><label>Ghi chú riêng<textarea name="note" defaultValue={state.capsules[detail.id].privateNote||''} maxLength={1000} onChange={()=>setNoteSaved(false)}/></label><button type="submit">Lưu ghi chú</button>{noteSaved&&<small role="status">Đã lưu riêng.</small>}</form>}
       </div>
     </div>}
     {placing && <div className="myspace-modal-backdrop" onClick={() => setPlacing(null)}>

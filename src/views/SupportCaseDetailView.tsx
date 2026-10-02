@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { benefitStateLabel, orderState } from '../world/personalSelectors';
 import {
   ArrowLeft,
   AlertTriangle,
@@ -42,18 +43,18 @@ export const SupportCaseDetailView: React.FC = () => {
       <div className="container" style={{ padding: '40px 20px' }}>
         <div className="card" data-testid="support-case-not-found-recovery" style={{ maxWidth: '560px', margin: '0 auto', textAlign: 'center', padding: '36px 24px' }}>
           <AlertTriangle size={48} color="var(--danger)" style={{ margin: '0 auto 16px auto' }} />
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '800', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: '600', marginBottom: '8px' }}>
             Không tìm thấy hồ sơ hỗ trợ
           </h2>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', marginBottom: '24px', lineHeight: 1.6 }}>
             Mã hồ sơ <code>{caseId}</code> không tồn tại trong phiên thử nghiệm hiện tại hoặc thuộc về phân vùng khác.
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <Link to="/me" className="btn btn-primary" id="support-back-to-myworld-btn">
+            <Link to="/account/help" className="btn btn-primary" id="support-back-to-myworld-btn">
               <ArrowLeft size={16} />
-              <span>Về My World</span>
+              <span>Về Trợ giúp</span>
             </Link>
-            <Link to="/worlds" className="btn btn-secondary">
+            <Link to="/explore" className="btn btn-secondary">
               Khám phá Worlds
             </Link>
           </div>
@@ -75,14 +76,14 @@ export const SupportCaseDetailView: React.FC = () => {
     {
       id: 'open',
       title: '1. Khởi tạo & Tiếp nhận',
-      desc: 'Hồ sơ đã được gửi thành công. Đội ngũ tiếp nhận vào hàng đợi xử lý.',
+      desc: 'Đã lưu yêu cầu trên thiết bị. Chưa gửi đến đội hỗ trợ.',
       isCompleted: true,
       isActive: supportCase.status === 'open',
     },
     {
       id: 'acknowledged',
       title: '2. Xác nhận hồ sơ',
-      desc: 'Nhân viên hỗ trợ đã xác nhận thông tin và chuyển giao dữ liệu sang bộ phận đối soát.',
+      desc: 'Bước tiếp nhận được mô phỏng trong demo.',
       isCompleted:
         supportCase.status === 'acknowledged' ||
         supportCase.status === 'investigating' ||
@@ -93,7 +94,7 @@ export const SupportCaseDetailView: React.FC = () => {
     {
       id: 'investigating',
       title: '3. Đối soát kỹ thuật',
-      desc: 'Kiểm tra dữ liệu phân bổ quyền lợi hoặc tình trạng vận chuyển với đơn vị vận hành.',
+      desc: 'Mô phỏng kiểm tra quyền lợi hoặc đơn hàng.',
       isCompleted:
         supportCase.status === 'investigating' ||
         supportCase.status === 'resolved' ||
@@ -103,24 +104,24 @@ export const SupportCaseDetailView: React.FC = () => {
     {
       id: 'resolved',
       title: '4. Kết luận xử lý',
-      desc: 'Đưa ra kết luận chính thức. (Lưu ý: Kết luận hồ sơ tách biệt với việc kích hoạt nguồn dữ liệu).',
+      desc: 'Kết luận demo không tự thay đổi quyền lợi hay giao hàng.',
       isCompleted: supportCase.status === 'resolved' || supportCase.status === 'closed',
       isActive: supportCase.status === 'resolved',
     },
   ];
 
   return (
-    <div className="container" style={{ padding: '24px 20px 60px 20px' }}>
+    <div className="presence-utility presence-support-detail">
       {/* Breadcrumb Navigation */}
       <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <Link
-          to="/me"
+          to="/account/help"
           className="btn btn-secondary"
           style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
           id="back-to-myworld-btn"
         >
           <ArrowLeft size={14} />
-          <span>Quay lại My World</span>
+          <span>Quay lại Trợ giúp</span>
         </Link>
 
         {benefit && (
@@ -139,7 +140,7 @@ export const SupportCaseDetailView: React.FC = () => {
             className="btn btn-secondary"
             style={{ fontSize: 'var(--text-xs)', padding: '6px 12px' }}
           >
-            <span>Chi tiết đơn hàng #{order.id}</span>
+            <span>Chi tiết đơn hàng</span>
           </Link>
         )}
       </div>
@@ -148,13 +149,13 @@ export const SupportCaseDetailView: React.FC = () => {
         {/* Header */}
         <header>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontWeight: '700' }}>
+            <span className="tag" style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--primary)', fontWeight: '700' }}>
               HỒ SƠ HỖ TRỢ & ĐỐI SOÁT
             </span>
             <span className="demo-badge">DEMO</span>
           </div>
-          <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: '800', margin: '0 0 8px 0' }}>
-            Hồ sơ hỗ trợ #{supportCase.id}
+          <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: '600', margin: '0 0 8px 0' }}>
+            Yêu cầu hỗ trợ
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
             Hệ thống hỗ trợ và kiểm tra minh bạch · Không đưa ra cam kết thời gian phản hồi giả định.
@@ -185,12 +186,12 @@ export const SupportCaseDetailView: React.FC = () => {
                 <LifeBuoy size={24} />
               </div>
               <div>
-                <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: '0 0 4px 0' }}>
+                <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '600', margin: '0 0 4px 0' }}>
                   {supportCase.subjectType === 'benefit' ? 'Hỗ trợ đối soát quyền lợi' : 'Hỗ trợ đơn hàng lưu niệm'}
                 </h3>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                  Mã tham chiếu đối tượng: <code>{supportCase.subjectId}</code>
-                  {world && ` · Thế giới: ${world.name}`}
+                  {benefit?.title || order?.productTitle || product?.title || 'Nội dung cần kiểm tra'}
+                  {world && ` · ${world.name}`}
                 </div>
               </div>
             </div>
@@ -200,7 +201,7 @@ export const SupportCaseDetailView: React.FC = () => {
               {supportCase.status === 'open' && (
                 <span
                   className="tag"
-                  style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
+                  style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--primary)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
                   data-testid="case-status-badge"
                 >
                   Tiếp nhận (Open)
@@ -209,7 +210,7 @@ export const SupportCaseDetailView: React.FC = () => {
               {supportCase.status === 'acknowledged' && (
                 <span
                   className="tag"
-                  style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
+                  style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--appearance-accent)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
                   data-testid="case-status-badge"
                 >
                   Đã ghi nhận (Acknowledged)
@@ -218,7 +219,7 @@ export const SupportCaseDetailView: React.FC = () => {
               {supportCase.status === 'investigating' && (
                 <span
                   className="tag"
-                  style={{ backgroundColor: '#FEF3C7', color: '#B45309', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
+                  style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--appearance-accent)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
                   data-testid="case-status-badge"
                 >
                   Đang đối soát (Investigating)
@@ -227,7 +228,7 @@ export const SupportCaseDetailView: React.FC = () => {
               {supportCase.status === 'resolved' && (
                 <span
                   className="tag"
-                  style={{ backgroundColor: '#DCFCE7', color: '#15803D', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
+                  style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--appearance-accent)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
                   data-testid="case-status-badge"
                 >
                   Đã có kết luận (Resolved)
@@ -236,7 +237,7 @@ export const SupportCaseDetailView: React.FC = () => {
               {supportCase.status === 'closed' && (
                 <span
                   className="tag"
-                  style={{ backgroundColor: '#F3F4F6', color: '#4B5563', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
+                  style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--appearance-accent)', fontWeight: '700', padding: '6px 12px', borderRadius: 'var(--radius-md)' }}
                   data-testid="case-status-badge"
                 >
                   Đã đóng (Closed)
@@ -262,7 +263,7 @@ export const SupportCaseDetailView: React.FC = () => {
                 <div>
                   <strong style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>{benefit.title}</strong>
                   <div data-testid="benefit-subject-status" style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', marginTop: '2px' }}>
-                    Trạng thái hiện tại: <strong>{benefit.status.toUpperCase()}</strong> · Lý do: <code>{benefit.reasonCode}</code>
+                    Trạng thái hiện tại: <strong>{benefitStateLabel(state,benefit)}</strong>
                   </div>
                 </div>
                 <Link
@@ -282,7 +283,7 @@ export const SupportCaseDetailView: React.FC = () => {
                     {product ? product.title : order.productId}
                   </strong>
                   <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', marginTop: '2px' }}>
-                    Trạng thái đơn: <strong>{order.status.toUpperCase()}</strong> · Nguồn: <code>{order.sourceRef}</code>
+                    Trạng thái đơn: <strong>{orderState(order,state)}</strong>
                   </div>
                 </div>
                 <Link
@@ -297,6 +298,8 @@ export const SupportCaseDetailView: React.FC = () => {
           </div>
 
           {/* Metadata Grid */}
+          <details className="presence-diagnostics"><summary>Thông tin đối chiếu demo</summary>
+          <p>Mã tham chiếu đối tượng: <code>{supportCase.subjectId}</code></p>
           <div
             style={{
               display: 'grid',
@@ -322,21 +325,22 @@ export const SupportCaseDetailView: React.FC = () => {
             </div>
           </div>
 
+          </details>
           {/* Next Action Callout */}
           <div
             style={{
               padding: '12px 16px',
-              backgroundColor: '#EFF6FF',
+              backgroundColor: 'var(--appearance-soft)',
               border: '1px solid #BFDBFE',
               borderRadius: 'var(--radius-md)',
               fontSize: 'var(--text-xs)',
               lineHeight: 1.5,
             }}
           >
-            <strong style={{ color: '#1E40AF', display: 'block', marginBottom: '2px' }}>
+            <strong style={{ color: 'var(--appearance-accent)', display: 'block', marginBottom: '2px' }}>
               Bước tiếp theo của hồ sơ:
             </strong>
-            <span style={{ color: '#1E3A8A' }}>{supportCase.nextAction}</span>
+            <span style={{ color: 'var(--appearance-accent)' }}>{supportCase.nextAction}</span>
           </div>
 
           {/* Stated Resolution (if resolved) */}
@@ -344,7 +348,7 @@ export const SupportCaseDetailView: React.FC = () => {
             <div
               style={{
                 padding: '16px',
-                backgroundColor: '#ECFDF5',
+                backgroundColor: 'var(--appearance-soft)',
                 border: '1px solid #A7F3D0',
                 borderRadius: 'var(--radius-md)',
                 fontSize: 'var(--text-xs)',
@@ -373,7 +377,7 @@ export const SupportCaseDetailView: React.FC = () => {
           aria-label="Tiến trình các bước cập nhật thử nghiệm"
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: 0 }}>
+            <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '600', margin: 0 }}>
               Tiến trình xử lý hồ sơ thử nghiệm
             </h3>
             <span className="demo-badge">DEMO</span>
@@ -414,7 +418,7 @@ export const SupportCaseDetailView: React.FC = () => {
                       {step.title}
                     </strong>
                     {step.isActive && (
-                      <span className="tag" style={{ backgroundColor: '#EDE9FE', color: 'var(--primary)', fontSize: '11px', fontWeight: '700' }}>
+                      <span className="tag" style={{ backgroundColor: 'var(--appearance-soft)', color: 'var(--primary)', fontSize: '11px', fontWeight: '700' }}>
                         Hiện tại
                       </span>
                     )}
@@ -429,14 +433,15 @@ export const SupportCaseDetailView: React.FC = () => {
         </section>
 
         {/* Operator Simulation Desk */}
-        <section
+        <details
           className="card"
-          style={{ padding: '24px', backgroundColor: '#FAF9FE', border: '1px solid #DDD6FE' }}
+          style={{ padding: '24px', backgroundColor: 'var(--appearance-soft)', border: '1px solid #DDD6FE' }}
           aria-label="Bàn điều khiển mô phỏng vận hành"
         >
+          <summary>Công cụ mô phỏng hỗ trợ</summary>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <FileQuestion size={20} color="var(--primary)" />
-            <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '800', margin: 0, color: 'var(--primary)' }}>
+            <h3 style={{ fontSize: 'var(--text-base)', fontWeight: '600', margin: 0, color: 'var(--primary)' }}>
               Bàn mô phỏng vận hành hỗ trợ
             </h3>
           </div>
@@ -536,7 +541,7 @@ export const SupportCaseDetailView: React.FC = () => {
                     type="button"
                     onClick={() => dispatch({ type: 'RECONCILE_BENEFIT', benefitId: benefit.id })}
                     className="btn btn-primary"
-                    style={{ fontSize: 'var(--text-xs)', padding: '10px 18px', alignSelf: 'flex-start', backgroundColor: '#059669', borderColor: '#059669' }}
+                    style={{ fontSize: 'var(--text-xs)', padding: '10px 18px', alignSelf: 'flex-start', backgroundColor: 'var(--appearance-accent)', borderColor: 'var(--appearance-accent)' }}
                     id="reconcile-benefit-btn"
                     data-testid="reconcile-benefit-btn"
                   >
@@ -544,7 +549,7 @@ export const SupportCaseDetailView: React.FC = () => {
                     <span>Thực hiện đối soát: Cấp trạng thái Đủ điều kiện (Eligible)</span>
                   </button>
                 ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#15803D', fontSize: 'var(--text-xs)', fontWeight: '700' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--appearance-accent)', fontSize: 'var(--text-xs)', fontWeight: '700' }}>
                     <CheckCircle2 size={16} />
                     <span>Nguồn dữ liệu đã được đối soát: Trạng thái quyền lợi hiện là {benefit.status.toUpperCase()}</span>
                   </div>
@@ -552,7 +557,7 @@ export const SupportCaseDetailView: React.FC = () => {
               </div>
             )}
           </div>
-        </section>
+        </details>
       </div>
     </div>
   );

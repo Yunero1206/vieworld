@@ -4,6 +4,12 @@ import { getArtistCover } from './artistVisuals';
 import { selectPublicVoices } from './exploreDiscovery';
 
 export function contextMedia(artistId: string, session?: Session): ExploreMedia {
+  if (artistId === 'artist-a' && session?.id === 'session-dropin-01') {
+    return { src: `${import.meta.env.BASE_URL}images/merch-studio/artist-a-dropin.webp` };
+  }
+  if (artistId === 'artist-a' && session?.id === 'session-a-album-drop') {
+    return { src: `${import.meta.env.BASE_URL}images/merch-studio/artist-a-album-launch.webp` };
+  }
   const moments = getWorldMoments(artistId);
   const studio = session?.format === 'listening' || /album|thu âm|bản thu/i.test(session?.title || '');
   return moments[studio ? 1 : 0]?.media || { src: getArtistCover(artistId) };
@@ -14,12 +20,19 @@ export function isArtistHallRoom(state: AppState, artistId: string, roomId: stri
   if (roomId === `hall-${artistId}`) return true;
   if (state.activeTenantId === 'vieworld-demo' && getWorldProject(artistId)?.id === roomId) return true;
   const session = state.sessions[roomId];
-  return Boolean(session && session.tenantId === state.activeTenantId && session.rightsApproved !== false
+  return Boolean(session && session.tenantId === state.activeTenantId && session.rightsApproved === true
+    && session.status !== 'cancelled' && !['missing','expired'].includes(session.mediaStatus||'')
     && (session.worldId === artistId || (state.worlds[session.worldId]?.type === 'ip' && state.worlds[session.worldId]?.linkedWorldIds.includes(artistId))));
+}
+
+/** No canonical endedAt/grace deadline exists in this demo: ended rooms remain read-only. */
+export function canWriteArtistHallRoom(state: AppState, artistId: string, roomId: string): boolean {
+  return isArtistHallRoom(state,artistId,roomId) && state.sessions[roomId]?.status!=='ended' && !state.sessions[roomId]?.isChatPaused;
 }
 export function artistRooms(state: AppState, artistId: string, selectedRoomId?: string): ArtistRoom[] {
   const name = state.worlds[artistId]?.name || '';
-  const sessions = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved !== false
+  const sessions = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved === true
+    && !['missing','expired'].includes(session.mediaStatus||'')
     && (session.worldId === artistId || (state.worlds[session.worldId]?.type === 'ip' && state.worlds[session.worldId]?.linkedWorldIds.includes(artistId)))
     && (['running','open'].includes(session.status) || (session.status === 'scheduled' && session.scheduledStartTime >= state.demoTime) || (session.id === selectedRoomId && ['ended','paused'].includes(session.status))))
     .sort((a,b) => Number(b.status === 'running') - Number(a.status === 'running'));
@@ -32,7 +45,8 @@ export function artistRooms(state: AppState, artistId: string, selectedRoomId?: 
 }
 /** Same canonical room as Context Mode; demo excerpts remain visibly illustrative. */
 export function hallEntries(state: AppState, artistId: string, roomId: string): ChatMessage[] {
-  const fixtures = selectPublicVoices(state,artistId).filter(voice => voice.isDemo && voice.sourceContextId === roomId)
+  const messages = (state.hallMessages?.[artistId] || []).filter(message => message.sessionId === roomId && !message.isReported);
+  const fixtures = selectPublicVoices(state,artistId,roomId).filter(voice => voice.isDemo && !messages.some(message=>message.id===voice.id))
     .map(voice => ({ id: voice.id, sessionId: roomId, fanId: `demo-${voice.id}`, authorName: voice.author, text: voice.text, timestamp: '', isSample: true }));
-  return [...fixtures, ...(state.hallMessages?.[artistId] || []).filter(message => message.sessionId === roomId && !message.isReported)];
+  return [...fixtures, ...messages];
 }

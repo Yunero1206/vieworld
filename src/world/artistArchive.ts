@@ -23,9 +23,6 @@ export function artistArchiveChapters(state:AppState,artistId:string,moments:Exp
   }));
   const remaining=moments.filter(moment=>!assigned.has(moment.id));
   if(remaining.length) chapters.push({id:`daily-${artistId}-${year}`,title:'Những ngày thường',year,kind:'Era',media:remaining[0].media,detail:'Những lát cắt gần đây được giữ lại trong world.',momentIds:remaining.map(moment=>moment.id),demo:remaining.some(moment=>moment.isDemo)});
-  Object.values(state.capsules).filter(capsule=>capsule.tenantId===state.activeTenantId && capsule.worldId===artistId && capsule.fanId===state.fanProfile.id && capsule.isSaved).forEach(capsule=>{
-    const session=state.sessions[capsule.sessionId];
-    chapters.push({id:capsule.id,title:`Capsule · ${session?.title||'Kỷ niệm của bạn'}`,year:Number((session?.scheduledStartTime||state.demoTime).slice(0,4)),kind:'Capsule',media:contextMedia(artistId,session),detail:'Kỷ niệm riêng của bạn; không phải nội dung công khai của world.',momentIds:[],to:'/me?panel=capsules',private:true});
-  });
+
   return chapters;
 }

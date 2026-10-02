@@ -6,7 +6,7 @@ import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Que
 import { createInitialState } from '../data/fixtures';
 import { ARTIST_NOTES } from '../world/fanWorld';
 import { getExploreMomentById } from '../world/exploreRows';
-import { hallEntries, isArtistHallRoom } from '../world/artistPresentation';
+import { hallEntries, isArtistHallRoom, canWriteArtistHallRoom } from '../world/artistPresentation';
 import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
 import { validRoomDesign } from '../world/places';
 import { commerceReducer } from '../world/commerce';
@@ -14,6 +14,7 @@ import { shippingReducer } from '../world/shipping';
 import { historyReducer } from '../world/history';
 import { validHomeDestination } from '../world/homeDestination';
 import { accountReducer, isDemoSignedIn } from '../world/account';
+import { hasAvatarFit } from '../world/avatarFit';
 
 export function appReducer(state: AppState, action: AppAction): AppState {
   if (!isDemoSignedIn(state) && ['SAVE_ROOM_DESIGN','SET_DISPLAY_SLOT','SET_DISPLAY_SURFACE','SET_AVATAR_PRESET','EQUIP_WARDROBE','EQUIP_DIGITAL_PRODUCT','REMOVE_DIGITAL_SLOT','SET_SHOWCASE_SLOT','CLEAR_SHOWCASE_SLOT','SAVE_CAPSULE','SAVE_PUBLIC_IDENTITY'].includes(action.type)) {
@@ -22,6 +23,17 @@ export function appReducer(state: AppState, action: AppAction): AppState {
   const featureState=accountReducer(state,action) ?? commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);
   if(featureState)return featureState;
   switch (action.type) {
+    case 'SET_FAN_SHARING': {
+      if (!isDemoSignedIn(state)) return state;
+      return { ...state, fanProfile: { ...state.fanProfile, sharing: { communityPresenceEnabled: action.communityPresenceEnabled, hallPublicProjectionEnabled: action.hallPublicProjectionEnabled } } };
+    }
+    case 'SET_HALL_PUBLIC_CONSENT': {
+      if (!isDemoSignedIn(state) || state.worlds[action.worldId]?.tenantId !== state.activeTenantId) return state;
+      return { ...state, hallMessages: { ...state.hallMessages, [action.worldId]: (state.hallMessages?.[action.worldId] || []).map(message => {
+        if (message.id !== action.messageId || message.fanId !== state.fanProfile.id || message.isSample) return message;
+        return { ...message, explorePreviewConsent: action.consent, explorePreviewStatus: action.consent && message.explorePreviewConsent && message.explorePreviewStatus === 'approved' ? 'approved' : 'pending' };
+      }) } };
+    }
     case 'SAVE_ROOM_DESIGN': {
       if(!validRoomDesign(action.design)) return {...state,lastError:{code:'ROOM_DESIGN_INVALID',message:'Bố cục phòng chưa hợp lệ. Chọn tối đa 8 món trong vùng sàn.'}};
       return {...state,lastError:undefined,fanProfile:{...state.fanProfile,roomDesign:{...action.design,layers:{...action.design.layers},items:action.design.items.map(i=>({...i}))}}};
@@ -32,6 +44,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (!isArtistHallRoom(state, action.worldId, roomId)) {
         return { ...state, lastError: { code: 'HALL_ROOM_INVALID', message: 'Không tìm thấy phòng trò chuyện này trong world.' } };
       }
+      if (!canWriteArtistHallRoom(state,action.worldId,roomId)) return {...state,lastError:{code:'HALL_ROOM_READ_ONLY',message:'Phòng này đang chỉ đọc. Bạn vẫn có thể xem lại lời nhắn.'}};
       const messages = state.hallMessages?.[action.worldId] || [];
       const value = action.text.trim();
       if (messages.some(m => m.id === action.requestId)) return state;
@@ -42,7 +55,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: roomId, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime, replyToId: action.replyToId, momentIds }].slice(-100) } };
     }
     case 'TOGGLE_HALL_REACTION': {
-      if (!canEnterHall(state, action.worldId) || !isArtistHallRoom(state,action.worldId,action.roomId) || !hallEntries(state,action.worldId,action.roomId).some(item => item.id === action.messageId)) return state;
+      if (!canEnterHall(state, action.worldId) || !canWriteArtistHallRoom(state,action.worldId,action.roomId) || !hallEntries(state,action.worldId,action.roomId).some(item => item.id === action.messageId)) return state;
       const reactions = state.hallReactions?.[action.worldId] || {};
       const ids = reactions[action.messageId] || [];
       const fanId = state.fanProfile.id;
@@ -66,7 +79,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'EQUIP_DIGITAL_PRODUCT': {
       const product = state.products[action.productId];
-      if (!product?.digitalSlot || !ownsDigitalProduct(state, product)) return { ...state, lastError: { code: 'DIGITAL_NOT_OWNED', message: 'Chỉ mặc vật phẩm digital đã được bàn giao cho bạn. Thử trước không tạo quyền sở hữu.' } };
+      if (!product?.digitalSlot || !hasAvatarFit(product.digitalItemId,state.fanProfile.avatarPreset) || !ownsDigitalProduct(state, product)) return { ...state, lastError: { code: 'DIGITAL_NOT_OWNED', message: 'Chỉ mặc vật phẩm digital đã được bàn giao cho bạn. Thử trước không tạo quyền sở hữu.' } };
       return { ...state, lastError: undefined, fanProfile: { ...state.fanProfile, digitalLook: { ...state.fanProfile.digitalLook, [product.digitalSlot]: product.digitalItemId } } };
     }
     case 'REMOVE_DIGITAL_SLOT': {
@@ -1181,6 +1194,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         };
       }
 
+      if(benefit.tenantId!==state.activeTenantId||benefit.fanId!==state.fanProfile.id)return state;
+      if((benefit.availableFrom&&Date.parse(benefit.availableFrom)>Date.parse(state.demoTime))||(benefit.expiresAt&&Date.parse(benefit.expiresAt)<=Date.parse(state.demoTime)))return {...state,lastError:{code:'BENEFIT_WINDOW_CLOSED',message:'Quyền lợi chưa mở hoặc đã hết hạn.'}};
       if (benefit.status === 'claimed') {
         return state; // Idempotent: already claimed, no-op
       }

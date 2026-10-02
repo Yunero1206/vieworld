@@ -11,7 +11,8 @@ import { useEffect, useRef } from 'react';
 export function useDialogA11y(
   isOpen: boolean,
   onClose: () => void,
-  containerRef: React.RefObject<HTMLElement | null>
+  containerRef: React.RefObject<HTMLElement | null>,
+  returnFocusRef?: React.RefObject<HTMLElement | null>
 ) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -45,6 +46,8 @@ export function useDialogA11y(
     const frameId = requestAnimationFrame(focusTarget);
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const topDialog = [...document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')].at(-1);
+      if (topDialog && topDialog !== containerRef.current) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         onCloseRef.current();
@@ -91,7 +94,9 @@ export function useDialogA11y(
       document.body.style.overflow = oldOverflow;
       if (previousActiveElementRef.current && previousActiveElementRef.current.isConnected) {
         previousActiveElementRef.current.focus();
+      } else {
+        returnFocusRef?.current?.focus();
       }
     };
-  }, [isOpen, containerRef]);
+  }, [isOpen, containerRef, returnFocusRef]);
 }

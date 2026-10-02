@@ -33,7 +33,10 @@ describe('Current Artist navigation context', () => {
   it('keeps navigation usable before an artist is available', () => {
     render(<MemoryRouter><GlobalNavigation pathname="/explore" /></MemoryRouter>);
     const nav = screen.getByRole('navigation', { name: 'Điều hướng chính' });
-    expect(within(nav).getAllByRole('link').map(link => link.textContent)).toEqual(['Home', 'Explore', 'My Space', 'VieSHOP']);
+    expect(within(nav).getAllByRole('link').map(link => link.getAttribute('aria-label'))).toEqual(['Home', 'Explore', 'Artist', 'My Space', 'VieSHOP']);
+    expect(within(nav).getByRole('link', { name: 'Artist' })).toHaveAttribute('href', '/explore?scope=following');
+    expect(nav.querySelector('[data-vw-icon="artist"]')).toBeInTheDocument();
+    expect(nav.querySelector('.fw-artist-avatar')).toBeNull();
   });
 
   it('keeps utility controls in the same desktop rail even without an artist', () => {

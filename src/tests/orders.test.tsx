@@ -415,7 +415,7 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
 
       // Step 3: Verify OrderDetailView rendered
       expect(screen.getByText(/CHI TIẾT ĐƠN HÀNG VIESHOP/i)).toBeInTheDocument();
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/Chờ thanh toán \(Pending\)/i);
+      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Chờ thanh toán$/i);
       expect(screen.getByText(/HÀNH TRÌNH ĐƠN HÀNG/i)).toBeInTheDocument();
 
       // Stepper shows Pending step active
@@ -426,7 +426,7 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       fireEvent.click(payBtn);
 
       // Status badge updates to Paid
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/Đã thanh toán \(Paid\)/i);
+      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Đã thanh toán$/i);
       expect(screen.queryByTestId('simulate-payment-btn')).not.toBeInTheDocument();
 
       // INVARIANT: Fulfilment button now visible, but NOT yet fulfilled
@@ -438,7 +438,7 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       for(let stage=0;stage<5;stage++)fireEvent.click(screen.getByTestId('advance-shipment-btn'));
 
       // Status badge updates to Fulfilled
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/Đã bàn giao \(Fulfilled\)/i);
+      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Đã bàn giao$/i);
       expect(screen.getByText(/Hoàn tất bàn giao vật phẩm/i)).toBeInTheDocument();
       expect(screen.getByText(/Đã ghi nhận quyền sở hữu/i)).toBeInTheDocument();
 

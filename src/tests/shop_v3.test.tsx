@@ -33,7 +33,7 @@ describe('VieSHOP storefront presentation', () => {
   });
 
   it('uses one set of short edition labels without changing product IDs or names', () => {
-    expect(DELIVERY_LABELS).toEqual({ physical: 'Bản vật lý', digital: 'Bản số', bundle: 'Cả hai' });
+    expect(DELIVERY_LABELS).toEqual({ physical: 'Ngoài đời', digital: 'Trong VieWorld', bundle: 'Cả hai' });
     expect(productDisplayTitle('Áo Star Club · Digital')).toBe('Áo Star Club');
     expect(state().products['product-star-shirt-digital'].title).toBe('Áo Star Club · Digital');
   });
@@ -44,8 +44,8 @@ describe('VieSHOP storefront presentation', () => {
     expect(detail).toHaveClass('fw-panel-product');
     expect(detail.querySelector('.fw-product-detail-layout')).toBeInTheDocument();
     const editionChoices = detail.querySelector('.fw-variant-selector') as HTMLElement;
-    expect(within(editionChoices).getByRole('button', { name: /Bản vật lý/ })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(within(editionChoices).getByRole('button', { name: /Bản số/ }));
+    expect(within(editionChoices).getByRole('button', { name: /Ngoài đời/ })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(within(editionChoices).getByRole('button', { name: /Trong VieWorld/ }));
     expect(within(detail).getByText(/Không giao hàng/)).toBeInTheDocument();
   });
 

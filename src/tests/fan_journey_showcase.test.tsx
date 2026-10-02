@@ -123,9 +123,10 @@ describe('One fan, one connected journey — showcase', () => {
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/me?section=collection&mode=memories&type=capsule']}><Routes><Route path="/me" element={<FanWorldView/>}/></Routes></MemoryRouter></AppProvider>);
     fireEvent.click(screen.getByRole('button', { name: `Tùy chọn ${state.sessions[capsule.sessionId].title}` }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Xem chi tiết' }));
-    fireEvent.click(screen.getByRole('link', { name: 'Ghi chú riêng cho kỷ niệm này →' }));
     expect(screen.getByRole('textbox', { name: 'Ghi chú riêng' })).toHaveValue('Ghi chú riêng đúng kỷ niệm');
     expect(screen.queryByDisplayValue('Không phải kỷ niệm đang chọn')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Chọn kỷ niệm để trưng trong My Space ↗' })).toHaveAttribute('href', '/me?section=collection&mode=memories&type=capsule');
+    fireEvent.change(screen.getByRole('textbox',{name:'Ghi chú riêng'}),{target:{value:'Bản ghi chú mới'}});
+    fireEvent.click(screen.getByRole('button',{name:'Lưu ghi chú'}));
+    expect(loadState().state.capsules[capsule.id].privateNote).toBe('Bản ghi chú mới');
   });
 });
