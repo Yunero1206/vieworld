@@ -1,5 +1,6 @@
 import { closeSync, existsSync, openSync, readSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, resolve, relative } from 'node:path';
+import './check-source.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const errors = new Set();
@@ -35,6 +36,10 @@ else {
     if (!existsSync(resolve(dist, asset.slice(1)))) errors.add(`Built entry references missing ${asset}`);
   }
   for (const file of ['sw.js', 'manifest.json', 'images/vieworld-logo.svg']) if (!existsSync(resolve(dist, file))) errors.add(`dist/${file} missing`);
+  if (existsSync(resolve(dist, 'sw.js'))) {
+    const worker = readFileSync(resolve(dist, 'sw.js'), 'utf8');
+    if (!/const CACHE_NAME = 'vieworld-pwa-[a-f0-9]{12}';/.test(worker)) errors.add('Built service worker is missing its release-specific cache version.');
+  }
   const bundles = walk(resolve(dist, 'assets')).filter(file => file.endsWith('.js'));
   const total = bundles.reduce((sum, file) => sum + statSync(file).size, 0);
   console.log(`Built JS: ${bundles.length} files / ${(total / 1024).toFixed(0)} KiB uncompressed (route chunks included).`);

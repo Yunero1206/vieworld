@@ -2,10 +2,11 @@ import type { AppState, Product } from '../domain/types';
 import { historyCards, hasHistoryBadge } from './history';
 import { readDisplaySurfaces } from './displaySurfaces';
 import { merchImageUrl } from './merchImages';
+import { productRoomMetadata, type RoomItemMetadata } from './roomItemKinds';
 
 export type DisplaySlot = 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement';
 
-export interface DisplayItem {
+export interface DisplayItem extends RoomItemMetadata {
   id: string;
   slot?: DisplaySlot;
   title: string;
@@ -27,24 +28,21 @@ export interface DisplayItem {
 }
 
 export const DISPLAY_FIXTURES: { slot: DisplaySlot; label: string; x: number; y: number }[] = [
-  { slot: 'shirt', label: 'Áo kỷ niệm', x: 20, y: 41 },
-  { slot: 'ticket', label: 'Vé sự kiện', x: 36.5, y: 28 },
-  { slot: 'disc', label: 'Album trên giá trưng', x: 73, y: 42 },
-  { slot: 'lightstick', label: 'Ánh sáng fandom', x: 68.5, y: 35.5 },
-  { slot: 'achievement', label: 'Cột mốc & Kỷ vật', x: 55.5, y: 27 },
+  { slot: 'shirt', label: 'Giá trang phục', x: 20, y: 41 },
+  { slot: 'ticket', label: 'Bảng kỷ niệm', x: 36.5, y: 28 },
+  { slot: 'disc', label: 'Góc âm nhạc', x: 73, y: 42 },
+  { slot: 'lightstick', label: 'Góc ánh sáng', x: 68.5, y: 35.5 },
+  { slot: 'achievement', label: 'Kệ lưu niệm', x: 55.5, y: 27 },
 ];
 
 export function productDisplaySlot(p: Product): DisplaySlot | undefined {
   if (p.previewCapabilities?.room === false) return undefined;
-  return p.roomSurface || (p.digitalSlot === 'shirt' || /(?:shirt|hoodie|bomber)-/.test(p.image || '') ? 'shirt'
-    : p.digitalSlot === 'lightstick' || /lightstick-/.test(p.image || '') ? 'lightstick'
-    : p.digitalSlot === 'hat' ? 'achievement'
-    : p.category === 'album' ? 'disc' : p.category === 'ticket' ? 'ticket' : undefined);
+  return productRoomMetadata(p).supportedSurfaces?.[0];
 }
 
 /** A disposable preview projection; never writes ownership or placement. */
 export function productRoomPreviewItem(p: Product): DisplayItem {
-  return { id: p.id, title: p.title, detail: '', slot: productDisplaySlot(p), image: p.image,
+  return { ...productRoomMetadata(p), id: p.id, title: p.title, detail: '', slot: productDisplaySlot(p), image: p.image,
     roomAsset: p.roomAsset, familyId: p.familyId, digitalItemId: p.digitalItemId,
     footprint: p.roomFootprint, isDisplayCompatible: Boolean(productDisplaySlot(p)) };
 }
@@ -64,6 +62,7 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     const slot = productDisplaySlot(p);
 
     return [{
+      ...productRoomMetadata(p),
       id: p.id,
       slot,
       title: p.title,
@@ -90,6 +89,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
     .map(c => ({
       id: c.id,
       slot: 'ticket' as const,
+      itemKind: 'paper-memory' as const,
+      supportedSurfaces: ['ticket' as const],
       title: s.sessions[c.sessionId]?.title || 'Kỷ niệm của mình',
       worldId: c.worldId,
       image: 'ticket-digital',
@@ -105,6 +106,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
   const cards: DisplayItem[] = historyCards(s).map(c => ({
     id: c.id,
     slot: 'ticket' as const,
+    itemKind: 'paper-memory' as const,
+    supportedSurfaces: ['ticket' as const],
     title: c.eventTitle,
     worldId: c.worldId,
     collectedAt: c.collectedAt,
@@ -120,6 +123,8 @@ export function ownedCollection(s: AppState): DisplayItem[] {
   const badges: DisplayItem[] = [10, 20].filter(n => hasHistoryBadge(s, n)).map(n => ({
     id: `badge-${n}`,
     slot: 'achievement' as const,
+    itemKind: 'achievement-marker' as const,
+    supportedSurfaces: ['achievement' as const],
     title: `Người giữ ký ức · ${n}`,
     isDisplayCompatible: true,
     category: 'achievement',

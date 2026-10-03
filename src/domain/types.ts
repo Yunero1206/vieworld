@@ -202,6 +202,9 @@ export interface Product extends BaseRecord {
   roomAsset?: string;
   roomSurface?: import('../world/display').DisplaySlot;
   roomFootprint?: 1 | 2 | 3;
+  itemKind?: import('../world/roomItemKinds').RoomItemKind;
+  supportedSurfaces?: import('../world/display').DisplaySlot[];
+  roomPresentation?: import('../world/roomItemKinds').RoomItemMetadata['roomPresentation'];
   previewOnly?: boolean;
   releaseType?: 'in_stock' | 'pre_order';
   estimatedShipping?: string;
@@ -356,6 +359,7 @@ export type AppAction =
   | { type: 'SAVE_PRIVATE_CONTACT'; contact: import('../world/account').PrivateContact }
   | { type: 'SET_DISPLAY_SLOT'; slot: 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement'; itemId?: string }
   | { type: 'SET_DISPLAY_SURFACE'; surfaceId: import('../world/display').DisplaySlot; selection: import('../world/displaySurfaces').SurfaceSelection }
+  | { type: 'SET_DISPLAY_SURFACES'; surfaces: import('../world/displaySurfaces').RoomSurfaces }
   | { type: 'ADVANCE_SHIPMENT'; orderId: string; expectedStage: number }
   | { type: 'ADD_TO_CART'; productId: string; optionLabel?: string; quantity?: number }
   | { type: 'SET_CART_QUANTITY'; key: string; quantity: number }

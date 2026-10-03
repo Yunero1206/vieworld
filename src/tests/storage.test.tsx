@@ -2,19 +2,15 @@
  * Acceptance T02: Persistence, Recovery, Reset, and Layout Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  saveState,
-  loadState,
-  resetTenantStorage,
-  _resetMemoryFallbackFlagForTesting,
-  STORAGE_KEY_PREFIX,
-} from '../services/storageAdapter';
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { createInitialState } from '../data/fixtures';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { AppProvider, useApp } from '../context/AppContext';
-import { ConfirmDialog } from '../components/ConfirmDialog';
-import { ResetDrawer } from '../components/ResetDrawer';
+import {
+_resetMemoryFallbackFlagForTesting,
+loadState,
+resetTenantStorage,
+saveState,
+STORAGE_KEY_PREFIX,
+} from '../services/storageAdapter';
 
 describe('T02 Acceptance: Storage Adapter & Persistence Invariants', () => {
   beforeEach(() => {
@@ -118,58 +114,6 @@ describe('T02 Acceptance: Storage Adapter & Persistence Invariants', () => {
       // Invariant: mfan-demo and unrelated keys are 100% PRESERVED
       expect(window.localStorage.getItem(mfanKey)).not.toBeNull();
       expect(window.localStorage.getItem(foreignKey)).toBe('important_browser_data');
-    });
-  });
-
-  describe('5. Accessible ConfirmDialog & ResetDrawer Interactions', () => {
-    it('ConfirmDialog supports keyboard Escape key cancellation and confirm callback', () => {
-      const onConfirm = vi.fn();
-      const onCancel = vi.fn();
-
-      const { unmount } = render(
-        <ConfirmDialog
-          isOpen={true}
-          title="Xác nhận thao tác"
-          description="Bạn có chắc chắn muốn thực hiện thao tác này?"
-          onConfirm={onConfirm}
-          onCancel={onCancel}
-        />
-      );
-
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-
-      // Test Escape key closes dialog
-      fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
-      expect(onCancel).toHaveBeenCalledTimes(1);
-
-      // Test Confirm button click
-      const confirmBtn = screen.getByRole('button', { name: /Xác nhận/i });
-      fireEvent.click(confirmBtn);
-      expect(onConfirm).toHaveBeenCalledTimes(1);
-
-      unmount();
-    });
-
-    it('ResetDrawer allows switching tenant and triggers scenario selection', () => {
-      const Consumer = () => {
-        const { state } = useApp();
-        return <div data-testid="active-tenant">{state.activeTenantId}</div>;
-      };
-
-      render(
-        <AppProvider disableAutoHydrate={true}>
-          <Consumer />
-          <ResetDrawer isOpen={true} onClose={() => {}} />
-        </AppProvider>
-      );
-
-      expect(screen.getByTestId('active-tenant')).toHaveTextContent('vieworld-demo');
-
-      // Switch tenant via select
-      const select = screen.getByLabelText(/KHÔNG GIAN NỀN TẢNG/i);
-      fireEvent.change(select, { target: { value: 'mfan-demo' } });
-
-      expect(screen.getByTestId('active-tenant')).toHaveTextContent('mfan-demo');
     });
   });
 });

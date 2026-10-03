@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
 import { SessionView } from '../views/SessionView';
-import { AppShell } from '../components/AppShell';
+import { FanShell as AppShell } from '../components/FanShell';
 import { PresencePanel } from '../components/PresencePanel';
 import { AvatarStage } from '../components/AvatarStage';
 import { Session } from '../domain/types';

@@ -16,8 +16,20 @@ import { validHomeDestination } from '../world/homeDestination';
 import { accountReducer, isDemoSignedIn } from '../world/account';
 import { hasAvatarFit } from '../world/avatarFit';
 
+const SIGNED_IN_ACTIONS = new Set<AppAction['type']>([
+  'SAVE_ROOM_DESIGN', 'SET_DISPLAY_SLOT', 'SET_DISPLAY_SURFACE', 'SET_DISPLAY_SURFACES',
+  'SET_AVATAR_PRESET', 'EQUIP_WARDROBE', 'EQUIP_DIGITAL_PRODUCT', 'REMOVE_DIGITAL_SLOT',
+  'SET_SHOWCASE_SLOT', 'CLEAR_SHOWCASE_SLOT', 'SAVE_CAPSULE', 'SAVE_PUBLIC_IDENTITY',
+  'ADD_TO_CART', 'SET_CART_QUANTITY', 'CHECKOUT_CART', 'PAY_CHECKOUT', 'CANCEL_CHECKOUT',
+  'CREATE_ORDER', 'SIMULATE_PAYMENT', 'SIMULATE_FULFILMENT', 'CLAIM_BENEFIT', 'OPEN_SUPPORT_CASE',
+  'TOGGLE_FOLLOW', 'TOGGLE_SAVED_PRODUCT', 'TOGGLE_RSVP', 'ENTER_LOBBY', 'LEAVE_LOBBY',
+  'JOIN_LIVE_SESSION', 'WATCH_REPLAY', 'SUBMIT_QUESTION', 'VOTE_POLL',
+]);
+const JOURNEY_ACTIONS = new Set<AppAction['type']>(['REMEMBER_FAN_DESTINATION', 'VISIT_FAN_WORLD', 'READ_ARTIST_NOTE']);
+
 export function appReducer(state: AppState, action: AppAction): AppState {
-  if (!isDemoSignedIn(state) && ['SAVE_ROOM_DESIGN','SET_DISPLAY_SLOT','SET_DISPLAY_SURFACE','SET_AVATAR_PRESET','EQUIP_WARDROBE','EQUIP_DIGITAL_PRODUCT','REMOVE_DIGITAL_SLOT','SET_SHOWCASE_SLOT','CLEAR_SHOWCASE_SLOT','SAVE_CAPSULE','SAVE_PUBLIC_IDENTITY'].includes(action.type)) {
+  if (!isDemoSignedIn(state) && JOURNEY_ACTIONS.has(action.type)) return state;
+  if (!isDemoSignedIn(state) && SIGNED_IN_ACTIONS.has(action.type)) {
     return { ...state, lastError: { code: 'DEMO_LOGIN_REQUIRED', message: 'Đăng nhập demo trước khi thay đổi góc riêng của bạn.' } };
   }
   const featureState=accountReducer(state,action) ?? commerceReducer(state,action) ?? historyReducer(state,action) ?? shippingReducer(state,action);

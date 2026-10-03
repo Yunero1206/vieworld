@@ -86,7 +86,7 @@ export function FanShopView() {
   const allProducts = useMemo(() => Object.values(state.products).filter(product => product.tenantId === state.activeTenantId), [state.products, state.activeTenantId]);
   const categories = availableShopCategories(allProducts);
   const ownOrders = Object.values(state.orders).filter(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id);
-  const saved = state.fanProfile.savedProductIds || [];
+  const saved = signedIn ? state.fanProfile.savedProductIds || [] : [];
 
   useEffect(() => {
     setSize('');
@@ -217,6 +217,7 @@ export function FanShopView() {
 
   function buy() {
     if (!selected || selectedOwned || selected.category === 'membership' || locked || unavailable || selected.previewOnly || (selected.sizes && !size)) return;
+    if (!signedIn) { window.dispatchEvent(new Event('vieworld-open-auth')); return; }
     dispatch({ type: 'ADD_TO_CART', productId: selected.id, optionLabel: size || undefined });
     setAdded(true);
   }
@@ -363,7 +364,7 @@ export function FanShopView() {
                       className="fw-text-button fw-product-fav"
                       aria-label={`${isSaved ? 'Bỏ lưu' : 'Lưu'} ${fam.primaryProduct.title}`}
                       aria-pressed={isSaved}
-                      onClick={() => dispatch({ type: 'TOGGLE_SAVED_PRODUCT', productId: fam.primaryProduct.id })}
+                      onClick={() => signedIn ? dispatch({ type: 'TOGGLE_SAVED_PRODUCT', productId: fam.primaryProduct.id }) : window.dispatchEvent(new Event('vieworld-open-auth'))}
                     >
                       <Heart size={17} fill={isSaved ? 'currentColor' : 'none'} />
                     </button>

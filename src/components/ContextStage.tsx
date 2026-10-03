@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarDays, Check, MessageCircle, Send, BarChart3 } from 'lucide-react';
-import type { Session } from '../domain/types';
+import type { AppAction, Session } from '../domain/types';
 import { useApp } from '../context/AppContext';
 import { AvatarStage } from './AvatarStage';
 import { SilentMediaPlaceholder } from './SilentMediaPlaceholder';
@@ -12,6 +12,7 @@ import { MembershipBadge } from './MembershipBadge';
 import { membershipTenure, memberForChat } from '../world/membershipBadge';
 import { LiveCheer } from './LiveCheer';
 import { canWriteArtistHallRoom } from '../world/artistPresentation';
+import { isDemoSignedIn } from '../world/account';
 
 const formatTime = (value: string) => new Intl.DateTimeFormat('vi-VN', {
   timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -60,8 +61,10 @@ export function ContextStage({ session, artistId, artistName, image }: { session
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const context = sessionWorldContext(session, artistId);
-  const isRsvpd = state.rsvpdSessionIds.includes(session.id);
-  const participated = Boolean(state.participations[`part_${state.fanProfile.id}_${session.id}_live`]);
+  const signedIn = isDemoSignedIn(state);
+  const isRsvpd = signedIn && state.rsvpdSessionIds.includes(session.id);
+  const participated = signedIn && Boolean(state.participations[`part_${state.fanProfile.id}_${session.id}_live`]);
+  const interact = (action: AppAction) => signedIn ? dispatch(action) : window.dispatchEvent(new Event('vieworld-open-auth'));
   const replayAvailable = session.replayStatus === 'available' && session.mediaStatus !== 'expired';
   const avatar = session.avatarAssetId && state.avatarAssets[session.avatarAssetId]?.status === 'approved'
     ? state.avatarAssets[session.avatarAssetId] : undefined;
@@ -72,10 +75,10 @@ export function ContextStage({ session, artistId, artistName, image }: { session
       {liveStage ? <div className="artist-context-live-media"><div className="vw-live-scene" data-live={session.status === 'running' && session.artistPresence === 'present'}><AvatarStage avatar={avatar} artistPresence={session.artistPresence} isPaused={session.status === 'paused'} compact stageVariant={session.format === 'concert' ? 'concert' : 'standard'} /><div className="vw-live-lights" aria-hidden="true"/>{session.status === 'running' && <LiveCheer artistId={artistId}/>}</div><SilentMediaPlaceholder showCheer={false} isMuted={isMuted} onToggleMute={() => setIsMuted(value => !value)} isPlaying={isPlaying} onTogglePlay={() => setIsPlaying(value => !value)} mediaStatus={session.mediaStatus || 'cleared_local'} trackTitle="Âm thanh demo · chọn để phát" /></div>
         : <div className="artist-context-artwork"><img src={image} alt="" /><div><span>{context.phase === 'upcoming' ? 'Hẹn gặp ở đây' : context.phase === 'ended' ? 'Một chương đã ở lại' : 'Đang diễn ra'}</span></div></div>}
       <div className="artist-context-actions">
-        {context.phase === 'upcoming' && <button type="button" onClick={() => dispatch({ type: 'TOGGLE_RSVP', sessionId: session.id })}>{isRsvpd ? <Check size={16} /> : <CalendarDays size={16} />}{isRsvpd ? 'Đã nhắc mình' : 'Nhắc mình (RSVP)'}</button>}
-        {context.phase === 'active' && session.status === 'running' && <button type="button" disabled={participated} onClick={() => dispatch({ type: 'JOIN_LIVE_SESSION', sessionId: session.id })}>{participated ? <Check size={16} /> : undefined}{participated ? 'Đã ghi nhận tham dự' : 'Tham dự trực tiếp'}</button>}
+        {context.phase === 'upcoming' && <button type="button" onClick={() => interact({ type: 'TOGGLE_RSVP', sessionId: session.id })}>{isRsvpd ? <Check size={16} /> : <CalendarDays size={16} />}{isRsvpd ? 'Đã nhắc mình' : 'Nhắc mình (RSVP)'}</button>}
+        {context.phase === 'active' && session.status === 'running' && <button type="button" disabled={participated} onClick={() => interact({ type: 'JOIN_LIVE_SESSION', sessionId: session.id })}>{participated ? <Check size={16} /> : undefined}{participated ? 'Đã ghi nhận tham dự' : 'Tham dự trực tiếp'}</button>}
         {session.status === 'paused' && <span>Buổi phát đang tạm dừng. Hãy đợi nghệ sĩ quay lại.</span>}
-        {context.phase === 'ended' && replayAvailable && <button type="button" onClick={() => dispatch({ type: 'WATCH_REPLAY', sessionId: session.id })}>Ghi nhận xem lại</button>}
+        {context.phase === 'ended' && replayAvailable && <button type="button" onClick={() => interact({ type: 'WATCH_REPLAY', sessionId: session.id })}>Ghi nhận xem lại</button>}
         {context.phase === 'ended' && !replayAvailable && <span>Chưa có bản xem lại. Kỷ niệm vẫn ở Kho lưu trữ.</span>}
         {session.format === 'concert' && session.setlist?.length ? <details><summary>Chương trình biểu diễn</summary><ul>{session.setlist.map((entry, index) => <li key={index}>{entry.title}</li>)}</ul></details> : null}
       </div>

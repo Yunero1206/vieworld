@@ -1,14 +1,14 @@
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
+import { existsSync,readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe,expect,it } from 'vitest';
 import { CatalogItemArt } from '../components/CatalogItemArt';
-import { catalogVisual } from '../world/catalogVisuals';
-import { contextMedia } from '../world/artistPresentation';
-import { selectHomePresence } from '../world/presenceDiscovery';
-import { createInitialState } from '../data/fixtures';
-import { hasAvatarFit } from '../world/avatarFit';
 import { VieWorldLogo } from '../components/VieWorldLogo';
+import { createInitialState } from '../data/fixtures';
+import { contextMedia } from '../world/artistPresentation';
+import { hasAvatarFit } from '../world/avatarFit';
+import { catalogVisual } from '../world/catalogVisuals';
+import { selectHomePresence } from '../world/presenceDiscovery';
 
 describe('Home context and mature merchandise presentation', () => {
   it('isolates logo gradients between hidden desktop and visible mobile navigation', () => {

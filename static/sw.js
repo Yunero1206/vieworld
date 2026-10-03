@@ -1,5 +1,6 @@
 // VieWorld Service Worker — PWA Offline Caching for My Space and Core Assets
-const CACHE_NAME = 'vieworld-pwa-v3';
+// Vite replaces this version with a digest of the release, including public assets.
+const CACHE_NAME = 'vieworld-pwa-v4';
 const CORE_PRECACHE = [
   '/',
   '/index.html',
@@ -34,20 +35,17 @@ self.addEventListener('fetch', (event) => {
   const asset = url.pathname.startsWith('/images/') || url.pathname.startsWith('/fonts/') || url.pathname.startsWith('/assets/');
   if (!navigation && !asset) return;
 
-  // Cache-first for images and fonts
+  // Public URLs are not hashed. Refresh them in the background so updated artwork
+  // can replace a cached version while keeping an offline response available.
   if (url.pathname.startsWith('/images/') || url.pathname.includes('font') || url.pathname.endsWith('.png') || url.pathname.endsWith('.webp')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(cache => cache.match(event.request)).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (response && response.ok) {
-            const clone = response.clone();
-            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {}));
-          }
-          return response;
-        }).catch(() => new Response('Offline: resource unavailable', { status: 503 }));
-      })
-    );
+    const fresh = fetch(event.request).then(async response => {
+      if (!response.ok || response.headers.get('content-type')?.includes('text/html')) return new Response('Resource unavailable', { status: 503 });
+      try { const cache = await caches.open(CACHE_NAME); await cache.put(event.request, response.clone()); } catch { /* Storage denial must not discard a valid network response. */ }
+      return response;
+    }).catch(() => undefined);
+    event.waitUntil(fresh.then(() => {}));
+    event.respondWith(caches.open(CACHE_NAME).then(cache => cache.match(event.request)).catch(() => undefined)
+      .then(async cached => cached || await fresh || new Response('Offline: resource unavailable', { status: 503 })));
     return;
   }
 
@@ -55,12 +53,13 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response && response.ok && (navigation || !response.headers.get('content-type')?.includes('text/html'))) {
+        if (!navigation && response.headers.get('content-type')?.includes('text/html')) return new Response('Resource unavailable', { status: 503 });
+        if (response && response.ok) {
           const clone = response.clone();
           event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(navigation ? '/index.html' : event.request, clone)).catch(() => {}));
         }
         return response;
       })
-      .catch(() => caches.open(CACHE_NAME).then(cache => cache.match(navigation ? '/index.html' : event.request)).then(res => res || new Response('Offline: resource unavailable', { status: 503 })))
+      .catch(() => caches.open(CACHE_NAME).then(cache => cache.match(navigation ? '/index.html' : event.request)).catch(() => undefined).then(res => res || new Response('Offline: resource unavailable', { status: 503 })))
   );
 });

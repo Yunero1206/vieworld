@@ -10,12 +10,12 @@ import {WorldPanel} from '../components/WorldPanel';
 import {PrivacyDialog} from '../components/account/PrivacyDialog';
 import {loadPrivacySettings} from '../world/privacy';
 
-export function FanWorldView(){return <PersonalSpaceGate><RoomFirstSpace/></PersonalSpaceGate>;}
+export function FanWorldView(){const {state}=useApp();return <PersonalSpaceGate><RoomFirstSpace key={state.activeTenantId+':'+state.fanProfile.id}/></PersonalSpaceGate>;}
 function RoomFirstSpace(){
  const {state}=useApp();const [params,setParams]=useSearchParams();
  const [privacy,setPrivacy]=useState(()=>loadPrivacySettings(state.activeTenantId,state.fanProfile.id));
  const [privacyOpen,setPrivacyOpen]=useState(false);
- useEffect(()=>{const refresh=()=>setPrivacy(loadPrivacySettings(state.activeTenantId,state.fanProfile.id));window.addEventListener('vieworld-privacy-changed',refresh);return()=>window.removeEventListener('vieworld-privacy-changed',refresh);},[state.activeTenantId,state.fanProfile.id]);
+ useEffect(()=>{const refresh=()=>setPrivacy(loadPrivacySettings(state.activeTenantId,state.fanProfile.id));refresh();window.addEventListener('vieworld-privacy-changed',refresh);return()=>window.removeEventListener('vieworld-privacy-changed',refresh);},[state.activeTenantId,state.fanProfile.id]);
  const panel=params.get('panel')||params.get('drawer')||params.get('zone');
  const route=panel&&({bag:'/orders',orders:'/orders',pass:'/memberships',membership:'/memberships',benefits:'/memberships',support:'/account/help',account:'/account/settings',privacy:'/account/settings',worlds:'/explore',hall:'/explore?scope=following',calendar:'/explore?scope=following',sessions:'/explore',archive:'/explore'} as Record<string,string>)[panel];
  const section=params.get('section')||(panel==='wardrobe'?'avatar':panel==='capsules'||panel==='showcase'||params.has('custom')?'collection':null);

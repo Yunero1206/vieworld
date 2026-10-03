@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe,expect,it } from 'vitest';
 import { EXPANDED_PRODUCTS } from '../data/expandedUniverse';
-import { NEW_MERCH } from '../world/merchCatalog';
 import { displayAssetUrl } from '../world/display';
+import { NEW_MERCH } from '../world/merchCatalog';
 import { merchImageUrl } from '../world/merchImages';
 
 describe('canonical merchandise artwork', () => {

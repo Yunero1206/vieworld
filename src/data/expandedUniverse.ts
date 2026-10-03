@@ -691,7 +691,8 @@ export const EXPANDED_PRODUCTS: Record<string, Product> = {
     releaseType: 'in_stock',
     batchLabel: 'Sẵn hàng',
     image: 'ticket-digital',
-    previewCapabilities: { avatar: false, room: false },
+    roomSurface: 'ticket',
+    previewCapabilities: { avatar: false, room: true },
     description: 'Set 5 photocard hologram hiệu ứng cầu vồng ghi lại khoảnh khắc biểu diễn tại Hà Nội và Sài Gòn.',
     includes: ['5 photocard hologram cán mờ', 'Bao bì bảo vệ PVC'],
   },
@@ -736,7 +737,8 @@ export const EXPANDED_PRODUCTS: Record<string, Product> = {
     image: 'lightstick-digital',
     digitalSlot: 'lightstick',
     digitalItemId: 'c-lightstick-digital',
-    previewCapabilities: { avatar: true, room: false },
+    roomSurface: 'lightstick',
+    previewCapabilities: { avatar: true, room: true },
     description: 'Vật phẩm cầm tay phát sáng tím neon cho avatar VieWorld trong các buổi biểu diễn trực tuyến.',
     includes: ['1 lightstick tím cho avatar VieWorld'],
   },
@@ -1670,4 +1672,3 @@ export function applyPersonaToState(base: AppState, presetKey: string): AppState
 
   return base;
 }
-

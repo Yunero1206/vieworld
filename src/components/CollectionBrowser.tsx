@@ -4,7 +4,7 @@ import { Award, MoreHorizontal, X } from 'lucide-react';
 import {CatalogItemArt,hasCatalogItemArt} from './CatalogItemArt';
 import { useApp } from '../context/AppContext';
 import { displayAssetUrl, ownedCollection, type DisplayItem, type DisplaySlot } from '../world/display';
-import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection } from '../world/displaySurfaces';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem } from '../world/displaySurfaces';
 import { ArchiveCollection } from './ArchiveCollection';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from './SearchCombobox';
@@ -88,10 +88,8 @@ export function CollectionBrowser() {
   function place(id: DisplaySlot, item: DisplayItem) {
     const oldId = displayedAt(item.id);
     if (oldId === id) { setPlacing(null); return; }
-    const selection = { ...surfaces[id], itemIds: [...surfaces[id].itemIds, item.id], focalItemId: surfaces[id].focalItemId || item.id };
-    const profile = oldId ? { ...state.fanProfile, displaySurfaces: { ...surfaces, [oldId]: { ...surfaces[oldId], itemIds: surfaces[oldId].itemIds.filter(value => value !== item.id) } } } : state.fanProfile;
-    const problem = validateSurfaceSelection(profile, id, selection, owned);
-    if (problem) { setNotice(problem); return; }
+    // The room owns preview/replacement/save. A full surface must still open so
+    // the fan can explicitly choose the outgoing item there.
     navigate(`/me?place=${encodeURIComponent(item.id)}&surface=${id}`);
   }
 

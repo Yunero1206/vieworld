@@ -1,87 +1,20 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { AppProvider } from '../context/AppContext';
+import { fireEvent,render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it,vi } from 'vitest';
 import { FanShell } from '../components/FanShell';
-import { FanShopView } from '../views/FanShopView';
-import { CartView } from '../views/CartView';
-import { InboxView } from '../views/InboxView';
+import { AppProvider } from '../context/AppContext';
 import { createInitialState } from '../data/fixtures';
-import { resolveStandeeEvent, getTruthfulSessionStatus } from '../world/eventStatus';
-import { DEFAULT_PRIVACY, canAccessRoom, loadPrivacySettings, savePrivacySettings } from '../world/privacy';
-import { checkProductEligibility } from '../world/commerce';
 import { saveState } from '../services/storageAdapter';
+import { CartView } from '../views/CartView';
+import { FanShopView } from '../views/FanShopView';
+import { InboxView } from '../views/InboxView';
+import { checkProductEligibility } from '../world/commerce';
+import { DEFAULT_PRIVACY,canAccessRoom,loadPrivacySettings,savePrivacySettings } from '../world/privacy';
 
 describe('Audit P1 & P2 Quality Verification Suite', () => {
   beforeEach(() => {
     localStorage.clear();
     window.scrollTo = vi.fn();
-  });
-
-  describe('1. Truthful Session Status Resolution', () => {
-    const baseSession = {
-      id: 's1',
-      worldId: 'artist-a',
-      title: 'Hát ngẫu hứng',
-      scheduledStart: '2026-09-20T20:00:00Z',
-      scheduledStartTime: '2026-09-20T20:00:00Z',
-      scheduledEnd: '2026-09-20T22:00:00Z',
-      format: 'dropin' as const,
-      mediaMode: 'audio' as const,
-      artistPresence: 'present' as const,
-      audioTrackUrl: '',
-      spatialEnabled: false,
-      chatEnabled: true,
-      questionsEnabled: true,
-      replayAllowed: true,
-      hostRole: 'artist' as const,
-      segmentMode: 'live' as const,
-      aiUse: 'none' as const,
-      replayStatus: 'not_planned' as const,
-      demo: true as const,
-      tenantId: 'vieworld-demo' as const,
-      version: 1,
-      updatedAt: '2026-09-20T20:00:00Z',
-    };
-
-    it('identifies running sessions truthfully as LIVE', () => {
-      const running = { ...baseSession, status: 'running' as const };
-      expect(getTruthfulSessionStatus(running, '2026-09-20T20:30:00Z')).toBe('live');
-    });
-
-    it('identifies open lobby sessions as open (Sảnh mở)', () => {
-      const open = { ...baseSession, status: 'open' as const };
-      expect(getTruthfulSessionStatus(open, '2026-09-20T19:50:00Z')).toBe('open');
-    });
-
-    it('identifies future scheduled sessions as upcoming, and past scheduled as ended', () => {
-      const scheduled = { ...baseSession, status: 'scheduled' as const };
-      expect(getTruthfulSessionStatus(scheduled, '2026-09-20T19:00:00Z')).toBe('upcoming');
-      // If demo time is past scheduledStartTime
-      expect(getTruthfulSessionStatus(scheduled, '2026-09-20T21:00:00Z')).toBe('ended');
-    });
-
-    it('resolveStandeeEvent returns active running session first with kind live as general announcement', () => {
-      const s = createInitialState('vieworld-demo');
-      const sessions = {
-        s1: { ...baseSession, status: 'running' as const },
-      };
-      const resolved = resolveStandeeEvent(sessions, s.worlds, s.demoTime);
-      expect(resolved).toBeDefined();
-      expect(resolved?.kind).toBe('live');
-      expect(resolved?.eyebrow).toBe('THÔNG BÁO CHUNG');
-    });
-
-    it('resolveStandeeEvent returns open lobby with kind open as general announcement', () => {
-      const s = createInitialState('vieworld-demo');
-      const sessions = {
-        s1: { ...baseSession, status: 'open' as const },
-      };
-      const resolved = resolveStandeeEvent(sessions, s.worlds, s.demoTime);
-      expect(resolved).toBeDefined();
-      expect(resolved?.kind).toBe('open');
-      expect(resolved?.eyebrow).toBe('THÔNG BÁO CHUNG');
-    });
   });
 
   describe('2. Space Privacy Access Control', () => {

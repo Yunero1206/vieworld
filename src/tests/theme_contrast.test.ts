@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe,expect,it } from 'vitest';
 
 const css = readFileSync('src/styles/appearance.css', 'utf8');
 const luminance = (hex: string) => {

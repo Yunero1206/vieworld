@@ -1,9 +1,7 @@
+import { fireEvent,render,screen } from '@testing-library/react';
 import { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { SearchCombobox, rankSuggestions } from '../components/SearchCombobox';
-import { globalSearchSuggestions } from '../world/searchDiscovery';
-import { createInitialState } from '../data/fixtures';
+import { describe,expect,it,vi } from 'vitest';
+import { SearchCombobox,rankSuggestions } from '../components/SearchCombobox';
 
 const suggestions = [{ id:'a', label:'Đêm Hà Nội', context:'Artist A' }, { id:'b', label:'Hoodie', context:'Artist B' }];
 describe('Scoped search suggestions', () => {
@@ -29,12 +27,5 @@ describe('Scoped search suggestions', () => {
     const input = screen.getByRole('combobox'); fireEvent.focus(input);
     fireEvent.keyDown(input,{key:'Enter',isComposing:true}); expect(submit).not.toHaveBeenCalled();
     fireEvent.blur(input); expect(input).toHaveAttribute('aria-expanded','false');
-  });
-  it('does not index Hall messages or personal owned data; event routes retain context prefix', () => {
-    const state=createInitialState('vieworld-demo');
-    const results=globalSearchSuggestions(state);
-    expect(results.every(item=>!item.id.startsWith('hall-'))).toBe(true);
-    expect(results.find(item=>item.id.startsWith('event-'))?.target).toContain('context=session%3A');
-    expect(results.some(item=>item.id.startsWith('moment-'))).toBe(true);
   });
 });

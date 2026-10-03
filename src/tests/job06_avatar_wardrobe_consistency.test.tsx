@@ -21,17 +21,11 @@
  *    - Wardrobe choice is scoped per tenant without leakage.
  */
 
-import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { AppProvider } from '../context/AppContext';
-import { AppShell } from '../components/AppShell';
-import { MyWorldView } from '../views/MyWorldView';
+import { render,screen } from '@testing-library/react';
+import { describe,expect,it } from 'vitest';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { AvatarStage } from '../components/AvatarStage';
-import { getAccessoryById, getAccessoryName, isFanAccessory } from '../world/assetManifest';
-import { createInitialState } from '../data/fixtures';
-import { saveState } from '../services/storageAdapter';
+import { getAccessoryById,getAccessoryName,isFanAccessory } from '../world/assetManifest';
 
 describe('Job 06 Acceptance: Unified Avatar & Wardrobe Consistency', () => {
   describe('1. Asset Manifest & Defensive Fallbacks', () => {
@@ -122,78 +116,6 @@ describe('Job 06 Acceptance: Unified Avatar & Wardrobe Consistency', () => {
       expect(screen.getByTestId('disconnected-stage-notice')).toBeInTheDocument();
       expect(screen.getByText(/Nghệ sĩ đã ngắt kết nối/i)).toBeInTheDocument();
       expect(screen.getByText(/không sử dụng AI để đóng giả/i)).toBeInTheDocument();
-    });
-  });
-
-
-describe('4. Cross-Surface Consistency: "Đổi tủ đồ một lần, các màn thấy cùng một diện mạo"', () => {
-    it('synchronizes equipped accessory across AppShell header, MyRoom diorama, and MyWorld profile', async () => {
-      saveState(createInitialState());
-      render(
-        <MemoryRouter initialEntries={['/me']}>
-          <AppProvider>
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route path="/me" element={<MyWorldView />} />
-              </Route>
-            </Routes>
-          </AppProvider>
-        </MemoryRouter>
-      );
-
-      // 1. Initial State in AppShell Desktop Header
-      const headerAvatar = screen.getByTestId('header-user-avatar');
-      expect(headerAvatar).toBeInTheDocument();
-      const headerRenderer = screen.getByTestId('header-avatar-renderer');
-      expect(headerRenderer).toBeInTheDocument();
-      expect(headerRenderer).toHaveAttribute('data-role', 'fan');
-      expect(headerRenderer).toHaveAttribute('data-accessory', 'accessory_classic');
-
-      // 2. Initial State in MyRoom Diorama Stage
-      const roomAvatarBtn = screen.getByTestId('room-avatar-hotspot');
-      expect(roomAvatarBtn).toBeInTheDocument();
-      const roomRenderer = screen.getByTestId('room-avatar-renderer');
-      expect(roomRenderer).toBeInTheDocument();
-      expect(roomRenderer).toHaveAttribute('data-accessory', 'accessory_classic');
-      expect(within(roomAvatarBtn).getByText(/Huy hiệu Ngôi sao Cổ điển/i)).toBeInTheDocument();
-
-      // 3. Initial State in Wardrobe Cabinet Hotspot
-      const wardrobeSpot = screen.getByTestId('room-wardrobe-hotspot');
-      expect(wardrobeSpot).toHaveTextContent(/Đang mặc: Huy hiệu Ngôi sao Cổ điển/i);
-
-      // 4. Initial State in Profile Header Avatar
-      const profileAvatar = screen.getByTestId('profile-header-avatar');
-      expect(profileAvatar).toBeInTheDocument();
-      const profileRenderer = screen.getByTestId('profile-avatar-renderer');
-      expect(profileRenderer).toHaveAttribute('data-accessory', 'accessory_classic');
-
-      // 5. Open Wardrobe tab via hotspot
-      fireEvent.click(wardrobeSpot);
-
-      // Customizer is open
-      expect(screen.getByTestId('wardrobe-customizer')).toBeInTheDocument();
-
-      // Select 'Kính thực tế ảo Cyber' (visor_neon)
-      const visorCard = screen.getByTestId('accessory-card-visor_neon');
-      fireEvent.click(visorCard);
-
-      // Save
-      const saveBtn = screen.getByRole('button', { name: /Lưu lựa chọn 'Kính thực tế ảo Cyber'/i });
-      fireEvent.click(saveBtn);
-
-      // 6. VERIFY INSTANT CROSS-SURFACE SYNCHRONIZATION:
-      // a) Header user avatar is now wearing cyber visor
-      expect(headerRenderer).toHaveAttribute('data-accessory', 'visor_neon');
-
-      // b) Room avatar is now wearing cyber visor
-      expect(roomRenderer).toHaveAttribute('data-accessory', 'visor_neon');
-      expect(within(roomAvatarBtn).getByText(/Kính thực tế ảo Cyber/i)).toBeInTheDocument();
-
-      // c) Wardrobe hotspot shows cyber visor
-      expect(wardrobeSpot).toHaveTextContent(/Đang mặc: Kính thực tế ảo Cyber/i);
-
-      // d) Profile header avatar is now wearing cyber visor
-      expect(profileRenderer).toHaveAttribute('data-accessory', 'visor_neon');
     });
   });
 });

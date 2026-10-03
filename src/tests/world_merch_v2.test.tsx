@@ -20,7 +20,7 @@ function fulfilled(productId:string) {
 function member(state=initial()):AppState {
   return {...state,memberships:{m:{id:'m',tenantId:state.activeTenantId,version:1,updatedAt:state.demoTime,fanId:state.fanProfile.id,worldId:'artist-a',status:'active',expiresAt:'2099-01-01T00:00:00Z'}}};
 }
-function mount(path:string){return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<FanWorldView/>}/><Route path="/worlds/:worldId" element={<FanWorldView/>}/><Route path="/me" element={<FanWorldView/>}/><Route path="/shop" element={<FanShopView/>}/></Routes></MemoryRouter></AppProvider>);}
+function mount(path:string){return render(<AppProvider initialState={initial()}><MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<FanWorldView/>}/><Route path="/worlds/:worldId" element={<FanWorldView/>}/><Route path="/me" element={<FanWorldView/>}/><Route path="/shop" element={<FanShopView/>}/></Routes></MemoryRouter></AppProvider>);}
 
 describe('World v2: ownership and access contracts',()=>{
   beforeEach(()=>localStorage.clear());

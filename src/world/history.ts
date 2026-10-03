@@ -1,6 +1,6 @@
 import { displayOptions, DISPLAY_FIXTURES } from './display';
 import type { AppAction, AppState } from '../domain/types';
-import { readDisplaySurfaces, validateSurfaceSelection } from './displaySurfaces';
+import { readDisplaySurfaces, validateSurfaceSelection, validateDisplaySurfaces, surfaceSupportsItem, DISPLAY_SURFACES } from './displaySurfaces';
 
 export interface HistoryCard { id:string; fanId:string; tenantId:string; eventTitle:string; worldId:string; collectedAt:string; physicalStatus:'owned'|'returned'; returnedAt?:string; source:'demo-serialized-card' }
 export const historyCards=(s:AppState)=>(s.ticketArchive || []).filter(c=>c.fanId===s.fanProfile.id && c.tenantId===s.activeTenantId);
@@ -13,6 +13,10 @@ export function historyReducer(s:AppState,a:AppAction):AppState|undefined {
       if(!DISPLAY_FIXTURES.some(f=>f.slot===a.slot) || (a.itemId && !displayOptions(s).some(i=>i.slot===a.slot && i.id===a.itemId)))return {...s,lastError:{code:'DISPLAY_NOT_OWNED',message:'Chọn đúng loại món đã nhận hoặc huy hiệu đã đạt.'}};
       const previous = readDisplaySurfaces(s.fanProfile, displayOptions(s));
       const selection = { itemIds: a.itemId ? [a.itemId] : [], focalItemId: a.itemId, layoutPreset: previous[a.slot].layoutPreset };
+      const item = displayOptions(s).find(value => value.id === a.itemId);
+      if (item && !surfaceSupportsItem(DISPLAY_SURFACES.find(surface => surface.id === a.slot)!, item)) return {...s,lastError:{code:'DISPLAY_NOT_OWNED',message:'Món này không phù hợp với khu vực trưng bày.'}};
+      const problem = validateSurfaceSelection(s.fanProfile, a.slot, selection, displayOptions(s));
+      if (problem) return {...s,lastError:{code:'DISPLAY_SURFACE_INVALID',message:problem}};
       return {...s,lastError:undefined,fanProfile:{...s.fanProfile,displaySlots:{...s.fanProfile.displaySlots,[a.slot]:a.itemId},displaySurfaces:{...previous,[a.slot]:selection}}};
     }
     case 'SET_DISPLAY_SURFACE': {
@@ -22,6 +26,14 @@ export function historyReducer(s:AppState,a:AppAction):AppState|undefined {
       return {...s,lastError:undefined,fanProfile:{...s.fanProfile,
         displaySlots:{...s.fanProfile.displaySlots,[a.surfaceId]:a.selection.itemIds[0] || ''},
         displaySurfaces:{...previous,[a.surfaceId]:a.selection},
+      }};
+    }
+    case 'SET_DISPLAY_SURFACES': {
+      const problem = validateDisplaySurfaces(s.fanProfile, a.surfaces, displayOptions(s));
+      if (problem) return {...s,lastError:{code:'DISPLAY_SURFACE_INVALID',message:problem}};
+      return {...s,lastError:undefined,fanProfile:{...s.fanProfile,
+        displaySlots:Object.fromEntries(DISPLAY_SURFACES.map(surface => [surface.id,a.surfaces[surface.id].itemIds[0] || ''])),
+        displaySurfaces:a.surfaces,
       }};
     }
     case 'IMPORT_DEMO_CARDS': {

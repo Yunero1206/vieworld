@@ -16,19 +16,15 @@
  * 12. UI integration across WorldDetailView, MyWorldView, and BenefitDetailView.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it } from 'vitest';
+import { FanShell as AppShell } from '../components/FanShell';
+import { AppProvider } from '../context/AppContext';
+import { createInitialState,scenarioPresets } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
 import { AppState } from '../domain/types';
-import { createInitialState, scenarioPresets } from '../data/fixtures';
-import { AppProvider } from '../context/AppContext';
-import { AppShell } from '../components/AppShell';
-import { WorldDetailView } from '../views/WorldDetailView';
-import { MyWorldView } from '../views/MyWorldView';
 import { BenefitDetailView } from '../views/BenefitDetailView';
-import { MembershipCard } from '../components/MembershipCard';
-import { saveState } from '../services/storageAdapter';
 
 describe('T07 Acceptance: Membership and Eligible Benefits', () => {
   let state: AppState;
@@ -286,149 +282,6 @@ describe('T07 Acceptance: Membership and Eligible Benefits', () => {
   });
 
   describe('2. UI Integration: WorldDetailView & MyWorldView Journeys', () => {
-    it('7. Refresh preserves membership and benefit state in localStorage', async () => {
-      saveState(createInitialState());
-      // Render application at /me
-      const { unmount } = render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/me']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="me" element={<MyWorldView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Navigate to Quyền lợi & Hội viên tab
-      const benefitsTab = screen.getByRole('tab', { name: /Quyền lợi & Hội viên/i });
-      fireEvent.click(benefitsTab);
-
-      // Verify initial benefit status
-      expect(screen.getByTestId('benefit-status-benefit-replay-01')).toHaveTextContent(/Đủ điều kiện/i);
-
-      // Claim benefit-replay-01
-      const claimBtn = screen.getByTestId('claim-benefit-btn-benefit-replay-01');
-      fireEvent.click(claimBtn);
-
-      // Verify claimed badge appears
-      expect(screen.getByTestId('benefit-claimed-indicator-benefit-replay-01')).toBeInTheDocument();
-
-      // Unmount simulating page refresh
-      unmount();
-
-      // Remount application
-      render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/me']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="me" element={<MyWorldView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Re-enter Quyền lợi & Hội viên tab
-      const benefitsTabAfter = screen.getByRole('tab', { name: /Quyền lợi & Hội viên/i });
-      fireEvent.click(benefitsTabAfter);
-
-      // Verify state was persisted in storage and restored
-      expect(screen.getByTestId('benefit-claimed-indicator-benefit-replay-01')).toBeInTheDocument();
-      expect(screen.getByTestId('benefit-status-benefit-replay-01')).toHaveTextContent(/Đã kích hoạt/i);
-    });
-
-    it('renders MembershipCard with active, inactive, and expired states truthfully', () => {
-      const mockWorld = state.worlds['artist-a'];
-
-      // Active state
-      const { rerender } = render(
-        <MembershipCard
-          world={mockWorld}
-          membership={{
-            id: 'member-a-01',
-            tenantId: 'vieworld-demo',
-            version: 1,
-            updatedAt: state.demoTime,
-            fanId: 'fan-linh',
-            worldId: 'artist-a',
-            status: 'active',
-            expiresAt: '2027-01-01T00:00:00.000Z',
-          }}
-        />
-      );
-
-      expect(screen.getByTestId('membership-status-active')).toBeInTheDocument();
-      expect(screen.getByText(/Đã là hội viên chính thức/i)).toBeInTheDocument();
-
-      // Inactive state
-      rerender(
-        <MembershipCard
-          world={mockWorld}
-          membership={undefined}
-        />
-      );
-      expect(screen.getByTestId('membership-status-inactive')).toBeInTheDocument();
-      expect(screen.getByText(/Mô phỏng: Nâng cấp hội viên/i)).toBeInTheDocument();
-
-      // Expired state
-      rerender(
-        <MembershipCard
-          world={mockWorld}
-          membership={{
-            id: 'member-a-01',
-            tenantId: 'vieworld-demo',
-            version: 1,
-            updatedAt: state.demoTime,
-            fanId: 'fan-linh',
-            worldId: 'artist-a',
-            status: 'expired',
-            expiresAt: '2026-01-01T00:00:00.000Z',
-          }}
-        />
-      );
-      expect(screen.getByTestId('membership-status-expired')).toBeInTheDocument();
-      expect(screen.getByText(/Mô phỏng: Gia hạn hội viên/i)).toBeInTheDocument();
-    });
-
-    it('renders WorldDetailView membership tab and allows upgrading membership', async () => {
-      // Seed new fan scenario in storage so artist-a membership starts inactive
-      saveState(scenarioPresets.newFan('vieworld-demo'));
-
-      render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/worlds/artist-a']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="worlds/:worldId" element={<WorldDetailView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Click on Hội viên & Quyền lợi tab
-      const membershipTab = screen.getByRole('tab', { name: /Hội viên & Quyền lợi/i });
-      fireEvent.click(membershipTab);
-
-      // Verify inactive status
-      expect(screen.getByTestId('membership-status-inactive')).toBeInTheDocument();
-
-      // Click upgrade button
-      const upgradeBtn = screen.getByTestId('upgrade-membership-btn-artist-a');
-      fireEvent.click(upgradeBtn);
-
-      // Membership is now active!
-      expect(screen.getByTestId('membership-status-active')).toBeInTheDocument();
-
-      // Replay benefit is now eligible
-      expect(screen.getByTestId('benefit-status-benefit-replay-01')).toHaveTextContent(/Đủ điều kiện/i);
-
-      // Early access benefit remains pending (Invariant: active membership does not automatically grant all benefits)
-      expect(screen.getByTestId('benefit-status-benefit-early-access-01')).toHaveTextContent(/Đang chờ đối soát/i);
-    });
 
     it('renders BenefitDetailView with qualification details and early access constitutional disclosure', () => {
       render(

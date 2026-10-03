@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Heart, X, Plus, Check, SlidersHorizontal, Shield, Camera, MoreHorizontal } from 'lucide-react';
+import { Heart, X, Check, SlidersHorizontal, Shield, Camera, MoreHorizontal, ArrowRight, MapPin } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AvatarRenderer } from './AvatarRenderer';
 import { ownedDigitalLook } from '../world/merchCatalog';
 import { DISPLAY_FIXTURES, displayedItems, displayOptions, displayAssetUrl, type DisplayItem, type DisplaySlot } from '../world/display';
-import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateSurfaceSelection, type SurfaceSelection } from '../world/displaySurfaces';
+import { DISPLAY_SURFACES, itemFootprint, readDisplaySurfaces, surfaceSupportsItem, validateDisplaySurfaces, planRoomPlacement, removeRoomItem, roomCandidates, type RoomSurfaces, type SurfaceSelection } from '../world/displaySurfaces';
+import { roomItemLabel } from '../world/roomItemKinds';
 import { composeRoomSurface, ROOM_SURFACE_BOUNDS } from '../world/roomComposition';
 import {CatalogItemArt,hasCatalogItemArt} from './CatalogItemArt';
 import { RoomPropVisual } from './RoomPropVisual';
@@ -39,6 +40,7 @@ interface DisplayRoomSceneProps {
   onOpenAvatar?: () => void;
   onOpenGuestbook?: () => void;
   previewItemId?: string;
+  pendingItemIds?: string[];
 }
 
 export function DisplayRoomScene({
@@ -63,6 +65,7 @@ export function DisplayRoomScene({
   onOpenAvatar,
   onOpenGuestbook,
   previewItemId,
+  pendingItemIds = [],
 }: DisplayRoomSceneProps) {
   const [ambientFeedback, setAmbientFeedback] = useState<string | null>(null);
   const feedbackTimeout = useRef<number | null>(null);
@@ -256,7 +259,7 @@ export function DisplayRoomScene({
               {surfaceObjects.length ? (
                 <span className="myspace-surface-composition">
                   {composition.map(({ item: object, anchor, focal }) => {
-                    return <span key={object.id} className={`myspace-room-prop is-${surface.type} ${focal ? 'is-focal' : ''} ${object.id===previewItemId?'is-ghost':''}`} data-room-item={object.id}
+                    return <span key={object.id} className={`myspace-room-prop is-${surface.type} ${focal ? 'is-focal' : ''} ${object.id===previewItemId||pendingItemIds.includes(object.id)?'is-ghost':''}`} data-room-item={object.id}
                       style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, width: `${anchor.width}%`, height: `${anchor.height}%`, zIndex: anchor.z, transformOrigin: `50% ${anchor.pivotY}%`, transform: `translate(-50%, -${anchor.pivotY}%) rotate(${anchor.rotate}deg)` }}>
                       <RoomPropVisual item={object}/>
                     </span>;
@@ -335,30 +338,26 @@ export function PersonalDisplayRoom({
   const allSlotOptions = useMemo(() => displayOptions(state), [state]);
   const selections = useMemo(() => readDisplaySurfaces(state.fanProfile, allSlotOptions), [state.fanProfile, allSlotOptions]);
   const [drawerNotice, setDrawerNotice] = useState('');
-  const [preview,setPreview]=useState<{slot:DisplaySlot;selection:SurfaceSelection;from?:DisplaySlot}|null>(null);
-  const [ghost,setGhost]=useState<typeof preview>(null);
+  const [draft,setDraft]=useState<RoomSurfaces|null>(null);
+  const [ghost,setGhost]=useState<{surfaces:RoomSurfaces;itemId:string}|null>(null);
+  const [replacement,setReplacement]=useState<{incoming?:string;outgoing?:string}|null>(null);
   const [itemQuery,setItemQuery]=useState('');
-  const projectPreview=(value:typeof preview)=>value?{...selections,...(value.from?{[value.from]:{...selections[value.from],itemIds:selections[value.from].itemIds.filter(id=>!value.selection.itemIds.includes(id))}}:{}),[value.slot]:value.selection}:selections;
-  const selectedSurfaces=projectPreview(preview);
-  const previewSurfaces=projectPreview(ghost||preview);
+  const selectedSurfaces=draft||selections;
+  const previewSurfaces=ghost?.surfaces||selectedSurfaces;
   useEffect(()=>{
     const itemId=roomParams.get('place');const slot=roomParams.get('surface') as DisplaySlot;
     const surface=DISPLAY_SURFACES.find(s=>s.id===slot);const item=allSlotOptions.find(i=>i.id===itemId);
     if(!item||!surface||!surfaceSupportsItem(surface,item)||selections[slot].itemIds.includes(item.id))return;
-    const from=DISPLAY_SURFACES.find(s=>s.id!==slot&&selections[s.id].itemIds.includes(item.id))?.id;
-    const selection={...selections[slot],itemIds:[...selections[slot].itemIds,item.id]};
-    const profile=from?{...state.fanProfile,displaySurfaces:{...selections,[from]:{...selections[from],itemIds:selections[from].itemIds.filter(id=>id!==item.id)}}}:state.fanProfile;
-    const problem=validateSurfaceSelection(profile,slot,selection,allSlotOptions);
-    setActiveDrawerSlot(slot);if(problem){setDrawerNotice(problem);return;}
-    setPreview({slot,selection,from});setDrawerNotice('Xem thử trong phòng. Chọn Đặt ở đây để lưu.');
+    const plan=planRoomPlacement(state.fanProfile,selections,slot,item.id,allSlotOptions);
+    setActiveDrawerSlot(slot);
+    if(plan.problem){setDrawerNotice(plan.problem);if(plan.problem==='Khu vực này đã đầy.')setReplacement({incoming:item.id});return;}
+    setDraft(plan.surfaces!);setDrawerNotice('Đang xem thử trong phòng.');
   },[roomParams.get('place'),roomParams.get('surface')]);
 
 
-  const slotEligibleItems = useMemo(() => {
-    if (!activeDrawerSlot) return [];
-    const surface = DISPLAY_SURFACES.find(item => item.id === activeDrawerSlot);
-    return allSlotOptions.filter(item => surface && surfaceSupportsItem(surface, item)&&matchesVietnameseQuery(item.title,itemQuery));
-  }, [allSlotOptions, activeDrawerSlot,itemQuery]);
+  const candidates=activeDrawerSlot?roomCandidates(activeDrawerSlot,selectedSurfaces,allSlotOptions):[];
+  const showItemSearch=candidates.length>=6;
+  const slotEligibleItems=candidates.filter(item=>!showItemSearch||matchesVietnameseQuery(`${item.title} ${state.worlds[item.worldId||'']?.name||''}`,itemQuery));
 
   const activeFixtureConfig = DISPLAY_SURFACES.find(f => f.id === activeDrawerSlot);
   const currentSelection = activeDrawerSlot ? selectedSurfaces[activeDrawerSlot] : undefined;
@@ -367,50 +366,50 @@ export function PersonalDisplayRoom({
 
   const handleSelectSlot = (slot: DisplaySlot, trigger?: HTMLElement) => {
     if(roomMode==='visitor')return;
-    if(slot==='shirt'&&roomMode==='view'){onOpen('wardrobe');return;}
-    setPreview(null);setGhost(null);setItemQuery('');
+    setGhost(null);setReplacement(null);setItemQuery('');
     setDrawerNotice('');
     lastTriggerButtonRef.current = trigger || document.getElementById(`fixture-${slot}`);
     setActiveDrawerSlot(slot);
   };
 
   const handleCloseDrawer = () => {
-    setActiveDrawerSlot(null);setPreview(null);setGhost(null);if(roomParams.has('place'))setRoomParams({},{replace:true});
+    setActiveDrawerSlot(null);setDraft(null);setGhost(null);setReplacement(null);setItemQuery('');if(roomParams.has('place'))setRoomParams({},{replace:true});
     lastTriggerButtonRef.current?.focus();
   };
-  useDialogA11y(Boolean(activeDrawerSlot), handleCloseDrawer, drawerRef);
+  useDialogA11y(Boolean(activeDrawerSlot), handleCloseDrawer, drawerRef, undefined, false);
 
-  const applySelection = (selection: SurfaceSelection, success: string) => {
+  const handleApplyItem = (itemId: string, replaceId=replacement?.outgoing) => {
     if (!activeDrawerSlot) return;
-    const problem = validateSurfaceSelection(state.fanProfile, activeDrawerSlot, selection, allSlotOptions);
-    if (problem) { setDrawerNotice(`${problem} Đổi món hoặc chọn chỗ khác.`); return; }
-    setPreview({slot:activeDrawerSlot,selection});
-    setGhost(null);
-    setDrawerNotice('Xem thử trong phòng. Chọn Đặt ở đây để lưu.');
-    void success;
+    const plan=planRoomPlacement(state.fanProfile,selectedSurfaces,activeDrawerSlot,itemId,allSlotOptions,replaceId);
+    if(plan.problem){
+      setGhost(null);setDrawerNotice(plan.problem);
+      if(plan.problem==='Khu vực này đã đầy.')setReplacement({incoming:itemId});
+      return;
+    }
+    setDraft(plan.surfaces!);setGhost(null);setReplacement(null);setDrawerNotice('Đang xem thử trong phòng.');
   };
 
-  const handleApplyItem = (itemId: string) => {
-    if (!currentSelection) return;
-    applySelection({ ...currentSelection, itemIds: [...currentSelection.itemIds, itemId], focalItemId: currentSelection.focalItemId || itemId }, 'Đã đặt món vào phòng.');
-  };
-
-  const previewCandidate=(itemId:string):typeof preview=>{
+  const previewCandidate=(itemId:string):typeof ghost=>{
     if(!activeDrawerSlot||!currentSelection||currentSelection.itemIds.includes(itemId))return null;
-    const item=allSlotOptions.find(i=>i.id===itemId);
-    if(!item||Object.entries(selections).some(([id,s])=>id!==activeDrawerSlot&&s.itemIds.includes(itemId)))return null;
-    const canFit=currentSurfaceItems.length<(activeFixtureConfig?.maxItems||0)&&currentUnits+itemFootprint(item)<=(activeFixtureConfig?.capacityUnits||0);
-    const replaceId=currentSelection.focalItemId||currentSelection.itemIds[0];
-    const selection=canFit?{...currentSelection,itemIds:[...currentSelection.itemIds,itemId],focalItemId:currentSelection.focalItemId||itemId}
-      :{...currentSelection,itemIds:currentSelection.itemIds.map(id=>id===replaceId?itemId:id),focalItemId:itemId};
-    if(!selection.itemIds.includes(itemId)||validateSurfaceSelection(state.fanProfile,activeDrawerSlot,selection,allSlotOptions))return null;
-    return {slot:activeDrawerSlot,selection,from:preview?.from};
+    const plan=planRoomPlacement(state.fanProfile,selectedSurfaces,activeDrawerSlot,itemId,allSlotOptions,replacement?.outgoing);
+    return plan.surfaces?{surfaces:plan.surfaces,itemId}:null;
   };
 
   const handleRemoveItem = (itemId: string) => {
-    if (!currentSelection) return;
-    const itemIds = currentSelection.itemIds.filter(id => id !== itemId);
-    applySelection({ ...currentSelection, itemIds, focalItemId: currentSelection.focalItemId === itemId ? itemIds[0] : currentSelection.focalItemId }, 'Đã cất món. Bộ sưu tập vẫn còn nguyên.');
+    if (!activeDrawerSlot) return;
+    setDraft(removeRoomItem(selectedSurfaces,activeDrawerSlot,itemId));setGhost(null);setReplacement(null);
+    setDrawerNotice('Đã gỡ trong bản xem thử. Món vẫn ở Bộ sưu tập.');
+  };
+  const itemDescription=(item:DisplayItem)=>[roomItemLabel(item),state.worlds[item.worldId||'']?.name].filter(Boolean).join(' · ');
+  const hasRoomChanges=Boolean(draft&&JSON.stringify(draft)!==JSON.stringify(selections));
+  const surfaceFull=Boolean(activeFixtureConfig&&(currentSurfaceItems.length>=activeFixtureConfig.maxItems||currentUnits>=activeFixtureConfig.capacityUnits));
+  const saveRoom=()=>{
+    if(!draft)return;
+    const problem=validateDisplaySurfaces(state.fanProfile,draft,allSlotOptions);
+    if(problem){setDrawerNotice(problem);return;}
+    dispatch({type:'SET_DISPLAY_SURFACES',surfaces:draft});
+    if(roomParams.has('place'))setRoomParams({},{replace:true});
+    setDraft(null);setGhost(null);setReplacement(null);setDrawerNotice('Đã lưu thay đổi.');
   };
 
   const handleLikeRoom = () => {
@@ -424,7 +423,7 @@ export function PersonalDisplayRoom({
   const isVisitorMode = roomMode === 'visitor';
 
   return (
-    <section className="v6-personal-room" data-preview-state={ghost?'hover':preview?'selected':undefined} aria-label="My Space — năm vị trí trưng bày">
+    <section className="v6-personal-room" data-preview-state={ghost?'hover':hasRoomChanges?'selected':undefined} aria-label="My Space — năm vị trí trưng bày">
       <DisplayRoomScene
         fan={{
           id: state.fanProfile.id,
@@ -435,7 +434,8 @@ export function PersonalDisplayRoom({
         }}
         items={allSlotOptions}
         surfaces={previewSurfaces}
-        previewItemId={ghost?.selection.itemIds.find(id=>!currentSelection?.itemIds.includes(id))}
+        previewItemId={ghost?.itemId}
+        pendingItemIds={DISPLAY_SURFACES.flatMap(surface=>selectedSurfaces[surface.id].itemIds.filter(id=>!selections[surface.id].itemIds.includes(id)))}
         onSelect={handleSelectSlot}
         isLightstickActive={isLightstickActive}
         onToggleLightstick={() => setIsLightstickActive(p => !p)}
@@ -454,9 +454,9 @@ export function PersonalDisplayRoom({
         onOpenGuestbook={privacy.guestbookEnabled&&!isVisitorMode?()=>onOpen('guestbook'):undefined}
       />
 
-      {!isVisitorMode && <nav className="myspace-mobile-surfaces" aria-label="Chọn khu vực trưng bày">
+      {!isVisitorMode && <nav className={`myspace-mobile-surfaces${activeDrawerSlot?' is-drawer-open':''}`} aria-label="Chọn khu vực trưng bày">
         {DISPLAY_SURFACES.map(surface => <button key={surface.id} type="button" onClick={event => handleSelectSlot(surface.id, event.currentTarget)}>
-          <strong>{surface.label}</strong><small>{selections[surface.id].itemIds.length}/{surface.maxItems} món</small>
+          <strong>{surface.label}</strong><small>{selectedSurfaces[surface.id].itemIds.length}/{surface.maxItems} món</small>
         </button>)}
       </nav>}
 
@@ -510,20 +510,20 @@ export function PersonalDisplayRoom({
 
       {/* Quick Slot Picker Drawer (In-Room Drawer) */}
       {activeDrawerSlot && (
-        <div className="v7-drawer-backdrop" onClick={handleCloseDrawer}>
+        <div className="v7-drawer-backdrop">
           <div
             ref={drawerRef}
             tabIndex={-1}
             className="v7-slot-picker-drawer"
             onClick={e => e.stopPropagation()}
             role="dialog"
-            aria-modal="true"
+            aria-modal="false"
             aria-label={`Trưng bày ${activeFixtureConfig?.label}`}
           >
             <div className="v7-drawer-header">
               <div>
-                <span className="v7-drawer-eyebrow">VỊ TRÍ TRƯNG BÀY</span>
                 <h3>{activeFixtureConfig?.label}</h3>
+                <p className="myspace-surface-capacity">{currentSurfaceItems.length}/{activeFixtureConfig?.maxItems} món</p>
               </div>
               <button
                 className="v7-drawer-close-btn"
@@ -534,38 +534,47 @@ export function PersonalDisplayRoom({
               </button>
             </div>
 
-            <p className="myspace-surface-capacity">
-              {currentSurfaceItems.length}/{activeFixtureConfig?.maxItems || 5} món · {currentUnits}/{activeFixtureConfig?.capacityUnits || 0} sức chứa
-            </p>
-            {activeFixtureConfig && currentSurfaceItems.length > activeFixtureConfig.maxItems && <p className="myspace-drawer-notice" role="status">Bố cục cũ được giữ nguyên. Khu vực này hiện phù hợp tối đa {activeFixtureConfig.maxItems} món; bạn có thể cất bớt, không mất món trong Bộ sưu tập.</p>}
-            <label className="presence-room-search">Tìm trong khu vực<input value={itemQuery} onChange={e=>setItemQuery(e.target.value)} placeholder="Tên vật phẩm…"/></label>
-            {currentSurfaceItems.length > 0 && <div className="v7-slot-current-section">
-              <span className="v7-slot-section-title">Đang trưng bày</span>
+            <label className="myspace-drawer-mobile-context">
+              <span className="sr-only">Đổi khu vực trưng bày</span>
+              <select value={activeDrawerSlot} onChange={event=>handleSelectSlot(event.target.value as DisplaySlot, event.currentTarget)}>
+                {DISPLAY_SURFACES.map(surface=><option key={surface.id} value={surface.id}>{surface.label}</option>)}
+              </select>
+            </label>
+
+            <div className="myspace-drawer-body">
+            <div className="v7-slot-current-section">
+              <h4 className="v7-slot-section-title">Đang trưng bày</h4>
+              {!currentSurfaceItems.length&&<p className="myspace-drawer-empty-current">Chưa trưng bày món nào.</p>}
               {currentSurfaceItems.map(item => <div className="v7-slot-current-card" key={item.id}>
                 <div className="v7-drawer-item-media">{hasCatalogItemArt(item.id)?<CatalogItemArt id={item.id} title={item.title}/>:displayAssetUrl(item) ? <img src={displayAssetUrl(item)} alt="" /> : <span className="v6-trophy">✦</span>}</div>
-                <div className="v7-drawer-item-info"><strong>{item.title}</strong><small>Trong bộ sưu tập</small></div>
+                <div className="v7-drawer-item-info"><strong>{item.title}</strong><small>{itemDescription(item)}</small></div>
                 <div className="myspace-surface-item-actions">
-                  <button type="button" onClick={() => handleRemoveItem(item.id)}>Gỡ khỏi phòng</button>
+                  <button type="button" onClick={() => handleRemoveItem(item.id)} aria-label={`Gỡ ${item.title}`}>Gỡ</button>
+                  {(surfaceFull||replacement)&&candidates.length>0&&<button type="button" aria-label={replacement?.incoming?'Thay bằng món đã chọn':undefined} aria-pressed={replacement?.outgoing===item.id} onClick={()=>{
+                    if(replacement?.incoming)handleApplyItem(replacement.incoming,item.id);
+                    else{setReplacement({outgoing:item.id});setGhost(null);setDrawerNotice('Chọn món bên dưới để thay.');}
+                  }}>Thay món này</button>}
                 </div>
               </div>)}
-            </div>}
+            </div>
             {drawerNotice && <p className="myspace-drawer-notice" role="status">{drawerNotice}</p>}
-            {(currentSurfaceItems.length >= (activeFixtureConfig?.maxItems || 5) || currentUnits >= (activeFixtureConfig?.capacityUnits || 0)) && <p className="myspace-drawer-notice" role="status">Khu vực này đã đầy. Chọn Đổi món, hoặc chọn chỗ khác bên dưới.</p>}
+            {surfaceFull&&drawerNotice!=='Khu vực này đã đầy.'&&<p className="myspace-drawer-notice">Khu vực này đã đầy.</p>}
+            {replacement&&<div className="myspace-replacement-notice" role="status">
+              <p>{replacement.incoming?`Chọn món đang trưng bày để thay bằng ${allSlotOptions.find(item=>item.id===replacement.incoming)?.title}.`:`Thay ${allSlotOptions.find(item=>item.id===replacement.outgoing)?.title} bằng một món bên dưới.`}</p>
+              <button type="button" onClick={()=>{setReplacement(null);setGhost(null);setDrawerNotice('');}}>Hủy chọn</button>
+            </div>}
 
             <div className="v7-slot-candidates-section">
-              <span className="v7-slot-section-title">
-                Món phù hợp trong Bộ sưu tập ({slotEligibleItems.length})
-              </span>
+              <h4 className="v7-slot-section-title">Có thể đặt ở đây</h4>
+              {showItemSearch&&<label className="presence-room-search">Tìm trong Bộ sưu tập<input value={itemQuery} onChange={e=>setItemQuery(e.target.value)} placeholder="Tên vật phẩm…"/></label>}
 
               <div className="v7-drawer-items-list">
                 {slotEligibleItems.map(item => {
-                  const isCurrent = currentSelection?.itemIds.includes(item.id);
-                  const isElsewhere = Object.entries(selections).some(([id, surface]) => id !== activeDrawerSlot && surface.itemIds.includes(item.id));
-                  const canFit = currentSurfaceItems.length < (activeFixtureConfig?.maxItems || 0) && currentUnits + itemFootprint(item) <= (activeFixtureConfig?.capacityUnits || 0);
+                  const elsewhere=DISPLAY_SURFACES.find(surface=>surface.id!==activeDrawerSlot&&selectedSurfaces[surface.id].itemIds.includes(item.id));
                   return (
                     <div
                       key={item.id}
-                      className={`v7-drawer-item-card ${isCurrent ? 'selected' : ''}`}
+                      className="v7-drawer-item-card"
                     >
                       <div className="v7-drawer-item-media">
                         {hasCatalogItemArt(item.id)?<CatalogItemArt id={item.id} title={item.title}/>:displayAssetUrl(item) ? (
@@ -576,27 +585,13 @@ export function PersonalDisplayRoom({
                       </div>
                       <div className="v7-drawer-item-info">
                         <strong>{item.title}</strong>
-                        <small>{itemFootprint(item)} sức chứa{isElsewhere ? ' · Đang ở chỗ khác' : ''}</small>
+                        <small>{itemDescription(item)}</small>
+                        {elsewhere&&<small className="myspace-item-location"><MapPin size={12}/>Đang ở {elsewhere.label}</small>}
                       </div>
                       <div className="v7-drawer-item-action">
-                        {isCurrent ? (
-                          <span className="v7-item-applied-pill">
-                            <Check size={14} /> Đang trưng
-                          </span>
-                        ) : (
-                          <button type="button" className="v7-item-select-btn" disabled={isElsewhere || (!canFit && !currentSurfaceItems.length)} onMouseEnter={()=>setGhost(previewCandidate(item.id))} onMouseLeave={()=>setGhost(null)} onFocus={()=>setGhost(previewCandidate(item.id))} onBlur={()=>setGhost(null)} onClick={() => {
-                            if (canFit) handleApplyItem(item.id);
-                            else if (currentSelection) {
-                              const replaceId = currentSelection.focalItemId || currentSelection.itemIds[0];
-                              const next = { ...currentSelection, itemIds: currentSelection.itemIds.map(id => id === replaceId ? item.id : id), focalItemId: item.id };
-                              const problem = validateSurfaceSelection(state.fanProfile, activeDrawerSlot, next, allSlotOptions);
-                              if (problem) { setDrawerNotice('Món này chưa vừa chỗ. Cất bớt một món hoặc chọn khu vực khác.'); return; }
-                              applySelection(next, 'Đã đổi món điểm nhấn. Món cũ vẫn ở Bộ sưu tập.');
-                            }
-                          }}>
-                            <Plus size={14} /> {isElsewhere ? 'Đang ở chỗ khác' : canFit ? 'Đặt vào phòng' : 'Đổi món điểm nhấn'}
-                          </button>
-                        )}
+                        <button type="button" className="v7-item-select-btn" onMouseEnter={()=>setGhost(previewCandidate(item.id))} onMouseLeave={()=>setGhost(null)} onFocus={()=>setGhost(previewCandidate(item.id))} onBlur={()=>setGhost(null)} onClick={()=>handleApplyItem(item.id)}>
+                          {replacement?.outgoing?'Thay món này':elsewhere?'Chuyển tới đây':'Đặt vào đây'}
+                        </button>
                       </div>
                     </div>
                   );
@@ -604,26 +599,21 @@ export function PersonalDisplayRoom({
 
                 {!slotEligibleItems.length && (
                   <div className="v7-drawer-empty">
-                    <p>Chưa có món phù hợp trong bộ sưu tập.</p>
-                    <Link to="/shop" className="fw-text-button" onClick={handleCloseDrawer}>
-                      Khám phá vật phẩm tại VieSHOP →
-                    </Link>
+                    <p>{showItemSearch&&itemQuery?'Không tìm thấy món phù hợp.':'Chưa có món phù hợp trong Bộ sưu tập.'}</p>
+                    {!candidates.length&&!currentSurfaceItems.length&&<Link to="/shop" className="fw-text-button" onClick={handleCloseDrawer}>Khám phá VieCollect <ArrowRight size={16}/></Link>}
                   </div>
                 )}
               </div>
             </div>
-
-            {preview&&<div className="presence-room-preview-confirm"><button onClick={()=>{if(preview.from)dispatch({type:'SET_DISPLAY_SURFACE',surfaceId:preview.from,selection:selectedSurfaces[preview.from]});dispatch({type:'SET_DISPLAY_SURFACE',surfaceId:preview.slot,selection:preview.selection});if(roomParams.has('place'))setRoomParams({},{replace:true});setPreview(null);setGhost(null);setDrawerNotice('Đã lưu trong phòng.');}}>Đặt ở đây</button><button onClick={()=>{setPreview(null);setGhost(null);setDrawerNotice('');}}>Hủy xem thử</button></div>}
+            </div>
             <div className="v7-drawer-footer">
-              <div className="myspace-other-surfaces" aria-label="Chọn chỗ khác">
-                {DISPLAY_SURFACES.filter(surface => surface.id !== activeDrawerSlot).map(surface => <button key={surface.id} type="button" onClick={() => { setDrawerNotice('');setPreview(null);setGhost(null);setItemQuery(''); setActiveDrawerSlot(surface.id); }}>{surface.label}</button>)}
-              </div>
+              {hasRoomChanges&&<div className="presence-room-preview-confirm"><button type="button" onClick={()=>{setDraft(null);setGhost(null);setReplacement(null);setDrawerNotice('');}}>Hủy</button><button type="button" className="myspace-primary-action" onClick={saveRoom}>Lưu thay đổi</button></div>}
               <Link
-                to={`/me?section=collection&type=${activeDrawerSlot}`}
+                to="/me?section=collection"
                 className="v7-drawer-collection-link"
                 onClick={handleCloseDrawer}
               >
-                Mở trong Bộ sưu tập riêng ↗
+                Mở trong Bộ sưu tập riêng <ArrowRight size={16}/>
               </Link>
             </div>
           </div>

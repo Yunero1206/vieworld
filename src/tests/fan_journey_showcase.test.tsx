@@ -33,8 +33,10 @@ describe('One fan, one connected journey — showcase', () => {
     expect(isDemoSignedIn(state)).toBe(false);
     const assigned = getCurrentArtistId(state); expect(assigned).toBeTruthy(); expect(getCurrentArtistId(state)).toBe(assigned);
     setCurrentArtistId(state, 'artist-a'); step({ type: 'VISIT_FAN_WORLD', worldId: 'artist-a' });
-    step({ type: 'TOGGLE_FOLLOW', worldId: 'artist-a' }); expect(state.followedWorldIds).toContain('artist-a'); expect(canEnterHall(state, 'artist-a')).toBe(false);
+    step({ type: 'TOGGLE_FOLLOW', worldId: 'artist-a' }); expect(state.followedWorldIds).toEqual([]); expect(state.lastError?.code).toBe('DEMO_LOGIN_REQUIRED');
     step({ type: 'DEMO_SIGN_IN', provider: 'google', mode: 'register' }); expect(state.memberships).toEqual({});
+    step({ type: 'VISIT_FAN_WORLD', worldId: 'artist-a' });
+    step({ type: 'TOGGLE_FOLLOW', worldId: 'artist-a' }); expect(state.followedWorldIds).toContain('artist-a'); expect(canEnterHall(state, 'artist-a')).toBe(false);
     step({ type: 'UPGRADE_MEMBERSHIP', worldId: 'artist-a' }); expect(canEnterHall(state, 'artist-a')).toBe(true);
     step({ type: 'TOGGLE_RSVP', sessionId: 'session-listen-01' }); expect(state.rsvpdSessionIds).toContain('session-listen-01'); expect(state.participations).toEqual({});
     step({ type: 'JOIN_LIVE_SESSION', sessionId: 'session-dropin-01' });

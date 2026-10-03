@@ -12,7 +12,8 @@ export function useDialogA11y(
   isOpen: boolean,
   onClose: () => void,
   containerRef: React.RefObject<HTMLElement | null>,
-  returnFocusRef?: React.RefObject<HTMLElement | null>
+  returnFocusRef?: React.RefObject<HTMLElement | null>,
+  modal = true,
 ) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -54,7 +55,7 @@ export function useDialogA11y(
         return;
       }
 
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || !modal) return;
 
       if (!containerRef.current) return;
       const focusable = Array.from(
@@ -86,17 +87,17 @@ export function useDialogA11y(
 
     window.addEventListener('keydown', handleKeyDown);
     const oldOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (modal) document.body.style.overflow = 'hidden';
 
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = oldOverflow;
+      if (modal) document.body.style.overflow = oldOverflow;
       if (previousActiveElementRef.current && previousActiveElementRef.current.isConnected) {
         previousActiveElementRef.current.focus();
       } else {
         returnFocusRef?.current?.focus();
       }
     };
-  }, [isOpen, containerRef, returnFocusRef]);
+  }, [isOpen, containerRef, returnFocusRef, modal]);
 }

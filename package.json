@@ -12,6 +12,7 @@
     "start": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "check:showcase": "node scripts/check-showcase.mjs",
+    "check:source": "node scripts/check-source.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"
@@ -30,9 +31,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
-    "jpeg-js": "^0.4.4",
     "jsdom": "^26.0.0",
-    "pngjs": "^7.0.0",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",
     "vitest": "4.1.11"

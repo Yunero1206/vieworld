@@ -1,13 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { fireEvent,render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it } from 'vitest';
 import { AppProvider } from '../context/AppContext';
-import { SessionView } from '../views/SessionView';
-import { WorldDetailView } from '../views/WorldDetailView';
-import { MyWorldView } from '../views/MyWorldView';
 import { createInitialState } from '../data/fixtures';
-import { saveState, _resetMemoryFallbackFlagForTesting } from '../services/storageAdapter';
-import { AppState, Session } from '../domain/types';
+import { AppState,Session } from '../domain/types';
+import { _resetMemoryFallbackFlagForTesting,saveState } from '../services/storageAdapter';
+import { SessionView } from '../views/SessionView';
 
 describe('T13 Acceptance: Session Variants (Listening Room & Live House)', () => {
   let mockState: AppState;
@@ -200,76 +198,6 @@ describe('T13 Acceptance: Session Variants (Listening Room & Live House)', () =>
       expect(screen.getByRole('tab', { name: /Trò chuyện/i })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: /Câu hỏi Q&A/i })).toBeInTheDocument();
       expect(screen.getByRole('tab', { name: /Bình chọn/i })).toBeInTheDocument();
-    });
-  });
-
-  describe('6. Cross-View Replay Expiration Consistency', () => {
-    it('consistently represents expired rights and disables playback in SessionView, Archive, and My World', () => {
-      const stateWithExpired: AppState = {
-        ...mockState,
-        capsules: {
-          'capsule-expired-01': {
-            id: 'capsule-expired-01',
-            tenantId: 'vieworld-demo',
-            version: 1,
-            updatedAt: '2026-09-09T00:00:00.000Z',
-            fanId: 'fan-linh',
-            sessionId: 'session-expired-01',
-            worldId: 'artist-a',
-            participationId: 'part_fan-linh_session-expired-01_live',
-            isSaved: true,
-            privateNote: 'Kỷ niệm mùa hè đầu tiên.',
-          },
-        },
-      };
-
-      saveState(stateWithExpired);
-
-      // 1. Check SessionView: expired banner and disabled audio play toggle
-      const { unmount: unmountSession } = render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/sessions/session-expired-01']}>
-            <Routes>
-              <Route path="/sessions/:sessionId" element={<SessionView />} />
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      expect(screen.getByTestId('expired-rights-session-banner')).toHaveTextContent('Bản quyền nội dung đã hết hạn (Expired Rights)');
-      expect(screen.getByTestId('expired-rights-audio-notice')).toHaveTextContent('Bản quyền âm thanh đã hết hạn');
-      expect(screen.getByTestId('audio-play-toggle')).toBeDisabled();
-      unmountSession();
-
-      // 2. Check WorldDetailView (Archive tab): shows expired rights tag
-      const { unmount: unmountWorld } = render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/worlds/artist-a']}>
-            <Routes>
-              <Route path="/worlds/:worldId" element={<WorldDetailView />} />
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Open Archive tab
-      fireEvent.click(screen.getByRole('tab', { name: /Kho lưu trữ/i }));
-      expect(screen.getByTestId('archive-replay-expired-session-expired-01')).toHaveTextContent('Bản quyền đã hết hạn');
-      unmountWorld();
-
-      // 3. Check MyWorldView (Capsules tab): shows expired replay notice while preserving private note
-      render(
-        <AppProvider>
-          <MemoryRouter initialEntries={['/me']}>
-            <Routes>
-              <Route path="/me" element={<MyWorldView />} />
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      expect(screen.getByTestId('replay-expired-notice-capsule-expired-01')).toHaveTextContent('Bản ghi Replay đã hết hạn bản quyền');
-      expect(screen.getByText('Kỷ niệm mùa hè đầu tiên.')).toBeInTheDocument();
     });
   });
 

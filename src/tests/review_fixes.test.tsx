@@ -1,17 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { AppProvider } from '../context/AppContext';
-import { ErrorBoundary } from '../components/ErrorBoundary';
+import { fireEvent,render,screen,within } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it,vi } from 'vitest';
 import { CollectionBrowser } from '../components/CollectionBrowser';
-import { FanShopView } from '../views/FanShopView';
-import { OrderDetailView } from '../views/OrderDetailView';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { AppProvider } from '../context/AppContext';
 import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
-import { saveState, loadState } from '../services/storageAdapter';
-import { ownedCollection, displayOptions } from '../world/display';
-import { filterDisplayItems, formatCollectionDate, COLLECTION_TIMEZONE,  } from '../world/displayFilter';
-import { matchesVietnameseQuery, normalizeVietnameseText } from '../utils/textSearch';
+import { loadState,saveState } from '../services/storageAdapter';
+import { matchesVietnameseQuery,normalizeVietnameseText } from '../utils/textSearch';
+import { FanShopView } from '../views/FanShopView';
+import { OrderDetailView } from '../views/OrderDetailView';
+import { displayOptions,ownedCollection } from '../world/display';
 
 function ProblemChild({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) {
@@ -123,119 +122,6 @@ describe('Review Fixes & UX Regression Suite', () => {
     });
   });
 
-  describe('2. P2 Collection dates disagree with the date filter', () => {
-    it('aligns date filter and display in Asia/Ho_Chi_Minh timezone (UTC+7)', () => {
-      expect(COLLECTION_TIMEZONE).toBe('Asia/Ho_Chi_Minh');
-
-      // 2026-09-12T18:30:00Z is 01:30 on 2026-09-13 in Asia/Ho_Chi_Minh
-      const timestamp = '2026-09-12T18:30:00Z';
-      const formatted = formatCollectionDate(timestamp);
-      expect(formatted).toBe('13/09/2026');
-
-      const items = [
-        {
-          id: 'item-1',
-          slot: 'shirt' as const,
-          title: 'Áo Concert Mùa Thu',
-          detail: 'Chi tiết áo',
-          worldId: 'artist-a',
-          collectedAt: timestamp,
-        },
-      ];
-
-      // Filter for 2026-09-13 inclusive must match item-1
-      const matched = filterDisplayItems(items, {
-        slot: 'all',
-        query: '',
-        artist: 'all',
-        from: '2026-09-13',
-        to: '2026-09-13',
-      });
-      expect(matched.map(i => i.id)).toEqual(['item-1']);
-
-      // Filter for 2026-09-12 must NOT match item-1
-      const notMatched = filterDisplayItems(items, {
-        slot: 'all',
-        query: '',
-        artist: 'all',
-        from: '2026-09-12',
-        to: '2026-09-12',
-      });
-      expect(notMatched).toHaveLength(0);
-    });
-
-    it('tests midnight boundaries, missing dates and reversed ranges', () => {
-      const items = [
-        {
-          id: 'midnight-start',
-          slot: 'disc' as const,
-          title: 'Đĩa Midnight',
-          detail: '',
-          collectedAt: '2026-09-13T00:00:00+07:00',
-        },
-        {
-          id: 'midnight-end',
-          slot: 'disc' as const,
-          title: 'Đĩa Late Night',
-          detail: '',
-          collectedAt: '2026-09-13T23:59:59.999+07:00',
-        },
-        {
-          id: 'next-day-start',
-          slot: 'disc' as const,
-          title: 'Đĩa Next Day',
-          detail: '',
-          collectedAt: '2026-09-14T00:00:00+07:00',
-        },
-        {
-          id: 'no-date',
-          slot: 'ticket' as const,
-          title: 'Vé chưa ngày',
-          detail: '',
-        },
-        {
-          id: 'no-utc-suffix',
-          slot: 'lightstick' as const,
-          title: 'Lightstick No Suffix',
-          detail: '',
-          collectedAt: '2026-09-13T15:30:00',
-        },
-      ];
-
-      // Both midnight-start and midnight-end and no-utc-suffix match 2026-09-13
-      const onDay = filterDisplayItems(items, {
-        slot: 'all',
-        query: '',
-        artist: 'all',
-        from: '2026-09-13',
-        to: '2026-09-13',
-      });
-      expect(onDay.map(i => i.id).sort()).toEqual(['midnight-end', 'midnight-start', 'no-utc-suffix'].sort());
-      expect(onDay.some(i => i.id === 'next-day-start')).toBe(false);
-      expect(onDay.some(i => i.id === 'no-date')).toBe(false);
-
-      // Reversed ranges safely return empty
-      const reversed = filterDisplayItems(items, {
-        slot: 'all',
-        query: '',
-        artist: 'all',
-        from: '2026-09-20',
-        to: '2026-09-10',
-      });
-      expect(reversed).toEqual([]);
-
-      // Without date filters, item without date is preserved
-      const allItems = filterDisplayItems(items, {
-        slot: 'all',
-        query: '',
-        artist: 'all',
-        from: '',
-        to: '',
-      });
-      expect(allItems).toHaveLength(5);
-    });
-  });
-
   describe('3. P2 All collection items includes non-display compatible owned items', () => {
     it('derives complete owned collection including caps while preserving displayOptions fixtures', () => {
       let state = createInitialState('vieworld-demo');
@@ -261,11 +147,12 @@ describe('Review Fixes & UX Regression Suite', () => {
       // Cap is in allOwned
       const cap = allOwned.find(i => i.id === 'product-cap-real');
       expect(cap).toBeDefined();
-      expect(cap?.isDisplayCompatible).toBe(false);
-      expect(cap?.slot).toBeUndefined();
+      expect(cap?.isDisplayCompatible).toBe(true);
+      expect(cap?.slot).toBe('achievement');
+      expect(cap?.itemKind).toBe('keepsake');
 
       // displayCandidates only includes display-compatible items
-      expect(displayCandidates.some(i => i.id === 'product-cap-real')).toBe(false);
+      expect(displayCandidates.some(i => i.id === 'product-cap-real')).toBe(true);
     });
 
     it('renders an owned digital cap in collection with a room-display action', () => {

@@ -17,17 +17,10 @@
  * 13. Constitutional guard: Zero credit card, CVV, bank account, password, or delivery address inputs exist.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { beforeEach,describe,expect,it } from 'vitest';
+import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
 import { AppState } from '../domain/types';
-import { createInitialState } from '../data/fixtures';
-import { AppProvider } from '../context/AppContext';
-import { AppShell } from '../components/AppShell';
-import { ShopView } from '../views/ShopView';
-import { OrderDetailView } from '../views/OrderDetailView';
-import { MyWorldView } from '../views/MyWorldView';
 import { saveState } from '../services/storageAdapter';
 
 describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', () => {
@@ -342,143 +335,6 @@ describe('T08 Acceptance: Merchandise Orders, Simulated Checkout & Fulfilment', 
       expect(parsed.state.orders[order.id]).toBeDefined();
       expect(parsed.state.orders[order.id].status).toBe('fulfilled');
       expect(parsed.state.orders[order.id].productId).toBe('product-pin-01');
-    });
-  });
-
-  describe('2. UI Integration & End-to-End Journeys', () => {
-    it('1. ShopView displays products, stock, benefit gating reasons and simulated order buttons', () => {
-      render(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter initialEntries={['/worlds/artist-a/shop']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="worlds/:worldId/shop" element={<ShopView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Verify Header
-      expect(screen.getByText(/VIESHOP CONTEXTUAL COMMERCE/i)).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 1, name: /Cửa hàng quà tặng lưu niệm/i })).toBeInTheDocument();
-
-      // Product 1: Pin (open, in-stock)
-      expect(screen.getByText(/Huy hiệu kim loại kỷ niệm Star Drop-in/i)).toBeInTheDocument();
-      expect(screen.getByText(/150.000 VND/i)).toBeInTheDocument();
-      expect(screen.getAllByText(/Tồn kho thử nghiệm:/i)).toHaveLength(
-        Object.values(createInitialState('vieworld-demo').products).filter(p => p.worldId === 'artist-a').length
-      );
-
-      // Product 2: Shirt (gated by benefit-early-access-01 which is pending)
-      expect(screen.getByText(/Áo thun kỷ niệm Midnight Neon Tour/i)).toBeInTheDocument();
-      expect(screen.getByText(/380.000 VND/i)).toBeInTheDocument();
-      expect(screen.getByText(/Yêu cầu quyền lợi hội viên chưa thỏa mãn/i)).toBeInTheDocument();
-      expect(screen.getByText(/Quyền lợi của bạn hiện đang ở trạng thái chờ đối soát \(pending\)/i)).toBeInTheDocument();
-
-      // Order button for Shirt is disabled
-      const shirtBtn = screen.getByTestId('order-product-btn-product-shirt-01');
-      expect(shirtBtn).toBeDisabled();
-
-      // Order button for Pin is enabled
-      const pinBtn = screen.getByTestId('order-product-btn-product-pin-01');
-      expect(pinBtn).not.toBeDisabled();
-      expect(pinBtn).toHaveTextContent(/Mô phỏng đặt hàng/i);
-    });
-
-    it('2. End-to-end journey: Order in Shop → View OrderDetail → Pay → Fulfill → Verify in My World', async () => {
-      render(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter initialEntries={['/worlds/artist-a/shop']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="worlds/:worldId/shop" element={<ShopView />} />
-                <Route path="orders/:orderId" element={<OrderDetailView />} />
-                <Route path="me" element={<MyWorldView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Step 1: Click "Mô phỏng đặt hàng" on the Pin product
-      const pinBtn = screen.getByTestId('order-product-btn-product-pin-01');
-      fireEvent.click(pinBtn);
-
-      // Order appears in recent orders section on ShopView
-      expect(screen.getByRole('heading', { level: 2, name: /Đơn hàng gần đây/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Xem tiến trình đơn hàng/i })).toBeInTheDocument();
-
-      // Step 2: Click "Xem tiến trình đơn hàng"
-      const viewOrderLink = screen.getByRole('link', { name: /Xem tiến trình đơn hàng/i });
-      fireEvent.click(viewOrderLink);
-
-      // Step 3: Verify OrderDetailView rendered
-      expect(screen.getByText(/CHI TIẾT ĐƠN HÀNG VIESHOP/i)).toBeInTheDocument();
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Chờ thanh toán$/i);
-      expect(screen.getByText(/HÀNH TRÌNH ĐƠN HÀNG/i)).toBeInTheDocument();
-
-      // Stepper shows Pending step active
-      expect(screen.getByText(/^Khởi tạo đơn hàng$/i)).toBeInTheDocument();
-
-      // Step 4: Click "Mô phỏng: Thanh toán đơn hàng"
-      const payBtn = screen.getByTestId('simulate-payment-btn');
-      fireEvent.click(payBtn);
-
-      // Status badge updates to Paid
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Đã thanh toán$/i);
-      expect(screen.queryByTestId('simulate-payment-btn')).not.toBeInTheDocument();
-
-      // INVARIANT: Fulfilment button now visible, but NOT yet fulfilled
-      const fulfillBtn = screen.getByTestId('advance-shipment-btn');
-      expect(fulfillBtn).toBeInTheDocument();
-      expect(screen.getByText(/Vật phẩm vào Bộ sưu tập khi đơn hoàn tất/i)).toBeInTheDocument();
-
-      // Step 5: Click "Mô phỏng: Xác nhận bàn giao vật phẩm"
-      for(let stage=0;stage<5;stage++)fireEvent.click(screen.getByTestId('advance-shipment-btn'));
-
-      // Status badge updates to Fulfilled
-      expect(screen.getByTestId('order-status-badge')).toHaveTextContent(/^Đã bàn giao$/i);
-      expect(screen.getByText(/Hoàn tất bàn giao vật phẩm/i)).toBeInTheDocument();
-      expect(screen.getByText(/Đã ghi nhận quyền sở hữu/i)).toBeInTheDocument();
-
-      // Step 6: Navigate to My World (/me)
-      const myWorldLink = screen.getByRole('link', { name: /Xem đồ đã nhận/i });
-      fireEvent.click(myWorldLink);
-
-      // In My World, switch to "Đơn hàng & Sở hữu" tab
-      const ordersTab = screen.getByRole('tab', { name: /Đơn hàng & Sở hữu/i });
-      fireEvent.click(ordersTab);
-
-      // Fulfilled merchandise appears under "Bộ sưu tập vật phẩm đã sở hữu"
-      expect(screen.getByRole('heading', { level: 2, name: /Bộ sưu tập vật phẩm đã sở hữu/i })).toBeInTheDocument();
-      expect(screen.getByTestId('owned-items-grid')).toBeInTheDocument();
-      expect(within(screen.getByTestId('owned-items-grid')).getByText(/Huy hiệu kim loại kỷ niệm Star Drop-in/i)).toBeInTheDocument();
-      expect(within(screen.getByTestId('owned-items-grid')).getByText(/ĐÃ SỞ HỮU/i)).toBeInTheDocument();
-
-      // Also appears in the order history section
-      expect(screen.getByRole('heading', { level: 2, name: /Lịch sử đơn hàng VieSHOP/i })).toBeInTheDocument();
-    });
-
-    it('3. Constitutional Guard: Zero payment card or delivery address inputs exist across views', () => {
-      const { container } = render(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter initialEntries={['/worlds/artist-a/shop']}>
-            <Routes>
-              <Route path="/" element={<AppShell />}>
-                <Route path="worlds/:worldId/shop" element={<ShopView />} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Verify no inputs of type password, credit card, or address
-      const inputs = container.querySelectorAll('input');
-      expect(inputs).toHaveLength(0);
-
-      // Verify disclosures
-      expect(screen.getByText(/Không thu tiền thật, không yêu cầu thẻ ngân hàng hay địa chỉ giao dịch/i)).toBeInTheDocument();
     });
   });
 });

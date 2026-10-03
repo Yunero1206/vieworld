@@ -1,7 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation, useParams } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
-import { useApp } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { getCurrentArtistId } from './world/currentArtist';
 import { getExploreMomentById } from './world/exploreRows';
 import { artistForWorld, sessionContextUrl } from './world/worldContext';
@@ -53,7 +52,7 @@ function SessionContextRedirect() {
   const session = candidate?.tenantId === state.activeTenantId ? candidate : undefined;
   const artistId = session ? artistForWorld(state, session.worldId) : undefined;
   return session && artistId
-    ? <Navigate to={session.rightsApproved === false ? `/artist/${artistId}` : sessionContextUrl(artistId, session.id)} replace />
+    ? <Navigate to={session.rightsApproved !== true || session.status === 'cancelled' || ['missing','expired'].includes(session.mediaStatus || '') ? `/artist/${artistId}` : sessionContextUrl(artistId, session.id)} replace />
     : <SessionView />;
 }
 export const App: React.FC = () => {
@@ -64,7 +63,7 @@ export const App: React.FC = () => {
           <Route path="/" element={<AppShell />}>
             <Route index element={<WorldPlazaView />} />
             <Route path="about-demo" element={<Navigate to="/" replace />} />
-            <Route path="worlds" element={<WorldPlazaView />} />
+            <Route path="worlds" element={<Navigate to="/explore" replace />} />
             <Route path="artist/:artistId" element={<ArtistWorldView />} />
             <Route path="artist/:artistId/hall" element={<ArtistWorldView />} />
             <Route path="artist/:artistId/archive" element={<ArtistWorldView />} />
@@ -77,7 +76,7 @@ export const App: React.FC = () => {
             <Route path="moments" element={<Navigate to="/explore" replace />} />
             <Route path="moments/:momentId" element={<LegacyMomentRedirect />} />
             <Route path="archive" element={<LegacyArchiveRedirect />} />
-            <Route path="cart" element={<CartView />} /><Route path="checkout/:checkoutId" element={<CartView />} /><Route path="members/:fanId" element={<MemberSpaceView />} />
+            <Route path="cart" element={<PersonalSpaceGate><CartView /></PersonalSpaceGate>} /><Route path="checkout/:checkoutId" element={<PersonalSpaceGate><CartView /></PersonalSpaceGate>} /><Route path="members/:fanId" element={<MemberSpaceView />} />
             <Route path="shop" element={<FanShopView />} />
             <Route path="worlds/:worldId/shop" element={<FanShopView />} />
             <Route path="sessions/:sessionId" element={<SessionContextRedirect />} />

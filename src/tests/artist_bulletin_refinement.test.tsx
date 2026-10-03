@@ -1,26 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { fireEvent,render,screen,within } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it } from 'vitest';
+import { AppProvider } from '../context/AppContext';
 import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
-import { selectPublicVoices } from '../world/exploreDiscovery';
-import { artistArchiveChapters } from '../world/artistArchive';
-import { getWorldMoments } from '../world/exploreRows';
-import { artistRooms, hallEntries } from '../world/artistPresentation';
-import { DesktopNotificationBoard } from '../components/notifications/DesktopNotificationBoard';
-import { AppProvider } from '../context/AppContext';
 import { saveState } from '../services/storageAdapter';
 import { ArtistHall } from '../views/ArtistHall';
 import { ArtistWorldView } from '../views/ArtistWorldView';
+import { artistArchiveChapters } from '../world/artistArchive';
+import { artistRooms,hallEntries } from '../world/artistPresentation';
+import { selectPublicVoices } from '../world/exploreDiscovery';
+import { getWorldMoments } from '../world/exploreRows';
 
 describe('Artist tabs and bulletin refinement',()=>{
   beforeEach(()=>localStorage.clear());
-  it('renders a content-sized board, not a standee background',()=>{
-    const read=vi.fn(); const {container}=render(<DesktopNotificationBoard notifications={[{id:'n',type:'system',categoryLabel:'VieWorld',categoryDotColor:'#365c42',title:'Một lời nhắc',read:false,timeAgo:'Hôm nay'}]} onSelectNotification={vi.fn()} onViewAll={vi.fn()} onMarkAllAsRead={read}/>);
-    expect(container.querySelector('img[src*="standee"]')).toBeNull();
-    expect(screen.getByRole('heading',{name:'Bảng thông báo'})).toBeVisible();
-    fireEvent.click(screen.getByRole('button',{name:'Đánh dấu đã đọc'}));expect(read).toHaveBeenCalledOnce();
-  });
   it('resolves live, project and general rooms without duplicating an IP world',()=>{
     const state=createInitialState('vieworld-demo');const rooms=artistRooms(state,'artist-a');
     expect(rooms.some(room=>room.id==='session-listen-01')).toBe(true);

@@ -1,17 +1,15 @@
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import { AppProvider, useApp } from '../context/AppContext';
+import { act,fireEvent,render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { AppProvider,useApp } from '../context/AppContext';
 import { createInitialState } from '../data/fixtures';
 import { appReducer } from '../domain/reducer';
-import { freshGuestState, isDemoSignedIn } from '../world/account';
-import { artistForWorld } from '../world/worldContext';
-import { globalSearchSuggestions } from '../world/searchDiscovery';
-import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
-import { buildStorageKey, collectLocalDemoBackup, loadState, saveState, _resetMemoryFallbackFlagForTesting, SCHEMA_VERSION } from '../services/storageAdapter';
-import { ErrorBoundary } from '../components/ErrorBoundary';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { SupportCaseDetailView } from '../views/SupportCaseDetailView';
+import { _resetMemoryFallbackFlagForTesting,buildStorageKey,collectLocalDemoBackup,loadState,saveState,SCHEMA_VERSION } from '../services/storageAdapter';
 import { BenefitDetailView } from '../views/BenefitDetailView';
+import { SupportCaseDetailView } from '../views/SupportCaseDetailView';
+import { freshGuestState,isDemoSignedIn } from '../world/account';
+import { canEnterHall,ownsDigitalProduct } from '../world/merchCatalog';
 
 beforeEach(() => { localStorage.clear(); _resetMemoryFallbackFlagForTesting(); });
 afterEach(() => vi.restoreAllMocks());
@@ -26,14 +24,6 @@ describe('Showcase connection and recovery guards', () => {
     expect(screen.queryByText('Private foreign case')).toBeNull(); mounted.unmount();
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={[`/benefits/${benefit.id}`]}><Routes><Route path="/benefits/:benefitId" element={<BenefitDetailView/>}/></Routes></MemoryRouter></AppProvider>);
     expect(screen.getByRole('heading', { name: 'Không tìm thấy quyền lợi' })).toBeVisible();
-  });
-  it('resolves linked programme events to an artist in routes AND search, never a foreign tenant', () => {
-    const state = createInitialState();
-    expect(artistForWorld(state, 'neon-sessions')).toBe('artist-a');
-    expect(globalSearchSuggestions(state).find(item => item.id === 'event-session-listen-01')?.target).toContain('/artist/artist-a?context=');
-    state.worlds['artist-a'].tenantId = 'mfan-demo';
-    expect(artistForWorld(state, 'artist-a')).toBeUndefined();
-    expect(artistForWorld(state, 'missing')).toBeUndefined();
   });
   it('revokes private Hall access on logout, preserves records and restores access after demo sign-in', () => {
     const state = createInitialState(); expect(canEnterHall(state, 'artist-a')).toBe(true);

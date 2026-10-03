@@ -25,7 +25,9 @@ export const InboxView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [showPreferences, setShowPreferences] = useState(false);
 
-  const notifications = Object.values(state.notifications || {}).sort(
+  const notifications = Object.values(state.notifications || {}).filter(
+    notification => notification.tenantId === state.activeTenantId && notification.fanId === state.fanProfile.id
+  ).sort(
     (a, b) =>
       new Date(b.createdAt || b.updatedAt).getTime() -
       new Date(a.createdAt || a.updatedAt).getTime()

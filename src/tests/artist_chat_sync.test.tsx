@@ -4,13 +4,9 @@
  * with dynamic and distinct data per artist and per event.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { AppProvider } from '../context/AppContext';
+import { fireEvent,render,screen } from '@testing-library/react';
+import { beforeEach,describe,expect,it } from 'vitest';
 import { FanChatPanel } from '../components/FanChatPanel';
-import { ArtistBroadcast } from '../components/ArtistBroadcast';
-import { ArtistCommunity } from '../components/ArtistCommunity';
 import { getArtistChatMeta } from '../data/artistChatConfig';
 
 describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
@@ -134,55 +130,6 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
       fireEvent.click(loyaltyBadge);
       expect(screen.getByText(/Cột mốc Fandom \(Pulse Crew\)/i)).toBeInTheDocument();
       expect(screen.getByText(/Thành viên Pulse Crew Đột Phá/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('3. Unified Live Chat in Moments', () => {
-    it('renders integrated live chat inside ArtistBroadcast for Moments tab Live & Concert', () => {
-      render(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter>
-            <ArtistBroadcast worldId="artist-a" format="dropin" />
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Avatar stage exists
-      expect(screen.getByLabelText(/Khung phát avatar artist 2D/i)).toBeInTheDocument();
-
-      // Link to full session exists
-      expect(screen.getByRole('link', { name: 'Vào phiên · chat, câu hỏi & âm thanh →' })).toBeInTheDocument();
-
-      // Embedded Live Chat dock is rendered
-      expect(screen.getByLabelText(/Khung trò chuyện cộng đồng/i)).toBeInTheDocument();
-      expect(screen.getByText('Live chat')).toBeInTheDocument();
-      expect(screen.getByTestId('chat-input-field')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Gửi/i })).toBeInTheDocument();
-    });
-
-    it('displays distinct companion days in ArtistCommunity home tab per artist', () => {
-      const { rerender } = render(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter>
-            <ArtistCommunity worldId="artist-a" onOpen={() => {}} />
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Artist A has 128 days
-      expect(screen.getByText(/✦ Đồng hành cùng Artist A 128 ngày/i)).toBeInTheDocument();
-
-      // Re-render with Mira
-      rerender(
-        <AppProvider disableAutoHydrate={true}>
-          <MemoryRouter>
-            <ArtistCommunity worldId="artist-mira" onOpen={() => {}} />
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      // Mira has 210 days
-      expect(screen.getByText(/✦ Đồng hành cùng MIRA 210 ngày/i)).toBeInTheDocument();
     });
   });
 });

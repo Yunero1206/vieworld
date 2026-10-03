@@ -54,12 +54,20 @@ export function withMerchCatalog(state: AppState): AppState {
   if (state.activeTenantId !== 'vieworld-demo' || !state.worlds['artist-a']) return state;
   const allMerch = { ...NEW_MERCH, ...EXPANDED_PRODUCTS };
   const missing = Object.values(allMerch).filter(p => !state.products[p.id]);
-  if (!missing.length) return state;
+  // These two existing objects now have authored room visuals. Update only
+  // presentation capabilities in old saved catalogues, never receipts or stock.
+  const roomUpdates=Object.fromEntries(['product-c-photocard-real','product-c-lightstick-digital'].flatMap(id=>{
+    const saved=state.products[id];const source=allMerch[id];
+    return saved?.previewCapabilities?.room===false&&saved.tenantId===state.activeTenantId
+      ?[[id,{...saved,roomSurface:source.roomSurface,previewCapabilities:{...saved.previewCapabilities,room:true}}]]:[];
+  }));
+  if (!missing.length&&!Object.keys(roomUpdates).length) return state;
   return {
     ...state,
     products: {
       ...state.products,
       ...Object.fromEntries(missing.map(p => [p.id, { ...p }])),
+      ...roomUpdates,
     },
   };
 }

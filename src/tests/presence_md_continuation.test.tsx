@@ -51,7 +51,7 @@ describe('Continuation: canonical MD beats a plausible but unrelated visual',()=
   const state=initial();state.orders={};own(state,'product-lightstick-digital');
   const {container}=mount(state,'/me',<PersonalDisplayRoom onOpen={vi.fn()}/>);
   fireEvent.click(screen.getByRole('button',{name:'Góc ánh sáng: chưa trưng bày'}));
-  const choose=within(screen.getByRole('dialog')).getByRole('button',{name:'Đặt vào phòng'});
+  const choose=within(screen.getByRole('dialog')).getByRole('button',{name:'Đặt vào đây'});
   fireEvent.mouseEnter(choose);
   expect(container.querySelector('.v6-personal-room')).toHaveAttribute('data-preview-state','hover');
   expect(container.querySelector('[data-room-item="product-lightstick-digital"]')).toHaveClass('is-ghost');
@@ -60,7 +60,7 @@ describe('Continuation: canonical MD beats a plausible but unrelated visual',()=
   fireEvent.focus(choose);expect(container.querySelector('.v6-personal-room')).toHaveAttribute('data-preview-state','hover');
   fireEvent.click(choose);fireEvent.blur(choose);expect(container.querySelector('.v6-personal-room')).toHaveAttribute('data-preview-state','selected');
   expect(readDisplaySurfaces(loadState().state.fanProfile).lightstick.itemIds).toEqual([]);
-  fireEvent.click(screen.getByRole('button',{name:'Đặt ở đây'}));
+  fireEvent.click(screen.getByRole('button',{name:'Lưu thay đổi'}));
   expect(readDisplaySurfaces(loadState().state.fanProfile).lightstick.itemIds).toEqual(['product-lightstick-digital']);
  });
 });

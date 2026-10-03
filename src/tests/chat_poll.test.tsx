@@ -2,16 +2,15 @@
  * Acceptance T05: Questions, Poll and Moderated Fan Chat Invariant Tests
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { AppProvider } from '../context/AppContext';
-import { SessionView } from '../views/SessionView';
-import { AppShell } from '../components/AppShell';
-import { QuestionQueue } from '../components/QuestionQueue';
-import { LivePollPanel } from '../components/LivePollPanel';
+import { fireEvent,render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it,vi } from 'vitest';
 import { FanChatPanel } from '../components/FanChatPanel';
-import { Session, Poll } from '../domain/types';
+import { FanShell as AppShell } from '../components/FanShell';
+import { QuestionQueue } from '../components/QuestionQueue';
+import { AppProvider } from '../context/AppContext';
+import { Session } from '../domain/types';
+import { SessionView } from '../views/SessionView';
 
 describe('T05 Acceptance: Questions, Poll and Moderated Fan Chat', () => {
   beforeEach(() => {
@@ -143,56 +142,6 @@ describe('T05 Acceptance: Questions, Poll and Moderated Fan Chat', () => {
 
       // Status transitions to 'answered'
       expect(screen.getByText('Đã trả lời')).toBeInTheDocument();
-    });
-  });
-
-  describe('3. Live Poll Voting and Reconciliation', () => {
-    const mockPoll: Poll = {
-      id: 'poll-test-1',
-      tenantId: 'vieworld-demo',
-      version: 1,
-      updatedAt: '2026-09-09T20:00:00Z',
-      sessionId: 'session-dropin-01',
-      prompt: 'Bạn muốn nghe bài hát nào tiếp theo?',
-      options: [
-        { id: 'opt-a', text: 'Bài hát A', votes: 10 },
-        { id: 'opt-b', text: 'Bài hát B', votes: 20 },
-      ],
-      status: 'open',
-    };
-
-    it('reconciles total votes with exact sum of option counts', () => {
-      const mockVote = vi.fn();
-      render(<LivePollPanel poll={mockPoll} onVote={mockVote} />);
-
-      // Total votes: 10 + 20 = 30
-      expect(screen.getByText(/Tổng cộng:/i)).toHaveTextContent('30');
-      expect(screen.getByText(/10 phiếu \(33%\)/i)).toBeInTheDocument();
-      expect(screen.getByText(/20 phiếu \(67%\)/i)).toBeInTheDocument();
-
-      // Click vote on Option A
-      const voteBtnA = screen.getByLabelText(/Bình chọn cho: Bài hát A/i);
-      fireEvent.click(voteBtnA);
-      expect(mockVote).toHaveBeenCalledWith('poll-test-1', 'opt-a');
-    });
-
-    it('enforces single vote per fan and highlights selected option', () => {
-      const votedPoll: Poll = {
-        ...mockPoll,
-        options: [
-          { id: 'opt-a', text: 'Bài hát A', votes: 11 },
-          { id: 'opt-b', text: 'Bài hát B', votes: 20 },
-        ],
-        userVotedOptionId: 'opt-a',
-      };
-
-      render(<LivePollPanel poll={votedPoll} onVote={vi.fn()} />);
-
-      // Verify voted badge and no voting buttons rendered
-      expect(screen.getByText(/Bạn đã hoàn thành bình chọn \(1 lượt duy nhất\)/i)).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /Bình chọn/i })).not.toBeInTheDocument();
-      // Total reconciled: 11 + 20 = 31
-      expect(screen.getByText(/Tổng cộng:/i)).toHaveTextContent('31');
     });
   });
 

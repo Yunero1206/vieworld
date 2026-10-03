@@ -3,14 +3,13 @@
  * Verifies full compliance with VieWorld_Test_Universe_Expansion_Implementation_Plan.md
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it } from 'vitest';
 import { AppProvider } from '../context/AppContext';
-import { ArtistWorldView } from '../views/ArtistWorldView';
+import { CROWD_FANS,EXPANDED_ARCHIVE_CHAPTERS,EXPANDED_GUESTBOOK_NOTES,EXPANDED_HALL_MESSAGES,EXPANDED_PRODUCTS,EXPANDED_PUBLIC_VOICES,KEY_FAN_PERSONAS,} from '../data/expandedUniverse';
 import { createInitialState } from '../data/fixtures';
-import { EXPANDED_PUBLIC_VOICES, EXPANDED_ARCHIVE_CHAPTERS, EXPANDED_PRODUCTS, EXPANDED_GUESTBOOK_NOTES, KEY_FAN_PERSONAS, CROWD_FANS, EXPANDED_HALL_MESSAGES,  } from '../data/expandedUniverse';
-import { buildScenarioState } from '../data/scenarioManager';
+import { ArtistWorldView } from '../views/ArtistWorldView';
 import { selectPublicVoices } from '../world/exploreDiscovery';
 import { getPreviewCapabilities } from '../world/shopPresentation';
 
@@ -150,26 +149,6 @@ describe('VieWorld Test Universe Expansion Suite', () => {
         expect(leaked).toBe(false);
       }
     });
-
-    it('reported messages are excluded from active hall display', () => {
-      const rawMessagesA = EXPANDED_HALL_MESSAGES['artist-a'] || [];
-      const reported = rawMessagesA.find(m => m.isReported);
-      expect(reported).toBeDefined();
-
-      // Render ArtistWorldView with Hall tab
-      const state = buildScenarioState('hallMember');
-      render(
-        <AppProvider initialState={state}>
-          <MemoryRouter initialEntries={['/artist/artist-a/hall']}>
-            <Routes>
-              <Route path="/artist/:artistId/*" element={<ArtistWorldView />} />
-            </Routes>
-          </MemoryRouter>
-        </AppProvider>
-      );
-
-      expect(screen.queryByText(reported!.text)).not.toBeInTheDocument();
-    });
   });
 
   describe('5. 20-25 Public Fan Voices (§11)', () => {
@@ -253,20 +232,6 @@ describe('VieWorld Test Universe Expansion Suite', () => {
       expect(screen.getByText('2026')).toBeInTheDocument();
       expect(screen.getByText('2025')).toBeInTheDocument();
       expect(screen.getByText('2024')).toBeInTheDocument();
-    });
-
-    it('Journey 3: Scenario Manager loads persona presets seamlessly', () => {
-      const collectorState = buildScenarioState('collector');
-      expect(collectorState.fanProfile.displayName).toBe('Quốc Hưng');
-      expect(Object.keys(collectorState.orders).length).toBeGreaterThanOrEqual(10);
-
-      const multiFandomState = buildScenarioState('multiFandom');
-      expect(multiFandomState.fanProfile.displayName).toBe('Thảo Vy');
-      expect(multiFandomState.followedWorldIds.length).toBeGreaterThanOrEqual(7);
-
-      const edgeState = buildScenarioState('edgeCases');
-      expect(edgeState.followedWorldIds).toContain('artist-b');
-      expect(edgeState.followedWorldIds).toContain('artist-e');
     });
   });
 

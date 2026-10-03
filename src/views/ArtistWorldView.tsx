@@ -13,7 +13,7 @@ import { getArtistCover } from '../world/artistVisuals';
 import { ArtistHall } from './ArtistHall';
 import { ArtistArchive } from './ArtistArchive';
 import { ContextStage, ProjectContextStage } from '../components/ContextStage';
-import { sessionContextUrl } from '../world/worldContext';
+import { artistForWorld, sessionContextUrl } from '../world/worldContext';
 import { productBadge, productPrice } from '../world/shopPresentation';
 import { membershipWorldsForFan } from '../world/personalSelectors';
 import { isDemoSignedIn } from '../world/account';
@@ -60,9 +60,9 @@ export function ArtistWorldView() {
   const focused = momentId && artistId ? getExploreMomentById(artistId, momentId) : undefined;
   const context = params.get('context');
   const contextSession = context?.startsWith('session:') ? state.sessions[context.slice(8)] : undefined;
-  const validContextSession = contextSession?.rightsApproved === true && contextSession.mediaStatus !== 'expired' && contextSession.mediaStatus !== 'missing' && contextSession?.tenantId === state.activeTenantId
-    && (contextSession.worldId === artistId || state.worlds[contextSession.worldId]?.linkedWorldIds.includes(artistId || '')) ? contextSession : undefined;
-  const contextNote = context?.startsWith('note:') ? ARTIST_NOTES.find(item => item.id === context.slice(5) && item.worldId === artistId) : undefined;
+  const validContextSession = contextSession?.rightsApproved === true && contextSession.status !== 'cancelled' && contextSession.mediaStatus !== 'expired' && contextSession.mediaStatus !== 'missing' && contextSession?.tenantId === state.activeTenantId
+    && artistForWorld(state, contextSession.worldId) === artistId ? contextSession : undefined;
+  const contextNote = context?.startsWith('note:') ? ARTIST_NOTES.find(item => item.id === context.slice(5) && item.worldId === artistId && item.publishedAt <= state.demoTime) : undefined;
   const project = artistId && state.activeTenantId === 'vieworld-demo' ? getWorldProject(artistId) : undefined;
   const selectedProject = context?.startsWith('explore-project:') && project?.id === context.slice(16) ? project : undefined;
   useArtistContextTransition(location.pathname, validContextSession?.id || selectedProject?.id || null);

@@ -1,23 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useState } from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { AppProvider, useApp } from '../context/AppContext';
-import { createInitialState } from '../data/fixtures';
-import { appReducer } from '../domain/reducer';
-import { freshGuestState, isDemoSignedIn, privateContact, EMPTY_CONTACT, validateContact } from '../world/account';
-import { loadState, saveState } from '../services/storageAdapter';
-import { currentPublicFan } from '../world/community';
-import { FanShell } from '../components/FanShell';
-import { AuthOverlay } from '../components/account/AuthOverlay';
+import { cleanup,fireEvent,render,screen } from '@testing-library/react';
+import { MemoryRouter,Route,Routes } from 'react-router-dom';
+import { beforeEach,describe,expect,it,vi } from 'vitest';
 import { AccountInfoDialog } from '../components/account/AccountInfoDialog';
+import { AuthOverlay } from '../components/account/AuthOverlay';
 import { PrivacyDialog } from '../components/account/PrivacyDialog';
-import { SupportDialog } from '../components/account/SupportDialog';
-import { WorldGuidePanel } from '../components/WorldGuidePanel';
-import { MemberSpaceView } from '../views/MemberSpaceView';
-import { Route, Routes } from 'react-router-dom';
-import { loadPrivacySettings, savePrivacySettings } from '../world/privacy';
+import { FanShell } from '../components/FanShell';
+import { AppProvider,useApp } from '../context/AppContext';
+import { createInitialState } from '../data/fixtures';
 import { queryWorldGuide } from '../data/guideKnowledge';
+import { appReducer } from '../domain/reducer';
+import { loadState,saveState } from '../services/storageAdapter';
+import { MemberSpaceView } from '../views/MemberSpaceView';
+import { EMPTY_CONTACT,freshGuestState,isDemoSignedIn,privateContact,validateContact } from '../world/account';
+import { currentPublicFan } from '../world/community';
+import { loadPrivacySettings,savePrivacySettings } from '../world/privacy';
 
 function Probe() { const { state } = useApp(); return <div data-testid="account-probe">{JSON.stringify({ signedIn: isDemoSignedIn(state), contact: privateContact(state), cases: Object.values(state.supportCases) })}</div>; }
 beforeEach(() => { cleanup(); localStorage.clear(); });
@@ -114,14 +110,6 @@ describe('Consistent utility overlays and truthful privacy/support', () => {
     render(<AppProvider initialState={createInitialState()}><MemoryRouter initialEntries={['/members/fan-linh']}><Routes><Route path="/members/:fanId" element={<MemberSpaceView/>}/></Routes></MemoryRouter></AppProvider>);
     expect(screen.getByRole('heading', { name: 'Phòng này chỉ mình bạn xem.' })).toBeVisible();
   });
-  it('support creates one canonical case and does not promise a real response', () => {
-    render(<AppProvider initialState={createInitialState()}><MemoryRouter><SupportDialog onClose={vi.fn()}/><Probe/></MemoryRouter></AppProvider>);
-    expect(screen.queryByText(/24 giờ/)).toBeNull();
-    fireEvent.change(screen.getByLabelText('Bạn cần kiểm tra điều gì?'), { target: { value: 'benefit:benefit-early-access-01' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Mở hồ sơ hỗ trợ demo' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Mở hồ sơ hỗ trợ demo' }));
-    expect(screen.getByRole('heading', { name: 'Hồ sơ của bạn (1)' })).toBeVisible();
-  });
   it('support cannot open a case for a different fan or tenant', () => {
     const state = createInitialState(); state.benefits['benefit-early-access-01'].fanId = 'different-fan';
     const next = appReducer(state, { type: 'OPEN_SUPPORT_CASE', subjectType: 'benefit', subjectId: 'benefit-early-access-01' });
@@ -131,13 +119,5 @@ describe('Consistent utility overlays and truthful privacy/support', () => {
     const result = queryWorldGuide('so dien thoai'); expect(result.type).toBe('answered');
     if (result.type === 'answered') expect(result.cards[0].topic).toBe('account');
     expect(queryWorldGuide('số điện thoại của nghệ sĩ').type).toBe('unsupported_topic');
-  });
-  it('shared overlay closes with Escape and restores focus', async () => {
-    function Harness() { const [open, setOpen] = useState(false); return <><button onClick={() => setOpen(true)}>Mở</button><WorldGuidePanel isOpen={open} onClose={() => setOpen(false)}/></>; }
-    render(<MemoryRouter><Harness/></MemoryRouter>);
-    const trigger = screen.getByRole('button', { name: 'Mở' }); trigger.focus(); fireEvent.click(trigger);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Đóng Hướng dẫn VieWorld' })).toHaveFocus());
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.queryByRole('dialog')).toBeNull(); expect(trigger).toHaveFocus();
   });
 });

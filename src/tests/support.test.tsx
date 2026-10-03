@@ -20,7 +20,7 @@ import { appReducer } from '../domain/reducer';
 import { AppState } from '../domain/types';
 import { createInitialState } from '../data/fixtures';
 import { AppProvider } from '../context/AppContext';
-import { AppShell } from '../components/AppShell';
+import { FanShell as AppShell } from '../components/FanShell';
 import { SupportCaseDetailView } from '../views/SupportCaseDetailView';
 import { BenefitDetailView } from '../views/BenefitDetailView';
 import { OrderDetailView } from '../views/OrderDetailView';

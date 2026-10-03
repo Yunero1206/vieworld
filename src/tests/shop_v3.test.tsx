@@ -22,7 +22,7 @@ describe('VieSHOP storefront presentation', () => {
     expect(productBadge(byId['product-cap-real'])).toBeUndefined();
     expect(productBadge(byId['product-member-preview'])).toBe('Concept');
     expect(getPreviewCapabilities(byId['product-member-preview'], products)).toEqual({ avatar: false, room: false });
-    expect(getPreviewCapabilities(byId['product-cap-real'], products)).toEqual({ avatar: true, room: false });
+    expect(getPreviewCapabilities(byId['product-cap-real'], products)).toEqual({ avatar: true, room: true });
     expect(getPreviewCapabilities(byId['product-cd-real'], products)).toEqual({ avatar: false, room: true });
   });
 

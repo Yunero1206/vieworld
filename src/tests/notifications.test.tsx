@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from '../context/AppContext';
-import { AppShell } from '../components/AppShell';
+import { FanShell as AppShell } from '../components/FanShell';
 import { InboxView } from '../views/InboxView';
 import { SessionView } from '../views/SessionView';
 import { OrderDetailView } from '../views/OrderDetailView';
@@ -187,7 +187,7 @@ describe('T10 Acceptance: Notifications, Inbox, and Read States', () => {
     const renderApp = (initialRoute = '/inbox') => {
       return render(
         <MemoryRouter initialEntries={[initialRoute]}>
-          <AppProvider>
+          <AppProvider initialState={createInitialState('vieworld-demo')}>
             <Routes>
               <Route element={<AppShell />}>
                 <Route path="inbox" element={<InboxView />} />
@@ -214,7 +214,7 @@ describe('T10 Acceptance: Notifications, Inbox, and Read States', () => {
       expect(screen.queryByText(/yêu cầu quyền thông báo đẩy|nhập email|nhập số điện thoại/i)).not.toBeInTheDocument();
 
       // Check sidebar unread badge is visible
-      const unreadBadge = screen.getByTestId('unread-notif-badge');
+      const unreadBadge = screen.getByRole('button', { name: /^Thông báo, [1-9]\d* chưa đọc$/ });
       expect(unreadBadge).toBeInTheDocument();
 
       // Notifications list is present
@@ -261,7 +261,7 @@ describe('T10 Acceptance: Notifications, Inbox, and Read States', () => {
       // Unread count tag disappears
       expect(screen.queryByTestId('inbox-unread-count-tag')).not.toBeInTheDocument();
       // AppShell unread badge disappears
-      expect(screen.queryByTestId('unread-notif-badge')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Thông báo, 0 chưa đọc' })).toBeInTheDocument();
 
       // "Chưa đọc" tab now shows empty state
       const unreadTab = screen.getByRole('tab', { name: /Chưa đọc \(0\)/i });

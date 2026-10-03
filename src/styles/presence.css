@@ -125,17 +125,46 @@
 .presence-room-guestbook-trigger{position:absolute;left:68%;top:51%;width:16%;height:23%;min-width:0;min-height:0;border:0;background:none;padding:0;color:#294532;font:500 12px var(--font-sans);z-index:8;cursor:pointer}
 .presence-room-guestbook-trigger img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 5px #715b3429)}.presence-room-guestbook-trigger>span{position:absolute;bottom:0;left:50%;transform:translateX(-50%);padding:5px 9px;white-space:nowrap;background:#ffffffe8;border-radius:16px;font-size:11px;opacity:0;transition:opacity .2s}
 .presence-room-guestbook-trigger:is(:hover,:focus-visible)>span{opacity:1}.presence-room-guestbook-trigger:focus-visible{outline:3px solid var(--shell-focus);outline-offset:4px;border-radius:12px}
-.presence-room-page .v7-drawer-backdrop{background:transparent;backdrop-filter:none;pointer-events:none}.presence-room-page .v7-slot-picker-drawer{position:fixed;right:20px;top:20px;bottom:20px;box-sizing:border-box;border-radius:18px;pointer-events:auto;width:min(370px,95vw);max-height:calc(100dvh - 40px);box-shadow:0 15px 50px #13251d40}
+.presence-room-page .v7-drawer-backdrop{background:transparent;backdrop-filter:none;pointer-events:none}.presence-room-page .v7-slot-picker-drawer{position:fixed;right:20px;top:20px;bottom:20px;box-sizing:border-box;border-radius:22px;pointer-events:auto;width:min(390px,95vw);max-height:calc(100dvh - 40px);padding:24px;gap:0;overflow:hidden;box-shadow:0 15px 50px #13251d30;animation:v7-fade-in .15s ease-out}
+.presence-room-page .v7-slot-picker-drawer{--shell-surface:#fffefa;--shell-ink:#19302b;--shell-muted:#6b7a75;--shell-border:#e4eae5;--shell-selected:#edf3ee;--shell-accent:#315f4b;--shell-focus:#5c9981;--surface:var(--shell-surface);--surface-subtle:#f5f7f2;--ink:var(--shell-ink);--muted:var(--shell-muted);--border:var(--shell-border);--primary:var(--shell-accent);--appearance-selected:var(--shell-selected);--appearance-focus:var(--shell-focus);background:var(--shell-surface);color:var(--shell-ink)}
+.presence-room-page .v7-drawer-header{align-items:flex-start;gap:12px;padding-bottom:22px;flex-shrink:0}
+.presence-room-page .v7-drawer-header h3{margin:5px 0 8px;font:600 24px/1.3 var(--font-sans)}
+.presence-room-page .myspace-surface-capacity{margin:0;color:var(--shell-muted);font:400 14px/1.5 var(--font-sans)}
+.presence-room-page .v7-drawer-close-btn{width:42px;height:42px;flex-shrink:0}
+.presence-room-page .myspace-drawer-body{min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
+.myspace-drawer-mobile-context{display:none}
+.presence-room-page .v7-slot-current-section{padding:0 0 20px;border:0;border-bottom:1px solid var(--shell-border);border-radius:0;background:transparent;margin:0 0 20px}
+.presence-room-page .v7-slot-section-title{margin:0 0 12px;font:600 16px/1.4 var(--font-sans);color:var(--shell-ink);text-transform:none;letter-spacing:0}
+.presence-room-page .v7-drawer-items-list{max-height:none;overflow:visible;padding:0;gap:8px}
+.presence-room-page :is(.v7-slot-current-card,.v7-drawer-item-card){display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;padding:10px;border:1px solid var(--shell-border);border-radius:16px;background:var(--shell-surface);margin-bottom:8px;flex-wrap:nowrap}
+.presence-room-page .v7-drawer-item-info{min-width:0;overflow-wrap:break-word}
+.presence-room-page .v7-drawer-item-info strong{font:600 14px/1.4 var(--font-sans)}
+.presence-room-page .v7-drawer-item-info small{font:400 12px/1.5 var(--font-sans)}
+.presence-room-page :is(.myspace-surface-item-actions,.v7-drawer-item-action){display:flex;flex-direction:column;gap:4px;max-width:110px}
+.presence-room-page :is(.myspace-surface-item-actions button,.v7-item-select-btn){padding:7px 12px;border:0;border-radius:999px;min-height:40px;font:500 12px/1.35 var(--font-sans);background:var(--shell-selected);color:var(--shell-accent)}
+.presence-shell .presence-room-page .myspace-surface-item-actions button{background:var(--shell-selected);color:var(--shell-accent)}
+.presence-room-page .myspace-surface-item-actions button[aria-pressed=true]{outline:2px solid var(--shell-accent)}
+.presence-room-page .myspace-item-location{display:flex;align-items:flex-start;gap:3px;margin-top:3px}.myspace-item-location svg{flex-shrink:0;margin-top:2px}
+.presence-room-page .v7-drawer-footer{display:flex;flex-direction:column;align-items:stretch;gap:0;margin-top:18px;padding-top:16px;flex-shrink:0}
+.presence-room-page .v7-drawer-collection-link{display:flex;align-items:center;gap:8px;font:500 14px/1.4 var(--font-sans);text-decoration:none}
+.presence-room-page .v7-drawer-empty{padding:18px 12px;font:400 14px/1.5 var(--font-sans)}
+.presence-room-page .v7-drawer-empty .fw-text-button{display:flex;align-items:center;gap:6px}
+.myspace-drawer-empty-current{margin:0;color:var(--shell-muted);font:400 14px/1.5 var(--font-sans)}
+.myspace-replacement-notice{margin:12px 0;padding:12px;border-radius:12px;background:var(--shell-selected);font:400 13px/1.5 var(--font-sans)}
+.myspace-replacement-notice p{margin:0 0 6px}.myspace-replacement-notice button{border:0;background:none;color:var(--shell-accent);padding:5px 0;font:500 13px var(--font-sans)}
 .presence-room-search{display:grid;gap:8px;font:500 13px/1.5 var(--font-sans)}
 .presence-room-search input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--shell-border);border-radius:10px;background:var(--shell-surface);color:var(--shell-ink);font:400 14px var(--font-sans)}
-.presence-room-page .v7-drawer-header h3{font:600 19px/1.4 var(--font-sans)}
 .presence-room-page .v6-slot-empty{color:var(--shell-accent)}
+.presence-room-page .v6-display-scene.is-view-mode .v6-fixture:not(.occupied){pointer-events:auto!important;opacity:1}
+.presence-room-page .v6-display-scene.is-view-mode .v6-fixture:not(.occupied) .v6-fixture-label{opacity:0}
+.presence-room-page .v6-display-scene.is-view-mode .v6-fixture:not(.occupied):is(:hover,:focus-visible) .v6-fixture-label{opacity:1}
 .presence-room-page .v6-fixture:is(:hover,:focus-visible){border-color:var(--shell-focus);outline-color:var(--shell-focus)}
 .presence-room-page .v6-display-scene.is-edit-mode .v6-fixture.edit-hotspot:not(.occupied){border-color:var(--shell-focus);outline-color:var(--shell-focus)}
 .presence-room-page .v6-fixture:hover .v6-slot-empty{background:var(--shell-accent);color:var(--shell-surface);box-shadow:0 3px 10px #35695330}
 .presence-room-page .v7-drawer-eyebrow{display:none}
-.presence-room-preview-confirm{position:sticky;bottom:0;display:flex;gap:8px;padding:14px;background:var(--shell-surface);border-top:1px solid var(--shell-border)}
+.presence-room-preview-confirm{display:flex;gap:8px;padding:0 0 14px;background:var(--shell-surface)}
 .presence-room-preview-confirm button{padding:10px;border-radius:9px;border:1px solid var(--shell-border);background:var(--shell-selected);color:inherit}
+.presence-room-preview-confirm button:last-child{flex:1;background:var(--shell-accent);color:var(--shell-surface)}
 @media(hover:none){.presence-home-caption{display:none}}
 @media(max-width:1150px){.presence-explore-row{grid-template-columns:90px 140px minmax(200px,1.5fr) minmax(160px,1fr);gap:14px}.presence-shell .artist-hall-layout{grid-template-columns:minmax(0,1fr)}.presence-shell .artist-hall-aside{margin-top:12px}.presence-shell .artist-hall-page{grid-template-columns:180px minmax(0,1fr)}}
 @media(min-width:761px) and (max-height:480px){
@@ -162,12 +191,17 @@
  .presence-artist-main{grid-template-columns:1fr}.presence-artist-main>.artist-world-object{min-height:250px}.presence-artist-side>.artist-world-object{min-height:150px}
  .presence-shell .artist-hall-page{display:block}.presence-shell .artist-hall-room-grid{flex-direction:row;overflow:auto}.presence-shell .artist-hall-room-grid button{width:auto;min-width:135px}.presence-shell .artist-hall-layout{display:block}
  .presence-shell :is(input:not([type=checkbox]):not([type=radio]),select,textarea){font-size:16px}
- .presence-room-page{padding:0}.presence-room-page .v6-display-scene-wrapper{border-radius:0}.presence-room-page .v7-slot-picker-drawer{max-height:50dvh;top:auto;bottom:70px;width:100%;right:0;border-radius:20px 20px 0 0}
+ .presence-room-page{padding:0}.presence-room-page .v6-display-scene-wrapper{border-radius:0}.presence-room-page .v7-slot-picker-drawer{height:62dvh;max-height:calc(100dvh - 150px);top:auto;bottom:70px;width:100%;right:0;border-radius:20px 20px 0 0;padding:18px}
+ .presence-room-page .v7-drawer-header{padding-bottom:16px}.presence-room-page .v7-drawer-header h3{font-size:20px}
+ .presence-room-page :is(.v7-slot-current-card,.v7-drawer-item-card){grid-template-columns:46px minmax(0,1fr) auto;gap:8px;padding:8px}.presence-room-page .v7-drawer-item-media{width:46px;height:46px}
  /* Small room anchors overlap on touch screens; use the existing named surface controls. */
  .presence-room-page .myspace-mobile-surfaces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px}
+ .presence-room-page .myspace-mobile-surfaces.is-drawer-open{display:none}
+ .presence-room-page .myspace-drawer-mobile-context{display:block;margin:0 0 14px;flex-shrink:0}
+ .presence-room-page .myspace-drawer-mobile-context select{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--shell-border);border-radius:10px;background:var(--shell-surface);color:var(--shell-ink);font:400 16px var(--font-sans)}
  .presence-room-page .myspace-mobile-surfaces button{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--shell-border);border-radius:10px;background:var(--shell-surface);color:var(--shell-ink);font:400 12px/1.4 var(--font-sans)}
  .presence-room-page .myspace-mobile-surfaces strong{font-weight:500}.presence-room-page .myspace-mobile-surfaces small{color:var(--shell-muted);font-size:11px;white-space:nowrap}
- .presence-room-page .v6-display-scene .v6-fixture{pointer-events:none}.presence-room-page .v6-display-scene .v6-fixture::after{pointer-events:none}
+ .presence-room-page .v6-display-scene .v6-fixture{pointer-events:none!important}.presence-room-page .v6-display-scene.is-view-mode .v6-fixture:not(.occupied){pointer-events:none!important}.presence-room-page .v6-display-scene .v6-fixture::after{pointer-events:none}
 }
 @media(prefers-reduced-motion:reduce){.presence-home-art,.presence-home-caption,.presence-home-echo{transition:none}}
 /* Shop editorial story and quiet family catalogue. No cross-page search. */
