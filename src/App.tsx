@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { getCurrentArtistId } from './world/currentArtist';
 import { getExploreMomentById } from './world/exploreRows';
 import { artistForWorld, sessionContextUrl } from './world/worldContext';
+import { isMemberQASession } from './world/hallRooms';
 import { FanShell as AppShell } from './components/FanShell';
 import { PersonalSpaceGate } from './components/account/PersonalSpaceGate';
 const PersonalUtilityView=lazy(()=>import('./views/PersonalUtilityView').then(m=>({default:m.PersonalUtilityView})));
@@ -52,7 +53,7 @@ function SessionContextRedirect() {
   const session = candidate?.tenantId === state.activeTenantId ? candidate : undefined;
   const artistId = session ? artistForWorld(state, session.worldId) : undefined;
   return session && artistId
-    ? <Navigate to={session.rightsApproved !== true || session.status === 'cancelled' || ['missing','expired'].includes(session.mediaStatus || '') ? `/artist/${artistId}` : sessionContextUrl(artistId, session.id)} replace />
+    ? <Navigate to={session.rightsApproved !== true || session.status === 'cancelled' || ['missing','expired'].includes(session.mediaStatus || '') ? `/artist/${artistId}` : isMemberQASession(state,session.id) ? `/artist/${artistId}/hall?room=${session.id}` : sessionContextUrl(artistId, session.id)} replace />
     : <SessionView />;
 }
 export const App: React.FC = () => {

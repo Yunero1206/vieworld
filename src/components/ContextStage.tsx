@@ -5,13 +5,12 @@ import type { AppAction, Session } from '../domain/types';
 import { useApp } from '../context/AppContext';
 import { AvatarStage } from './AvatarStage';
 import { SilentMediaPlaceholder } from './SilentMediaPlaceholder';
-import { canEnterHall } from '../world/merchCatalog';
 import { selectPublicVoices } from '../world/exploreDiscovery';
 import { sessionWorldContext } from '../world/worldContext';
 import { MembershipBadge } from './MembershipBadge';
 import { membershipTenure, memberForChat } from '../world/membershipBadge';
 import { LiveCheer } from './LiveCheer';
-import { canWriteArtistHallRoom } from '../world/artistPresentation';
+import { canReadArtistHallRoom, canWriteArtistHallRoom } from '../world/hallRooms';
 import { isDemoSignedIn } from '../world/account';
 
 const formatTime = (value: string) => new Intl.DateTimeFormat('vi-VN', {
@@ -21,8 +20,9 @@ const formatTime = (value: string) => new Intl.DateTimeFormat('vi-VN', {
 function ContextHall({ artistId, artistName, roomId, heading = 'Hall đang xem cùng nhau' }: { artistId: string; artistName: string; roomId: string; heading?: string }) {
   const { state, dispatch } = useApp();
   const [message, setMessage] = useState('');
-  const member = canEnterHall(state, artistId);
-  const writable = member && canWriteArtistHallRoom(state, artistId, roomId);
+  const readable = canReadArtistHallRoom(state, artistId, roomId);
+  const signedIn = isDemoSignedIn(state);
+  const writable = canWriteArtistHallRoom(state, artistId, roomId);
   const logRef = useRef<HTMLDivElement>(null);
   const followLatest = useRef(true);
   const poll = Object.values(state.polls).find(item => item.tenantId === state.activeTenantId && item.sessionId === roomId);
@@ -30,6 +30,7 @@ function ContextHall({ artistId, artistName, roomId, heading = 'Hall đang xem c
   useEffect(() => {
     if (followLatest.current && logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [messages.length, roomId]);
+  useEffect(()=>setMessage(''),[roomId,state.fanProfile.id,signedIn,readable]);
   const publicDemo = state.activeTenantId === 'vieworld-demo'
     ? selectPublicVoices(state, artistId).filter(voice => voice.isDemo && voice.sourceContextId === roomId) : [];
   const hallUrl = `/artist/${artistId}/hall?room=${encodeURIComponent(roomId)}`;
@@ -43,16 +44,16 @@ function ContextHall({ artistId, artistName, roomId, heading = 'Hall đang xem c
   }
   return <aside className="artist-context-hall" aria-label={`Hall của ${artistName} trong hoạt động này`}>
     <header><div><MessageCircle size={18} /><strong>{heading}</strong></div><Link to={hallUrl}>Vào Hall <ArrowRight size={15} /></Link></header>
-    {member ? <>
-      {poll && <details className="vw-context-poll"><summary><BarChart3 size={15}/>{poll.prompt}</summary><div>{poll.options.map(option => <button key={option.id} type="button" aria-pressed={poll.userVotedOptionId === option.id} disabled={poll.status !== 'open' || Boolean(poll.userVotedOptionId)} onClick={() => dispatch({ type: 'VOTE_POLL', pollId: poll.id, optionId: option.id })}>{poll.userVotedOptionId === option.id && <Check size={14}/>} {option.text}</button>)}<small>{poll.userVotedOptionId ? 'Đã ghi nhận lựa chọn của bạn.' : poll.status === 'closed' ? 'Bình chọn đã khép lại.' : 'Chọn một câu trả lời.'}</small></div></details>}
+    {readable ? <>
+      {poll && <details className="vw-context-poll"><summary><BarChart3 size={15}/>{poll.prompt}</summary><div>{poll.options.map(option => <button key={option.id} type="button" aria-pressed={signedIn&&poll.userVotedOptionId === option.id} disabled={!writable || poll.status !== 'open' || Boolean(poll.userVotedOptionId)} onClick={() => dispatch({ type: 'VOTE_POLL', pollId: poll.id, optionId: option.id })}>{signedIn&&poll.userVotedOptionId === option.id && <Check size={14}/>} {option.text}</button>)}<small>{!signedIn?'Đăng nhập để bình chọn.':poll.userVotedOptionId ? 'Đã ghi nhận lựa chọn của bạn.' : poll.status === 'closed' ? 'Bình chọn đã khép lại.' : 'Chọn một câu trả lời.'}</small></div></details>}
       <div ref={logRef} className="artist-context-hall-messages" role="log" aria-label="Trò chuyện cùng Hall" onScroll={event => { const log = event.currentTarget; followLatest.current = log.scrollHeight - log.scrollTop - log.clientHeight < 40; }}>
-        {publicDemo.slice(0, 3).map((voice, index) => <p key={voice.id}><strong><span className="vw-chat-initial" aria-hidden="true">{voice.author.replace('@','').charAt(0).toUpperCase()}</span>{voice.author}<MembershipBadge artistId={artistId} months={[0,3,12][index]} demo/><small>mẫu</small></strong><span>{voice.text}</span></p>)}
+        {publicDemo.slice(0, 3).map(voice => <p key={voice.id}><strong><span className="vw-chat-initial" aria-hidden="true">{voice.author.replace('@','').charAt(0).toUpperCase()}</span>{voice.author}<small>Minh họa</small></strong><span>{voice.text}</span></p>)}
         {messages.slice(-12).map(item => <p key={item.id}><strong><span className="vw-chat-initial" aria-hidden="true">{item.authorName.charAt(0)}</span>{item.authorName}<MembershipBadge artistId={artistId} months={membershipTenure(memberForChat(state, artistId, item.fanId), state.demoTime)}/>{item.badgeLabel && <small>{item.badgeLabel}</small>}</strong><span>{item.text}</span></p>)}
         {!messages.length && !publicDemo.length && <p>Hall đang yên. Bạn có thể bắt đầu câu chuyện.</p>}
       </div>
       {writable ? <form onSubmit={submit}><label htmlFor="artist-context-message" className="sr-only">Gửi lời trong Hall</label><input id="artist-context-message" value={message} maxLength={280} onChange={event => setMessage(event.target.value)} placeholder="Chia sẻ với Hall…" /><button type="submit" disabled={!message.trim()} aria-label="Gửi lời nhắn"><Send size={17} /></button></form>
-        : <p className="presence-hall-readonly">Phòng đang chỉ đọc. Bạn vẫn có thể xem lại lời nhắn.</p>}
-    </> : <div className="artist-context-hall-gate"><strong>Không gian trò chuyện dành cho thành viên</strong><p>{heading}. Tin nhắn riêng không hiện ở ngoài Hall.</p><Link to={hallUrl}>Tìm hiểu Hall <ArrowRight size={16} /></Link></div>}
+        : !signedIn ? <div className="hall-guest-composer"><p>Đăng nhập để tham gia cuộc trò chuyện.</p><button className="fw-button" onClick={()=>window.dispatchEvent(new Event('vieworld-open-auth'))}>Đăng nhập</button></div> : <p className="presence-hall-readonly">Phòng đang chỉ đọc. Bạn vẫn có thể xem lại lời nhắn.</p>}
+    </> : <div className="artist-context-hall-gate"><strong>Không gian này chưa thể mở</strong><Link to={hallUrl}>Về Hall <ArrowRight size={16} /></Link></div>}
   </aside>;
 }
 

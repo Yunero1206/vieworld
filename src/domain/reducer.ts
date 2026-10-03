@@ -6,8 +6,10 @@ import { AppAction, AppState, AvatarAsset, Membership, Order, Participation, Que
 import { createInitialState } from '../data/fixtures';
 import { ARTIST_NOTES } from '../world/fanWorld';
 import { getExploreMomentById } from '../world/exploreRows';
-import { hallEntries, isArtistHallRoom, canWriteArtistHallRoom } from '../world/artistPresentation';
-import { canEnterHall, ownsDigitalProduct } from '../world/merchCatalog';
+import { hallEntries } from '../world/artistPresentation';
+import { getHallRoomPolicy, isMemberQASession, isArtistHallRoom, isPublicProjectableHallRoom, canReadArtistHallRoom, canWriteArtistHallRoom, canSubmitArtistHallQuestion } from '../world/hallRooms';
+import { hasActiveMembership, ownsDigitalProduct } from '../world/merchCatalog';
+import { artistForWorld } from '../world/worldContext';
 import { validRoomDesign } from '../world/places';
 import { commerceReducer } from '../world/commerce';
 import { shippingReducer } from '../world/shipping';
@@ -43,6 +45,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (!isDemoSignedIn(state) || state.worlds[action.worldId]?.tenantId !== state.activeTenantId) return state;
       return { ...state, hallMessages: { ...state.hallMessages, [action.worldId]: (state.hallMessages?.[action.worldId] || []).map(message => {
         if (message.id !== action.messageId || message.fanId !== state.fanProfile.id || message.isSample) return message;
+        if (action.consent && !isPublicProjectableHallRoom(state,action.worldId,message.sessionId)) return message;
         return { ...message, explorePreviewConsent: action.consent, explorePreviewStatus: action.consent && message.explorePreviewConsent && message.explorePreviewStatus === 'approved' ? 'approved' : 'pending' };
       }) } };
     }
@@ -51,11 +54,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return {...state,lastError:undefined,fanProfile:{...state.fanProfile,roomDesign:{...action.design,layers:{...action.design.layers},items:action.design.items.map(i=>({...i}))}}};
     }
     case 'SEND_HALL_MESSAGE': {
-      if (!canEnterHall(state, action.worldId)) return { ...state, lastError: { code: 'HALL_MEMBERSHIP_REQUIRED', message: 'Hall này dành cho hội viên đang hoạt động của đúng nhà nhạc.' } };
       const roomId = action.roomId || `hall-${action.worldId}`;
-      if (!isArtistHallRoom(state, action.worldId, roomId)) {
+      const policy=getHallRoomPolicy(state,action.worldId,roomId);
+      if (!policy) {
         return { ...state, lastError: { code: 'HALL_ROOM_INVALID', message: 'Không tìm thấy phòng trò chuyện này trong world.' } };
       }
+      if (!isDemoSignedIn(state)) return {...state,lastError:{code:'HALL_LOGIN_REQUIRED',message:'Đăng nhập để tham gia cuộc trò chuyện.'}};
+      if (!canReadArtistHallRoom(state,action.worldId,roomId)) return {...state,lastError:{code:'HALL_MEMBERSHIP_REQUIRED',message:'Không gian này dành cho hội viên của nghệ sĩ.'}};
+      if (policy.mode!=='chat') return {...state,lastError:{code:'HALL_ROOM_MODE_UNSUPPORTED',message:'Phòng Q&A chỉ nhận câu hỏi trong phiên đang mở.'}};
       if (!canWriteArtistHallRoom(state,action.worldId,roomId)) return {...state,lastError:{code:'HALL_ROOM_READ_ONLY',message:'Phòng này đang chỉ đọc. Bạn vẫn có thể xem lại lời nhắn.'}};
       const messages = state.hallMessages?.[action.worldId] || [];
       const value = action.text.trim();
@@ -67,7 +73,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, lastError: undefined, hallMessages: { ...state.hallMessages, [action.worldId]: [...messages, { id: action.requestId, sessionId: roomId, fanId: state.fanProfile.id, authorName: state.fanProfile.displayName, text: value, timestamp: state.demoTime, replyToId: action.replyToId, momentIds }].slice(-100) } };
     }
     case 'TOGGLE_HALL_REACTION': {
-      if (!canEnterHall(state, action.worldId) || !canWriteArtistHallRoom(state,action.worldId,action.roomId) || !hallEntries(state,action.worldId,action.roomId).some(item => item.id === action.messageId)) return state;
+      if (!canWriteArtistHallRoom(state,action.worldId,action.roomId) || !hallEntries(state,action.worldId,action.roomId).some(item => item.id === action.messageId)) return state;
       const reactions = state.hallReactions?.[action.worldId] || {};
       const ids = reactions[action.messageId] || [];
       const fanId = state.fanProfile.id;
@@ -75,13 +81,14 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case 'SEND_ARTIST_LETTER': {
       const text = action.text.trim();
-      if (!canEnterHall(state,action.worldId) || !isArtistHallRoom(state,action.worldId,`hall-${action.worldId}`) || !text || text.length > 1000) return state;
+      if (!hasActiveMembership(state,action.worldId) || !isArtistHallRoom(state,action.worldId,`hall-${action.worldId}`) || !text || text.length > 1000) return state;
       const letters = state.artistLetters || [];
       if (letters.some(letter => letter.id === action.requestId)) return state;
       return { ...state, artistLetters: [...letters,{ id: action.requestId, worldId: action.worldId, fanId: state.fanProfile.id, text, createdAt: state.demoTime }].slice(-100) };
     }
     case 'REPORT_HALL_MESSAGE': {
-      if (!canEnterHall(state, action.worldId)) return state;
+      const message=(state.hallMessages?.[action.worldId] || []).find(m=>m.id===action.messageId);
+      if (!isDemoSignedIn(state) || !message || !canReadArtistHallRoom(state,action.worldId,message.sessionId)) return state;
       return { ...state, hallMessages: { ...state.hallMessages, [action.worldId]: (state.hallMessages?.[action.worldId] || []).map(m => m.id === action.messageId ? { ...m, isReported: true, reportRef: `report-${m.id}` } : m) } };
     }
     case 'TOGGLE_SAVED_PRODUCT': {
@@ -413,7 +420,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      */
     case 'SUBMIT_QUESTION': {
       const session = state.sessions[action.sessionId];
-      if (!session || session.status !== 'running') {
+      const artistId=session && artistForWorld(state,session.worldId);
+      const policy=artistId && getHallRoomPolicy(state,artistId,action.sessionId);
+      const memberQA=isMemberQASession(state,action.sessionId);
+      if (memberQA && !hasActiveMembership(state,'artist-a')) return {...state,lastError:{code:'HALL_MEMBERSHIP_REQUIRED',message:'Không gian này dành cho hội viên của nghệ sĩ.'}};
+      if (!session || session.tenantId!==state.activeTenantId || session.status !== 'running'
+        || (memberQA && (!artistId || !canSubmitArtistHallQuestion(state,artistId,session.id)))
+        || (policy && policy.mode==='qa' && !canSubmitArtistHallQuestion(state,artistId!,session.id))) {
         return {
           ...state,
           lastError: {
@@ -569,7 +582,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
      */
     case 'VOTE_POLL': {
       const poll = state.polls[action.pollId];
-      if (!poll || poll.status !== 'open') {
+      const session = poll && state.sessions[poll.sessionId];
+      const artistId = session && artistForWorld(state, session.worldId);
+      if (!poll || poll.tenantId !== state.activeTenantId || poll.status !== 'open'
+        || (artistId && !canWriteArtistHallRoom(state, artistId, poll.sessionId))
+        || !poll.options.some(option => option.id === action.optionId)) {
         return {
           ...state,
           lastError: { code: 'POLL_CLOSED', message: 'Bình chọn đã đóng.' },
@@ -1045,7 +1062,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         productId: product.id,
         status: 'pending',
         createdAt: state.demoTime,
-        sourceRef: 'VieSHOP-SIM',
+        sourceRef: 'VieCollect-SIM',
         requestId: action.requestId,
         optionLabel: action.optionLabel,
         unitPriceVND: product.priceVND,
@@ -1065,7 +1082,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           category: 'order',
           sourceAttribution: 'platform',
           title: `Đơn hàng mới #${orderId}`,
-          body: `Đơn hàng mô phỏng "${product.title}" đã được khởi tạo thành công tại VieSHOP.`,
+          body: `Đơn hàng mô phỏng "${product.title}" đã được khởi tạo thành công tại VieCollect.`,
           isRead: false,
           targetRoute: `/orders/${orderId}`,
           createdAt: state.demoTime,
@@ -1606,7 +1623,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           ...state.orders,
           [order.id]: {
             ...order,
-            sourceRef: 'VieSHOP-RECONCILED',
+            sourceRef: 'VieCollect-RECONCILED',
             updatedAt: state.demoTime,
           },
         },

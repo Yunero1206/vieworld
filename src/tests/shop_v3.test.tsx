@@ -12,7 +12,7 @@ function mount(path: string) {
   return render(<AppProvider><MemoryRouter initialEntries={[path]}><Routes><Route path="/shop" element={<FanShopView/>}/></Routes></MemoryRouter></AppProvider>);
 }
 
-describe('VieSHOP storefront presentation', () => {
+describe('VieCollect storefront presentation', () => {
   beforeEach(() => localStorage.clear());
 
   it('derives compact categories, capabilities and meaningful badges from canonical products', () => {

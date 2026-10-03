@@ -49,7 +49,7 @@ export function FanShell() {
   },[]);
   useEffect(()=>{setAccountOpen(false);window.scrollTo?.(0,0);},[pathname]);
   useEffect(()=>{
-    const pageTitles:Record<string,string>={'/':'Home','/explore':'Explore','/shop':'VieSHOP','/me':'My Space','/memberships':'Hội viên & quyền lợi','/orders':'Đơn hàng','/account/settings':'Cài đặt & riêng tư','/account/help':'Trợ giúp'};
+    const pageTitles:Record<string,string>={'/':'Home','/explore':'Explore','/shop':'VieCollect','/me':'My Space','/memberships':'Hội viên & quyền lợi','/orders':'Đơn hàng','/account/settings':'Cài đặt & riêng tư','/account/help':'Trợ giúp'};
     const title=artist&&routeArtist?artist.name:pageTitles[pathname];
     document.title=title?`${title} · VieWorld`:'VieWorld';
     if(routeArtist&&artist)setCurrentArtistId(state,artist.id);

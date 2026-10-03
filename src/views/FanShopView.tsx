@@ -13,7 +13,7 @@ import { Product } from '../domain/types';
 import { DELIVERY_LABELS, DELIVERY_SUMMARIES, ownedDigitalLook, ownsDigitalProduct, productDisplayTitle } from '../world/merchCatalog';
 import { merchImageUrl } from '../world/merchImages';
 import { getArtistCover } from '../world/artistVisuals';
-import { canEnterHall } from '../world/merchCatalog';
+import { hasActiveMembership } from '../world/merchCatalog';
 import { ORDER_LABELS } from '../world/fanWorld';
 import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from '../components/SearchCombobox';
@@ -52,7 +52,7 @@ export function FanShopView() {
   const { state, dispatch } = useApp();
   const signedIn = isDemoSignedIn(state);
   const tenantConfig = getTenantConfig(state.activeTenantId);
-  const shopTitle = tenantConfig.labels.shopTitle || 'VieSHOP';
+  const shopTitle = tenantConfig.labels.shopTitle || 'VieCollect';
   const { worldId } = useParams();
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -225,7 +225,7 @@ export function FanShopView() {
   if (worldId && !world) {
     return (
       <div className="fw-empty">
-        <h1>Chưa tìm thấy cửa hàng này</h1>
+        <h1>Chưa tìm thấy bộ sưu tập này</h1>
         <Link className="fw-button" to="/shop">Về {shopTitle}</Link>
       </div>
     );
@@ -238,10 +238,10 @@ export function FanShopView() {
         <div className="vw-shop-story-message">
           <p className="fw-eyebrow">{heroName} · Bộ sưu tập</p>
           <h1>Mang một phần âm nhạc<br/>về bên bạn.</h1>
-          <p>Những món đồ gắn với world của {heroName}.</p>
+          <p>Sưu tập những điều bạn thích, tạo dấu ấn riêng cùng {heroName}.</p>
           <button type="button" className="fw-button" onClick={() => document.getElementById('shop-catalog')?.scrollIntoView({behavior:'smooth'})}>Khám phá bộ sưu tập <ArrowRight size={17}/></button>
         </div>
-        <aside className="vw-shop-collection-note"><small>NGOÀI ĐỜI & TRONG VIEWORLD</small><p>Chọn món để giữ bên mình, hoặc phiên bản số để mặc và trưng trong My Space.</p><span>Mỗi phiên bản ghi rõ những gì bạn nhận.</span></aside>
+        <aside className="vw-shop-collection-note"><small>DẤU ẤN CỦA BẠN</small><p>Mỗi món là một phần câu chuyện fan: giữ bên mình, mặc lên avatar hoặc trưng trong My Space.</p><span>Chọn những gì hợp với bạn, không cần có thật nhiều.</span></aside>
       </header>
 
 
@@ -402,7 +402,7 @@ export function FanShopView() {
       </div>
 
       <footer className="fw-shop-footnote">
-        Đây là bản trải nghiệm. Hình ảnh minh họa ý tưởng; VieSHOP chưa thu tiền hay giao hàng thật.
+        Đây là bản trải nghiệm. Hình ảnh minh họa ý tưởng; VieCollect chưa thu tiền hay giao hàng thật.
       </footer>
 
       {/* Filter Drawer Modal */}
@@ -556,7 +556,7 @@ export function FanShopView() {
               </div>
               <p>Gồm bản vật lý và bản số tương ứng. Xem từng sản phẩm để biết món số dùng được ở đâu.</p>
             </div>
-            <p className="fw-muted">VieSHOP hiện là bản trải nghiệm, chưa thu tiền hay giao hàng thật.</p>
+            <p className="fw-muted">VieCollect hiện là bản trải nghiệm, chưa thu tiền hay giao hàng thật.</p>
           </div>
         </WorldPanel>
       )}
@@ -651,7 +651,7 @@ export function FanShopView() {
                 </p>
               )}
 
-              {selected.category === 'membership' ? <Link className="fw-button fw-buy" to={canEnterHall(state,selected.worldId) ? '/memberships?artist='+selected.worldId : '/artist/'+selected.worldId+'/hall'}>{canEnterHall(state,selected.worldId) ? 'Xem hội viên của bạn' : 'Tìm hiểu hội viên'}</Link> : selectedOwned ? <p className="vw-shop-owned-note"><Check size={17}/>Bạn đã có phiên bản này. <Link to="/me?section=collection">Mở bộ sưu tập</Link></p> : selected.previewOnly ? <p className="vw-shop-concept-note">Đây là ý tưởng để xem trước, chưa mở bán.</p> : (
+              {selected.category === 'membership' ? <Link className="fw-button fw-buy" to={'/memberships?artist='+selected.worldId}>{hasActiveMembership(state,selected.worldId) ? 'Xem hội viên của bạn' : 'Tìm hiểu hội viên'}</Link> : selectedOwned ? <p className="vw-shop-owned-note"><Check size={17}/>Bạn đã có phiên bản này. <Link to="/me?section=collection">Mở bộ sưu tập</Link></p> : selected.previewOnly ? <p className="vw-shop-concept-note">Đây là ý tưởng để xem trước, chưa mở bán.</p> : (
                 <button
                   className="fw-button fw-buy"
                   onClick={buy}

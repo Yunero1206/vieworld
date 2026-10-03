@@ -81,13 +81,13 @@ describe('Canonical visual connections without fabricated presence', () => {
     state.hallMessages = {'artist-a':[{...message(state,'sample'),isSample:true}]};
     expect(hallEntries(state,'artist-a','session-dropin-01').filter(m => m.id === 'sample')).toHaveLength(1);
   });
-  it('highlights the requested source in Hall without removing the membership gate', () => {
+  it('highlights the requested public source without requiring membership', () => {
     const state = initial();
     const {unmount} = render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01&message=voice-a-2']}><ArtistHall artistId="artist-a" name="Artist A" sessions={[]}/></MemoryRouter></AppProvider>);
     expect(screen.getByLabelText('Lời nhắn được mở từ cộng đồng')).toHaveTextContent('@luna');
     unmount(); state.memberships = {};
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01&message=voice-a-2']}><ArtistHall artistId="artist-a" name="Artist A" sessions={[]}/></MemoryRouter></AppProvider>);
-    expect(screen.queryByRole('log')).toBeNull();
+    expect(screen.getByRole('log')).toHaveTextContent('@luna');
   });
   it('does not admit a Hall session whose content rights are unknown', () => {
     const state = initial(); delete state.sessions['session-dropin-01'].rightsApproved;

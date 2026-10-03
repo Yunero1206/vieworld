@@ -15,13 +15,13 @@ describe('Context stage refinement',()=>{
     fireEvent.click(screen.getByRole('button',{name:'Vẫy lightstick cổ vũ'}));
     expect(container.querySelectorAll('.vw-live-cheer-particles svg')).toHaveLength(5);
     expect(screen.getByRole('log',{name:'Trò chuyện cùng Hall'})).toBeInTheDocument();
-    expect(screen.getAllByRole('img',{name:/Minh họa · Hội viên/})).toHaveLength(3);
+    expect(screen.queryAllByRole('img',{name:/Minh họa · Hội viên/})).toHaveLength(0);
   });
-  it('never exposes private chat/composer or tenure to a nonmember',()=>{
+  it('opens public chat/composer for nonmembers without invented sample tenure',()=>{
     const state=createInitialState('vieworld-demo'); state.memberships={}; saveState(state); mount();
-    expect(screen.queryByRole('log')).not.toBeInTheDocument();
-    expect(screen.queryByRole('textbox',{name:'Gửi lời trong Hall'})).not.toBeInTheDocument();
-    expect(screen.getByRole('link',{name:'Tìm hiểu Hall'})).toBeInTheDocument();
+    expect(screen.getByRole('log')).toBeInTheDocument();
+    expect(screen.getByRole('textbox',{name:'Gửi lời trong Hall'})).toBeInTheDocument();
+    expect(screen.getByRole('link',{name:'Vào Hall'})).toBeInTheDocument();
   });
   it('stores a start date on new membership but preserves an active period on retry',()=>{
     const state=createInitialState('vieworld-demo'); state.memberships={};

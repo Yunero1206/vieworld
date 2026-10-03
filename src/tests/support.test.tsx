@@ -291,7 +291,7 @@ describe('T09 Acceptance: Support Requests & Recovery Without Auto-Grant', () =>
             worldId: 'artist-a',
             productId: 'product-pin-01',
             status: 'paid',
-            sourceRef: 'VieSHOP-TEST',
+            sourceRef: 'VieCollect-TEST',
             requestId: 'req_support_order_01',
           },
         },

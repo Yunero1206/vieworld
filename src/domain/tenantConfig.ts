@@ -69,7 +69,7 @@ export const TENANT_CONFIGS: Record<TenantId, TenantConfig> = {
       discoverTitle: 'Khám phá',
       worldsTitle: 'Worlds',
       myWorldTitle: 'My World',
-      shopTitle: 'VieSHOP',
+      shopTitle: 'VieCollect',
       sessionsTitle: 'Sân khấu',
       inboxTitle: 'Hộp thư',
       studioTitle: 'Studio',

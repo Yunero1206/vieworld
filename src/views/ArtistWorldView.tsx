@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type CSSProperties } from 'react';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Heart, MoreHorizontal, Play, ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { merchImageUrl } from '../world/merchImages';
@@ -19,6 +19,7 @@ import { membershipWorldsForFan } from '../world/personalSelectors';
 import { isDemoSignedIn } from '../world/account';
 import { worldActivities, selectArtistActivityPair } from '../world/presenceDiscovery';
 import { useArtistContextTransition } from '../hooks/useArtistContextTransition';
+import { isMemberQASession, isPublicProjectableHallRoom } from '../world/hallRooms';
 
 export const artistMediaStyle = (media: ExploreMedia): CSSProperties => media.panel === undefined
   ? { backgroundImage: `url("${media.src}")` }
@@ -41,7 +42,7 @@ export function ArtistWorldView() {
   const section = sectionFor(location.pathname);
   const path = `/artist/${artistId}`;
   const image = getArtistCover(artistId);
-  const sessions = useMemo(() => Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.worldId === artistId && session.rightsApproved === true && session.mediaStatus !== 'expired' && session.mediaStatus !== 'missing'), [state.sessions, artistId, state.activeTenantId]);
+  const sessions = useMemo(() => Object.values(state.sessions).filter(session => artistId && session.worldId === artistId && isPublicProjectableHallRoom(state,artistId,session.id)), [state.sessions, artistId, state.activeTenantId]);
   const activeContexts = (artistId ? worldActivities(state,artistId) : []).filter(activity=>activity.phase!=='recent'&&state.sessions[activity.id]).map(activity=>state.sessions[activity.id]).sort((a,b)=>Number(['running','open','paused'].includes(b.status))-Number(['running','open','paused'].includes(a.status))||a.scheduledStartTime.localeCompare(b.scheduledStartTime)).slice(0,3);
   const [primary,secondary]=selectArtistActivityPair(state,artistId||'');
   const pulse=selectWorldPulse(state,artistId||'',primary?.id);
@@ -75,7 +76,8 @@ export function ArtistWorldView() {
   }, [artistId, scoped]);
 
   if (!world || !scoped || !artistId) return <div className="artist-world-missing"><h1>Không tìm thấy Artist World này.</h1><Link to="/explore">Trở về Explore <ArrowRight size={17} /></Link></div>;
-  const member = membershipWorldsForFan(state).find(m=>m.world.id===artistId && m.active);
+  if (contextSession && isMemberQASession(state,contextSession.id)) return <Navigate to={`${path}/hall?room=${contextSession.id}`} replace/>;
+  const member = isDemoSignedIn(state) ? membershipWorldsForFan(state).find(m=>m.world.id===artistId && m.active) : undefined;
   const followed = isDemoSignedIn(state) && state.followedWorldIds.includes(artistId);
   const toggleFollow = () => isDemoSignedIn(state) ? dispatch({type:'TOGGLE_FOLLOW',worldId:artistId}) : window.dispatchEvent(new Event('vieworld-open-auth'));
   const heroCompact = ['hall','archive','moment'].includes(section) || Boolean(validContextSession || selectedProject);
@@ -87,7 +89,7 @@ export function ArtistWorldView() {
         {!heroCompact && <button type="button" aria-pressed={followed} onClick={toggleFollow}><Heart size={16} fill={followed ? 'currentColor' : 'none'} />{followed ? 'Đang theo dõi' : 'Theo dõi'}</button>}{member&&<Link className="presence-membership-chip" to={`/memberships?artist=${artistId}`}>◇ Hội viên{member.months!==null&&member.months>=0?' · '+member.months+' tháng':''}</Link>}
       </div>
       {!heroCompact && <p className="artist-world-signature">Good music.<br/>Better people.</p>}
-      <details className="artist-identity-menu"><summary aria-label={`Tùy chọn world của ${world.name}`}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={toggleFollow}>{followed?'Bỏ theo dõi':'Theo dõi'} {world.name}</button><Link to={`/shop?artist=${artistId}`}>VieSHOP của {world.name}</Link><Link to={`${path}/archive`}>Xem Kho lưu trữ</Link></div></details>
+      <details className="artist-identity-menu"><summary aria-label={`Tùy chọn world của ${world.name}`}><MoreHorizontal size={20}/></summary><div><button type="button" onClick={toggleFollow}>{followed?'Bỏ theo dõi':'Theo dõi'} {world.name}</button><Link to={`/shop?artist=${artistId}`}>VieCollect của {world.name}</Link><Link to={`${path}/archive`}>Xem Kho lưu trữ</Link></div></details>
     </header>
     <nav className="artist-world-local-nav" aria-label={`Trong world của ${world.name}`}>
       <Link to={path} aria-current={section === 'home' || section === 'moment' ? 'page' : undefined}>Trang chính</Link>
@@ -116,11 +118,11 @@ export function ArtistWorldView() {
           {moments.length < 5 && note && <Link to={note.sessionId ? sessionContextUrl(artistId, note.sessionId) : path}><span style={{ backgroundImage: `url("${image}")` }} /><strong>{note.title}</strong></Link>}
           {sessions.filter(session => session.status === 'ended').slice(0, Math.min(2, Math.max(0, 5 - moments.length - (note ? 1 : 0)))).map(session => <Link key={session.id} to={sessionContextUrl(artistId, session.id)}><span style={{ backgroundImage: `url("${image}")` }} /><strong>{session.title}</strong></Link>)}</ArtistVisualRail>
       </section>
-      <section className="artist-home-section" aria-labelledby="artist-products-heading"><div className="artist-world-section-head"><h2 id="artist-products-heading">Gần {world.name} hơn một chút</h2><Link to={`/shop?artist=${artistId}`}>VieSHOP của {world.name} <ArrowRight size={17} /></Link></div>
+      <section className="artist-home-section" aria-labelledby="artist-products-heading"><div className="artist-world-section-head"><h2 id="artist-products-heading">Gần {world.name} hơn một chút</h2><Link to={`/shop?artist=${artistId}`}>VieCollect của {world.name} <ArrowRight size={17} /></Link></div>
         {products.length ? <ArtistVisualRail label="Vật phẩm trong world" className="artist-home-products">{products.map(product => <Link key={product.id} to={`/shop?artist=${artistId}&product=${product.id}`}>
           {hasCatalogItemArt(product.id) ? <CatalogItemArt id={product.id} title={product.title} cutout /> : <img src={product.image ? merchImageUrl(product.image) : '/images/vieworld-logo.svg'} alt="" loading="lazy" />}
           <span><strong>{product.title}</strong><small>{productPrice(product).current}{productBadge(product) ? ` · ${productBadge(product)}` : ''}</small></span><ShoppingBag size={15} /></Link>)}</ArtistVisualRail>
-          : <p className="artist-world-empty">Chưa có sản phẩm nào được mở trong VieSHOP của {world.name}.</p>}
+          : <p className="artist-world-empty">Chưa có sản phẩm nào được mở trong VieCollect của {world.name}.</p>}
       </section>
     </div>}
     {section === 'hall' && <ArtistHall artistId={artistId} name={world.name} sessions={sessions} />}

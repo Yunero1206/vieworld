@@ -1,5 +1,6 @@
 import type { AppState, Session, World } from '../domain/types';
 import { isDemoSignedIn } from './account';
+import { isPublicProjectableHallRoom } from './hallRooms';
 
 export interface PlazaEvent {
   id: string;
@@ -48,7 +49,7 @@ function timeLabel(session: Session, now: Date) {
 function isPublicSession(state: AppState, session: Session): World | undefined {
   const world = state.worlds[session.worldId];
   if (!world || world.type !== 'artist' || world.tenantId !== state.activeTenantId) return undefined;
-  if (session.tenantId !== state.activeTenantId || session.rightsApproved !== true) return undefined;
+  if (!isPublicProjectableHallRoom(state,world.id,session.id)) return undefined;
   if (session.mediaStatus === 'expired' || session.mediaStatus === 'missing') return undefined;
   return world;
 }

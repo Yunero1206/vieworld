@@ -26,24 +26,24 @@ Vite mặc định chạy ở `http://localhost:5173`. `check:showcase` cần bu
 | Home | `/` | Ba thời điểm Gần đây, Hiện tại, Sắp tới. Hiện tại là điểm nhấn; không phải feed vô hạn hoặc bảng quản lý phòng. |
 | Explore | `/explore` | Tìm không dấu theo Artist World. Tên nghệ sĩ khớp chính xác hoặc tiền tố đứng trước hoạt động khớp; theo dõi và độ mới chỉ là ưu tiên phụ. |
 | Artist World | `/artist/:artistId` | Trang chính có một hoạt động chính, một hoạt động phụ, tiếng nói fandom, kỷ niệm và vật phẩm liên quan. |
-| Hall | `/artist/:artistId/hall` | Hội viên trò chuyện theo phòng. Trả lời mở thành thread; ngữ cảnh bên phải bám phòng đang chọn. |
+| Hall | `/artist/:artistId/hall` | Phòng chung và cộng đồng miễn phí: khách đọc, đăng nhập để trò chuyện. Member Lounge và Q&A là không gian riêng của hội viên từng artist. |
 | Kho lưu trữ | `/artist/:artistId/archive` | Timeline công khai của nghệ sĩ với bốn nhóm: tất cả, sự kiện, thời kỳ và dự án. Không trộn ghi chú riêng của fan. |
-| VieSHOP | `/shop` | Một card cho mỗi dòng sản phẩm. Chi tiết mở ở giữa màn hình, chọn Ngoài đời, Trong VieWorld hoặc Cả hai theo phiên bản thực sự có. |
+| VieCollect | `/shop` | Sưu tập những món tạo dấu ấn riêng của fan, từ kỷ niệm đến trang phục avatar và đồ trưng bày. Chi tiết mở giữa màn hình; mỗi phiên bản ghi rõ nhận ngoài đời, trong VieWorld hay cả hai. |
 | My Space | `/me` | Mở thẳng phòng. Chọn avatar, giá trang phục, kệ, bảng kỷ niệm, góc âm nhạc hoặc sổ lưu bút để tương tác. Bộ sưu tập riêng mở từ phòng. |
 | Hội viên, đơn hàng | `/memberships`, `/orders` | Hội viên được nhóm theo nghệ sĩ; đơn hàng nhóm theo lần checkout thay vì đếm mỗi dòng thành một đơn. |
 | Tài khoản, trợ giúp | `/account/settings`, `/account/help` | Thiết lập riêng tư, liên hệ, giao diện và hướng dẫn. Hồ sơ hỗ trợ demo chỉ lưu trên thiết bị. |
 
-Desktop dùng rail nhỏ; tên hiện khi hover hoặc điều hướng bằng bàn phím. Mobile có năm đích: Home, Explore, Artist, VieSHOP và Tài khoản. My Space là mục đầu trong menu tài khoản. Không có search chung ở header: Explore, Shop và Bộ sưu tập có phạm vi tìm riêng.
+Desktop dùng rail nhỏ; tên hiện khi hover hoặc điều hướng bằng bàn phím. Mobile có năm đích: Home, Explore, Artist, VieCollect và Tài khoản. My Space là mục đầu trong menu tài khoản. Không có search chung ở header: Explore, Shop và Bộ sưu tập có phạm vi tìm riêng.
 
 ## Những luật quan trọng
 
 - Đăng nhập demo mới được mở hoặc sửa dữ liệu cá nhân. Khách vẫn xem nội dung công khai, không mượn tên hay đồ của hồ sơ Linh.
 - Tạo hồ sơ mới không tạo sẵn đơn hàng, kỷ niệm hoặc lời nhắn của fan khác. State lưu theo tenant và ID fan.
-- Theo dõi không đồng nghĩa hội viên. Hội viên cần còn hiệu lực để vào Hall.
+- Theo dõi không đồng nghĩa hội viên. Phòng công cộng không yêu cầu hội viên; Member Lounge/Q&A cần hội viên còn hiệu lực của đúng artist.
 - Phòng Hall của phiên đã kết thúc chỉ đọc lại; không gửi hoặc react thêm. Phiên hủy, thiếu media hoặc chưa duyệt quyền không được mở thành phòng hợp lệ.
 - Chỉ hiển thị artist đang hiện diện khi session được chọn thực sự running và báo `artistPresence=present`. Không suy ra số người online từ avatar minh họa.
 - Lời nhắn Hall được đưa ra nơi công khai phải có opt-in tài khoản, consent cho lời nhắn và trạng thái duyệt; lời nhắn bị report không được chiếu ra. Quote fixture được ghi là minh họa.
-- Home có tối đa ba lời nhắn cùng hoạt động Hiện tại. Bubble dẫn về đúng phòng và tin nguồn; Hall vẫn kiểm tra hội viên. Hình fan ngồi ghế là artwork trang trí, không đại diện người đang online.
+- Home có tối đa ba lời nhắn cùng hoạt động Hiện tại. Bubble dẫn về đúng phòng và tin nguồn; Lounge và Q&A không bao giờ được chiếu công khai dù đã consent. Hình fan ngồi ghế là artwork trang trí, không đại diện người đang online.
 - Lưu món, thêm giỏ hoặc xem thử không cấp quyền sở hữu. Bản physical không mặc định kèm digital.
 - Avatar dùng một thân chuẩn; trang phục, nón và món cầm tay chỉ dùng fit đã chuẩn bị. Món chưa có fit không được dán ảnh lên avatar để giả lập hỗ trợ.
 - Room có vị trí và giới hạn cố định. Hover hoặc focus món để xem thử nhẹ, chọn để giữ bản xem thử, xác nhận mới lưu. Không kéo thả pixel, không xóa món đã mua khi cất khỏi phòng. Kệ trống không giả ánh sáng của một lightstick chưa đặt.

@@ -58,7 +58,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Tư cách Hội viên',
     title: 'Tư cách Hội viên & Điều kiện nâng cấp',
     description:
-      'Theo dõi giúp bạn giữ liên hệ với Artist World; hội viên là quyền riêng của từng world, bao gồm truy cập Hall khi đủ điều kiện. Mở Hội viên & quyền lợi để xem tư cách và quyền lợi. VieWorld không thu tiền thật trong bản thử nghiệm.',
+      'Hall là nơi fan gặp nhau. Phòng chung và các phòng cộng đồng miễn phí: khách đọc được, đăng nhập là có thể trò chuyện. Hội viên của từng artist mở thêm Member Lounge và phiên riêng như Q&A. Mở Hội viên & quyền lợi để xem tư cách và quyền lợi. Demo không thu tiền thật.',
     keywords: [
       'hội viên',
       'membership',
@@ -106,14 +106,14 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
   {
     id: 'guide-card-orders',
     topic: 'orders',
-    topicLabel: 'VieSHOP & Đơn hàng',
-    title: 'Cửa hàng VieSHOP & Quy trình Giao nhận (Fulfilment)',
+    topicLabel: 'VieCollect & Bộ sưu tập',
+    title: 'VieCollect: sưu tập và thể hiện bản thân',
     description:
-      'VieSHOP là nơi xem và chọn vật phẩm. Giao dịch hiện tại là demo, không thu tiền thật. Vật phẩm đã nhận nằm trong My Space / Bộ sưu tập; chỉ món tương thích mới có thể trưng trong phòng hoặc dùng trên avatar.',
+      'VieCollect giúp bạn sưu tập những vật phẩm gắn với artist và tạo dấu ấn riêng. Có món để giữ ngoài đời, có bản số để mặc hoặc trưng trong My Space. Vật phẩm đã nhận nằm trong Bộ sưu tập; chỉ món tương thích mới dùng được trong phòng hoặc trên avatar. Luồng đặt hàng là mô phỏng, không thu tiền hay giao hàng thật.',
     keywords: [
       'đơn hàng',
       'order',
-      'vieshop',
+      'viecollect',
       'shop',
       'cửa hàng',
       'mua hàng',
@@ -128,7 +128,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     ],
     actionLink: {
       to: '/shop?artist=artist-a',
-      label: 'Mở cửa hàng VieSHOP Artist A',
+      label: 'Khám phá VieCollect của Artist A',
     },
     sourceTitle: 'VieWorld demo · Thanh toán và bàn giao',
     updatedAt: '2026-09-09',
@@ -139,7 +139,7 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     topicLabel: 'Phiên sự kiện & Sân khấu',
     title: 'Các định dạng sự kiện: Drop-in, Phòng nghe & Live House',
     description:
-      'Chọn cuộc hẹn ở Artist World để mở sân khấu ngay trong Trang chính; shell và các tab giữ nguyên. Nhắc lịch (RSVP) chỉ là lời nhắc, không phải vé hay hội viên. Nhạc phát khi bạn chủ động bật. Chat bên cạnh dùng cùng room Hall và yêu cầu hội viên của đúng nghệ sĩ.',
+      'Chọn cuộc hẹn ở Artist World để mở hoạt động trong Trang chính; shell và các tab giữ nguyên. Nhắc lịch (RSVP) không phải vé hay hội viên. Nhạc chỉ phát khi bạn chủ động bật. Chat công cộng dùng cùng phòng Hall: khách có thể đọc, đăng nhập để tham gia. Q&A hội viên mở riêng trong Hall của đúng artist.',
     keywords: [
       'phiên',
       'session',
@@ -240,9 +240,9 @@ export const APPROVED_KNOWLEDGE_CARDS: GuideKnowledgeCard[] = [
     id: 'guide-card-tenants',
     topic: 'tenants',
     topicLabel: 'Một thế giới, một danh tính',
-    title: 'Home, Explore, Artist World, My Space và VieSHOP',
+    title: 'Home, Explore, Artist World, My Space và VieCollect',
     description:
-      'Home giúp bạn nắm tình hình; Explore là nơi ghé những Artist World khác. World đang ghé nằm ở slot artist trên sidebar, với Trang chính / Hall / Kho lưu trữ bên trong. Moment mở trong context của world, không có kênh Moments riêng. My Space giữ phòng, bộ sưu tập và avatar của bạn; VieSHOP là nơi mua vật phẩm. Dữ liệu demo lưu trong trình duyệt này, chưa đồng bộ tài khoản qua dịch vụ bên ngoài.',
+      'Home giúp bạn nắm tình hình; Explore là nơi ghé những Artist World khác. World đang ghé nằm ở slot artist trên sidebar, với Trang chính / Hall / Kho lưu trữ bên trong. Moment mở trong world, không có kênh Moments riêng. My Space giữ phòng, bộ sưu tập và avatar của bạn; VieCollect giúp sưu tập vật phẩm và tạo dấu ấn riêng. Dữ liệu demo lưu trong trình duyệt này, chưa đồng bộ qua dịch vụ bên ngoài.',
     keywords: [
       'tenant',
       'mfan',

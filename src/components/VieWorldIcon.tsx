@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-export type VieWorldIconName = 'explore' | 'artist' | 'room' | 'bag' | 'bell' | 'account' | 'calendar' | 'moment' | 'sound' | 'arrow';
+export type VieWorldIconName = 'explore' | 'artist' | 'room' | 'bag' | 'collect' | 'bell' | 'account' | 'calendar' | 'moment' | 'sound' | 'arrow';
 
 /** One optically aligned 24px family, authored from the approved VieWorld guide. */
 export function VieWorldIcon({ name, size = 24, ...props }: SVGProps<SVGSVGElement> & { name: VieWorldIconName; size?: number }) {
@@ -9,6 +9,7 @@ export function VieWorldIcon({ name, size = 24, ...props }: SVGProps<SVGSVGEleme
     {name === 'artist' && <><circle cx="12" cy="12" r="6.8"/><ellipse cx="12" cy="12" rx="10" ry="3.4" transform="rotate(-25 12 12)"/><path className="vw-icon-spark" fill="var(--icon-spark-fill, #fcfdfb)" d="m18.5 2.1.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/></>}
     {name === 'room' && <><path d="M5 21V6.6A2.6 2.6 0 0 1 7.6 4h8.8A2.6 2.6 0 0 1 19 6.6V21M3.5 21h17M8.5 21V7.5l7 1.8V21"/><path d="M13 15.5h.1"/></>}
     {name === 'bag' && <><rect x="4.5" y="7.2" width="15" height="14" rx="2.4"/><path d="M8.3 8.2V6a3.7 3.7 0 0 1 7.4 0v2.2"/></>}
+    {name === 'collect' && <><path d="M6.2 7.1V5a2 2 0 0 1 2-2h9.6a2 2 0 0 1 2 2v12.5"/><rect x="3.8" y="6.3" width="13.6" height="15" rx="2.2"/><path className="vw-icon-spark" d="m10.6 10.1 1 2.6 2.7 1-2.7 1-1 2.6-1-2.6-2.7-1 2.7-1 1-2.6Z"/></>}
     {name === 'bell' && <><path d="M8 18.5h8m-1.9 1.8a2.3 2.3 0 0 1-4.2 0M6.5 9.2a5.5 5.5 0 0 1 11 0c0 4.8 1 6.1 2 7.3.4.5.1 1.2-.6 1.2H5.1c-.7 0-1-.7-.6-1.2 1-1.2 2-2.5 2-7.3Z"/></>}
     {name === 'account' && <><circle cx="12" cy="7.1" r="4"/><path d="M4.5 21v-1.8a7.5 7.5 0 0 1 15 0V21"/></>}
     {name === 'calendar' && <><rect x="3.8" y="5.4" width="16.4" height="15" rx="2.1"/><path d="M7.5 3.5v4M16.5 3.5v4M4.5 10h15"/></>}

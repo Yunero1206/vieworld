@@ -15,11 +15,12 @@ describe('Artist Home context mode', () => {
     expect(sessionWorldContext({ ...live, status: 'ended' }, 'artist-a').phase).toBe('ended');
   });
 
-  it('uses the same Hall room for a fan project while still enforcing membership', () => {
+  it('uses the same public Hall room for a fan project without requiring membership', () => {
     const state = createInitialState();
     const action = { type: 'SEND_HALL_MESSAGE' as const, worldId: 'artist-c', roomId: 'project-c-birthday', text: 'Cùng chuẩn bị nhé!', requestId: 'project-message-1' };
-    const denied = appReducer(state, action);
-    expect(denied.lastError?.code).toBe('HALL_MEMBERSHIP_REQUIRED');
+    const publicSent = appReducer(state, action);
+    expect(publicSent.lastError).toBeUndefined();
+    expect(publicSent.hallMessages?.['artist-c'].at(-1)?.sessionId).toBe('project-c-birthday');
     const memberState = appReducer(state, { type: 'UPGRADE_MEMBERSHIP', worldId: 'artist-c' });
     const sent = appReducer(memberState, action);
     expect(sent.lastError).toBeUndefined();

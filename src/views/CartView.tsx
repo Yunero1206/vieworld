@@ -34,7 +34,7 @@ export function CartView(){
     <Link className="fw-text-button" to="/shop"><ArrowLeft size={16}/>Tiếp tục chọn đồ</Link>
     <header className="fw-scene-heading"><h1>{checkoutId?allFulfilled?'Đã nhận đủ vật phẩm':paid?'Đơn đang chuẩn bị':cancelled?'Đã hủy đơn':'Thanh toán thử':review?'Kiểm tra đơn':'Giỏ đồ của mình'}<span>Chọn đúng phiên bản, biết rõ món mình nhận.</span></h1></header>
     <ol className="v5-checkout-steps" aria-label="Tiến trình mua hàng">{stepLabels.map((v,i)=><li key={i} aria-current={i===activeStepIndex?'step':undefined}><span>{i+1}</span>{v}</li>)}</ol>
-    {checkoutId && !group.length ? <div className="fw-empty"><h2>Không tìm thấy lần chốt đơn này.</h2><Link to="/cart" className="fw-button">Về giỏ đồ</Link></div> : !checkoutId&&!cart.length?<div className="fw-empty"><ShoppingBag size={36}/><h2>Giỏ đồ đang nhẹ tênh.</h2><p>Thử đồ ở VieSHOP rồi thêm đúng phiên bản mình thích.</p><Link to="/shop" className="fw-button">Ghé VieSHOP</Link><Link to="/me?panel=bag" className="fw-text-button">Xem đơn đã chốt →</Link></div>:<div className="v5-checkout-layout"><section aria-label="Món đã chọn">
+    {checkoutId && !group.length ? <div className="fw-empty"><h2>Không tìm thấy lần chốt đơn này.</h2><Link to="/cart" className="fw-button">Về giỏ đồ</Link></div> : !checkoutId&&!cart.length?<div className="fw-empty"><ShoppingBag size={36}/><h2>Giỏ đồ đang nhẹ tênh.</h2><p>Thử đồ ở VieCollect rồi thêm đúng phiên bản mình thích.</p><Link to="/shop" className="fw-button">Ghé VieCollect</Link><Link to="/me?panel=bag" className="fw-text-button">Xem đơn đã chốt →</Link></div>:<div className="v5-checkout-layout"><section aria-label="Món đã chọn">
       {(checkoutId?group.map(o=>({key:o.id,productId:o.productId,quantity:o.quantity || 1,optionLabel:o.optionLabel,order:o})):cart.map(l=>({...l,order:undefined}))).map(l=>{const p=state.products[l.productId];return <article className="v5-cart-line" key={l.key}>
         {p?.image?<img src={merchImageUrl(p.image)} alt={p.title} width="100" height="100"/>:<Package size={40}/>}
         <div><small>{state.worlds[p?.worldId]?.name} · {DELIVERY_LABELS[p?.delivery || 'physical']}</small><h2>{productDisplayTitle(l.order?.productTitle || p?.title || 'Món không còn trong danh mục')}</h2><p>{l.optionLabel?`Cỡ ${l.optionLabel} · `:''}{money(l.order?.unitPriceVND ?? p?.priceVND ?? 0)} / món</p>
@@ -44,7 +44,7 @@ export function CartView(){
       </article>;})}
       <p className="fw-muted">{physical?'Có bản vật lý trong đơn. Bạn có thể theo dõi hành trình giao hàng mô phỏng, không cần địa chỉ thật.':'Đơn chỉ có bản số. Vật phẩm sẽ vào My Space sau khi nhận.'}</p>
       {review&&<button className="fw-text-button" onClick={()=>setReview(false)}>← Sửa lại giỏ đồ</button>}
-    </section><aside className="v5-order-summary"><p className="fw-eyebrow">VIESHOP · TRẢI NGHIỆM THỬ NGHIỆM</p><h2>{allFulfilled?'Đồ đã vào Bộ sưu tập':paid?'Đơn đang được chuẩn bị':'Tóm tắt lần mua'}</h2><p><span>Tiền sản phẩm</span><strong>{money(total)}</strong></p><p><span>Giao nhận demo</span><span>0 ₫</span></p><p className="v5-total"><span>Tổng mô phỏng</span><strong>{money(total)}</strong></p>
+    </section><aside className="v5-order-summary"><p className="fw-eyebrow">VieCollect · TRẢI NGHIỆM THỬ NGHIỆM</p><h2>{allFulfilled?'Đồ đã vào Bộ sưu tập':paid?'Đơn đang được chuẩn bị':'Tóm tắt lần mua'}</h2><p><span>Tiền sản phẩm</span><strong>{money(total)}</strong></p><p><span>Giao nhận demo</span><span>0 ₫</span></p><p className="v5-total"><span>Tổng mô phỏng</span><strong>{money(total)}</strong></p>
       {!checkoutId&&problem&&<p role="alert">{problem}</p>}
       {!checkoutId&&!review&&<button className="fw-button" disabled={!!problem} onClick={()=>setReview(true)}>Kiểm tra đơn →</button>}
       {!checkoutId&&review&&<><label className="v5-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Tôi đã kiểm tra cỡ, số lượng và phiên bản. Đây là giao dịch thử, không thu tiền.</label><button className="fw-button" disabled={!consent||!!problem||busy} onClick={checkout}>{busy?'Đang chốt…':'Chốt đơn'}</button><small>Chốt đơn chưa cấp vật phẩm.</small></>}
@@ -86,7 +86,7 @@ export function CartView(){
           )}
         </div>
       </div>}
-      {cancelled&&<><p>Không phát sinh thanh toán hay quyền sở hữu.</p><Link to="/shop" className="fw-button">Chọn lại ở VieSHOP</Link></>}
+      {cancelled&&<><p>Không phát sinh thanh toán hay quyền sở hữu.</p><Link to="/shop" className="fw-button">Chọn lại ở VieCollect</Link></>}
       <Link to="/me?panel=bag" className="fw-text-button">Mọi đơn đã chốt →</Link>
     </aside></div>}
   </div>;

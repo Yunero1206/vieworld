@@ -77,7 +77,7 @@ export function commerceReducer(s:AppState,a:AppAction):AppState|undefined {
       const problem=cartProblem(s);if(problem)return fail(s,problem);
       const orders={...s.orders};
       (s.cart || []).forEach((l,i)=>{const p=s.products[l.productId];const id=`checkout-${a.requestId}-${i}`;
-        orders[id]={id,tenantId:s.activeTenantId,version:1,updatedAt:s.demoTime,fanId:s.fanProfile.id,worldId:p.worldId,productId:p.id,status:'pending',createdAt:s.demoTime,sourceRef:'VieSHOP-CART-SIM',requestId:id,checkoutId:a.requestId,quantity:l.quantity,optionLabel:l.optionLabel,unitPriceVND:p.priceVND,productTitle:p.title,productImage:p.image,deliveryType:p.delivery,digitalSlot:p.digitalSlot,estimatedShipping:p.estimatedShipping,batchLabel:p.batchLabel};
+        orders[id]={id,tenantId:s.activeTenantId,version:1,updatedAt:s.demoTime,fanId:s.fanProfile.id,worldId:p.worldId,productId:p.id,status:'pending',createdAt:s.demoTime,sourceRef:'VieCollect-CART-SIM',requestId:id,checkoutId:a.requestId,quantity:l.quantity,optionLabel:l.optionLabel,unitPriceVND:p.priceVND,productTitle:p.title,productImage:p.image,deliveryType:p.delivery,digitalSlot:p.digitalSlot,estimatedShipping:p.estimatedShipping,batchLabel:p.batchLabel};
       });
       return {...s,orders,cart:[],lastError:undefined};
     }

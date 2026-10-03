@@ -10,6 +10,7 @@
 import { AppState, TenantId } from '../domain/types';
 import { createInitialState, createFreshFanState, CANONICAL_WORLDS, CANONICAL_AVATARS, CANONICAL_SESSIONS } from '../data/fixtures';
 import { withMerchCatalog } from '../world/merchCatalog';
+import { withCommunityHallFixture } from '../data/communityHall';
 import { freshGuestState } from '../world/account';
 import { resetCurrentArtistSelections } from '../world/currentArtist';
 import { idbGet, idbSet, idbDelete, clearTenantAsync, STORE_TENANT_STATE } from './indexedDbAdapter';
@@ -179,7 +180,7 @@ export function loadState(
         const parsed = JSON.parse(raw);
         if (!isPersistedState(parsed.state, tenantId, fanId)) throw new Error('Invalid cached state');
         return {
-          state: withMerchCatalog(parsed.state),
+          state: withCommunityHallFixture(withMerchCatalog(parsed.state)),
           isMemoryFallback: true,
           notice: 'Chế độ lưu tạm trong bộ nhớ: trình duyệt không cho phép lưu trữ cục bộ.',
         };
@@ -236,7 +237,7 @@ export function loadState(
     }
 
     return {
-      state: withMerchCatalog(parsed.state),
+      state: withCommunityHallFixture(withMerchCatalog(parsed.state)),
       isMemoryFallback: false,
     };
   } catch {
@@ -270,7 +271,7 @@ export async function loadStateAsync(
     const idbData = await idbGet<AppState>(STORE_TENANT_STATE, key);
     if (isPersistedState(idbData, tenantId, fanId)) {
       return {
-        state: withMerchCatalog(idbData),
+        state: withCommunityHallFixture(withMerchCatalog(idbData)),
         isMemoryFallback: false,
       };
     }

@@ -77,7 +77,8 @@ describe('World v2: ownership and access contracts',()=>{
   });
   it('guards Hall posting, validates length, deduplicates, persists and hides reports locally',()=>{
     const action={type:'SEND_HALL_MESSAGE' as const,worldId:'artist-a',text:'  Acoustic nhé  ',requestId:'hall-1'};
-    expect(appReducer({...initial(),memberships:{}},action).lastError?.code).toBe('HALL_MEMBERSHIP_REQUIRED');
+    expect(appReducer({...initial(),memberships:{}},action).lastError).toBeUndefined();
+    expect(appReducer({...initial(),memberships:{}},{...action,roomId:'member-lounge-artist-a'}).lastError?.code).toBe('HALL_MEMBERSHIP_REQUIRED');
     let state=appReducer(member(),action);expect(state.hallMessages?.['artist-a'][0].text).toBe('Acoustic nhé');expect(appReducer(state,action)).toBe(state);
     expect(appReducer(state,{...action,requestId:'hall-2',text:'x'.repeat(281)}).lastError?.code).toBe('HALL_MESSAGE_INVALID');
     state=appReducer(state,{type:'REPORT_HALL_MESSAGE',worldId:'artist-a',messageId:'hall-1'});saveState(state);

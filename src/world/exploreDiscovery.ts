@@ -1,6 +1,7 @@
 import type { AppState, ChatMessage } from '../domain/types';
 import { EXPANDED_PUBLIC_VOICES } from '../data/expandedUniverse';
 import { isDemoSignedIn } from './account';
+import { isPublicProjectableHallRoom } from './hallRooms';
 
 export interface PublicVoice {
   id: string;
@@ -19,7 +20,7 @@ const DEMO_PUBLIC_VOICES: PublicVoice[] = EXPANDED_PUBLIC_VOICES;
 
 export function canProjectHallVoice(state: AppState, worldId: string, message: ChatMessage): boolean {
   // This local demo has no directory of other fans' privacy settings: unknown consent stays private.
-  return isDemoSignedIn(state) && state.worlds[worldId]?.tenantId === state.activeTenantId
+  return isDemoSignedIn(state) && isPublicProjectableHallRoom(state,worldId,message.sessionId)
     && message.fanId === state.fanProfile.id && state.fanProfile.sharing?.hallPublicProjectionEnabled === true
     && message.explorePreviewConsent === true && message.explorePreviewStatus === 'approved'
     && !message.isReported && Boolean(message.text.trim());
@@ -28,7 +29,7 @@ export function canProjectHallVoice(state: AppState, worldId: string, message: C
 /** Hall messages never leave Hall by default. Publication requires consent AND approval. */
 function projectableVoices(state: AppState, worldId: string, sourceContextId?: string): PublicVoice[] {
   if (state.worlds[worldId]?.tenantId !== state.activeTenantId) return [];
-  const curated = state.activeTenantId === 'vieworld-demo' ? DEMO_PUBLIC_VOICES.filter(voice => voice.worldId === worldId && (!sourceContextId || voice.sourceContextId === sourceContextId)) : [];
+  const curated = state.activeTenantId === 'vieworld-demo' ? DEMO_PUBLIC_VOICES.filter(voice => voice.worldId === worldId && isPublicProjectableHallRoom(state,worldId,voice.sourceContextId) && (!sourceContextId || voice.sourceContextId === sourceContextId)) : [];
   const approved = (state.hallMessages?.[worldId] || [])
     .filter(message => canProjectHallVoice(state, worldId, message) && (!sourceContextId || message.sessionId === sourceContextId))
     .map(message => ({
@@ -61,7 +62,7 @@ export function selectWorldPulse(state: AppState, worldId: string, primaryContex
     || pool.find(v=>v.selectedBy==='artist') || pool[0];
 }
 
-/** A public excerpt links back to its actual room; Hall still enforces membership. */
+/** A public excerpt links back to its actual public room; writes still require sign-in. */
 export function publicVoiceHallUrl(voice: PublicVoice): string {
   return `/artist/${encodeURIComponent(voice.worldId)}/hall?room=${encodeURIComponent(voice.sourceContextId)}&message=${encodeURIComponent(voice.id)}`;
 }

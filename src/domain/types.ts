@@ -212,6 +212,8 @@ export interface Product extends BaseRecord {
 }
 
 export interface Question extends BaseRecord {
+  answerText?: string;
+  answeredAt?: string;
   sessionId: string;
   fanId: string;
   authorName: string;

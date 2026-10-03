@@ -33,15 +33,15 @@ describe('Artist tabs and bulletin refinement',()=>{
     expect(appReducer(state,{...action,roomId:'hall-artist-a'})).toBe(state);
     expect(selectPublicVoices(next,'artist-a').some(voice=>voice.id==='reply')).toBe(false);
   });
-  it('toggles reactions only for valid rooms and active members',()=>{
+  it('toggles reactions for signed-in fans in public rooms, regardless of membership',()=>{
     const state=createInitialState('vieworld-demo');const id=hallEntries(state,'artist-a','session-dropin-01')[0].id;
     const action={type:'TOGGLE_HALL_REACTION' as const,worldId:'artist-a',roomId:'session-dropin-01',messageId:id};
     const next=appReducer(state,action);expect(next.hallReactions?.['artist-a'][id]).toEqual([state.fanProfile.id]);
     expect(appReducer(next,action).hallReactions?.['artist-a'][id]).toEqual([]);
-    const visitor={...state,memberships:{}};expect(appReducer(visitor,action)).toBe(visitor);
+    const visitor={...state,memberships:{}};expect(appReducer(visitor,action).hallReactions?.['artist-a'][id]).toEqual([state.fanProfile.id]);
     expect(appReducer(state,{...action,roomId:'hall-artist-a'})).toBe(state);
     const foreign={...state,memberships:Object.fromEntries(Object.entries(state.memberships).map(([key,value])=>[key,{...value,tenantId:'mfan-demo' as const}]))};
-    expect(appReducer(foreign,action)).toBe(foreign);
+    expect(appReducer(foreign,action).hallReactions?.['artist-a'][id]).toEqual([state.fanProfile.id]);
   });
   it('keeps letters private, idempotent and separate from Hall',()=>{
     const state=createInitialState('vieworld-demo');const action={type:'SEND_ARTIST_LETTER' as const,worldId:'artist-a',text:'Một lời cảm ơn',requestId:'letter'};
@@ -59,11 +59,11 @@ describe('Artist tabs and bulletin refinement',()=>{
     expect(chapters.some(chapter=>chapter.year===2024)).toBe(true);
   });
   it('exposes working reply, emoji, Moment picker, poll and private-letter controls',()=>{
-    const state=createInitialState('vieworld-demo');saveState(state);render(<AppProvider><MemoryRouter><ArtistHall artistId="artist-a" name="Artist A" sessions={Object.values(state.sessions).filter(session=>session.worldId==='artist-a')}/></MemoryRouter></AppProvider>);
+    const state=createInitialState('vieworld-demo');saveState(state);render(<AppProvider><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01']}><ArtistHall artistId="artist-a" name="Artist A" sessions={Object.values(state.sessions).filter(session=>session.worldId==='artist-a')}/></MemoryRouter></AppProvider>);
     const log=screen.getByRole('log',{name:'Tin nhắn trong Hall'});fireEvent.click(within(log).getAllByRole('button',{name:'Trả lời'})[0]);expect(screen.getByRole('button',{name:'Hủy trả lời'})).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'Thêm biểu cảm'}));fireEvent.click(screen.getByRole('button',{name:'Thêm 💙'}));expect(screen.getByRole('textbox',{name:'Gửi lời nhắn trong Hall'})).toHaveValue('💙');
     fireEvent.click(screen.getByRole('button',{name:'Chia sẻ khoảnh khắc'}));expect(screen.getByText('Chọn tối đa 3 khoảnh khắc công khai.')).toBeInTheDocument();
-    expect(screen.getByText('Mỗi người một lựa chọn.')).toBeInTheDocument();expect(screen.getByText('Demo lưu riêng trên thiết bị; chưa gửi đến artist/team.')).toBeInTheDocument();
+    expect(screen.getByText('Mỗi người một lựa chọn.')).toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Member Lounge/}));fireEvent.click(screen.getByText('Gửi lời cho Artist A'));expect(screen.getByText('Demo lưu riêng trên thiết bị; chưa gửi đến artist/team.')).toBeInTheDocument();
   });
   it('returns from Moment Focus to the open Archive chapter and keeps secondary filters usable',()=>{
     const {container}=render(<AppProvider><MemoryRouter initialEntries={['/artist/artist-a/archive']}><Routes>

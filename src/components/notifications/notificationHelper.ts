@@ -46,7 +46,7 @@ export function getCategoryInfo(notif: DomainNotification): {
   if (cat.includes('shop') || cat.includes('order')) {
     return {
       type: 'shop',
-      label: 'VieSHOP',
+      label: 'VieCollect',
       dotColor: '#D97706',
       thumbnailUrl: '/images/place-shop.jpg',
       ctaLabel: 'Xem ngay →',
@@ -95,8 +95,9 @@ export function mapDomainToDisplay(notif: DomainNotification): DisplayNotificati
     type,
     categoryLabel: label,
     categoryDotColor: dotColor,
-    title: notif.title,
-    body: notif.body,
+    // Old locally saved notices keep their data; presentation follows the current brand.
+    title: notif.title.replace(/vie\s?shop/gi, 'VieCollect'),
+    body: notif.body.replace(/vie\s?shop/gi, 'VieCollect'),
     createdAt: notif.createdAt || notif.updatedAt,
     timeAgo: formatTimeAgo(notif.createdAt || notif.updatedAt),
     read: Boolean(notif.isRead),

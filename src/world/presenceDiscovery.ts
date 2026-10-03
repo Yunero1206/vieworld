@@ -5,11 +5,12 @@ import {getWorldMoments,getWorldProject,type ExploreMedia} from './exploreRows';
 import {matchesVietnameseQuery} from '../utils/textSearch';
 import {isDemoSignedIn} from './account';
 import {selectPublicVoices} from './exploreDiscovery';
+import {isPublicProjectableHallRoom} from './hallRooms';
 
 export interface PresenceActivity {id:string;artistId:string;title:string;to:string;media:ExploreMedia;phase:'recent'|'now'|'next';label:string;at?:string;demo:boolean}
 export function worldActivities(state:AppState,artistId:string):PresenceActivity[]{
   if(state.worlds[artistId]?.type!=='artist'||state.worlds[artistId]?.tenantId!==state.activeTenantId)return [];
-  const sessions=Object.values(state.sessions).filter(s=>s.tenantId===state.activeTenantId&&s.rightsApproved===true&&s.mediaStatus!=='expired'&&s.mediaStatus!=='missing'&&artistForWorld(state,s.worldId)===artistId&&s.status!=='cancelled');
+  const sessions=Object.values(state.sessions).filter(s=>isPublicProjectableHallRoom(state,artistId,s.id)&&artistForWorld(state,s.worldId)===artistId);
   const list:PresenceActivity[]=sessions.flatMap(s=>{
     const phase=['running','open','paused'].includes(s.status)?'now':s.status==='scheduled'&&Date.parse(s.scheduledStartTime)>=Date.parse(state.demoTime)?'next':s.status==='ended'?'recent':null;
     return phase?[{id:s.id,artistId,title:s.title.replace(state.worlds[artistId].name+': ',''),to:sessionContextUrl(artistId,s.id),media:contextMedia(artistId,s),phase,label:s.status==='open'?'Sảnh đã mở':s.status==='paused'?'Tạm dừng':s.status==='running'?'Đang diễn ra':phase==='next'?'Sắp tới':'Đã khép lại',at:s.scheduledStartTime,demo:!!s.demo}]:[];

@@ -290,7 +290,7 @@ describe('5. P2 Shop search and navigation forgiving search & URL state', () => 
         productId: 'deleted-sku-archived-999', // SKU removed from products catalog
         status: 'paid',
         createdAt: state.demoTime,
-        sourceRef: 'VieSHOP-CART-SIM',
+        sourceRef: 'VieCollect-CART-SIM',
         requestId: 'req-archived-1',
         productTitle: 'Áo Kỷ Niệm Star Club (Archived)',
         productImage: 'shirt-physical',
@@ -323,7 +323,7 @@ describe('5. P2 Shop search and navigation forgiving search & URL state', () => 
       expect(screen.getByTestId('order-status-badge')).toHaveTextContent('Đã thanh toán');
     });
 
-    it('VieSHOP renders pre-order metadata and shipping ETA disclosures matching Weverse Shop', () => {
+    it('VieCollect renders pre-order metadata and shipping ETA disclosures matching Weverse Shop', () => {
       const state = createInitialState('vieworld-demo');
       saveState(state);
 

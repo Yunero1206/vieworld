@@ -32,7 +32,7 @@ describe('Latest canonical dock and ambient scene', () => {
     expect(nav.querySelectorAll('.presence-rail-brand')).toHaveLength(1);
     expect(nav.querySelectorAll('.vieworld-logo-icon')).toHaveLength(1);
     expect(nav.querySelector('.fw-artist-avatar')).toBeNull();
-    expect([...nav.querySelectorAll('[data-vw-icon]')].map(e => e.getAttribute('data-vw-icon'))).toEqual(['explore', 'artist', 'room', 'bag']);
+    expect([...nav.querySelectorAll('[data-vw-icon]')].map(e => e.getAttribute('data-vw-icon'))).toEqual(['explore', 'artist', 'room', 'collect']);
     expect(container.querySelectorAll('.fw-side-nav .selected')).toHaveLength(1);
   });
   it('keeps Cart local to Shop, not as a second utility in the global dock', () => {
@@ -41,6 +41,20 @@ describe('Latest canonical dock and ambient scene', () => {
     expect(within(rail).queryByRole('link', { name: /Giỏ hàng/ })).toBeNull();
     expect(rail.querySelector('a[href="/cart"]')).toBeNull();
     expect(rail.querySelector('[data-vw-icon="bell"]')).toBeInTheDocument();
+  });
+  it('uses smaller desktop artwork without shrinking the mobile icon family', () => {
+    render(<MemoryRouter><GlobalNavigation pathname="/shop"/></MemoryRouter>);
+    const desktop = screen.getByRole('navigation', { name: 'Điều hướng chính' });
+    const mobile = screen.getByRole('navigation', { name: 'Điều hướng di động' });
+    for (const icon of desktop.querySelectorAll('[data-vw-icon]')) {
+      expect(icon).toHaveAttribute('width', '22');
+      expect(icon).toHaveAttribute('height', '22');
+    }
+    expect(desktop.querySelector('.vieworld-logo-icon')).toHaveAttribute('width', '30');
+    for (const icon of mobile.querySelectorAll('[data-vw-icon]')) {
+      expect(icon).toHaveAttribute('width', '24');
+      expect(icon).toHaveAttribute('height', '24');
+    }
   });
   it('keeps mobile navigation icon-only while preserving accessible destination names', () => {
     render(<AppProvider initialState={createInitialState('vieworld-demo')}><MemoryRouter><FanShell/></MemoryRouter></AppProvider>);

@@ -128,7 +128,7 @@ export function CollectionBrowser() {
     {!filtered.length && <div className="myspace-collection-empty">
       {modeOwned.length ? <><p>Chưa có món nào phù hợp với lựa chọn này.</p><button type="button" onClick={() => { setQuery(''); setArtist('all'); setEventName('all'); setYear('all'); setCategory('all'); }}>Xem tất cả</button></> : mode === 'objects' ? <>
         <h3>Chưa có vật phẩm đã nhận.</h3><p>Vật phẩm hiện ở đây sau khi được giao trong demo. Đồ đã lưu hay còn trong giỏ chưa phải đồ của bạn.</p>
-        <Link to="/shop">Ghé VieSHOP →</Link><Link to="/orders">Kiểm tra đơn đã chốt →</Link>
+        <Link to="/shop">Ghé VieCollect →</Link><Link to="/orders">Kiểm tra đơn đã chốt →</Link>
       </> : <>
         <h3>Chưa có kỷ niệm ở đây.</h3><p>Kỷ niệm được giữ lại từ cuộc hẹn bạn đã tham dự; giữ chỗ thôi chưa ghi nhận tham dự.</p>
         <Link to="/explore">Tìm một cuộc hẹn →</Link>

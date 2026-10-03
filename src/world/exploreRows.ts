@@ -4,6 +4,8 @@ import { matchesVietnameseQuery, normalizeVietnameseText } from '../utils/textSe
 import { selectPublicVoices, type PublicVoice } from './exploreDiscovery';
 import { merchImageUrl } from './merchImages';
 import { artistForWorld } from './worldContext';
+import { ARTIST_PROJECTS } from '../data/artistProjects';
+import { isPublicProjectableHallRoom } from './hallRooms';
 import aConcert from '../assets/home/concert-night.png';
 import bTriptych from '../assets/explore-demo/artist-b-triptych.jpg';
 import cTriptych from '../assets/explore-demo/artist-c-triptych.jpg';
@@ -47,10 +49,7 @@ const mediaByWorld: Record<string, { avatar: ExploreMedia; moments: [ExploreMedi
   'artist-e': { avatar: { src: eTriptych, panel: 0 }, moments: [{ src: eTriptych, panel: 1 }, { src: eTriptych, panel: 2 }], titles: ['E · Tín hiệu mới', 'E · Trong phòng thu'], freshness: 50 },
 };
 
-const projects: Record<string, { id: string; title: string }> = {
-  'artist-a': { id: 'project-a-birthday', title: 'Gửi lời chúc đến Artist A' },
-  'artist-c': { id: 'project-c-birthday', title: 'Birthday Project đang mở' },
-};
+const projects = ARTIST_PROJECTS;
 
 // Extended moments catalog ensuring 45-60 total moments across worlds
 interface ExtendedMomentDef {
@@ -184,14 +183,14 @@ export function selectExploreRows(state: AppState, query = ''): ExploreWorldRow[
     .filter(world => world.tenantId === state.activeTenantId && world.type === 'artist' && mediaByWorld[world.id])
     .filter(world => {
       if (!query.trim()) return true;
-      const publicContexts = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && session.rightsApproved === true && session.mediaStatus !== 'expired' && session.mediaStatus !== 'missing' && session.status !== 'cancelled' && artistForWorld(state, session.worldId) === world.id).map(session => session.title);
+      const publicContexts = Object.values(state.sessions).filter(session => isPublicProjectableHallRoom(state,world.id,session.id)).map(session => session.title);
       return matchesVietnameseQuery(`${world.name} ${world.description} ${getWorldMoments(world.id).map(moment => moment.title).join(' ')} ${projects[world.id]?.title || ''} ${publicContexts.join(' ')}`, query);
     })
     .map(world => {
       const media = mediaByWorld[world.id];
       // Artist cross-links are recommendations, not shared ownership of their activities.
       // Programme worlds still resolve to their canonical artist through artistForWorld.
-      const owned = Object.values(state.sessions).filter(session => session.tenantId === state.activeTenantId && artistForWorld(state, session.worldId) === world.id && session.rightsApproved === true && session.mediaStatus !== 'missing' && session.mediaStatus !== 'expired' && session.status !== 'cancelled');
+      const owned = Object.values(state.sessions).filter(session => isPublicProjectableHallRoom(state,world.id,session.id) && artistForWorld(state, session.worldId) === world.id);
       const activity = owned.some(session => session.status === 'running') ? 4 : owned.some(session => session.status === 'open') ? 3 : owned.some(session => session.status === 'scheduled' && session.scheduledStartTime >= state.demoTime) ? 2 : 0;
       // Popularity is intentionally absent. Equally fresh demo worlds rotate daily instead of locking the same five in place.
       const rotationIndex = demoRotation.indexOf(world.id);

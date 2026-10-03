@@ -88,7 +88,7 @@ describe('canonical My Space taxonomy and drawer',()=>{
     fireEvent.click(fixture('Giá trang phục'));
     const drawer=screen.getByRole('dialog',{name:'Trưng bày Giá trang phục'});
     expect(within(drawer).queryByRole('textbox')).toBeNull();
-    expect(drawer.textContent).not.toMatch(/sức chứa|Điểm nhấn|VieSHOP|Chọn chỗ khác/);
+    expect(drawer.textContent).not.toMatch(/sức chứa|Điểm nhấn|VieCollect|Chọn chỗ khác/);
     const saved=screen.getByTestId('saved-room').textContent;
     fireEvent.click(within(drawer).getByRole('button',{name:'Đặt vào đây'}));
     expect(screen.getByTestId('saved-room').textContent).toBe(saved);

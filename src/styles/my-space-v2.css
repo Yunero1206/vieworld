@@ -61,7 +61,7 @@
 .vw-page-myspace .v7-sticky-note.note-color-pink { background: #fff0f2; border-color: #f4dbe0; }
 .vw-page-myspace .v7-sticky-note.note-color-mint { background: #edf6e9; border-color: #dcebd4; }
 
-/* Private collection: less card chrome than VieSHOP, different grammar for keepsakes. */
+/* Private collection: less card chrome than VieCollect, different grammar for keepsakes. */
 .myspace-collection { padding: 4px 0 44px; color: #26343b; }
 .myspace-mode-tabs, .myspace-avatar-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 4px 0 20px; }
 .myspace-mode-tabs button, .myspace-avatar-tabs button, .myspace-category-chips button { border: 1px solid #d8e0de; background: #fff; border-radius: 999px; color: #334b43; min-height: 38px; padding: 7px 17px; font: inherit; font-size: 13px; cursor: pointer; }

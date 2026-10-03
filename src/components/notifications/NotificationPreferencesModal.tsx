@@ -67,7 +67,7 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
     {
       key: 'promotional' as const,
       icon: Megaphone,
-      title: 'Tin từ VieSHOP & chương trình',
+      title: 'Tin từ VieCollect & chương trình',
       desc: 'Vật phẩm và chương trình mới. Nhóm này không bắt buộc.',
       color: '#DC2626',
     },

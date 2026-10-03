@@ -1,6 +1,6 @@
 import type {AppState,Benefit} from '../domain/types';
 import {artistForWorld,sessionContextUrl} from './worldContext';
-import {canEnterHall} from './merchCatalog';
+import {hasActiveMembership} from './merchCatalog';
 import {getWorldProject} from './exploreRows';
 
 /** Only explicitly supplied, currently valid targets create a benefit destination. */
@@ -9,7 +9,7 @@ export function benefitDestination(state:AppState,benefit:Benefit):string|undefi
   if(benefit.availableFrom&&Date.parse(benefit.availableFrom)>Date.parse(state.demoTime))return;
   if(benefit.expiresAt&&Date.parse(benefit.expiresAt)<=Date.parse(state.demoTime))return;
   const target=benefit.target;if(!target)return;
-  if(target.type==='artist_hall')return target.worldId===benefit.worldId&&canEnterHall(state,target.worldId)?`/artist/${target.worldId}/hall`:undefined;
+  if(target.type==='artist_hall')return target.worldId===benefit.worldId&&hasActiveMembership(state,target.worldId)?`/artist/${target.worldId}/hall?room=member-lounge-${target.worldId}`:undefined;
   if(target.type==='product_family'){
     const product=Object.values(state.products).find(p=>p.tenantId===state.activeTenantId&&p.worldId===benefit.worldId&&(p.familyId||p.id)===target.id&&(!p.requiredBenefitId||p.requiredBenefitId===benefit.id));
     return product?`/shop?artist=${product.worldId}&product=${product.id}`:undefined;

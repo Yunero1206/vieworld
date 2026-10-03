@@ -3,6 +3,7 @@ import { EXPANDED_ARCHIVE_CHAPTERS } from '../data/expandedUniverse';
 import type { ExploreMedia, ExploreMoment } from './exploreRows';
 import { contextMedia } from './artistPresentation';
 import { sessionContextUrl } from './worldContext';
+import { isPublicProjectableHallRoom } from './hallRooms';
 
 export interface ArtistChapter { id:string; title:string; year:number; kind:'Sự kiện'|'Era'|'Capsule'|'Fan project'; media:ExploreMedia; detail:string; momentIds:string[]; to?:string; demo?:boolean; private?:boolean }
 /** Chapter references are a presentation projection; Moment objects stay canonical. */
@@ -18,7 +19,7 @@ export function artistArchiveChapters(state:AppState,artistId:string,moments:Exp
     related.forEach(moment=>assigned.add(moment.id));
     return {...ch,media:related[0]?.media||moments[index%Math.max(1,moments.length)]?.media||contextMedia(artistId),momentIds:related.map(moment=>moment.id)};
   }) : [];
-  sessions.filter(session=>session.tenantId===state.activeTenantId && session.rightsApproved!==false && session.status==='ended').forEach(session=>chapters.push({
+  sessions.filter(session=>isPublicProjectableHallRoom(state,artistId,session.id) && session.status==='ended').forEach(session=>chapters.push({
     id:`session-${session.id}`,title:session.title,year:Number(session.scheduledStartTime.slice(0,4)),kind:'Sự kiện',media:contextMedia(artistId,session),detail:'Buổi diễn đã khép lại. Mở ngữ cảnh để xem trạng thái phát lại.',momentIds:[],to:sessionContextUrl(artistId,session.id),demo:session.demo,
   }));
   const remaining=moments.filter(moment=>!assigned.has(moment.id));

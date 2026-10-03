@@ -71,14 +71,13 @@ describe('One fan, one connected journey — showcase', () => {
     expect(state.lastError).toBeUndefined();
   });
 
-  it('opens login from a gated Hall and resumes the SAME artist/room before chatting', () => {
+  it('opens login from a public Hall and resumes the SAME artist/room before chatting without membership', () => {
     const state = freshGuestState(createInitialState()); state.memberships = {};
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01']}><Routes><Route element={<FanShell/>}><Route path="/artist/:artistId/hall" element={<ArtistWorldView/>}/></Route></Routes></MemoryRouter></AppProvider>);
-    expect(screen.queryByRole('log')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Đăng nhập demo để tiếp tục' }));
+    expect(screen.getByRole('log')).toBeVisible();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Đăng nhập' }).at(-1)!);
     fireEvent.click(screen.getByRole('button', { name: /mô phỏng Google/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Tiếp tục từ đây' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Tham gia hội viên (Demo)' }));
     expect(screen.getByRole('log', { name: 'Tin nhắn trong Hall' })).toBeVisible();
     fireEvent.change(screen.getByRole('textbox', { name: 'Gửi lời nhắn trong Hall' }), { target: { value: 'Lời chào trong phòng đúng' } });
     fireEvent.click(screen.getByRole('button', { name: 'Gửi lời nhắn' }));
@@ -89,7 +88,7 @@ describe('One fan, one connected journey — showcase', () => {
     const state = freshGuestState(createInitialState()); state.orders = {}; state.capsules = {}; state.participations = {};
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/me?section=collection']}><CollectionBrowser/></MemoryRouter></AppProvider>);
     expect(screen.getByRole('heading', { name: 'Chưa có vật phẩm đã nhận.' })).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Ghé VieSHOP →' })).toHaveAttribute('href', '/shop');
+    expect(screen.getByRole('link', { name: 'Ghé VieCollect →' })).toHaveAttribute('href', '/shop');
     expect(screen.queryByRole('button', { name: 'Xem tất cả' })).toBeNull();
     cleanup();
     render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/me?section=collection&type=memory']}><CollectionBrowser/></MemoryRouter></AppProvider>);

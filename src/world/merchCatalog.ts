@@ -76,11 +76,12 @@ export function ownsDigitalProduct(state: AppState, product: Product) {
   return product.tenantId === state.activeTenantId && !!product.digitalItemId && Object.values(state.orders).some(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id && o.status === 'fulfilled' && state.products[o.productId]?.tenantId === state.activeTenantId && state.products[o.productId]?.digitalItemId === product.digitalItemId);
 }
 
-export function canEnterHall(state: AppState, worldId: string) {
+export function hasActiveMembership(state: AppState, worldId: string) {
   return isDemoSignedIn(state) && state.worlds[worldId]?.tenantId === state.activeTenantId && Object.values(state.memberships).some(m => m.tenantId === state.activeTenantId && m.worldId === worldId && m.fanId === state.fanProfile.id && m.status === 'active' && (!m.expiresAt || Date.parse(m.expiresAt) > Date.parse(state.demoTime)));
 }
 
-export const hasActiveMembership = canEnterHall;
+/** @deprecated Membership predicate only. Hall access is resolved per room in hallRooms. */
+export const canEnterHall = hasActiveMembership;
 
 /** Never render a revoked item simply because an old appearance was saved. */
 export function ownedDigitalLook(state: AppState) {

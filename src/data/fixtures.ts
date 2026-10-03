@@ -3,6 +3,7 @@
  */
 
 import { NEW_MERCH } from '../world/merchCatalog';
+import { ARTIST_A_QA_SESSION, ARTIST_A_QA_ANSWER } from './communityHall';
 import {
   CANONICAL_INITIAL_DEMO_TIME,
   EXPANDED_WORLDS,
@@ -187,6 +188,7 @@ export const CANONICAL_AVATARS: Record<string, AvatarAsset> = {
 };
 
 export const CANONICAL_SESSIONS: Record<string, Session> = {
+  [ARTIST_A_QA_SESSION.id]: ARTIST_A_QA_SESSION,
   'session-dropin-01': {
     id: 'session-dropin-01',
     tenantId: 'vieworld-demo',
@@ -453,6 +455,7 @@ export const CANONICAL_PRODUCTS: Record<string, Product> = {
 };
 
 export const INITIAL_QUESTIONS: Record<string, Question> = {
+  [ARTIST_A_QA_ANSWER.id]: ARTIST_A_QA_ANSWER,
   'question-01': {
     id: 'question-01',
     tenantId: 'vieworld-demo',
@@ -1019,7 +1022,7 @@ export const scenarioPresets = {
           worldId: 'artist-a',
           productId: 'product-pin-01',
           status: 'paid',
-          sourceRef: 'VieSHOP-DEMO-PAY',
+          sourceRef: 'VieCollect-DEMO-PAY',
           requestId: 'req-paid-fixture-01',
         },
       },

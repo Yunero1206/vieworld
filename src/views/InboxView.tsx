@@ -98,7 +98,7 @@ export const InboxView: React.FC = () => {
     if (route.includes('/support')) return 'Xem vụ việc hỗ trợ';
     if (route.includes('/benefits') || route.includes('panel=membership')) return 'Xem quyền lợi';
     if (route.includes('panel=capsules') || route.includes('/me')) return 'Xem kỷ niệm';
-    if (route.includes('/shop')) return 'Ghé VieSHOP';
+    if (route.includes('/shop')) return 'Ghé VieCollect';
     return 'Xem chi tiết';
   };
 
@@ -299,7 +299,7 @@ export const InboxView: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', backgroundColor: 'var(--surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
               <div>
                 <strong style={{ fontSize: 'var(--text-sm)', display: 'block', color: 'var(--ink)' }}>
-                  Cập nhật đơn hàng VieSHOP
+                  Cập nhật đơn hàng VieCollect
                 </strong>
                 <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
                   Thông báo xác nhận đơn hàng mô phỏng và bàn giao vật phẩm vào Bộ sưu tập.

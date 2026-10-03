@@ -20,7 +20,7 @@ describe('In-World Notification Board Feature Suite', () => {
     {
       id: 'notif-2',
       type: 'order',
-      categoryLabel: 'Đơn hàng VieSHOP',
+      categoryLabel: 'Đơn hàng VieCollect',
       categoryDotColor: '#D97706',
       title: 'Đơn hàng #VIE-2026 đã giao thành công',
       body: 'Gói phụ kiện độc quyền đã sẵn sàng trong My Space.',

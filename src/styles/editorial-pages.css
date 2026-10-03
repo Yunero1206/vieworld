@@ -1,4 +1,4 @@
-/* Editorial layer shared by Home, Explore, Moments, My Space and VieSHOP.
+/* Editorial layer shared by Home, Explore, Moments, My Space and VieCollect.
    Body UI stays Be Vietnam Pro; only true titles use Vietnamese-capable Lora. */
 .fan-shell .vw-home-editorial :is(h1, h2, h3),
 .fan-shell .explore-world-list :is(h1, h2),

@@ -1,7 +1,7 @@
 import type { AppAction, AppState } from '../domain/types';
 export const SHIPPING_STEPS=[
- {title:'Shop xác nhận & đóng gói',location:'Kho VieSHOP · TP.HCM (mẫu)',detail:'Đối soát món, kích cỡ và số lượng; chuẩn bị kiện hàng.'},
- {title:'Bàn giao đơn vị vận chuyển',location:'Điểm lấy hàng · Kho VieSHOP (mẫu)',detail:'Vie Delivery Demo đã nhận kiện từ shop; bắt đầu theo dõi vận đơn.'},
+ {title:'Shop xác nhận & đóng gói',location:'Kho VieCollect · TP.HCM (mẫu)',detail:'Đối soát món, kích cỡ và số lượng; chuẩn bị kiện hàng.'},
+ {title:'Bàn giao đơn vị vận chuyển',location:'Điểm lấy hàng · Kho VieCollect (mẫu)',detail:'Vie Delivery Demo đã nhận kiện từ shop; bắt đầu theo dõi vận đơn.'},
  {title:'Đến trung tâm phân loại',location:'Trung tâm phân loại · TP.HCM (mẫu)',detail:'Kiện được phân tuyến đến trạm giao gần người nhận.'},
  {title:'Đang giao đến bạn',location:'Trạm giao nội thành · TP.HCM (mẫu)',detail:'Kiện đã lên tuyến giao cuối. Đây không phải vị trí GPS thật.'},
  {title:'Giao hàng thành công',location:'Điểm nhận của fan (mẫu)',detail:'Hoàn tất bàn giao vật phẩm; quyền sở hữu được ghi nhận.'},
