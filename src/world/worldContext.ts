@@ -26,7 +26,7 @@ export interface WorldContext {
 
 /** Session status remains canonical; context is only its Artist Home presentation. */
 export function sessionWorldContext(session: Session, artistId: string): WorldContext {
-  const phase: WorldContextPhase = ['running', 'paused'].includes(session.status) ? 'active'
+  const phase: WorldContextPhase = ['running', 'open', 'paused'].includes(session.status) ? 'active'
     : ['ended', 'cancelled'].includes(session.status) ? 'ended' : 'upcoming';
   const type: WorldContextType = session.format === 'concert' ? 'event' : 'live';
   return {

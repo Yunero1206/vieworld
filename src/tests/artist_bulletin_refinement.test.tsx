@@ -63,7 +63,7 @@ describe('Artist tabs and bulletin refinement',()=>{
     const log=screen.getByRole('log',{name:'Tin nhắn trong Hall'});fireEvent.click(within(log).getAllByRole('button',{name:'Trả lời'})[0]);expect(screen.getByRole('button',{name:'Hủy trả lời'})).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button',{name:'Thêm biểu cảm'}));fireEvent.click(screen.getByRole('button',{name:'Thêm 💙'}));expect(screen.getByRole('textbox',{name:'Gửi lời nhắn trong Hall'})).toHaveValue('💙');
     fireEvent.click(screen.getByRole('button',{name:'Chia sẻ khoảnh khắc'}));expect(screen.getByText('Chọn tối đa 3 khoảnh khắc công khai.')).toBeInTheDocument();
-    expect(screen.getByText('Mỗi người một lựa chọn.')).toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Member Lounge/}));fireEvent.click(screen.getByText('Gửi lời cho Artist A'));expect(screen.getByText('Demo lưu riêng trên thiết bị; chưa gửi đến artist/team.')).toBeInTheDocument();
+    expect(screen.getByText('Bình chọn minh họa · Mỗi người một lựa chọn.')).toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Member Lounge/}));fireEvent.click(screen.getByText('Gửi lời cho Artist A'));expect(screen.getByText('Demo lưu riêng trên thiết bị; chưa gửi đến artist/team.')).toBeInTheDocument();
   });
   it('returns from Moment Focus to the open Archive chapter and keeps secondary filters usable',()=>{
     const {container}=render(<AppProvider><MemoryRouter initialEntries={['/artist/artist-a/archive']}><Routes>

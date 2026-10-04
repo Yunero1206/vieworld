@@ -3,6 +3,7 @@ import { historyCards, hasHistoryBadge } from './history';
 import { readDisplaySurfaces } from './displaySurfaces';
 import { merchImageUrl } from './merchImages';
 import { productRoomMetadata, type RoomItemMetadata } from './roomItemKinds';
+import { isDemoSignedIn } from './account';
 
 export type DisplaySlot = 'shirt' | 'ticket' | 'disc' | 'lightstick' | 'achievement';
 
@@ -52,6 +53,7 @@ export function productRoomPreviewItem(p: Product): DisplayItem {
  * Includes all fulfilled products (compatible and non-compatible), capsules, history cards and badges.
  */
 export function ownedCollection(s: AppState): DisplayItem[] {
+  if (!isDemoSignedIn(s)) return [];
   const products: DisplayItem[] = Object.values(s.products).flatMap(p => {
     if (p.tenantId !== s.activeTenantId) return [];
     const receipts = Object.values(s.orders).filter(
@@ -70,7 +72,7 @@ export function ownedCollection(s: AppState): DisplayItem[] {
       roomAsset: p.roomAsset,
       familyId: p.familyId,
       digitalItemId: p.digitalItemId,
-      footprint: p.roomFootprint || (/(?:cap)-/.test(p.image || '') ? 1 : undefined),
+      footprint: p.roomFootprint,
       worldId: p.worldId,
       collectedAt: latestReceipt?.fulfilledAt,
       isDisplayCompatible: Boolean(slot),

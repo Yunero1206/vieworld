@@ -59,7 +59,7 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
   });
 
   describe('2. FanChatPanel Dynamic Rendering', () => {
-    it('renders Artist A specific loyalty days, viewer count, and fandom milestones', () => {
+    it('renders editorial milestones without invented tenure or viewer count', () => {
       render(
         <FanChatPanel
           sessionId="session-dropin-01"
@@ -70,21 +70,21 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
       );
 
       // Viewer count
-      expect(screen.getByText('2.1K')).toBeInTheDocument();
+      expect(screen.queryByText('2.1K')).toBeNull();
 
       // Loyalty badge
-      const loyaltyBadge = screen.getByRole('button', { name: /Đồng hành cùng Artist A: 128 ngày/i });
+      const loyaltyBadge = screen.getByRole('button', { name: /Hành trình minh họa của Artist A/i });
       expect(loyaltyBadge).toBeInTheDocument();
-      expect(screen.getByText('128 ngày')).toBeInTheDocument();
+      expect(screen.queryByText('128 ngày')).toBeNull();
 
       // Open loyalty milestone popup
       fireEvent.click(loyaltyBadge);
-      expect(screen.getByText(/Bạn đã đồng hành cùng/i)).toHaveTextContent('128 ngày');
+      expect(screen.getByText(/không ghi nhận thời gian đồng hành hay tham dự của bạn/)).toBeVisible();
       expect(screen.getByText(/Cột mốc Fandom \(V-Stars\)/i)).toBeInTheDocument();
       expect(screen.getByText(/Lưu giữ 2 capsule khoảnh khắc/i)).toBeInTheDocument();
     });
 
-    it('renders MIRA specific loyalty days (210 ngày), viewer count (4.2K), and Moonies milestones', () => {
+    it('renders MIRA sample milestones without implying fan tenure', () => {
       render(
         <FanChatPanel
           sessionId="session-mira-dropin"
@@ -95,12 +95,12 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
       );
 
       // Viewer count for Mira
-      expect(screen.getByText('4.2K')).toBeInTheDocument();
+      expect(screen.queryByText('4.2K')).toBeNull();
 
       // Loyalty badge for Mira
-      const loyaltyBadge = screen.getByRole('button', { name: /Đồng hành cùng MIRA: 210 ngày/i });
+      const loyaltyBadge = screen.getByRole('button', { name: /Hành trình minh họa của MIRA/i });
       expect(loyaltyBadge).toBeInTheDocument();
-      expect(screen.getByText('210 ngày')).toBeInTheDocument();
+      expect(screen.queryByText('210 ngày')).toBeNull();
 
       // Open loyalty popup
       fireEvent.click(loyaltyBadge);
@@ -108,7 +108,7 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
       expect(screen.getByText(/Hội viên Moonies Hoàng Kim/i)).toBeInTheDocument();
     });
 
-    it('renders KAI specific loyalty days (85 ngày), viewer count (2.7K), and Pulse Crew milestones', () => {
+    it('renders KAI sample milestones without implying fan tenure', () => {
       render(
         <FanChatPanel
           sessionId="session-kai-pulse"
@@ -119,12 +119,12 @@ describe('Synchronized Fan Chat Feature Across All Artists & Moments', () => {
       );
 
       // Viewer count for Kai
-      expect(screen.getByText('2.7K')).toBeInTheDocument();
+      expect(screen.queryByText('2.7K')).toBeNull();
 
       // Loyalty badge for Kai
-      const loyaltyBadge = screen.getByRole('button', { name: /Đồng hành cùng KAI: 85 ngày/i });
+      const loyaltyBadge = screen.getByRole('button', { name: /Hành trình minh họa của KAI/i });
       expect(loyaltyBadge).toBeInTheDocument();
-      expect(screen.getByText('85 ngày')).toBeInTheDocument();
+      expect(screen.queryByText('85 ngày')).toBeNull();
 
       // Open loyalty popup
       fireEvent.click(loyaltyBadge);

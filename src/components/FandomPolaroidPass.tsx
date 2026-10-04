@@ -6,7 +6,6 @@ import { VieWorldLogo } from './VieWorldLogo';
 import { merchImageUrl } from '../world/merchImages';
 import type { DisplayItem } from '../world/display';
 import { useDialogA11y } from '../hooks/useDialogA11y';
-import { useApp } from '../context/AppContext';
 
 interface FandomPolaroidPassProps {
   isOpen: boolean;
@@ -33,7 +32,6 @@ export function FandomPolaroidPass({
   mood,
   badge: _badge,
   fandomName = 'VieWorld',
-  companionDays = 128,
   items,
   fanId,
 }: FandomPolaroidPassProps) {
@@ -41,7 +39,6 @@ export function FandomPolaroidPass({
   const modalRef = useRef<HTMLDivElement>(null);
   useDialogA11y(isOpen, onClose, modalRef);
 
-  const { state } = useApp();
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -116,11 +113,11 @@ export function FandomPolaroidPass({
 
       ctx.fillStyle = '#5B46E8';
       ctx.font = 'bold 16px "Be Vietnam Pro", sans-serif';
-      ctx.fillText(`Thành viên đồng hành: ${companionDays} ngày`, 60, 250);
+      ctx.fillText('Thẻ giới thiệu fan · Bản minh họa', 60, 250);
 
       ctx.fillStyle = '#374151';
       ctx.font = '14px "Be Vietnam Pro", sans-serif';
-      ctx.fillText(`ID định danh: @${fanId} · Quyền truy cập: Hall & Moments`, 60, 285);
+      ctx.fillText(`@${fanId} · Không cấp quyền truy cập hay hội viên`, 60, 285);
 
       // Footer stamp
       ctx.fillStyle = '#9CA3AF';
@@ -140,10 +137,6 @@ export function FandomPolaroidPass({
   };
 
   const displayedPreviews = items.filter(i => i.image).slice(0, 3);
-  const isOwner = fanId === state.fanProfile.id;
-  const userBenefits = Object.values(state.benefits || {}).filter(
-    b => b.fanId === fanId && ['eligible', 'claimed'].includes(b.status)
-  );
 
   return (
     <div
@@ -193,13 +186,11 @@ export function FandomPolaroidPass({
               <div className="v7-polaroid-claims-grid">
                 <span className="v7-polaroid-claim-pill">{fandomName} Pass</span>
                 <span className="v7-polaroid-claim-pill">
-                  {isOwner ? 'Thành viên đang hoạt động' : 'Thành viên kết nối'}
+                  Bản giới thiệu fan
                 </span>
-                <span className="v7-polaroid-claim-pill">Hall Access ✓</span>
+                <span className="v7-polaroid-claim-pill">Không phải thẻ hội viên</span>
                 <span className="v7-polaroid-claim-pill">
-                  {userBenefits.length > 0
-                    ? `${userBenefits.length} đặc quyền khả dụng`
-                    : 'Thẻ giao lưu cộng đồng'}
+                  Vật phẩm do chủ phòng chọn
                 </span>
               </div>
             </div>
@@ -234,7 +225,7 @@ export function FandomPolaroidPass({
               <QrCode size={28} />
               <span>Ghé thăm: /members/{fanId}</span>
             </div>
-            <span className="v7-polaroid-stamp">COMMUNITY ACCESS · 2026</span>
+            <span className="v7-polaroid-stamp">DEMO · 2026</span>
           </div>
         </div>
 
@@ -289,7 +280,7 @@ export function FandomPolaroidPass({
           </div>
 
           <small className="v7-polaroid-hint">
-            Fandom Pass là thẻ định danh truy cập quyền lợi và kết nối cộng đồng tại VieWorld.
+            Thẻ giới thiệu góc riêng, không xác nhận số ngày đồng hành, tham dự hay quyền hội viên. Liên kết chỉ hoạt động với dữ liệu demo có trên trình duyệt này.
           </small>
         </div>
       </div>

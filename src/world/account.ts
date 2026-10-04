@@ -21,7 +21,7 @@ export const EMPTY_CONTACT: PrivateContact = {
 };
 
 function belongsToFan(state: AppState): boolean {
-  return state.demoAccount?.fanId === state.fanProfile.id && state.demoAccount.tenantId === state.activeTenantId;
+  return state.fanProfile.tenantId === state.activeTenantId && state.demoAccount?.fanId === state.fanProfile.id && state.demoAccount.tenantId === state.activeTenantId;
 }
 
 // A populated fan profile is not a login session. Missing/old sessions remain guests.

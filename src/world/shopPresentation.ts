@@ -1,5 +1,5 @@
 import type { Product } from '../domain/types';
-import { money } from './commerce';
+import { acquisitionPreviewOnly, money } from './commerce';
 import { productDisplaySlot } from './display';
 import { hasAvatarFit } from './avatarFit';
 
@@ -38,7 +38,7 @@ export function previewEdition(product: Product, catalog: Product[]): Product | 
 }
 
 export function productBadge(product: Product): string | undefined {
-  if (product.previewOnly) return 'Concept';
+  if (acquisitionPreviewOnly(product)) return 'Concept';
   if (!product.isAvailable || product.stockCount <= 0) return 'Hết hàng';
   if (product.releaseType === 'pre_order') return 'Đặt trước';
   if (product.category === 'membership') return 'Hội viên';

@@ -1,4 +1,8 @@
-import type { AppAction, AppState, Order } from '../domain/types';
+import type { AppAction, AppState, Order, Product } from '../domain/types';
+
+// Hybrid entitlements are not independent of shipment in the legacy receipt model.
+// Keep old receipts, but do not create new hybrid acquisitions until that exists.
+export const acquisitionPreviewOnly = (product: Product) => Boolean(product.previewOnly || product.delivery === 'bundle');
 
 export interface CartLine { key: string; productId: string; optionLabel?: string; quantity: number }
 export const cartKey = (id:string, option='') => `${id}::${option}`;
@@ -14,12 +18,12 @@ export function cartProblem(s:AppState, lines:CartLine[]=s.cart || []):string|un
   const quantities:Record<string,number>={};
   for(const l of lines){
     const p=s.products[l.productId];
-    if(!p || p.tenantId!==s.activeTenantId || !p.isAvailable || p.previewOnly)return 'Một món trong giỏ không còn mở bán. Vui lòng bỏ món đó.';
+    if(!p || p.tenantId!==s.activeTenantId || !p.isAvailable || acquisitionPreviewOnly(p))return 'Một món trong giỏ không còn mở bán. Vui lòng bỏ món đó.';
     if(!Number.isInteger(l.quantity)||l.quantity<1||l.quantity>10)return 'Mỗi phiên bản được chọn từ 1 đến 10 món.';
     if(p.sizes && !p.sizes.includes(l.optionLabel || ''))return `Chọn lại kích cỡ cho ${p.title}.`;
     if(p.delivery==='digital' && l.quantity!==1)return 'Vật phẩm digital chỉ cần một bản cho tài khoản của bạn.';
     const benefit=p.requiredBenefitId?s.benefits[p.requiredBenefitId]:undefined;
-    if(p.requiredBenefitId && (!benefit || benefit.fanId!==s.fanProfile.id || benefit.worldId!==p.worldId || !['eligible','claimed'].includes(benefit.status)))return `${p.title} cần quyền lợi hội viên còn hợp lệ.`;
+    if(p.requiredBenefitId && (!benefit || benefit.tenantId!==s.activeTenantId || benefit.fanId!==s.fanProfile.id || benefit.worldId!==p.worldId || !['eligible','claimed'].includes(benefit.status)))return `${p.title} cần quyền lợi hội viên còn hợp lệ.`;
     quantities[p.id]=(quantities[p.id] || 0)+l.quantity;
     if(quantities[p.id]>p.stockCount)return `${p.title} không đủ tồn kho cho số lượng đã chọn.`;
   }
@@ -32,7 +36,7 @@ export function checkProductEligibility(
   addQuantity: number = 1
 ): { eligible: boolean; reason?: string } {
   if (!p) return { eligible: false, reason: 'Không tìm thấy sản phẩm.' };
-  if (p.tenantId !== s.activeTenantId || !p.isAvailable || p.previewOnly) {
+  if (p.tenantId !== s.activeTenantId || !p.isAvailable || acquisitionPreviewOnly(p)) {
     return { eligible: false, reason: 'Sản phẩm hiện không mở bán.' };
   }
   if (p.sizes && (!optionLabel || !p.sizes.includes(optionLabel))) {
@@ -40,7 +44,7 @@ export function checkProductEligibility(
   }
   if (p.requiredBenefitId) {
     const benefit = s.benefits[p.requiredBenefitId];
-    if (!benefit || benefit.fanId !== s.fanProfile.id || benefit.worldId !== p.worldId || !['eligible', 'claimed'].includes(benefit.status)) {
+    if (!benefit || benefit.tenantId !== s.activeTenantId || benefit.fanId !== s.fanProfile.id || benefit.worldId !== p.worldId || !['eligible', 'claimed'].includes(benefit.status)) {
       return { eligible: false, reason: `${p.title} cần quyền lợi hội viên còn hợp lệ.` };
     }
   }

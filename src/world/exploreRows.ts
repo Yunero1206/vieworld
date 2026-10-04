@@ -121,7 +121,7 @@ export function getExploreMomentById(worldId: string, id: string): ExploreMoment
       sourceContext: worldId,
       targetUrl: `/artist/${worldId}/moment/${id}`,
       freshness: entry.freshness,
-      isDemo: worldId.startsWith('artist-') && !['artist-a', 'artist-mira', 'artist-kai'].includes(worldId),
+      isDemo: true,
     };
   }
 
@@ -131,7 +131,7 @@ export function getExploreMomentById(worldId: string, id: string): ExploreMoment
       sourceContext: worldId === 'artist-a' ? 'neon-sessions' : worldId,
       targetUrl: `/artist/${worldId}/moment/${id}`,
       freshness: entry.freshness,
-      isDemo: worldId.startsWith('artist-') && !['artist-a', 'artist-mira', 'artist-kai'].includes(worldId),
+      isDemo: true,
     };
   }
 

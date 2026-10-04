@@ -8,6 +8,9 @@ export interface PresencePanelProps {
 
 export const PresencePanel: React.FC<PresencePanelProps> = ({ session }) => {
   const getPresenceDetails = () => {
+    if (session.status !== 'running' || session.segmentMode !== 'live') return {
+      label: 'Nghệ sĩ không có mặt trong phân đoạn này', color: 'var(--muted)', icon: <AlertCircle size={14} />,
+    };
     switch (session.artistPresence) {
       case 'present':
         return {
@@ -160,7 +163,7 @@ export const PresencePanel: React.FC<PresencePanelProps> = ({ session }) => {
         }}
       >
         <span aria-hidden="true">🛡️</span>
-        <span>Hiện diện thật · AI không giả lập nghệ sĩ</span>
+        <span>Trạng thái minh họa · Không có nghệ sĩ thật</span>
       </div>
     </div>
   );

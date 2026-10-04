@@ -12,6 +12,12 @@ import { loadState, saveState } from '../services/storageAdapter';
 
 const initial = () => createInitialState('vieworld-demo');
 function fulfilled(productId:string) {
+  if (productId === 'product-star-shirt-bundle') {
+    // Historical coupled bundle receipts are retained, not newly purchasable.
+    const state = initial();
+    state.orders['legacy-bundle'] = { id: 'legacy-bundle', tenantId: state.activeTenantId, fanId: state.fanProfile.id, worldId: 'artist-a', version: 1, updatedAt: state.demoTime, productId, status: 'fulfilled', sourceRef: 'legacy-demo', requestId: 'legacy-bundle' };
+    return state;
+  }
   let state=appReducer(initial(),{type:'CREATE_ORDER',productId,requestId:`test-${productId}`,optionLabel:'M'});
   const order=Object.values(state.orders).find(o=>o.productId===productId)!;
   state=appReducer(state,{type:'SIMULATE_PAYMENT',orderId:order.id,requestId:order.requestId});

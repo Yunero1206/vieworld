@@ -11,6 +11,7 @@ import { FandomPolaroidPass } from '../components/FandomPolaroidPass';
 import { AvatarRenderer } from '../components/AvatarRenderer';
 import { canAccessRoom, loadPrivacySettings } from '../world/privacy';
 import { isDemoSignedIn } from '../world/account';
+import { PersonalSpaceGate } from '../components/account/PersonalSpaceGate';
 
 export function MemberSpaceView() {
   const { state } = useApp();
@@ -19,12 +20,13 @@ export function MemberSpaceView() {
   const [isVinylPlaying, setIsVinylPlaying] = useState(false);
   const [isLightstickActive, setIsLightstickActive] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [heartsCount, setHeartsCount] = useState(38);
+  const [heartsCount, setHeartsCount] = useState(0);
   const [isPassOpen, setIsPassOpen] = useState(false);
 
   const own = fanId === state.fanProfile.id;
   const privacySettings = own ? loadPrivacySettings(state.activeTenantId, state.fanProfile.id) : undefined;
-  const fan = own ? currentPublicFan(state) : DEMO_FANS.find(f => f.id === fanId);
+  const fan = own ? currentPublicFan(state) : state.activeTenantId === 'vieworld-demo' ? DEMO_FANS.find(f => f.id === fanId) : undefined;
+  if (own && !isDemoSignedIn(state)) return <PersonalSpaceGate><></></PersonalSpaceGate>;
 
   // This route previews the guest's view; the owner still edits the room at /me.
   if (own && privacySettings && !canAccessRoom(privacySettings, false, isDemoSignedIn(state))) {
@@ -64,7 +66,7 @@ export function MemberSpaceView() {
         <div className="v7-space-topbar">
           <Link className="v7-space-back-btn" to={own ? '/me' : '/artist/artist-a/hall'}>
             <ArrowLeft size={14} />
-            <span>{own ? 'Quay lại phòng của tôi' : 'Về Hall hội viên'}</span>
+            <span>{own ? 'Quay lại phòng của tôi' : 'Về Hall'}</span>
           </Link>
 
           <div className="v7-space-utilities">

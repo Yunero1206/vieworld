@@ -67,7 +67,10 @@ describe('One fan, one connected journey — showcase', () => {
     saveState(state); state = loadState().state;
     expect(readDisplaySurfaces(state.fanProfile).shirt.itemIds).toEqual([order.productId]); expect(homeDestination(state)?.to).toBe(destination);
     step({ type: 'DEMO_SIGN_OUT' }); expect(canEnterHall(state, 'artist-a')).toBe(false);
-    saveState(state); expect(isDemoSignedIn(loadState().state)).toBe(false); expect(ownedCollection(loadState().state).some(item => item.id === order.productId)).toBe(true);
+    saveState(state); expect(isDemoSignedIn(loadState().state)).toBe(false); expect(ownedCollection(loadState().state)).toEqual([]);
+    expect(loadState().state.orders[order.id]).toEqual(state.orders[order.id]);
+    step({ type: 'DEMO_SIGN_IN', provider: 'google', mode: 'login' });
+    expect(ownedCollection(state).some(item => item.id === order.productId)).toBe(true);
     expect(state.lastError).toBeUndefined();
   });
 
@@ -107,6 +110,8 @@ describe('One fan, one connected journey — showcase', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Kiểm tra đơn →' })); fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Chốt đơn' }));
     fireEvent.click(screen.getByRole('button', { name: /^Thanh toán thử 45/ }));
+    expect(screen.getByRole('heading', { name: /Chờ nhận bản số/ })).toBeVisible();
+    expect(screen.queryByText(/Chờ giao/)).toBeNull();
     expect(ownedCollection(loadState().state)).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: 'product-star-shirt-digital' })]));
     fireEvent.click(screen.getByRole('button', { name: 'Nhận bản số' }));
     expect(screen.getByText('Đã thêm vào Bộ sưu tập của bạn.')).toBeVisible();

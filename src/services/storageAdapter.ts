@@ -80,7 +80,7 @@ export function buildStorageKey(tenantId: TenantId, fanId: string = 'fan-linh'):
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 /** Validate the persisted envelope before selectors access its required collections. Optional additions remain optional. */
 export function isPersistedState(value: unknown, tenantId: TenantId, fanId: string): value is AppState {
-  if (!isRecord(value) || value.activeTenantId !== tenantId || !isRecord(value.fanProfile) || value.fanProfile.id !== fanId || typeof value.demoTime !== 'string' || !Number.isFinite(Date.parse(value.demoTime))) return false;
+  if (!isRecord(value) || value.activeTenantId !== tenantId || !isRecord(value.fanProfile) || value.fanProfile.id !== fanId || value.fanProfile.tenantId !== tenantId || typeof value.demoTime !== 'string' || !Number.isFinite(Date.parse(value.demoTime))) return false;
   const records = ['worlds', 'avatarAssets', 'sessions', 'memberships', 'benefits', 'participations', 'orders', 'supportCases', 'products', 'questions', 'polls', 'capsules', 'notifications'];
   const lists = ['followedWorldIds', 'rsvpdSessionIds', 'inLobbySessionIds'];
   return records.every(key => isRecord(value[key])) && lists.every(key => Array.isArray(value[key]));

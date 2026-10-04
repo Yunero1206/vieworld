@@ -19,6 +19,7 @@ import { matchesVietnameseQuery } from '../utils/textSearch';
 import { SearchCombobox } from '../components/SearchCombobox';
 import { getTenantConfig } from '../domain/tenantConfig';
 import { availableShopCategories, getPreviewCapabilities, previewEdition, productBadge, productPrice, shopCategory, SHOP_CATEGORY_LABELS } from '../world/shopPresentation';
+import { acquisitionPreviewOnly } from '../world/commerce';
 
 
 interface ProductFamily {
@@ -170,7 +171,7 @@ export function FanShopView() {
     const families: ProductFamily[] = [];
     for (const [key, vars] of map.entries()) {
       const primary = vars.find(v => v.delivery === 'physical') || vars[0];
-      const isPreview = vars.every(v => v.previewOnly);
+      const isPreview = vars.every(acquisitionPreviewOnly);
 
       families.push({
         key,
@@ -216,7 +217,7 @@ export function FanShopView() {
   const selectedOwned = signedIn && !!selected && selected.delivery === 'digital' && ownsDigitalProduct(state,selected);
 
   function buy() {
-    if (!selected || selectedOwned || selected.category === 'membership' || locked || unavailable || selected.previewOnly || (selected.sizes && !size)) return;
+    if (!selected || selectedOwned || selected.category === 'membership' || locked || unavailable || acquisitionPreviewOnly(selected) || (selected.sizes && !size)) return;
     if (!signedIn) { window.dispatchEvent(new Event('vieworld-open-auth')); return; }
     dispatch({ type: 'ADD_TO_CART', productId: selected.id, optionLabel: size || undefined });
     setAdded(true);
@@ -353,7 +354,7 @@ export function FanShopView() {
                     <div className="fw-product-art">
                       <MerchArt product={repProduct} />
                       {badge && <span className="fw-product-delivery-pill">{badge}</span>}
-                      {(preview.avatar || preview.room) && <span className="vw-shop-capability-chip">{preview.avatar ? 'Dùng cho avatar' : 'Trưng trong phòng'}</span>}
+                      {(preview.avatar || preview.room) && <span className="vw-shop-capability-chip">{preview.avatar ? (repProduct.delivery === 'digital' ? 'Dùng cho avatar' : 'Có bản avatar riêng') : 'Trưng trong phòng'}</span>}
                     </div>
                     <small className="fw-product-subline">{fam.artistName}</small>
                     <h2>{productDisplayTitle(delivery === 'all' ? fam.title : repProduct.title)}</h2>
@@ -402,7 +403,7 @@ export function FanShopView() {
       </div>
 
       <footer className="fw-shop-footnote">
-        Đây là bản trải nghiệm. Hình ảnh minh họa ý tưởng; VieCollect chưa thu tiền hay giao hàng thật.
+        VieCollect mô phỏng chọn, nhận và sưu tập vật phẩm vật lý hoặc số. Giá, tồn kho và giao dịch là dữ liệu minh họa; không thu tiền hay giao hàng thật. Lưu hoặc thêm giỏ chưa cấp sở hữu.
       </footer>
 
       {/* Filter Drawer Modal */}
@@ -592,7 +593,7 @@ export function FanShopView() {
               <p className="fw-eyebrow">{state.worlds[selected.worldId]?.name}{selected.releaseType === 'pre_order' ? ' · Đặt trước' : ''}</p>
               <p className="fw-product-edition">{DELIVERY_LABELS[selected.delivery || 'physical']} <span>{DELIVERY_SUMMARIES[selected.delivery || 'physical']}</span></p>
 
-              <h3 className="fw-product-price">{selected.previewOnly ? 'Ý tưởng · Chưa mở bán' : <>{productPrice(selected).compareAt && <del className="vw-shop-old-price">{productPrice(selected).compareAt}</del>}{productPrice(selected).current}</>}</h3>
+              <h3 className="fw-product-price">{acquisitionPreviewOnly(selected) ? 'Ý tưởng · Chưa mở bán' : <>{productPrice(selected).compareAt && <del className="vw-shop-old-price">{productPrice(selected).compareAt}</del>}{productPrice(selected).current}</>}</h3>
 
               {variants.length > 1 && (
                 <section className="fw-product-detail-section">
@@ -605,7 +606,7 @@ export function FanShopView() {
                       onClick={() => openProduct(p.id)}
                     >
                       <strong>{DELIVERY_LABELS[p.delivery || 'physical']}</strong>
-                      <small>{productPrice(p).current}</small>
+                      <small>{acquisitionPreviewOnly(p) ? 'Concept · Xem trước' : productPrice(p).current}</small>
                     </button>
                   ))}
                 </div>
@@ -621,7 +622,7 @@ export function FanShopView() {
                   <p><Monitor size={16} /><span>Vào My Space sau khi đơn được xác nhận. Không giao hàng.</span></p>
                 )}
                 {selected.delivery === 'bundle' && (
-                  <p><Package size={16} /><span>Bản vật lý theo đơn. Bản số vào My Space sau khi xác nhận.</span></p>
+                  <p><Package size={16} /><span>Concept kết hợp vật lý và số. Demo chưa tách quyền bản số khỏi giao hàng, nên chưa tạo đơn mới cho phiên bản này.</span></p>
                 )}
               </div>
 
@@ -643,7 +644,7 @@ export function FanShopView() {
 
               {tryProduct && (tryProduct.avatar || tryProduct.room) && <button type="button" className="fw-text-button vw-shop-detail-preview" onClick={() => { setTrying(selected); setPreviewTab(tryProduct.avatar ? 'avatar' : 'room'); setFittingDrawerOpen(true); }}>{previewLabel(selected,tryProduct)} <ArrowRight size={16}/></button>}
 
-              {!selected.previewOnly && unavailable && <p>Món này hiện đã hết hàng.</p>}
+              {!acquisitionPreviewOnly(selected) && unavailable && <p>Món này hiện đã hết hàng.</p>}
 
               {locked && (
                 <p className="fw-locked">
@@ -651,7 +652,7 @@ export function FanShopView() {
                 </p>
               )}
 
-              {selected.category === 'membership' ? <Link className="fw-button fw-buy" to={'/memberships?artist='+selected.worldId}>{hasActiveMembership(state,selected.worldId) ? 'Xem hội viên của bạn' : 'Tìm hiểu hội viên'}</Link> : selectedOwned ? <p className="vw-shop-owned-note"><Check size={17}/>Bạn đã có phiên bản này. <Link to="/me?section=collection">Mở bộ sưu tập</Link></p> : selected.previewOnly ? <p className="vw-shop-concept-note">Đây là ý tưởng để xem trước, chưa mở bán.</p> : (
+              {selected.category === 'membership' ? <Link className="fw-button fw-buy" to={'/memberships?artist='+selected.worldId}>{hasActiveMembership(state,selected.worldId) ? 'Xem hội viên của bạn' : 'Tìm hiểu hội viên'}</Link> : selectedOwned ? <p className="vw-shop-owned-note"><Check size={17}/>Bạn đã có phiên bản này. <Link to="/me?section=collection">Mở bộ sưu tập</Link></p> : acquisitionPreviewOnly(selected) ? <p className="vw-shop-concept-note">Đây là ý tưởng để xem trước, chưa mở bán.</p> : (
                 <button
                   className="fw-button fw-buy"
                   onClick={buy}

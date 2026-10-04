@@ -11,7 +11,7 @@ import { getHallRoomPolicy, isMemberQASession, isArtistHallRoom, isPublicProject
 import { hasActiveMembership, ownsDigitalProduct } from '../world/merchCatalog';
 import { artistForWorld } from '../world/worldContext';
 import { validRoomDesign } from '../world/places';
-import { commerceReducer } from '../world/commerce';
+import { acquisitionPreviewOnly, commerceReducer } from '../world/commerce';
 import { shippingReducer } from '../world/shipping';
 import { historyReducer } from '../world/history';
 import { validHomeDestination } from '../world/homeDestination';
@@ -26,6 +26,7 @@ const SIGNED_IN_ACTIONS = new Set<AppAction['type']>([
   'CREATE_ORDER', 'SIMULATE_PAYMENT', 'SIMULATE_FULFILMENT', 'CLAIM_BENEFIT', 'OPEN_SUPPORT_CASE',
   'TOGGLE_FOLLOW', 'TOGGLE_SAVED_PRODUCT', 'TOGGLE_RSVP', 'ENTER_LOBBY', 'LEAVE_LOBBY',
   'JOIN_LIVE_SESSION', 'WATCH_REPLAY', 'SUBMIT_QUESTION', 'VOTE_POLL',
+  'IMPORT_DEMO_CARDS', 'RETURN_HISTORY_CARDS', 'ADVANCE_SHIPMENT',
 ]);
 const JOURNEY_ACTIONS = new Set<AppAction['type']>(['REMEMBER_FAN_DESTINATION', 'VISIT_FAN_WORLD', 'READ_ARTIST_NOTE']);
 
@@ -1019,9 +1020,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'CREATE_ORDER': {
       if(Object.values(state.orders).some(o=>o.requestId===action.requestId && o.fanId===state.fanProfile.id))return state;
       const product = state.products[action.productId];
-      if (product?.previewOnly) return { ...state, lastError: { code: 'PREVIEW_ONLY', message: 'Mẫu này chưa mở bán. Xem luồng hội viên hoặc lịch sự kiện riêng.' } };
+      if (product && acquisitionPreviewOnly(product)) return { ...state, lastError: { code: 'PREVIEW_ONLY', message: 'Phiên bản concept chỉ để xem trước, chưa tạo đơn mới.' } };
       if (product?.sizes && !product.sizes.includes(action.optionLabel || '')) return { ...state, lastError: { code: 'SIZE_REQUIRED', message: 'Chọn đúng kích cỡ trước khi tạo đơn.' } };
-      if (!product || !product.isAvailable || product.stockCount <= 0) {
+      if (!product || product.tenantId !== state.activeTenantId || !product.isAvailable || product.stockCount <= 0) {
         return {
           ...state,
           lastError: {
@@ -1033,7 +1034,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
       if (product.requiredBenefitId) {
         const benefit = state.benefits[product.requiredBenefitId];
-        if (!benefit || (benefit.status !== 'eligible' && benefit.status !== 'claimed')) {
+        if (!benefit || benefit.tenantId !== state.activeTenantId || benefit.fanId !== state.fanProfile.id || benefit.worldId !== product.worldId || (benefit.status !== 'eligible' && benefit.status !== 'claimed')) {
           return {
             ...state,
             lastError: {

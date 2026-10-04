@@ -8,6 +8,8 @@ import { isPublicProjectableHallRoom } from './hallRooms';
 export interface ArtistChapter { id:string; title:string; year:number; kind:'Sự kiện'|'Era'|'Capsule'|'Fan project'; media:ExploreMedia; detail:string; momentIds:string[]; to?:string; demo?:boolean; private?:boolean }
 /** Chapter references are a presentation projection; Moment objects stay canonical. */
 export function artistArchiveChapters(state:AppState,artistId:string,moments:ExploreMoment[],sessions:Session[]):ArtistChapter[] {
+  if (state.worlds[artistId]?.type !== 'artist' || state.worlds[artistId]?.tenantId !== state.activeTenantId) return [];
+  moments = moments.filter(moment => moment.worldId === artistId);
   const year=Number(state.demoTime.slice(0,4));
   const assigned=new Set<string>();
   const chapters:ArtistChapter[]=state.activeTenantId==='vieworld-demo' ? EXPANDED_ARCHIVE_CHAPTERS.filter(ch=>ch.worldId===artistId).map((ch,index)=>{

@@ -32,7 +32,7 @@ export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-mira-hoodie-bundle', familyId: 'mira-hoodie', worldId: 'artist-mira', title: 'Áo Hoodie MIRA Cloud Dream · Duo Set', priceVND: 550000, category: 'merch', delivery: 'bundle', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Đợt 1', image: 'mira-hoodie-physical', digitalImage: 'mira-hoodie-digital', digitalSlot: 'shirt', digitalItemId: 'mira-hoodie', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo hoodie ngoài đời thực', '1 trang phục avatar sau bàn giao mô phỏng'] },
 
   // === ARTIST MIRA: SET 2 (Crescent Lightstick & Vinyl Album) ===
-  { id: 'product-mira-lightstick-real', familyId: 'mira-lightstick', worldId: 'artist-mira', title: 'Lightstick MIRA Crescent Glow', priceVND: 750000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Official Lightstick', image: 'mira-lightstick-physical', digitalImage: 'mira-lightstick-digital', description: 'Gậy phát sáng cổ vũ chính thức của MIRA. Cầu pha lê trong suốt ôm trọn vầng trăng khuyết phát ánh sáng tím lavender dịu dàng.', includes: ['1 lightstick MIRA Crescent Glow chính hãng', 'Dây đeo cổ tay và hộp trưng bày'] },
+  { id: 'product-mira-lightstick-real', familyId: 'mira-lightstick', worldId: 'artist-mira', title: 'Lightstick MIRA Crescent Glow', priceVND: 750000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Thiết kế minh họa', image: 'mira-lightstick-physical', digitalImage: 'mira-lightstick-digital', description: 'Thiết kế lightstick minh họa cho MIRA. Cầu pha lê trong suốt ôm trọn vầng trăng khuyết phát ánh sáng tím lavender dịu dàng.', includes: ['1 lightstick MIRA Crescent Glow minh họa', 'Dây đeo cổ tay và hộp trưng bày'] },
   { id: 'product-mira-lightstick-digital', familyId: 'mira-lightstick', worldId: 'artist-mira', title: 'Lightstick MIRA Crescent Glow · Digital', priceVND: 59000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'mira-lightstick-digital', digitalImage: 'mira-lightstick-digital', digitalSlot: 'lightstick', digitalItemId: 'mira-lightstick', includes: ['1 lightstick phát sáng tím cho avatar', 'Cầm trên tay khi tham dự Live Stage'] },
   { id: 'product-mira-vinyl-real', familyId: 'mira-vinyl', worldId: 'artist-mira', title: 'Đĩa than Vinyl MIRA "Midnight Reverie"', priceVND: 890000, category: 'album', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến phát hành: Tháng 12/2026', batchLabel: 'Limited Vinyl', image: 'mira-vinyl-physical', description: 'Phiên bản đĩa than màu tím hoa cà cẩm thạch giới hạn của album đầu tay "Midnight Reverie". Bìa gatefold cao cấp kèm sách ảnh nghệ thuật.', includes: ['1 đĩa than vinyl màu tím 12-inch 180g', 'Bìa gatefold mỹ thuật kèm photobook'] },
 
@@ -42,8 +42,8 @@ export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-kai-bomber-bundle', familyId: 'kai-bomber', worldId: 'artist-kai', title: 'Áo khoác Bomber KAI Pulse Wave · Duo Set', priceVND: 710000, category: 'merch', delivery: 'bundle', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Duo Set', image: 'kai-bomber-physical', digitalImage: 'kai-bomber-digital', digitalSlot: 'shirt', digitalItemId: 'kai-bomber', sizes: ['M', 'L', 'XL', '2XL'], includes: ['1 áo khoác bomber ngoài đời', '1 trang phục avatar cyberpunk tương ứng'] },
 
   // === ARTIST KAI: SET 4 (Wave Lightstick & Cassette Tape Set) ===
-  { id: 'product-kai-lightstick-real', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker', priceVND: 720000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Official Lightstick', image: 'kai-lightstick-physical', digitalImage: 'kai-lightstick-digital', description: 'Gậy cổ vũ chính thức KAI Wave Shaker phong cách cyberpunk góc cạnh. Cụm đèn LED neon equalizer phát sáng nhấp nháy đồng bộ theo nhịp bass.', includes: ['1 lightstick KAI Wave Shaker đa chế độ đèn', 'Dây đeo tay dệt công nghệ cao'] },
-  { id: 'product-kai-lightstick-digital', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker · Digital', priceVND: 59000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'kai-lightstick-digital', digitalImage: 'kai-lightstick-digital', digitalSlot: 'lightstick', digitalItemId: 'kai-lightstick', includes: ['1 lightstick neon cyan cho avatar', 'Hiệu ứng ánh sáng rực rỡ tại concert'] },
+  { id: 'product-kai-lightstick-real', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker', priceVND: 720000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 11/2026', batchLabel: 'Thiết kế minh họa', image: 'kai-lightstick-physical', digitalImage: 'kai-lightstick-digital', description: 'Thiết kế lightstick minh họa KAI Wave Shaker phong cách cyberpunk góc cạnh. Cụm đèn LED neon equalizer phát sáng nhấp nháy đồng bộ theo nhịp bass.', includes: ['1 lightstick KAI Wave Shaker đa chế độ đèn', 'Dây đeo tay dệt công nghệ cao'] },
+  { id: 'product-kai-lightstick-digital', familyId: 'kai-lightstick', worldId: 'artist-kai', title: 'Lightstick KAI Wave Shaker · Digital', priceVND: 59000, category: 'merch', delivery: 'digital', releaseType: 'in_stock', estimatedShipping: 'Kích hoạt ngay vào My Space sau xác nhận', batchLabel: 'Digital', image: 'kai-lightstick-digital', digitalImage: 'kai-lightstick-digital', digitalSlot: 'lightstick', digitalItemId: 'kai-lightstick', includes: ['1 lightstick neon cyan cho avatar', 'Có fit cầm tay cho avatar; không cấp quyền concert'] },
   { id: 'product-kai-cassette-real', familyId: 'kai-cassette', worldId: 'artist-kai', title: 'Băng Cassette KAI "City Pulse Beats" Boxset', priceVND: 350000, category: 'album', delivery: 'physical', releaseType: 'in_stock', estimatedShipping: 'Sẵn hàng · Giao trong 3-5 ngày làm việc', batchLabel: 'Cassette Tape', image: 'kai-cassette-physical', description: 'Băng cassette vỏ nhựa trong suốt màu xanh neon cyan độc đáo chứa tuyển tập các bản synth-wave và future beats. Kèm hộp slipcase dập kim tuyến.', includes: ['1 băng cassette trong suốt màu cyan', 'Hộp đựng slipcase kèm bộ 5 sticker hologram KAI'] },
 ].map(p => [p.id, { ...base, kind: (p.delivery || 'physical') as ProductKind, ...p } as Product]));
 
@@ -61,19 +61,27 @@ export function withMerchCatalog(state: AppState): AppState {
     return saved?.previewCapabilities?.room===false&&saved.tenantId===state.activeTenantId
       ?[[id,{...saved,roomSurface:source.roomSurface,previewCapabilities:{...saved.previewCapabilities,room:true}}]]:[];
   }));
-  if (!missing.length&&!Object.keys(roomUpdates).length) return state;
+  const truthUpdates=Object.fromEntries(['product-mira-lightstick-real','product-kai-lightstick-real','product-kai-lightstick-digital'].flatMap(id=>{
+    const saved=state.products[id], source=allMerch[id];
+    if(!saved || saved.tenantId!==state.activeTenantId)return [];
+    const copy={description:source.description,includes:source.includes,batchLabel:source.batchLabel};
+    return JSON.stringify({description:saved.description,includes:saved.includes,batchLabel:saved.batchLabel})===JSON.stringify(copy)
+      ?[]:[[id,{...saved,...copy}]];
+  }));
+  if (!missing.length&&!Object.keys(roomUpdates).length&&!Object.keys(truthUpdates).length) return state;
   return {
     ...state,
     products: {
       ...state.products,
       ...Object.fromEntries(missing.map(p => [p.id, { ...p }])),
       ...roomUpdates,
+      ...truthUpdates,
     },
   };
 }
 
 export function ownsDigitalProduct(state: AppState, product: Product) {
-  return product.tenantId === state.activeTenantId && !!product.digitalItemId && Object.values(state.orders).some(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id && o.status === 'fulfilled' && state.products[o.productId]?.tenantId === state.activeTenantId && state.products[o.productId]?.digitalItemId === product.digitalItemId);
+  return isDemoSignedIn(state) && product.tenantId === state.activeTenantId && !!product.digitalItemId && Object.values(state.orders).some(o => o.tenantId === state.activeTenantId && o.fanId === state.fanProfile.id && o.status === 'fulfilled' && state.products[o.productId]?.tenantId === state.activeTenantId && state.products[o.productId]?.digitalItemId === product.digitalItemId);
 }
 
 export function hasActiveMembership(state: AppState, worldId: string) {

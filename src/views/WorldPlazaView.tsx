@@ -36,7 +36,7 @@ export function WorldPlazaView() {
     <div className="presence-home-community">
       <div className="presence-home-echo-host"><AmbientHallEcho voices={home.voices}/></div>
       <img className="presence-home-bench" src="/images/presence-fans-bench.webp" width="1440" height="480" alt="" aria-hidden="true" fetchPriority="high" />
-      <small className="sr-only">Fan minh họa{home.voices.length ? ' · Lời nhắn được chọn từ Hall' : ''}</small>
+      <small className="fw-muted">Fan minh họa · Artist và phiên demo, không có livestream hay người online thật{home.voices.length ? ' · Lời nhắn được chọn từ Hall' : ''}</small>
     </div>
   </section>;
 }

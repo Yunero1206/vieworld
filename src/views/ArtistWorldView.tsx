@@ -53,7 +53,7 @@ export function ArtistWorldView() {
     const families = new Set<string>();
     return Object.values(state.products).filter(product => {
       const family = product.familyId || product.id;
-      if (product.tenantId !== state.activeTenantId || product.worldId !== artistId || !product.image || product.priceVND <= 0 || product.previewOnly || product.delivery === 'digital' || families.has(family)) return false;
+      if (product.tenantId !== state.activeTenantId || product.worldId !== artistId || !product.image || product.priceVND <= 0 || product.previewOnly || families.has(family)) return false;
       families.add(family);
       return true;
     }).slice(0, 4);

@@ -47,8 +47,8 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
   currentFanName,
   worldId,
   artistName = 'Nghệ sĩ',
-  companionDays,
-  viewerCount,
+  companionDays: _companionDays,
+  viewerCount: _viewerCount,
   initialMessages,
   isChatPaused = false,
   poll,
@@ -69,8 +69,6 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
   );
 
   const effectiveArtistName = artistName && artistName !== 'Nghệ sĩ' ? artistName : chatMeta.artistName;
-  const effectiveCompanionDays = companionDays ?? chatMeta.companionDays;
-  const effectiveViewerCount = viewerCount ?? chatMeta.viewerCount;
   const effectiveCues = cues && cues.length > 0 ? cues : chatMeta.cues;
   const effectivePoll = poll || chatMeta.poll;
   const defaultSeededMessages = chatMeta.initialMessages;
@@ -155,7 +153,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
       text,
       timestamp: new Date().toISOString(),
       isSample: false,
-      isVip: true,
+      isVip: false,
       badgeLabel,
     };
 
@@ -310,7 +308,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
             }}
           >
             <Users size={12} color="#64748B" />
-            <span>{effectiveViewerCount}</span>
+            <span>Trò chuyện minh họa</span>
           </span>
 
           {/* Re-open Poll pill if fan dismissed the poll banner */}
@@ -323,7 +321,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
               title="Mở lại bình chọn"
             >
               <BarChart3 size={11} color="var(--primary, #5B46E8)" />
-              <span>Bình chọn</span>
+              <span>Bình chọn minh họa</span>
               <span className="yt-poll-dot" />
             </button>
           )}
@@ -336,10 +334,10 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
             type="button"
             onClick={() => setIsLoyaltyModalOpen((prev) => !prev)}
             className="sr-only"
-            aria-label={`Đồng hành cùng ${effectiveArtistName}: ${effectiveCompanionDays} ngày`}
-            title="Xem hành trình đồng hành cùng nghệ sĩ"
+            aria-label={`Hành trình minh họa của ${effectiveArtistName}`}
+            title="Xem dấu mốc fandom minh họa"
           >
-            <span>{effectiveCompanionDays} ngày</span>
+            <span>Minh họa</span>
           </button>
 
           {isLoyaltyModalOpen && (
@@ -359,7 +357,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
                 </button>
               </div>
               <p style={{ fontSize: '12px', color: '#1E293B', margin: '0 0 8px', lineHeight: '1.4' }}>
-                Bạn đã đồng hành cùng <strong>{effectiveArtistName}</strong> được <strong>{effectiveCompanionDays} ngày</strong> (từ {chatMeta.companionDate}).
+                Dấu mốc của <strong>{effectiveArtistName}</strong> dưới đây là dữ liệu mẫu, không ghi nhận thời gian đồng hành hay tham dự của bạn.
               </p>
               <div style={{ fontSize: '11px', color: '#475569', display: 'flex', flexDirection: 'column', gap: '5px', backgroundColor: '#FDF2F8', border: '1px solid #FBCFE8', padding: '8px 10px', borderRadius: '8px' }}>
                 <div>🌸 <strong>Cột mốc Fandom ({chatMeta.fandomName}):</strong></div>
@@ -653,7 +651,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
           return (
             <div
               key={msg.id}
-              className={`chat-bubble ${msg.isVip ? 'yt-vip-chat-bubble' : ''}`}
+              className={`chat-bubble ${(_isMember && isMine && !msg.isSample) ? 'yt-vip-chat-bubble' : ''}`}
               style={{
                 display: 'flex',
                 alignItems: 'flex-start',
@@ -670,7 +668,7 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
                   width: '24px',
                   height: '24px',
                   borderRadius: '50%',
-                  backgroundColor: msg.isVip ? '#7C3AED' : isMine ? 'var(--primary, #5B46E8)' : '#64748B',
+                  backgroundColor: (_isMember && isMine && !msg.isSample) ? '#7C3AED' : isMine ? 'var(--primary, #5B46E8)' : '#64748B',
                   color: '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
@@ -679,10 +677,10 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
                   fontWeight: '700',
                   flexShrink: 0,
                   marginTop: '1px',
-                  boxShadow: msg.isVip ? '0 0 8px rgba(124, 58, 237, 0.4)' : 'none',
+                  boxShadow: (_isMember && isMine && !msg.isSample) ? '0 0 8px rgba(124, 58, 237, 0.4)' : 'none',
                 }}
               >
-                {msg.isVip ? <Crown size={13} /> : msg.authorName.charAt(0).toUpperCase()}
+                {(_isMember && isMine && !msg.isSample) ? <Crown size={13} /> : msg.authorName.charAt(0).toUpperCase()}
               </div>
 
               {/* Message Content */}
@@ -691,13 +689,13 @@ export const FanChatPanel: React.FC<FanChatPanelProps> = ({
                   <span
                     style={{
                       fontWeight: '700',
-                      color: msg.isVip ? '#7C3AED' : isMine ? 'var(--primary)' : '#0F172A',
+                      color: (_isMember && isMine && !msg.isSample) ? '#7C3AED' : isMine ? 'var(--primary)' : '#0F172A',
                     }}
                   >
                     {msg.authorName} {isMine && '(Bạn)'}
                   </span>
 
-                  {msg.isVip && (
+                  {(_isMember && isMine && !msg.isSample) && (
                     <span
                       className="chat-member-gem"
                       title={`${chatMeta.fandomName || 'Pulse Crew'} member`}

@@ -13,6 +13,7 @@ npm ci
 npm run dev
 npm run typecheck
 npm test
+npm run check:source
 npm run build
 npm run check:showcase
 ```
@@ -28,7 +29,7 @@ Vite mặc định chạy ở `http://localhost:5173`. `check:showcase` cần bu
 | Artist World | `/artist/:artistId` | Trang chính có một hoạt động chính, một hoạt động phụ, tiếng nói fandom, kỷ niệm và vật phẩm liên quan. |
 | Hall | `/artist/:artistId/hall` | Phòng chung và cộng đồng miễn phí: khách đọc, đăng nhập để trò chuyện. Member Lounge và Q&A là không gian riêng của hội viên từng artist. |
 | Kho lưu trữ | `/artist/:artistId/archive` | Timeline công khai của nghệ sĩ với bốn nhóm: tất cả, sự kiện, thời kỳ và dự án. Không trộn ghi chú riêng của fan. |
-| VieCollect | `/shop` | Sưu tập những món tạo dấu ấn riêng của fan, từ kỷ niệm đến trang phục avatar và đồ trưng bày. Chi tiết mở giữa màn hình; mỗi phiên bản ghi rõ nhận ngoài đời, trong VieWorld hay cả hai. |
+| VieCollect | `/shop` | Acquisition và bộ sưu tập vật phẩm vật lý, số, hybrid để biểu đạt dấu ấn fan. Physical/digital có luồng nhận demo; hybrid hiện là concept xem trước. Chi tiết ghi rõ mỗi phiên bản. |
 | My Space | `/me` | Mở thẳng phòng. Chọn avatar, giá trang phục, kệ, bảng kỷ niệm, góc âm nhạc hoặc sổ lưu bút để tương tác. Bộ sưu tập riêng mở từ phòng. |
 | Hội viên, đơn hàng | `/memberships`, `/orders` | Hội viên được nhóm theo nghệ sĩ; đơn hàng nhóm theo lần checkout thay vì đếm mỗi dòng thành một đơn. |
 | Tài khoản, trợ giúp | `/account/settings`, `/account/help` | Thiết lập riêng tư, liên hệ, giao diện và hướng dẫn. Hồ sơ hỗ trợ demo chỉ lưu trên thiết bị. |
@@ -40,11 +41,15 @@ Desktop dùng rail nhỏ; tên hiện khi hover hoặc điều hướng bằng b
 - Đăng nhập demo mới được mở hoặc sửa dữ liệu cá nhân. Khách vẫn xem nội dung công khai, không mượn tên hay đồ của hồ sơ Linh.
 - Tạo hồ sơ mới không tạo sẵn đơn hàng, kỷ niệm hoặc lời nhắn của fan khác. State lưu theo tenant và ID fan.
 - Theo dõi không đồng nghĩa hội viên. Phòng công cộng không yêu cầu hội viên; Member Lounge/Q&A cần hội viên còn hiệu lực của đúng artist.
-- Phòng Hall của phiên đã kết thúc chỉ đọc lại; không gửi hoặc react thêm. Phiên hủy, thiếu media hoặc chưa duyệt quyền không được mở thành phòng hợp lệ.
-- Chỉ hiển thị artist đang hiện diện khi session được chọn thực sự running và báo `artistPresence=present`. Không suy ra số người online từ avatar minh họa.
+- Hall phân biệt access `public/member`, mode `chat/qa` và lifecycle `permanent/scheduled/active/archived`. Phòng sự kiện scheduled cho trò chuyện chuẩn bị; paused chỉ đọc; ended public chỉ đọc lại, không gửi hoặc react thêm. Phiên hủy, thiếu media hoặc chưa duyệt quyền không được mở thành phòng hợp lệ. Không có cooldown tự suy đoán.
+- Chỉ hiển thị artist đang hiện diện khi session được chọn `running`, segment `live` và báo `artistPresence=present`. Đây vẫn là trạng thái minh họa, không có nghệ sĩ hay livestream thật. Không suy ra số người online từ avatar minh họa.
 - Lời nhắn Hall được đưa ra nơi công khai phải có opt-in tài khoản, consent cho lời nhắn và trạng thái duyệt; lời nhắn bị report không được chiếu ra. Quote fixture được ghi là minh họa.
 - Home có tối đa ba lời nhắn cùng hoạt động Hiện tại. Bubble dẫn về đúng phòng và tin nguồn; Lounge và Q&A không bao giờ được chiếu công khai dù đã consent. Hình fan ngồi ghế là artwork trang trí, không đại diện người đang online.
 - Lưu món, thêm giỏ hoặc xem thử không cấp quyền sở hữu. Bản physical không mặc định kèm digital.
+- Preorder/paid chưa phải vật phẩm đã nhận. Physical demo fulfilled có provenance trong Bộ sưu tập, nhưng không tự có fit avatar; digital nhận demo không có shipment vật lý. Bundle mới chỉ xem concept: model receipt cũ chưa tách digital entitlement khỏi fulfillment vật lý. Giữ receipt bundle đã nhận và dữ liệu cũ, không coi đó là bằng chứng hybrid đã hoàn thiện.
+- Guest không đọc ownership/identity cá nhân; đăng xuất ẩn chúng ngay nhưng giữ receipt và vị trí để đăng nhập lại. Đây là isolation của demo local, không phải xác thực an toàn phía server.
+- My Space cho fan chọn món; room tự bố cục ở surface tương thích, có capacity và thay thế rõ ràng. Move atomic; lỗi không làm mất vị trí cũ. Order/payment và ghi chú riêng không thành metadata công khai.
+- Dấu mốc 10/20 ghi số thẻ lịch sử đã trả trong demo, không phải tham dự concert, tuổi fan hoặc rank. Fandom Pass chỉ là bản giới thiệu do fan chọn, không cấp hội viên hay quyền truy cập. Sample voices không tự có badge hội viên.
 - Avatar dùng một thân chuẩn; trang phục, nón và món cầm tay chỉ dùng fit đã chuẩn bị. Món chưa có fit không được dán ảnh lên avatar để giả lập hỗ trợ.
 - Room có vị trí và giới hạn cố định. Hover hoặc focus món để xem thử nhẹ, chọn để giữ bản xem thử, xác nhận mới lưu. Không kéo thả pixel, không xóa món đã mua khi cất khỏi phòng. Kệ trống không giả ánh sáng của một lightstick chưa đặt.
 - Link quyền lợi và thời hạn chỉ hiện khi có metadata hợp lệ. Không tự tạo deadline, quyền xem lại hoặc điểm đến.
@@ -77,6 +82,10 @@ Nhóm fan trên Home và bàn sổ lưu bút dùng WebP có nền trong suốt. 
 Google/Facebook chỉ mô phỏng lựa chọn đăng nhập, không OAuth thật hoặc xác minh danh tính. State ở trình duyệt, không đồng bộ giữa thiết bị. Người dùng chung trình duyệt có thể mở các hồ sơ demo đã lưu. Không nhập địa chỉ, thông tin liên hệ, thanh toán hoặc dữ liệu nhạy cảm thật.
 
 Các artist, nội dung, giá, quyền lợi và phiên live là dữ liệu minh họa. Hall không có mạng realtime; media không cấp quyền phát bản ghi thương mại. Kiểm tra phía client không phải bảo mật production. Bản vận hành thật còn cần xác thực và ủy quyền server, thanh toán/inventory xác nhận, moderation, đồng bộ, consent và chính sách dữ liệu.
+
+Q&A demo có gửi câu hỏi, trạng thái hiển thị và câu trả lời fixture có nhãn minh họa; chưa có quy trình artist/team duyệt và trả lời thật. Archive giữ public activity hợp lệ và chapter được biên tập trong fixture, không tự đưa mọi room, member chat hoặc capsule riêng vào lịch sử chung. Không suy ra ngày lịch sử từ tên ảnh.
+
+“Moment → Place → Position → Continuity” và “Fan đến vì hứng thú, ở lại vì có vị trí” là giả thuyết để kiểm thử. Prototype chưa có user validation, analytics hay bằng chứng retention. Không có liên kết chính thức với nghệ sĩ thật, hãng giải trí hoặc DatVietVAC. Giá/tồn kho/giao nhận và contact/support chỉ mô phỏng; không sản xuất, thu tiền hoặc giao hàng thật.
 
 Visual mới bám hierarchy và behavior của bộ ảnh đã chốt; không phải bản chép pixel hoặc bộ asset hoàn chỉnh cho mọi tổ hợp. Món chưa có fit vẫn được giữ trong dữ liệu sở hữu, nhưng không có nút mặc giả.
 

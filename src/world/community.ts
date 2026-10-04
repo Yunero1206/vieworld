@@ -5,6 +5,7 @@ import { ownedDigitalLook } from './merchCatalog';
 import { hasHistoryBadge } from './history';
 import { readDisplaySurfaces, type SurfaceSelection } from './displaySurfaces';
 import type { DisplaySlot } from './display';
+import { isDemoSignedIn } from './account';
 
 export interface PublicFan { appearance?:FanProfile['avatarPreset']; id:string; name:string; bio:string; mood:string; accessory?:string; look:FanProfile['digitalLook']; room:RoomDesign; items:{title:string; detail:string; image?:string}[]; badge?:number; sample:boolean; displayItems?:DisplayItem[]; displaySurfaces?:Record<DisplaySlot,SurfaceSelection> }
 export const DEMO_FANS:PublicFan[]=[
@@ -13,10 +14,11 @@ export const DEMO_FANS:PublicFan[]=[
 ];
 
 /** Explicit projection: never pass orders, private notes, or the full fan state to a public profile. */
-export function currentPublicFan(s:AppState):PublicFan {
+export function currentPublicFan(s:AppState):PublicFan | undefined {
+  if (!isDemoSignedIn(s)) return undefined;
   const identity=s.fanProfile.publicIdentity;const look=ownedDigitalLook(s);
-  const items=(s.fanProfile.showcaseSlots || []).flatMap(id=>{const c=id?s.capsules[id]:undefined;return c?.fanId===s.fanProfile.id&&c.isSaved?[{title:s.sessions[c.sessionId]?.title || 'Kỷ niệm của mình',detail:'Một kỷ niệm được chủ phòng chọn trưng bày.',image:'ticket-digital'}]:[];});
-  const products=(identity?.productIds || []).flatMap(id=>{const p=s.products[id];return p&&Object.values(s.orders).some(o=>o.productId===id&&o.fanId===s.fanProfile.id&&o.tenantId===s.activeTenantId&&o.status==='fulfilled')?[{title:p.title,image:p.image,detail:'Món đã nhận, được chủ phòng chọn trưng bày. Chi tiết giao dịch không công khai.'}]:[];});
+  const items=(s.fanProfile.showcaseSlots || []).flatMap(id=>{const c=id?s.capsules[id]:undefined;return c?.fanId===s.fanProfile.id&&c.tenantId===s.activeTenantId&&c.isSaved?[{title:s.sessions[c.sessionId]?.title || 'Kỷ niệm của mình',detail:'Một kỷ niệm được chủ phòng chọn trưng bày.',image:'ticket-digital'}]:[];});
+  const products=(identity?.productIds || []).flatMap(id=>{const p=s.products[id];return p?.tenantId===s.activeTenantId&&Object.values(s.orders).some(o=>o.productId===id&&o.fanId===s.fanProfile.id&&o.tenantId===s.activeTenantId&&o.status==='fulfilled')?[{title:p.title,image:p.image,detail:'Món đã nhận, được chủ phòng chọn trưng bày. Chi tiết giao dịch không công khai.'}]:[];});
   const room=s.fanProfile.roomDesign || DEFAULT_ROOM;
   return {appearance:s.fanProfile.avatarPreset,id:s.fanProfile.id,name:s.fanProfile.displayName,bio:identity?.bio || 'Một góc nhỏ cho những điều mình yêu.',mood:identity?.mood || 'Hôm nay, cứ là mình thôi.',accessory:s.fanProfile.wardrobeChoice?.accessoryId,look,room,items:[...products,...(room.layers.memories?items:[])],badge:identity?.badge&&hasHistoryBadge(s,identity.badge)?identity.badge:undefined,sample:false,displayItems:displayedItems(s),displaySurfaces:readDisplaySurfaces(s.fanProfile,displayedItems(s))};
 }
