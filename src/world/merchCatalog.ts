@@ -13,6 +13,16 @@ export const DELIVERY_SUMMARIES = {
 export function productDisplayTitle(title: string): string {
   return title.replace(/\s*·\s*(Digital|Duo(?: Set)?)$/i, '');
 }
+
+/** Resolve a public look's label only; this never grants ownership or avatar fit. */
+export function equippedItemLabel(state: AppState, slot: NonNullable<Product['digitalSlot']>, itemId?: string): string | undefined {
+  if (!itemId) return;
+  const rank = (product: Product) => product.delivery === 'digital' ? 0 : product.delivery === 'bundle' ? 1 : 2;
+  const product = Object.values(state.products)
+    .filter(item => item.tenantId === state.activeTenantId && item.digitalSlot === slot && item.digitalItemId === itemId && item.title && productDisplayTitle(item.title).trim())
+    .sort((a, b) => rank(a) - rank(b) || a.id.localeCompare(b.id))[0];
+  return product ? productDisplayTitle(product.title).trim() : { shirt: 'Áo đang sử dụng', hat: 'Nón đang sử dụng', lightstick: 'Vật phẩm đang cầm' }[slot];
+}
 const base = { tenantId: 'vieworld-demo' as const, worldId: 'artist-a', version: 1, updatedAt: '2026-09-11T05:00:00Z', isAvailable: true, stockCount: 30, kind: 'physical' as ProductKind };
 export const NEW_MERCH: Record<string, Product> = Object.fromEntries([
   { id: 'product-star-shirt-real', familyId: 'star-shirt', title: 'Áo Star Club', priceVND: 390000, category: 'merch', delivery: 'physical', releaseType: 'pre_order', estimatedShipping: 'Dự kiến giao hàng: Tháng 10/2026', batchLabel: 'Đợt 1', image: 'shirt-physical', roomAsset: '/images/world-v6/shirt-cutout.webp', digitalImage: 'shirt-digital', description: 'Áo cotton màu kem, cổ olive và ngôi sao thêu nhỏ. Bản mẫu thiết kế, không phải ảnh hàng đã sản xuất.', sizes: ['S', 'M', 'L', 'XL'], includes: ['1 áo cotton ngoài đời', 'Không kèm trang phục avatar'] },

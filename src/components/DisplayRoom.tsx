@@ -205,7 +205,7 @@ export function DisplayRoomScene({
       <div className={`v6-display-scene ${isEditMode ? 'is-edit-mode' : 'is-view-mode'}`}>
         <img
           className="v6-room-art"
-          src="/images/myspace-room-v2.png"
+          src="/images/myspace-room-v2.webp"
           width="1672"
           height="941"
           style={{ pointerEvents: 'none' }}
@@ -628,7 +628,6 @@ export function PersonalDisplayRoom({
         digitalLook={ownedDigitalLook(state)}
         accessoryId={state.fanProfile.wardrobeChoice?.accessoryId}
         mood={state.fanProfile.publicIdentity?.mood}
-        companionDays={0}
         items={displayed}
         fanId={state.fanProfile.id}
       />

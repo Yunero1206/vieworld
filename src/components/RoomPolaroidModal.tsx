@@ -14,7 +14,6 @@ interface RoomPolaroidModalProps {
   digitalLook?: { shirt?: string; hat?: string; lightstick?: string };
   accessoryId?: string;
   mood?: string;
-  companionDays?: number;
   items: DisplayItem[];
   fanId: string;
 }
@@ -188,7 +187,7 @@ export function RoomPolaroidModal({
 
             <div className="v7-polaroid-room-view">
               <img
-                src="/images/myspace-room-v2.png"
+                src="/images/myspace-room-v2.webp"
                 alt="Góc phòng 2.5D của fan"
                 className="v7-polaroid-room-art"
                 onError={e => {

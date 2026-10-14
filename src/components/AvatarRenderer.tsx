@@ -65,10 +65,10 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({
 
   const getArtistAvatarSrc = () => {
     const key = `${displayName || ''} ${artistId || ''}`.toLowerCase();
-    if (key.includes('mira')) return '/images/characters-v4/artist-mira.png';
-    if (key.includes('kai')) return '/images/characters-v4/artist-kai.png';
+    if (key.includes('mira')) return '/images/characters-v4/artist-mira.webp';
+    if (key.includes('kai')) return '/images/characters-v4/artist-kai.webp';
     if (key.includes('neon')) return '/images/characters-v4/avatar-neon-sessions.webp';
-    return '/images/characters-v4/artist-a.png';
+    return '/images/characters-v4/artist-a.webp';
   };
 
   const characterSrc =

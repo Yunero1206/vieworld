@@ -17,7 +17,23 @@ function releaseCache(): Plugin {
       const hash = createHash('sha256');
       Object.keys(bundle).sort().forEach(name => { const item = bundle[name]; hash.update(name); hash.update(item.type === 'chunk' ? item.code : item.source); });
       files(root).forEach(file => { hash.update(relative(root, file).replaceAll('\\', '/')); hash.update(readFileSync(file)); });
-      const source = readFileSync(resolve(root, 'sw.js'), 'utf8').replace(/const CACHE_NAME = '[^']+';/, `const CACHE_NAME = 'vieworld-pwa-${hash.digest('hex').slice(0, 12)}';`);
+      // Cache the hashed shell and MySpace's static chunk dependencies as well as
+      // the room. HTML alone is not an offline app after a release cache rotates.
+      const offline = new Set<string>();
+      const visit = (name: string) => {
+        if (offline.has('/' + name)) return;
+        const item = bundle[name]; if (!item) return;
+        offline.add('/' + name);
+        if (item.type === 'chunk') item.imports.forEach(visit);
+      };
+      for (const [name, item] of Object.entries(bundle)) {
+        if (item.type === 'chunk' && (item.isEntry || item.name === 'FanWorldView')) visit(name);
+        if (item.type === 'asset' && /\.(?:css|woff2)$/.test(name)) offline.add('/' + name);
+      }
+      const original = readFileSync(resolve(root, 'sw.js'), 'utf8');
+      const core = [...original.matchAll(/^\s*'(\/[^']*)',?\s*$/gm)].map(match => match[1]);
+      const source = original.replace(/const CACHE_NAME = '[^']+';/, `const CACHE_NAME = 'vieworld-pwa-${hash.digest('hex').slice(0, 12)}';`)
+        .replace(/const CORE_PRECACHE = \[[\s\S]*?\];/, `const CORE_PRECACHE = ${JSON.stringify([...new Set([...core, ...offline])], null, 2)};`);
       this.emitFile({ type: 'asset', fileName: 'sw.js', source });
     },
   };

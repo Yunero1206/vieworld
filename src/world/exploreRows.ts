@@ -6,7 +6,7 @@ import { merchImageUrl } from './merchImages';
 import { artistForWorld } from './worldContext';
 import { ARTIST_PROJECTS } from '../data/artistProjects';
 import { isPublicProjectableHallRoom } from './hallRooms';
-import aConcert from '../assets/home/concert-night.png';
+import aConcert from '../assets/home/concert-night.webp';
 import bTriptych from '../assets/explore-demo/artist-b-triptych.jpg';
 import cTriptych from '../assets/explore-demo/artist-c-triptych.jpg';
 import dTriptych from '../assets/explore-demo/artist-d-triptych.jpg';
@@ -36,13 +36,13 @@ export interface ExploreWorldRow {
 }
 
 const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-const aStudio = publicAsset('images/neon-sessions-cover.jpg');
-const miraCover = publicAsset('images/mira-cover.jpg');
-const kaiCover = publicAsset('images/kai-cover.jpg');
+const aStudio = publicAsset('images/neon-sessions-cover.webp');
+const miraCover = publicAsset('images/mira-cover.webp');
+const kaiCover = publicAsset('images/kai-cover.webp');
 const mediaByWorld: Record<string, { avatar: ExploreMedia; moments: [ExploreMedia, ExploreMedia]; titles: [string, string]; kinds?: ['image' | 'video', 'image' | 'video']; freshness: number }> = {
-  'artist-a': { avatar: { src: publicAsset('images/characters-v4/artist-a.png') }, moments: [{ src: aConcert }, { src: aStudio }], titles: ['Concert Hà Nội', 'Soundcheck · Neon Sessions'], freshness: 100 },
-  'artist-mira': { avatar: { src: publicAsset('images/characters-v4/artist-mira.png') }, moments: [{ src: miraCover }, { src: merchImageUrl('mira-vinyl-physical') }], titles: ['Một tối cùng MIRA', 'Kỷ niệm · Luna'], freshness: 90 },
-  'artist-kai': { avatar: { src: publicAsset('images/characters-v4/artist-kai.png') }, moments: [{ src: kaiCover }, { src: merchImageUrl('kai-cassette-physical') }], titles: ['Nhịp đêm của KAI', 'Kỷ niệm · Pulse'], freshness: 80 },
+  'artist-a': { avatar: { src: publicAsset('images/characters-v4/artist-a.webp') }, moments: [{ src: aConcert }, { src: aStudio }], titles: ['Concert Hà Nội', 'Soundcheck · Neon Sessions'], freshness: 100 },
+  'artist-mira': { avatar: { src: publicAsset('images/characters-v4/artist-mira.webp') }, moments: [{ src: miraCover }, { src: merchImageUrl('mira-vinyl-physical') }], titles: ['Một tối cùng MIRA', 'Kỷ niệm · Luna'], freshness: 90 },
+  'artist-kai': { avatar: { src: publicAsset('images/characters-v4/artist-kai.webp') }, moments: [{ src: kaiCover }, { src: merchImageUrl('kai-cassette-physical') }], titles: ['Nhịp đêm của KAI', 'Kỷ niệm · Pulse'], freshness: 80 },
   'artist-b': { avatar: { src: bTriptych, panel: 0 }, moments: [{ src: bTriptych, panel: 1 }, { src: bTriptych, panel: 2 }], titles: ['B · Live ở sân khấu nhỏ', 'B · Trước giờ diễn'], freshness: 50 },
   'artist-c': { avatar: { src: cTriptych, panel: 0 }, moments: [{ src: cTriptych, panel: 1 }, { src: cTriptych, panel: 2 }], titles: ['C · Đêm ánh tím', 'C · Sau cánh gà'], freshness: 65 },
   'artist-d': { avatar: { src: dTriptych, panel: 0 }, moments: [{ src: dTriptych, panel: 1 }, { src: dTriptych, panel: 2 }], titles: ['D · Buổi diễn acoustic', 'D · Một chiều tập nhạc'], freshness: 50 },

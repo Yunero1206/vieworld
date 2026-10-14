@@ -79,7 +79,8 @@ export const SessionView: React.FC = () => {
   };
 
   // Safe Recovery Screen when session is invalid
-  const session = sessionId ? state.sessions[sessionId] : undefined;
+  const candidate = sessionId ? state.sessions[sessionId] : undefined;
+  const session = candidate?.tenantId === state.activeTenantId ? candidate : undefined;
 
   // Query questions and active poll for this session
   const sessionQuestions = session

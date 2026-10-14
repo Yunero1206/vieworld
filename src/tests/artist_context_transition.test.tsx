@@ -5,7 +5,7 @@ import { useArtistContextTransition } from '../hooks/useArtistContextTransition'
 describe('Artist context reading transition', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    document.body.innerHTML = '<header class="fw-header"></header><div class="artist-world-page"><h1>Artist</h1><nav class="artist-world-local-nav"></nav><h2 id="artist-context-title">Live</h2></div>';
+    document.body.innerHTML = '<nav class="fw-navigation-rail"></nav><div class="artist-world-page"><h1>Artist</h1><nav class="artist-world-local-nav"></nav><h2 id="artist-context-title">Live</h2></div>';
     vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
     vi.mocked(window.scrollTo).mockClear();
   });

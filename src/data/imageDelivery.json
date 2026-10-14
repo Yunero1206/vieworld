@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "note": "Existing artwork only. Original URLs stay available for legacy clients and persisted data. Budgets apply to these derivatives, not all legacy images.",
+  "assets": [
+    {
+      "source": "static/images/presence-meadow.png",
+      "target": "static/images/presence-meadow.webp",
+      "role": "background",
+      "quality": 88,
+      "maxBytes": 512000
+    },
+    {
+      "source": "static/images/myspace-room-v2.png",
+      "target": "static/images/myspace-room-v2.webp",
+      "role": "room",
+      "quality": 90,
+      "maxBytes": 512000
+    },
+    {
+      "source": "src/assets/home/concert-night.png",
+      "target": "src/assets/home/concert-night.webp",
+      "role": "hero",
+      "quality": 90,
+      "maxBytes": 512000
+    },
+    {
+      "source": "static/images/merch-v2/cd-physical.png",
+      "target": "static/images/merch-v2/cd-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/cap-physical.png",
+      "target": "static/images/merch-v2/cap-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/cap-digital.png",
+      "target": "static/images/merch-v2/cap-digital.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/membership-digital.png",
+      "target": "static/images/merch-v2/membership-digital.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/ticket-digital.png",
+      "target": "static/images/merch-v2/ticket-digital.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/shirt-physical.png",
+      "target": "static/images/merch-v2/shirt-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/shirt-digital.png",
+      "target": "static/images/merch-v2/shirt-digital.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/lightstick-physical.png",
+      "target": "static/images/merch-v2/lightstick-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/lightstick-digital.png",
+      "target": "static/images/merch-v2/lightstick-digital.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/kai-cassette-physical.jpg",
+      "target": "static/images/merch-v2/kai-cassette-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/kai-bomber-physical.jpg",
+      "target": "static/images/merch-v2/kai-bomber-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/kai-lightstick-physical.jpg",
+      "target": "static/images/merch-v2/kai-lightstick-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/mira-vinyl-physical.jpg",
+      "target": "static/images/merch-v2/mira-vinyl-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/mira-lightstick-physical.jpg",
+      "target": "static/images/merch-v2/mira-lightstick-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/merch-v2/mira-hoodie-physical.jpg",
+      "target": "static/images/merch-v2/mira-hoodie-physical.webp",
+      "role": "product",
+      "quality": 90,
+      "maxBytes": 327680
+    },
+    {
+      "source": "static/images/place-stage.jpg",
+      "target": "static/images/place-stage-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/place-shop.jpg",
+      "target": "static/images/place-shop-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/place-club.jpg",
+      "target": "static/images/place-club-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/place-lounge.jpg",
+      "target": "static/images/place-lounge-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/place-memory.jpg",
+      "target": "static/images/place-memory-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/vieworld-brand.jpg",
+      "target": "static/images/vieworld-brand-thumb.webp",
+      "role": "thumbnail",
+      "width": 320,
+      "quality": 88,
+      "maxBytes": 30720
+    },
+    {
+      "source": "static/images/characters-v4/artist-a.png",
+      "target": "static/images/characters-v4/artist-a.webp",
+      "role": "portrait",
+      "quality": 90,
+      "maxBytes": 225280
+    },
+    {
+      "source": "static/images/characters-v4/artist-mira.png",
+      "target": "static/images/characters-v4/artist-mira.webp",
+      "role": "portrait",
+      "quality": 90,
+      "maxBytes": 225280
+    },
+    {
+      "source": "static/images/characters-v4/artist-kai.png",
+      "target": "static/images/characters-v4/artist-kai.webp",
+      "role": "portrait",
+      "quality": 90,
+      "maxBytes": 225280
+    },
+    {
+      "source": "static/images/artist-a-cover.jpg",
+      "target": "static/images/artist-a-cover.webp",
+      "role": "cover",
+      "quality": 90,
+      "maxBytes": 409600
+    },
+    {
+      "source": "static/images/neon-sessions-cover.jpg",
+      "target": "static/images/neon-sessions-cover.webp",
+      "role": "cover",
+      "quality": 90,
+      "maxBytes": 409600
+    },
+    {
+      "source": "static/images/mira-cover.jpg",
+      "target": "static/images/mira-cover.webp",
+      "role": "cover",
+      "quality": 90,
+      "maxBytes": 409600
+    },
+    {
+      "source": "static/images/kai-cover.jpg",
+      "target": "static/images/kai-cover.webp",
+      "role": "cover",
+      "quality": 90,
+      "maxBytes": 409600
+    }
+  ]
+}

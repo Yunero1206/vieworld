@@ -45,6 +45,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   const [persistenceConflict, setPersistenceConflict] = useState(false);
   const conflictingKey = useRef<string | null>(null);
   const warnedStorage = useRef(false);
+  const lastPersisted = useRef<{ key: string; snapshot: AppState } | null>(null);
+  const persistSnapshot = useCallback((snapshot: AppState) => {
+    const key = buildStorageKey(snapshot.activeTenantId, snapshot.fanProfile.id);
+    // The lock applies to every immediate save, before deduplication.
+    if (conflictingKey.current === key) return false;
+    if (lastPersisted.current?.key === key && lastPersisted.current.snapshot === snapshot) return true;
+    const durable = saveState(snapshot);
+    // A failed write must remain retryable and keep the existing fallback notice.
+    if (durable) lastPersisted.current = { key, snapshot };
+    return durable;
+  }, []);
 
   // Initialize reducer with clean state
   const [state, dispatch] = useReducer(appReducer, initialTenantId, (tId) => {
@@ -65,7 +76,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   // Sync to storage on state change
   useEffect(() => {
     if (isHydrated && conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) {
-      const durable = saveState(state);
+      const durable = persistSnapshot(state);
       setMemoryFallback(isMemoryFallbackActive());
       if (!durable && !warnedStorage.current) {
         warnedStorage.current = true;
@@ -74,7 +85,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     } else {
       setIsHydrated(true);
     }
-  }, [state, isHydrated]);
+  }, [state, isHydrated, persistSnapshot]);
 
   useEffect(() => {
     const key = buildStorageKey(state.activeTenantId, state.fanProfile.id);
@@ -116,6 +127,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   const resetActiveTenant = useCallback(() => {
     const tenantId = state.activeTenantId;
     conflictingKey.current = null;
+    lastPersisted.current = null;
     setPersistenceConflict(false);
     resetTenantStorage(tenantId);
     const freshState = createInitialState(tenantId);
@@ -126,7 +138,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
   const setTenant = useCallback(
     (targetTenantId: TenantId) => {
       // Save current tenant before switching
-      if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
+      if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) persistSnapshot(state);
       // Load target tenant
       const loadResult = loadState(targetTenantId, getActiveFanId(targetTenantId));
       dispatch({ type: 'LOAD_SCENARIO', scenarioState: loadResult.state });
@@ -136,7 +148,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         setStorageNotice(`Đã chuyển sang không gian: ${targetTenantId}`);
       }
     },
-    [state]
+    [state, persistSnapshot]
   );
 
   const localProfiles = useCallback(() => listLocalDemoProfiles(state.activeTenantId), [state.activeTenantId]);
@@ -145,29 +157,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     if (name.length < 2 || name.length > 60 || /[\u0000-\u001f]/.test(name)) return 'Tên hiển thị cần từ 2–60 ký tự.';
     const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const fanId = `fan-local-${randomId}`;
-    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
+    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) persistSnapshot(state);
     const next = appReducer(createFreshFanState(state.activeTenantId, fanId, name), { type: 'DEMO_SIGN_IN', provider, mode: 'register' });
-    saveState(next);
+    persistSnapshot(next);
     setActiveFanId(state.activeTenantId, fanId);
     conflictingKey.current = null;
     setPersistenceConflict(false);
     dispatch({ type: 'LOAD_SCENARIO', scenarioState: next });
     return null;
-  }, [state]);
+  }, [state, persistSnapshot]);
 
   const signInDemoProfile = useCallback((fanId: string, provider: DemoProvider): string | null => {
     if (!listLocalDemoProfiles(state.activeTenantId).some(profile => profile.fanId === fanId)) return 'Hồ sơ này không còn trên thiết bị.';
-    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) saveState(state);
+    if (conflictingKey.current !== buildStorageKey(state.activeTenantId, state.fanProfile.id)) persistSnapshot(state);
     const loaded = loadState(state.activeTenantId, fanId);
     if (loaded.state.fanProfile.id !== fanId) return 'Không đọc được hồ sơ đã chọn.';
     const next = appReducer(loaded.state, { type: 'DEMO_SIGN_IN', provider, mode: 'login' });
-    saveState(next);
+    persistSnapshot(next);
     setActiveFanId(state.activeTenantId, fanId);
     conflictingKey.current = null;
     setPersistenceConflict(false);
     dispatch({ type: 'LOAD_SCENARIO', scenarioState: next });
     return null;
-  }, [state]);
+  }, [state, persistSnapshot]);
 
   return (
     <AppContext.Provider

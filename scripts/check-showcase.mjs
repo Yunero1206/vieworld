@@ -5,6 +5,17 @@ import './check-source.mjs';
 const root = resolve(import.meta.dirname, '..');
 const errors = new Set();
 const assets = new Set();
+const imageDelivery = JSON.parse(readFileSync(resolve(root, 'src/data/imageDelivery.json'), 'utf8'));
+for (const asset of imageDelivery.assets) {
+  // Originals are explicit legacy compatibility exceptions, not new delivery assets.
+  for (const path of [asset.source, asset.target]) if (!existsSync(resolve(root, path))) errors.add(`Image delivery missing ${path}`);
+  if (existsSync(resolve(root, asset.target))) {
+    const bytes = readFileSync(resolve(root, asset.target));
+    if (bytes.toString('ascii', 0, 4) !== 'RIFF' || bytes.toString('ascii', 8, 12) !== 'WEBP') errors.add(`${asset.target} is not WebP`);
+    if (bytes.length > asset.maxBytes) errors.add(`${asset.target} exceeds ${asset.role} budget (${asset.maxBytes} bytes)`);
+    if (asset.target.startsWith('static/') && !existsSync(resolve(root, 'dist', asset.target.slice(7)))) errors.add(`Built derivative missing ${asset.target}`);
+  }
+}
 function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(resolve(dir, entry.name)) : [resolve(dir, entry.name)]);
 }
@@ -39,6 +50,13 @@ else {
   if (existsSync(resolve(dist, 'sw.js'))) {
     const worker = readFileSync(resolve(dist, 'sw.js'), 'utf8');
     if (!/const CACHE_NAME = 'vieworld-pwa-[a-f0-9]{12}';/.test(worker)) errors.add('Built service worker is missing its release-specific cache version.');
+    const precache = worker.match(/const CORE_PRECACHE = (\[[\s\S]*?\]);/);
+    if (!precache) errors.add('Built service worker is missing its precache list.');
+    else {
+      const paths = JSON.parse(precache[1]);
+      for (const path of paths) if (!existsSync(resolve(dist, path === '/' ? 'index.html' : path.slice(1)))) errors.add(`Offline precache missing ${path}`);
+      for (const extension of ['.js','.css']) if (!paths.some(path => path.endsWith(extension))) errors.add(`Offline shell missing ${extension} dependencies`);
+    }
   }
   const bundles = walk(resolve(dist, 'assets')).filter(file => file.endsWith('.js'));
   const total = bundles.reduce((sum, file) => sum + statSync(file).size, 0);
@@ -48,5 +66,6 @@ else {
 }
 console.log(`Checked ${assets.size} unique literal public assets.`);
 console.log(`Checked ${publicImages.length} public raster file signatures.`);
+console.log(`Checked ${imageDelivery.assets.length} migrated image budgets and original compatibility paths.`);
 if (errors.size) { console.error([...errors].join('\n')); process.exitCode = 1; }
 else console.log('Showcase asset/build checks passed. This does not replace browser, content-rights or production-security review.');

@@ -28,7 +28,7 @@
 .presence-account hr{border:0;border-top:1px solid var(--shell-border);margin:8px 12px}
 .presence-account details{padding:8px 12px;font-size:12px}.presence-account details a{display:block;padding-top:8px}
 .presence-shell .presence-mobile-only{display:none}.presence-shell .fw-mobile-bottom-nav{display:none}
-.presence-home{position:relative;isolation:isolate;box-sizing:border-box;min-height:max(640px,100dvh);display:flex;flex-direction:column;justify-content:space-between;background:#c8e2f6 url('/images/presence-meadow.png') center/cover no-repeat;padding:clamp(24px,5vh,64px) clamp(25px,4vw,80px) 14px 94px;color:#173043;overflow:hidden}
+.presence-home{position:relative;isolation:isolate;box-sizing:border-box;min-height:max(640px,100dvh);display:flex;flex-direction:column;justify-content:space-between;background:#c8e2f6 url('/images/presence-meadow.webp') center/cover no-repeat;padding:clamp(24px,5vh,64px) clamp(25px,4vw,80px) 14px 94px;color:#173043;overflow:hidden}
 .presence-home::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(#c9e9ff15,#d7ecff30 60%,transparent)}
 [data-theme=dark] .presence-home::before{background:linear-gradient(#10284299,#12293f65)}[data-theme=dark] .presence-home{color:#f2f7f4}
 .presence-home-timeline{display:grid;grid-template-columns:1fr 1.48fr 1fr;align-items:start;gap:clamp(18px,2vw,36px);width:100%;max-width:1390px;margin:0 auto}

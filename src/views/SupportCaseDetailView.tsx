@@ -349,21 +349,21 @@ export const SupportCaseDetailView: React.FC = () => {
               style={{
                 padding: '16px',
                 backgroundColor: 'var(--appearance-soft)',
-                border: '1px solid #A7F3D0',
+                border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)',
                 fontSize: 'var(--text-xs)',
                 lineHeight: 1.6,
               }}
               data-testid="case-resolution-box"
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '700', color: '#065F46', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '700', color: 'var(--appearance-accent)', marginBottom: '4px' }}>
                 <CheckCircle2 size={16} />
                 <span>Kết luận xử lý từ bộ phận hỗ trợ</span>
               </div>
-              <p style={{ margin: '0 0 8px 0', color: '#047857', fontWeight: '600' }}>
+              <p style={{ margin: '0 0 8px 0', color: 'var(--ink)', fontWeight: '600' }}>
                 {supportCase.resolution}
               </p>
-              <div style={{ color: '#065F46', fontSize: '11px', borderTop: '1px dashed #A7F3D0', paddingTop: '6px' }}>
+              <div style={{ color: 'var(--muted)', fontSize: '11px', borderTop: '1px dashed var(--border)', paddingTop: '6px' }}>
                 <strong>Lưu ý:</strong> Việc giải quyết hồ sơ chỉ xác lập kết luận dịch vụ. Quyền lợi hội viên không tự động được kích hoạt nếu chưa qua bước kiểm tra nguồn dữ liệu độc lập.
               </div>
             </div>
@@ -401,7 +401,7 @@ export const SupportCaseDetailView: React.FC = () => {
                     height: '32px',
                     borderRadius: '50%',
                     backgroundColor: step.isCompleted ? 'var(--primary)' : 'var(--bg)',
-                    color: step.isCompleted ? '#FFFFFF' : 'var(--muted)',
+                    color: step.isCompleted ? 'var(--surface)' : 'var(--muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -435,7 +435,7 @@ export const SupportCaseDetailView: React.FC = () => {
         {/* Operator Simulation Desk */}
         <details
           className="card"
-          style={{ padding: '24px', backgroundColor: 'var(--appearance-soft)', border: '1px solid #DDD6FE' }}
+          style={{ padding: '24px', backgroundColor: 'var(--appearance-soft)', border: '1px solid var(--border)' }}
           aria-label="Bàn điều khiển mô phỏng vận hành"
         >
           <summary>Công cụ mô phỏng hỗ trợ</summary>

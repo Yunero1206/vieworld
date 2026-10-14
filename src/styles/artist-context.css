@@ -23,6 +23,11 @@
 .artist-context-actions :is(button, a, summary) { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 8px 12px; border: 1px solid #718bad; border-radius: 7px; background: #293d58; color: #eef4ff; font: 12px var(--font-sans); text-decoration: none; cursor: pointer; }
 .artist-context-actions button:disabled { opacity: .65; cursor: default; }
 .artist-context-actions details { position: relative; }
+.artist-context-tracks[open] { flex-basis: 100%; min-width: 0; }
+.artist-context-tracks ol { list-style: none; margin-top: 10px; padding: 14px; max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-subtle); color: var(--ink); font: 14px/1.6 var(--font-sans); }
+.artist-context-tracks li + li { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.artist-context-tracks li small { display: block; color: var(--muted); }
+.artist-context-tracks li p { margin: 5px 0 0; }
 .artist-context-actions details ul { position: absolute; z-index: 2; min-width: 220px; margin: 5px 0 0; padding: 13px 13px 13px 30px; border: 1px solid #526783; border-radius: 7px; background: #1e2b39; color: #e2ebf8; font-size: 12px; line-height: 1.6; box-shadow: 0 14px 35px #070d16bb; }
 .artist-context-actions > span,.artist-context-honesty { color: #aebed0; font-size: 11px; line-height: 1.5; }
 .artist-context-honesty { margin: 10px 0 0; }

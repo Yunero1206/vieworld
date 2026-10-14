@@ -26,7 +26,7 @@
   --bg: var(--appearance-bg); --surface: var(--appearance-surface);
   --surface-subtle: var(--appearance-soft); --ink: var(--appearance-ink);
   --muted: var(--appearance-muted); --border: var(--appearance-border);
-  --border-subtle: var(--appearance-border); --primary: var(--appearance-accent);
+  --border-subtle: var(--appearance-border); --primary: var(--shell-accent);
   --primary-light: var(--appearance-selected);
   --shell-surface: var(--appearance-surface); --shell-ink: var(--appearance-ink);
   --shell-muted: var(--appearance-muted); --shell-border: var(--appearance-border);

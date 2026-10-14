@@ -12,6 +12,7 @@ import { AvatarRenderer } from '../components/AvatarRenderer';
 import { canAccessRoom, loadPrivacySettings } from '../world/privacy';
 import { isDemoSignedIn } from '../world/account';
 import { PersonalSpaceGate } from '../components/account/PersonalSpaceGate';
+import { equippedItemLabel } from '../world/merchCatalog';
 
 export function MemberSpaceView() {
   const { state } = useApp();
@@ -225,9 +226,9 @@ export function MemberSpaceView() {
           <h3>Đang mặc</h3>
           <p>
             {[
-              fan.look?.shirt ? 'Áo Star Club' : null,
-              fan.look?.hat ? 'Nón Everyday Star' : null,
-              fan.look?.lightstick ? 'Star Light' : null,
+              equippedItemLabel(state, 'shirt', fan.look?.shirt),
+              equippedItemLabel(state, 'hat', fan.look?.hat),
+              equippedItemLabel(state, 'lightstick', fan.look?.lightstick),
             ]
               .filter(Boolean)
               .join(' · ') || 'Diện mạo cơ bản'}

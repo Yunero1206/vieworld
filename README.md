@@ -1,100 +1,127 @@
 # VieWorld
 
-VieWorld là bản thử nghiệm của Phạm Thanh Phú về một hành trình fan liền mạch: khám phá nghệ sĩ, tham gia hoạt động trong Artist World, giữ kỷ niệm và chọn cách xuất hiện trong My Space. Đây là showcase sản phẩm, không phải dịch vụ bán hàng, hội viên hay livestream đang vận hành thật.
+VieWorld là product prototype của Phạm Thanh Phú về một không gian chung cho fan và nghệ sĩ. Fan có thể khám phá Artist World, trò chuyện trong Hall, giữ lại kỷ niệm và dùng vật phẩm để tạo dấu ấn riêng trong My Space.
 
-Demo public: [vieworld.phamthanhphu.io.vn](https://vieworld.phamthanhphu.io.vn/). Render lấy source từ GitHub; thay đổi local chưa push sẽ chưa có trên bản public.
+[Trải nghiệm demo](https://vieworld.phamthanhphu.io.vn/) · [Báo cáo kiểm tra 14/10/2026](docs/implementation/vieworld-quality-upgrade-report.md)
 
-## Chạy và kiểm tra
+Đây là showcase độc lập, không phải nền tảng fandom đang vận hành thật. Nghệ sĩ, cộng đồng, giá, quyền lợi và hoạt động đều là dữ liệu minh họa. Không có OAuth, thanh toán, giao hàng, livestream hoặc hỗ trợ khách hàng thật. **Không nhập thông tin liên hệ, địa chỉ, thanh toán hoặc dữ liệu nhạy cảm thật.**
 
-Cần Node.js 22 và npm. Không cần `.env` cho dữ liệu demo.
+## Ý tưởng sản phẩm
+
+VieWorld thử nghiệm mối liên hệ **Moment → Place → Position → Continuity**: một khoảnh khắc khiến fan muốn ghé vào, một nơi để gặp nhau, một cách thể hiện mình và những điều đáng giữ để quay lại.
+
+Đây là giả thuyết sản phẩm, chưa có nghiên cứu người dùng hoặc dữ liệu chứng minh retention. Fan không bị buộc đi đủ một funnel hay mua vật phẩm để tham gia cộng đồng.
+
+## Khám phá demo
+
+| Nơi | Route | Trải nghiệm |
+| --- | --- | --- |
+| Home | `/` | Ba thời điểm Vừa rồi, Đang diễn ra và Sắp tới; hoạt động hiện tại là điểm nhấn. Bubble chọn lọc dẫn về lời nhắn nguồn trong Hall. |
+| Explore | `/explore` | Khám phá nghệ sĩ và hoạt động; tìm tiếng Việt không dấu, xem các world đang theo dõi. |
+| Artist World | `/artist/:artistId` | Trang chính, Hall và Kho lưu trữ của từng nghệ sĩ. Hoạt động mở ngay trong world, không tách thành một hành trình khác. |
+| Hall | `/artist/:artistId/hall` | Khách đọc phòng công cộng; fan đăng nhập có thể trò chuyện miễn phí. Member Lounge và Q&A cần hội viên còn hiệu lực của đúng nghệ sĩ. |
+| Kho lưu trữ | `/artist/:artistId/archive` | Kỷ niệm công khai hợp lệ và chapter được biên tập trong fixture; không đưa nội dung private vào timeline. |
+| VieCollect | `/shop` | Chọn vật phẩm để sưu tập, mặc lên avatar hoặc trưng trong phòng. Bản vật lý và bản số có luồng nhận demo riêng; hybrid mới chỉ xem concept. |
+| My Space | `/me` | Mở thẳng phòng cá nhân. Từ phòng, mở avatar, Bộ sưu tập riêng, các vị trí trưng bày hoặc Sổ lưu bút. |
+| Hội viên, đơn hàng | `/memberships`, `/orders` | Xem quan hệ hội viên theo nghệ sĩ, quyền lợi và những lần nhận vật phẩm mô phỏng. |
+| Tài khoản, trợ giúp | `/account/settings`, `/account/help` | Thông tin tài khoản private, riêng tư, giao diện và hướng dẫn tra cứu chỉ đọc. Yêu cầu hỗ trợ chỉ lưu trên thiết bị. |
+
+Desktop dùng rail nhỏ, tên hiện khi hover/focus. Mobile có năm đích: Home, Explore, Artist, VieCollect và Tài khoản; My Space nằm đầu menu tài khoản. Tìm kiếm có phạm vi riêng ở Explore, VieCollect và Bộ sưu tập, không có ô tìm kiếm toàn app ở header.
+
+Một luồng có thể thử: tạo hồ sơ demo mới → ghé Hall công cộng → xem thử vật phẩm số → thêm giỏ → chốt và thanh toán thử → nhận bản số → mở My Space → chọn vị trí phù hợp → lưu → tải lại để kiểm tra. Xem thử, thêm giỏ và thanh toán chưa tự cấp quyền sở hữu.
+
+## Chạy local
+
+Dùng Node.js 22 như cấu hình Render và npm. Không cần `.env`, backend hoặc tài khoản dịch vụ.
 
 ```sh
 npm ci
 npm run dev
+```
+
+Vite mặc định chạy tại `http://localhost:5173`. Để kiểm tra production build local:
+
+```sh
+npm run build
+npm run preview -- --host 127.0.0.1 --port 5189 --strictPort
+```
+
+## Kiểm tra trước khi chia sẻ
+
+```sh
 npm run typecheck
 npm test
 npm run check:source
 npm run build
 npm run check:showcase
+git diff --check
 ```
 
-Vite mặc định chạy ở `http://localhost:5173`. `check:showcase` cần build mới trong `dist/`: kiểm tra entry, tham chiếu asset trực tiếp, kích thước chunk JavaScript và định dạng ảnh. Nếu sandbox Windows chặn config loader, dùng `npm test -- --configLoader runner`, rồi `npm run typecheck` và `npx vite build --configLoader runner`.
+`check:source` kiểm tra import graph và literal links/routes. `check:showcase` cần build mới trong `dist/`: kiểm tra entry, asset references, signature ảnh, budget derivative, chunk JavaScript và precache đã phát sinh.
 
-## Một hành trình, các nơi khác nhau
+Nếu config loader bị sandbox Windows chặn, đọc log để phân biệt lỗi môi trường với lỗi app. Có thể dùng `npm test -- --configLoader runner`; với build, chạy `npm run typecheck` rồi `npx vite build --configLoader runner`.
 
-| Nơi | Route | Vai trò |
-| --- | --- | --- |
-| Home | `/` | Ba thời điểm Gần đây, Hiện tại, Sắp tới. Hiện tại là điểm nhấn; không phải feed vô hạn hoặc bảng quản lý phòng. |
-| Explore | `/explore` | Tìm không dấu theo Artist World. Tên nghệ sĩ khớp chính xác hoặc tiền tố đứng trước hoạt động khớp; theo dõi và độ mới chỉ là ưu tiên phụ. |
-| Artist World | `/artist/:artistId` | Trang chính có một hoạt động chính, một hoạt động phụ, tiếng nói fandom, kỷ niệm và vật phẩm liên quan. |
-| Hall | `/artist/:artistId/hall` | Phòng chung và cộng đồng miễn phí: khách đọc, đăng nhập để trò chuyện. Member Lounge và Q&A là không gian riêng của hội viên từng artist. |
-| Kho lưu trữ | `/artist/:artistId/archive` | Timeline công khai của nghệ sĩ với bốn nhóm: tất cả, sự kiện, thời kỳ và dự án. Không trộn ghi chú riêng của fan. |
-| VieCollect | `/shop` | Acquisition và bộ sưu tập vật phẩm vật lý, số, hybrid để biểu đạt dấu ấn fan. Physical/digital có luồng nhận demo; hybrid hiện là concept xem trước. Chi tiết ghi rõ mỗi phiên bản. |
-| My Space | `/me` | Mở thẳng phòng. Chọn avatar, giá trang phục, kệ, bảng kỷ niệm, góc âm nhạc hoặc sổ lưu bút để tương tác. Bộ sưu tập riêng mở từ phòng. |
-| Hội viên, đơn hàng | `/memberships`, `/orders` | Hội viên được nhóm theo nghệ sĩ; đơn hàng nhóm theo lần checkout thay vì đếm mỗi dòng thành một đơn. |
-| Tài khoản, trợ giúp | `/account/settings`, `/account/help` | Thiết lập riêng tư, liên hệ, giao diện và hướng dẫn. Hồ sơ hỗ trợ demo chỉ lưu trên thiết bị. |
+Lượt kiểm tra 14/10/2026: 603 test trong 67 suite, typecheck, source/build/asset checks đã pass; browser QA dùng light/dark trên desktop và mobile. Môi trường local dùng Node 26.7.0, **chưa xác minh Node 22**. Chưa đo LCP/CLS hoặc payload qua CDN; offline và release update chưa kiểm tra bằng chế độ mất mạng của browser thật. Xem [báo cáo](docs/implementation/vieworld-quality-upgrade-report.md) để biết phạm vi và giới hạn, không coi test xanh là chứng nhận production.
 
-Desktop dùng rail nhỏ; tên hiện khi hover hoặc điều hướng bằng bàn phím. Mobile có năm đích: Home, Explore, Artist, VieCollect và Tài khoản. My Space là mục đầu trong menu tài khoản. Không có search chung ở header: Explore, Shop và Bộ sưu tập có phạm vi tìm riêng.
+## Những nguyên tắc giữ xuyên suốt
 
-## Những luật quan trọng
+- Hồ sơ mới bắt đầu riêng, không mượn tên, đồ, đơn hàng hay lời nhắn của Linh. Đăng xuất ẩn dữ liệu protected ngay, giữ dữ liệu hợp lệ để đăng nhập lại.
+- Theo dõi không đồng nghĩa hội viên. Hall công cộng miễn phí; private access phụ thuộc đúng fan, tenant, nghệ sĩ và thời hạn.
+- Access, mode và lifecycle độc lập. Scheduled cho chuẩn bị; paused chỉ đọc; ended/archived không gửi hoặc react thêm. Hoạt động hủy, media lỗi hoặc quyền chưa duyệt không được mở như phiên hợp lệ.
+- Artist presence chỉ xuất hiện theo trạng thái phiên và segment hợp lệ, luôn là minh họa. Avatar trang trí, quote fixture và poll không chứng minh người đang online hoặc nghệ sĩ thật có mặt.
+- Public voice cần opt-in, consent và approval đúng ngữ cảnh. Private Lounge/Q&A không được chiếu ra Home/Explore/Archive, dù có consent. Home có tối đa ba bubble cùng hoạt động hiện tại.
+- Saved, cart, paid/preorder và owned là các trạng thái khác nhau. Chỉ nhận/fulfilled mới ghi ownership; bản physical-only không mở digital. Receipt hybrid cũ được giữ, không coi đó là bằng chứng luồng hybrid mới đã hoàn thiện.
+- Fan chọn món và vị trí tương thích, room tự bố cục với capacity cố định. Move atomic; thao tác lỗi không làm mất nguồn. Gỡ khỏi phòng không xóa đồ sở hữu hoặc provenance. Không kéo thả pixel.
+- Avatar chỉ mặc/cầm món đã có fit chuẩn bị sẵn; không dán ảnh sản phẩm lên người để giả hỗ trợ. Tên đồ mặc lấy từ public look của chủ phòng, không từ viewer.
+- Dấu mốc 10/20 là số thẻ lịch sử mẫu, không phải tuổi fan, attendance, rank hay spend score. Fandom Pass không cấp entitlement. Selected Q&A không đồng nghĩa answered; câu trả lời fixture có nhãn minh họa.
+- Giải quyết hồ sơ hỗ trợ không tự cấp quyền lợi hoặc giao hàng. Ghi chú riêng, order/payment và contact không trở thành metadata công khai.
 
-- Đăng nhập demo mới được mở hoặc sửa dữ liệu cá nhân. Khách vẫn xem nội dung công khai, không mượn tên hay đồ của hồ sơ Linh.
-- Tạo hồ sơ mới không tạo sẵn đơn hàng, kỷ niệm hoặc lời nhắn của fan khác. State lưu theo tenant và ID fan.
-- Theo dõi không đồng nghĩa hội viên. Phòng công cộng không yêu cầu hội viên; Member Lounge/Q&A cần hội viên còn hiệu lực của đúng artist.
-- Hall phân biệt access `public/member`, mode `chat/qa` và lifecycle `permanent/scheduled/active/archived`. Phòng sự kiện scheduled cho trò chuyện chuẩn bị; paused chỉ đọc; ended public chỉ đọc lại, không gửi hoặc react thêm. Phiên hủy, thiếu media hoặc chưa duyệt quyền không được mở thành phòng hợp lệ. Không có cooldown tự suy đoán.
-- Chỉ hiển thị artist đang hiện diện khi session được chọn `running`, segment `live` và báo `artistPresence=present`. Đây vẫn là trạng thái minh họa, không có nghệ sĩ hay livestream thật. Không suy ra số người online từ avatar minh họa.
-- Lời nhắn Hall được đưa ra nơi công khai phải có opt-in tài khoản, consent cho lời nhắn và trạng thái duyệt; lời nhắn bị report không được chiếu ra. Quote fixture được ghi là minh họa.
-- Home có tối đa ba lời nhắn cùng hoạt động Hiện tại. Bubble dẫn về đúng phòng và tin nguồn; Lounge và Q&A không bao giờ được chiếu công khai dù đã consent. Hình fan ngồi ghế là artwork trang trí, không đại diện người đang online.
-- Lưu món, thêm giỏ hoặc xem thử không cấp quyền sở hữu. Bản physical không mặc định kèm digital.
-- Preorder/paid chưa phải vật phẩm đã nhận. Physical demo fulfilled có provenance trong Bộ sưu tập, nhưng không tự có fit avatar; digital nhận demo không có shipment vật lý. Bundle mới chỉ xem concept: model receipt cũ chưa tách digital entitlement khỏi fulfillment vật lý. Giữ receipt bundle đã nhận và dữ liệu cũ, không coi đó là bằng chứng hybrid đã hoàn thiện.
-- Guest không đọc ownership/identity cá nhân; đăng xuất ẩn chúng ngay nhưng giữ receipt và vị trí để đăng nhập lại. Đây là isolation của demo local, không phải xác thực an toàn phía server.
-- My Space cho fan chọn món; room tự bố cục ở surface tương thích, có capacity và thay thế rõ ràng. Move atomic; lỗi không làm mất vị trí cũ. Order/payment và ghi chú riêng không thành metadata công khai.
-- Dấu mốc 10/20 ghi số thẻ lịch sử đã trả trong demo, không phải tham dự concert, tuổi fan hoặc rank. Fandom Pass chỉ là bản giới thiệu do fan chọn, không cấp hội viên hay quyền truy cập. Sample voices không tự có badge hội viên.
-- Avatar dùng một thân chuẩn; trang phục, nón và món cầm tay chỉ dùng fit đã chuẩn bị. Món chưa có fit không được dán ảnh lên avatar để giả lập hỗ trợ.
-- Room có vị trí và giới hạn cố định. Hover hoặc focus món để xem thử nhẹ, chọn để giữ bản xem thử, xác nhận mới lưu. Không kéo thả pixel, không xóa món đã mua khi cất khỏi phòng. Kệ trống không giả ánh sáng của một lightstick chưa đặt.
-- Link quyền lợi và thời hạn chỉ hiện khi có metadata hợp lệ. Không tự tạo deadline, quyền xem lại hoặc điểm đến.
-- Hội viên tổng quan ưu tiên quyền lợi cần chú ý và quan hệ với từng nghệ sĩ. Quyền lợi đã nhận, hết hạn hoặc thu hồi nằm trong lịch sử, không cộng vào số quyền lợi hiện có.
-- Liên kết giữa các nghệ sĩ không biến hoạt động của họ thành hoạt động chung. Programme được tìm qua đúng nghệ sĩ chủ quản; pulse Explore ưu tiên ngữ cảnh hoạt động chính.
-- Shop không dùng lời nhắn concert không liên quan làm đánh giá sản phẩm. Khi chưa có câu chuyện gắn với dòng sản phẩm, dùng nội dung biên tập và ghi rõ từng phiên bản nhận được gì.
+Deep links còn hữu ích được giữ tương thích: `/inbox`, `/sessions/:id` và các link My Space cũ. Ví dụ `/me?panel=capsules` mở nhóm kỷ niệm trong Bộ sưu tập riêng, không tạo một trang capsule song song.
 
-Các link My Space cũ còn hữu ích được chuyển về nơi hiện tại. Ví dụ `/me?panel=capsules` mở nhóm kỷ niệm trong Bộ sưu tập riêng, không tạo thêm một trang capsule song song. Dữ liệu sở hữu, vị trí cũ và ghi chú riêng được giữ.
+## Source và delivery
 
-## Source và hình ảnh
+React + TypeScript + Vite; reducer/selector giữ luật domain, fixture cung cấp dữ liệu demo, các route chính lazy-load.
 
-| Thư mục | Trách nhiệm |
+| Thư mục | Vai trò |
 | --- | --- |
-| `src/views/`, `src/components/` | Route và giao diện; các trang chính lazy-load. |
-| `src/domain/`, `src/world/` | Reducer, selector, quyền, tìm kiếm, đơn hàng và luật trình bày. |
-| `src/data/` | Fixture minh họa, không phải API production. |
-| `src/services/` | Lưu state demo và phục hồi khi storage lỗi. |
-| `src/styles/` | Token, typography và CSS. `presence.css` là lớp composition hiện tại. |
-| `src/tests/` | Regression logic, dữ liệu và UI; contract hiện tại ở `presence_contracts.test.tsx`, `presence_visual_connections.test.tsx` và `presence_md_continuation.test.tsx`. |
-| `static/` | Asset public gốc, manifest và service worker. |
+| `src/views/`, `src/components/` | Routes và giao diện. |
+| `src/domain/`, `src/world/` | State, quyền, scope, ownership, placement và luật trình bày. |
+| `src/data/` | Fixture minh họa và manifest delivery ảnh. |
+| `src/services/` | Lưu/khôi phục dữ liệu browser-local. |
+| `src/styles/` | Tokens, typography và composition; `presence.css` là lớp presentation hiện tại. |
+| `src/tests/` | Regression domain, privacy, persistence, route và UI contracts. |
+| `static/` | Public assets, manifest và service worker; Vite dùng làm `publicDir`. |
+| `scripts/` | Source/build checks và công cụ tối ưu ảnh tùy chọn. |
+| `docs/implementation/` | Bằng chứng kiểm tra và các quyết định triển khai. |
 
-Vite dùng `static/` làm `publicDir`. `dist/` là output tạo lại được, được Git ignore; không sửa ảnh hoặc code trực tiếp trong đó. Các ảnh sản phẩm có alias qua `merchImages.ts`. Product ID và ownership không thay đổi khi đổi presentation.
+Ảnh full-size được chuyển sang WebP, giữ artwork, geometry và alpha; notification có thumbnail riêng nhỏ hơn. `src/data/imageDelivery.json` ghi originals, derivatives và budget. Resolver giữ các alias/URL cũ, không đổi ID, fit hoặc ownership. Original files còn để phục vụ compatibility; `dist/` là output được Git ignore, không sửa trực tiếp.
 
-Một số món fixture từng mượn ảnh sai loại được thay bằng illustration SVG trong `CatalogItemArt`, dùng chung cho Shop, Collection và Room. Đây là hình concept, không phải ảnh hàng thật. Avatar fit nằm ở `avatarFit.ts`; chỉ mở khả năng thử/mặc khi món có fit phù hợp.
+Để tái tạo derivatives, dùng `node scripts/optimize-images.mjs --sharp-module <đường dẫn module Sharp>`. Đây là công cụ dev tùy chọn; Sharp không cần để chạy hoặc build app. Không tạo artwork mới bằng converter.
 
-Nhóm fan trên Home và bàn sổ lưu bút dùng WebP có nền trong suốt. Chữ, thông báo và lời nhắn vẫn được render bằng giao diện, không nằm trong ảnh. Sổ lưu bút là đồ nội thất mặc định; không tự cấp vật phẩm sưu tập. Animation bubble ngắn và tắt khi người dùng chọn giảm chuyển động.
+Be Vietnam Pro dùng cho nội dung, Nunito cho display, Lora cho các heading/editorial đã định nghĩa. Nunito là variable font. Thông báo tính thời gian theo `demoTime`, không theo đồng hồ máy.
 
-## Giới hạn demo
+State vẫn lưu ngay, không debounce toàn snapshot. Snapshot cùng object/key đã lưu thành công được bỏ qua; ghi lỗi vẫn có memory-fallback notice. Xung đột giữa tab dừng ghi và yêu cầu recovery rõ ràng. Đây không phải khóa transactional hay bảo đảm chống mất dữ liệu khi crash.
 
-Google/Facebook chỉ mô phỏng lựa chọn đăng nhập, không OAuth thật hoặc xác minh danh tính. State ở trình duyệt, không đồng bộ giữa thiết bị. Người dùng chung trình duyệt có thể mở các hồ sơ demo đã lưu. Không nhập địa chỉ, thông tin liên hệ, thanh toán hoặc dữ liệu nhạy cảm thật.
+## Deploy và cache
 
-Các artist, nội dung, giá, quyền lợi và phiên live là dữ liệu minh họa. Hall không có mạng realtime; media không cấp quyền phát bản ghi thương mại. Kiểm tra phía client không phải bảo mật production. Bản vận hành thật còn cần xác thực và ủy quyền server, thanh toán/inventory xác nhận, moderation, đồng bộ, consent và chính sách dữ liệu.
+`render.yaml` khai báo static SPA:
 
-Q&A demo có gửi câu hỏi, trạng thái hiển thị và câu trả lời fixture có nhãn minh họa; chưa có quy trình artist/team duyệt và trả lời thật. Archive giữ public activity hợp lệ và chapter được biên tập trong fixture, không tự đưa mọi room, member chat hoặc capsule riêng vào lịch sử chung. Không suy ra ngày lịch sử từ tên ảnh.
+- Node 22.
+- Build: `npm ci && npm run build && npm run check:showcase`.
+- Publish: `dist/`.
+- SPA rewrite về `index.html`; HTML/service worker không cache cố định.
+- Service worker chỉ đăng ký trong production; cache version theo bundle/public assets, không dùng `skipWaiting` ép tab cũ đổi bundle.
 
-“Moment → Place → Position → Continuity” và “Fan đến vì hứng thú, ở lại vì có vị trí” là giả thuyết để kiểm thử. Prototype chưa có user validation, analytics hay bằng chứng retention. Không có liên kết chính thức với nghệ sĩ thật, hãng giải trí hoặc DatVietVAC. Giá/tồn kho/giao nhận và contact/support chỉ mô phỏng; không sản xuất, thu tiền hoặc giao hàng thật.
+Precache gồm shell, CSS/fonts, static dependencies của My Space và đồ nội thất mặc định. Offline là best-effort với những gì đã cache, không bao phủ mọi route hoặc mọi tổ hợp phòng. Vật phẩm/nội dung chưa cache vẫn cần mạng.
 
-Visual mới bám hierarchy và behavior của bộ ảnh đã chốt; không phải bản chép pixel hoặc bộ asset hoàn chỉnh cho mọi tổ hợp. Món chưa có fit vẫn được giữ trong dữ liệu sở hữu, nhưng không có nút mặc giả.
+Push GitHub không đồng nghĩa deployment đã thành công; cần xem kết quả build/deploy của Render. `vite preview` chỉ dùng kiểm tra local, không là production server.
 
-## Deploy
+## Giới hạn và quyền sử dụng
 
-`render.yaml` cấu hình static site: `npm ci && npm run build && npm run check:showcase`, publish `dist/` và rewrite SPA về `index.html`. Service worker chỉ đăng ký production; offline là best-effort với asset đã cache.
+Google/Facebook chỉ mô phỏng lựa chọn đăng nhập, không xác minh danh tính hoặc kết nối tài khoản thật. State lưu theo tenant/fan trong trình duyệt, không đồng bộ thiết bị. Ai dùng chung trình duyệt có thể chọn các hồ sơ demo đã lưu; client guards không phải bảo mật server.
 
-Trước khi chia sẻ, kiểm tra Home, Explore, ba tab Artist, Room/Collection/Avatar, Shop, checkout, tài khoản mới, sign-out, light/dark, màn hình hẹp, bàn phím và reload. Xác nhận quyền sử dụng media trước khi public. Test xanh và build thành công không chứng minh app sẵn sàng cho giao dịch hoặc dữ liệu fan thật.
+Hall không realtime; media không cấp quyền phát bản ghi thương mại. Giá, tồn kho, giao nhận và moderation đều mô phỏng. Bản vận hành thật còn cần auth/authorization server, dữ liệu authoritative, thanh toán, inventory, moderation, consent và chính sách dữ liệu.
 
-## Bản quyền
+VieWorld không có liên kết chính thức với nghệ sĩ, hãng giải trí hoặc DatVietVAC. Fixture MFan/FanMe không chứng minh quan hệ đối tác. Hình sản phẩm/nhân vật là concept hoặc minh họa AI, không phải ảnh hàng đã sản xuất. Kiểm tra quyền sử dụng media trước khi chia sẻ/public; visual hiện tại không phải bộ asset hoàn chỉnh cho mọi tổ hợp.
 
 © 2026 Phạm Thanh Phú. All rights reserved. Xem [LICENSE](LICENSE) trước khi sao chép, tái phân phối hoặc dùng thương mại.

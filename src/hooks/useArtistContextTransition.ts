@@ -12,8 +12,7 @@ export function useArtistContextTransition(pathname: string, contextId: string |
       // Keep the compact artist identity visible rather than cropping it away.
       const target = document.querySelector<HTMLElement>('.artist-world-page');
       if (!target) return;
-      const header = document.querySelector('.fw-header')?.getBoundingClientRect().bottom || 0;
-      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - header - 12);
+      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - 12);
       if (heading) {
         heading.tabIndex = -1;
         heading.focus({ preventScroll: true });

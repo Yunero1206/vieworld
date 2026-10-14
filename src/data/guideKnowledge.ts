@@ -303,7 +303,7 @@ const UNSUPPORTED_PATTERNS: { pattern: RegExp; reason: string }[] = [
 
 /**
  * Deterministic Query Processor for World Guide
- * Strictly read-only, local keyword matching, and prompt-injection immune.
+ * Local keyword matching only. Queries cannot execute tools or mutate app state.
  */
 export function queryWorldGuide(rawQuery: string): GuideQueryResult {
   const query = (rawQuery || '').trim();
@@ -324,7 +324,7 @@ export function queryWorldGuide(rawQuery: string): GuideQueryResult {
         type: 'injection_blocked',
         query,
         message:
-          'Yêu cầu không hợp lệ. Trợ lý hướng dẫn là công cụ tra cứu thông tin tĩnh được xác thực nội bộ, không có quyền can thiệp hay thay đổi trạng thái dữ liệu hệ thống.',
+          'Hướng dẫn chỉ tra cứu thông tin, không thay đổi tài khoản hay quyền lợi. Bạn có thể tìm cách dùng Hall, avatar hoặc bộ sưu tập.',
       };
     }
   }
@@ -336,7 +336,7 @@ export function queryWorldGuide(rawQuery: string): GuideQueryResult {
         type: 'unsupported_topic',
         query,
         message:
-          'Xin lỗi, tôi là trợ lý thông tin kỹ thuật nền tảng VieWorld. Tôi không có thẩm quyền và không được phép trả lời các câu hỏi về đời tư, ý kiến cá nhân của nghệ sĩ hoặc tư vấn tài chính / y tế.',
+          'Hướng dẫn chỉ giải thích cách dùng VieWorld. Nội dung này nằm ngoài phạm vi tra cứu.',
         limitationReason: item.reason,
       };
     }
@@ -375,7 +375,7 @@ export function queryWorldGuide(rawQuery: string): GuideQueryResult {
     type: 'unknown',
     query,
     message:
-      'Xin lỗi, câu hỏi này nằm ngoài phạm vi kiến thức đã được phê duyệt của trợ lý hướng dẫn. Bạn có thể tra cứu theo các chủ đề gợi ý bên dưới hoặc liên hệ ban tổ chức.',
+      'Chưa có hướng dẫn phù hợp với từ khóa này. Bạn có thể chọn một chủ đề bên dưới.',
     suggestedTopics: APPROVED_KNOWLEDGE_CARDS.slice(0, 4),
   };
 }

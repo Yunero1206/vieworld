@@ -1,4 +1,5 @@
 /** Resolve one catalog image to its canonical public asset without changing product IDs. */
+import { optimizedImageUrl } from './imageDelivery';
 export const MERCH_IMAGE_ROOT = '/images/merch-v2';
 
 const sharedArtwork: Record<string, string> = {
@@ -23,5 +24,5 @@ export function merchImageUrl(image: string): string {
   if (/^(?:https?:)?\//.test(value)) return value;
   const name = value.replace(/\.(?:png|jpe?g|webp)$/i, '');
   const canonical = sharedArtwork[name] || name;
-  return `${MERCH_IMAGE_ROOT}/${canonical}.${jpegArtwork.has(canonical) ? 'jpg' : 'png'}`;
+  return optimizedImageUrl(`${MERCH_IMAGE_ROOT}/${canonical}.${jpegArtwork.has(canonical) ? 'jpg' : 'png'}`);
 }

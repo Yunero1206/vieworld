@@ -34,7 +34,7 @@ export function PersonalUtilityView(){
   const benefitRow=(b:Benefit)=><Link className="presence-list-row" key={b.id} to={`/benefits/${b.id}`}><span><strong>{b.title}</strong><small>{state.worlds[b.worldId]?.name} · {benefitStateLabel(state,b)}{b.availableFrom?' · Mở '+date(b.availableFrom):''}{b.expiresAt?' · Đến '+date(b.expiresAt):''}</small></span><ChevronRight size={18}/></Link>;
   const groups=signedIn?purchaseGroupsForFan(state):[];
   const help=queryWorldGuide(query);
-  const cards=query.trim()?(help.type==='answered'?help.cards:[]):APPROVED_KNOWLEDGE_CARDS;
+  const cards=!query.trim()?APPROVED_KNOWLEDGE_CARDS:help.type==='answered'?help.cards:help.type==='unknown'?help.suggestedTopics:[];
   const cases=signedIn?Object.values(state.supportCases).filter(c=>c.tenantId===state.activeTenantId&&c.fanId===state.fanProfile.id):[];
   return <div className="presence-utility">
     <Link className="presence-back" to="/">← VieWorld</Link>
@@ -58,7 +58,8 @@ export function PersonalUtilityView(){
     </div>}
     {pathname.endsWith('/help')&&<>
       <label className="presence-help-search">Tìm trong hướng dẫn<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hall, avatar, đơn hàng…"/></label>
-      <div className="presence-help-topics">{cards.map(card=><details key={card.id}><summary><HelpCircle size={18}/>{card.title}</summary><p>{card.description}</p><Link to={card.actionLink.to}>{card.actionLink.label} →</Link></details>)}{!cards.length&&<p>Chưa có hướng dẫn phù hợp. Thử một từ khóa khác nhé.</p>}</div>
+      <div role="status" aria-live="polite" aria-atomic="true">{query.trim()&&help.type!=='answered'&&<><p>{help.message}</p>{help.type==='unsupported_topic'&&<p className="presence-note">{help.limitationReason}</p>}{help.type==='unknown'&&<p>Chủ đề bạn có thể tìm:</p>}</>}</div>
+      <div className="presence-help-topics">{cards.map(card=><details key={card.id}><summary><HelpCircle size={18}/>{card.title}</summary><p>{card.description}</p><Link to={card.actionLink.to}>{card.actionLink.label} →</Link></details>)}</div>
       <section className="presence-support"><h2>Yêu cầu hỗ trợ</h2><p>Chọn đơn hàng hoặc quyền lợi cần kiểm tra.</p><form onSubmit={e=>{e.preventDefault();const [kind,...id]=subject.split(':');if(kind==='order'||kind==='benefit')dispatch({type:'OPEN_SUPPORT_CASE',subjectType:kind,subjectId:id.join(':')});}}><select aria-label="Nội dung cần hỗ trợ" required value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Chọn nội dung</option>{groups.flatMap(g=>g.orders).map(o=><option value={`order:${o.id}`} key={o.id}>{o.productTitle||state.products[o.productId]?.title||'Đơn hàng'}</option>)}{(signedIn?fanBenefitsFor(state):[]).map(b=><option value={`benefit:${b.id}`} key={b.id}>{b.title}</option>)}</select><button disabled={!subject}>Tạo yêu cầu demo</button></form>
       {cases.map(c=>{const source=c.subjectType==='order'?groups.flatMap(g=>g.orders).find(o=>o.id===c.subjectId):undefined;const title=source?.productTitle||(source&&state.products[source.productId]?.title)||(c.subjectType==='benefit'?benefits.find(b=>b.id===c.subjectId)?.title:undefined)||'Nội dung cần kiểm tra';const status={open:'Đã tạo',acknowledged:'Đã tiếp nhận',investigating:'Đang kiểm tra',resolved:'Đã giải quyết',closed:'Đã đóng'}[c.status];return <Link className="presence-list-row" to={`/support/${c.id}`} key={c.id}><span><strong>{title}</strong><small>{c.subjectType==='order'?'Đơn hàng':'Quyền lợi'} · {status}</small></span><ChevronRight size={18}/></Link>;})}<p className="presence-note">Yêu cầu chỉ lưu trên thiết bị, chưa gửi đến đội hỗ trợ. Không có cam kết phản hồi.</p></section>
     </>}

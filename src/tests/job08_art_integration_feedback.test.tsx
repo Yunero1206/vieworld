@@ -1,10 +1,9 @@
 import { fireEvent,render,screen } from '@testing-library/react';
-import fs from 'fs';
-import path from 'path';
 import { describe,expect,it } from 'vitest';
 
 import { CallSampleCueBar } from '../components/CallSampleCueBar';
 import { CallSampleCue } from '../domain/types';
+import { AvatarStage } from '../components/AvatarStage';
 
 describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
 
@@ -70,21 +69,12 @@ describe('Job 08: Art Integration & Responsive Micro-Feedback', () => {
   /* -------------------------------------------------------------------------- */
   /* Test 4: Reduced Motion & Tactile Micro-Interactions in CSS                 */
   /* -------------------------------------------------------------------------- */
-  describe('CSS Micro-Interactions & Reduced Motion Rules', () => {
-    it('contains prefers-reduced-motion media query guarding artwork, animations, and hotspots', () => {
-      const cssContent = fs.readFileSync(path.resolve(__dirname, '../index.css'), 'utf-8');
-
-      // Verifies reduced motion rules disable animations and transitions
-      expect(cssContent).toContain('@media (prefers-reduced-motion: reduce)');
-      expect(cssContent).toContain('.diorama-backdrop-artwork');
-      expect(cssContent).toContain('.room-backdrop-artwork');
-      expect(cssContent).toContain('.lightstick-active-badge');
-      expect(cssContent).toContain('.avatar-renderer');
-
-      // Verifies tactile micro-interaction active states
-      expect(cssContent).toContain('.diorama-spot:active');
-      expect(cssContent).toContain('.room-spot:active');
-      expect(cssContent).toContain('transform: scale(0.98)');
+  describe('Current stage reduced motion behavior', () => {
+    it('freezes the current stage for reduced motion instead of requiring retired diorama selectors', () => {
+      const view=render(<AvatarStage artistPresence="present" reducedMotion/>);
+      expect(screen.getByTestId('avatar-graphic')).toHaveAttribute('data-frozen','true');
+      view.rerender(<AvatarStage artistPresence="present" reducedMotion={false}/>);
+      expect(screen.getByTestId('avatar-graphic')).toHaveAttribute('data-frozen','false');
     });
   });
 

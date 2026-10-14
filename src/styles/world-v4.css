@@ -1,5 +1,4 @@
 /* VieWorld type + interaction system. Self-hosted Vietnamese-first typography. */
-:root { --font-sans:'Be Vietnam Pro',system-ui,sans-serif; --font-display:'Nunito','Be Vietnam Pro',sans-serif; }
 .fan-shell { --primary:#3f665a; --primary-hover:#2e5047; --primary-light:#e9eee5; --accent:#b17b4c; --ink:#303f36; --muted:#657066; --border:#d6dccf; --surface:#fffdf6; font-family:var(--font-sans); line-height:1.65; }
 .fan-shell :is(button,input,select,textarea,p,a,span,small,strong,label,time,div) { font-family:var(--font-sans); }
 .fan-shell :is(h1,h2,h3,h4,.fw-brand,.vw-place-door strong,.vw-room-object strong) { font-family:var(--font-display)!important; font-weight:800; letter-spacing:-.025em; }

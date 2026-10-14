@@ -1,12 +1,13 @@
 import { Notification as DomainNotification } from '../../domain/types';
 import { DisplayNotification, NotificationCategory } from './notification.types';
 
-export function formatTimeAgo(isoString?: string): string {
+export function formatTimeAgo(isoString: string | undefined, referenceTime: string): string {
   if (!isoString) return 'Vừa xong';
   const time = new Date(isoString).getTime();
-  if (isNaN(time)) return 'Vừa xong';
+  const reference = new Date(referenceTime).getTime();
+  if (isNaN(time) || isNaN(reference)) return 'Vừa xong';
 
-  const diffSeconds = Math.max(0, Math.floor((Date.now() - time) / 1000));
+  const diffSeconds = Math.max(0, Math.floor((reference - time) / 1000));
 
   if (diffSeconds < 60) return 'Vừa xong';
   const diffMinutes = Math.floor(diffSeconds / 60);
@@ -17,8 +18,8 @@ export function formatTimeAgo(isoString?: string): string {
   if (diffDays === 1) return 'Hôm qua';
   if (diffDays < 7) return `${diffDays} ngày trước`;
 
-  const d = new Date(time);
-  return `${d.getDate()} thg ${d.getMonth() + 1}`;
+  const parts = new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', day: 'numeric', month: 'numeric' }).formatToParts(new Date(time));
+  return `${parts.find(part => part.type === 'day')?.value} thg ${parts.find(part => part.type === 'month')?.value}`;
 }
 
 export function getCategoryInfo(notif: DomainNotification): {
@@ -39,7 +40,7 @@ export function getCategoryInfo(notif: DomainNotification): {
       type: 'session',
       label: 'Cuộc hẹn nghệ sĩ',
       dotColor: '#2F6650',
-      thumbnailUrl: '/images/place-stage.jpg',
+      thumbnailUrl: '/images/place-stage-thumb.webp',
       ctaLabel: 'Xem chi tiết →',
     };
   }
@@ -48,7 +49,7 @@ export function getCategoryInfo(notif: DomainNotification): {
       type: 'shop',
       label: 'VieCollect',
       dotColor: '#D97706',
-      thumbnailUrl: '/images/place-shop.jpg',
+      thumbnailUrl: '/images/place-shop-thumb.webp',
       ctaLabel: 'Xem ngay →',
     };
   }
@@ -57,7 +58,7 @@ export function getCategoryInfo(notif: DomainNotification): {
       type: 'moment',
       label: 'Cộng đồng',
       dotColor: '#2563EB',
-      thumbnailUrl: '/images/place-club.jpg',
+      thumbnailUrl: '/images/place-club-thumb.webp',
       ctaLabel: 'Khám phá ngay →',
     };
   }
@@ -66,7 +67,7 @@ export function getCategoryInfo(notif: DomainNotification): {
       type: 'space',
       label: 'Không gian của tôi',
       dotColor: '#DC2626',
-      thumbnailUrl: '/images/place-lounge.jpg',
+      thumbnailUrl: '/images/place-lounge-thumb.webp',
       ctaLabel: 'Về không gian của tôi →',
     };
   }
@@ -75,7 +76,7 @@ export function getCategoryInfo(notif: DomainNotification): {
       type: 'support',
       label: 'Hỗ trợ',
       dotColor: '#4F46E5',
-      thumbnailUrl: '/images/place-memory.jpg',
+      thumbnailUrl: '/images/place-memory-thumb.webp',
       ctaLabel: 'Xem hỗ trợ →',
     };
   }
@@ -83,12 +84,12 @@ export function getCategoryInfo(notif: DomainNotification): {
     type: 'system',
     label: 'VieWorld',
     dotColor: '#059669',
-    thumbnailUrl: '/images/vieworld-brand.jpg',
+    thumbnailUrl: '/images/vieworld-brand-thumb.webp',
     ctaLabel: 'Xem chi tiết →',
   };
 }
 
-export function mapDomainToDisplay(notif: DomainNotification): DisplayNotification {
+export function mapDomainToDisplay(notif: DomainNotification, referenceTime: string): DisplayNotification {
   const { type, label, dotColor, thumbnailUrl, ctaLabel } = getCategoryInfo(notif);
   return {
     id: notif.id,
@@ -99,7 +100,7 @@ export function mapDomainToDisplay(notif: DomainNotification): DisplayNotificati
     title: notif.title.replace(/vie\s?shop/gi, 'VieCollect'),
     body: notif.body.replace(/vie\s?shop/gi, 'VieCollect'),
     createdAt: notif.createdAt || notif.updatedAt,
-    timeAgo: formatTimeAgo(notif.createdAt || notif.updatedAt),
+    timeAgo: formatTimeAgo(notif.createdAt || notif.updatedAt, referenceTime),
     read: Boolean(notif.isRead),
     targetRoute: notif.targetRoute || (type === 'session' ? '/explore' : type === 'shop' ? '/shop' : type === 'space' ? '/me' : '/explore'),
     thumbnailUrl,

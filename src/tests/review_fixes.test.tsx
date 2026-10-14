@@ -318,7 +318,7 @@ describe('5. P2 Shop search and navigation forgiving search & URL state', () => 
       expect(screen.getAllByText(/Dự kiến giao hàng: Tháng 10\/2026/i).length).toBeGreaterThan(0);
       expect(screen.getByAltText('Áo Kỷ Niệm Star Club (Archived)')).toHaveAttribute(
         'src',
-        '/images/merch-v2/shirt-physical.png'
+        '/images/merch-v2/shirt-physical.webp'
       );
       expect(screen.getByTestId('order-status-badge')).toHaveTextContent('Đã thanh toán');
     });

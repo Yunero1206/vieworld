@@ -1,6 +1,5 @@
 /* Shared typography: real Vietnamese weights, UI sans + editorial serif only. */
 .fan-shell {
-  --font-display: var(--font-sans);
   --type-caption: 12px; --type-meta: 13px; --type-ui: 14px; --type-body: 15px;
   --rail-expanded: 152px;
   font-size: var(--type-body); line-height: 1.6;

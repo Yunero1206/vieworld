@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import { AvatarStage } from './AvatarStage';
 import { SilentMediaPlaceholder } from './SilentMediaPlaceholder';
 import { selectPublicVoices } from '../world/exploreDiscovery';
-import { sessionWorldContext } from '../world/worldContext';
+import { artistForWorld, sessionWorldContext } from '../world/worldContext';
 import { MembershipBadge } from './MembershipBadge';
 import { membershipTenure, memberForChat } from '../world/membershipBadge';
 import { LiveCheer } from './LiveCheer';
@@ -67,8 +67,9 @@ export function ContextStage({ session, artistId, artistName, image }: { session
   const participated = signedIn && Boolean(state.participations[`part_${state.fanProfile.id}_${session.id}_live`]);
   const interact = (action: AppAction) => signedIn ? dispatch(action) : window.dispatchEvent(new Event('vieworld-open-auth'));
   const replayAvailable = session.replayStatus === 'available' && session.mediaStatus !== 'expired';
-  const avatar = session.avatarAssetId && state.avatarAssets[session.avatarAssetId]?.status === 'approved'
-    ? state.avatarAssets[session.avatarAssetId] : undefined;
+  const candidate = session.avatarAssetId ? state.avatarAssets[session.avatarAssetId] : undefined;
+  const avatar = candidate?.tenantId === state.activeTenantId && candidate.status === 'approved'
+    && candidate.allowedContexts.includes(session.format) && artistForWorld(state, candidate.ownerWorldId) === artistId ? candidate : undefined;
   const liveStage = context.type === 'live' && context.phase === 'active' && session.rightsApproved !== false;
   return <section className="artist-context-stage" aria-labelledby="artist-context-title">
     <div className="artist-context-stage-heading"><div><small>{session.status === 'open' ? 'SẢNH ĐÃ MỞ' : session.status === 'paused' ? 'TẠM DỪNG' : context.phase === 'active' ? '● ĐANG DIỄN RA' : context.phase === 'upcoming' ? 'SẮP DIỄN RA' : 'ĐÃ KHÉP LẠI'} · {context.type === 'live' ? 'LIVE' : 'SỰ KIỆN'} · MINH HỌA</small><h2 id="artist-context-title">{context.title}</h2><p><CalendarDays size={15} />{formatTime(session.scheduledStartTime)} · {artistName}</p></div><Link to={`/artist/${artistId}`} className="artist-context-close">Về Trang chính</Link></div>
@@ -82,6 +83,7 @@ export function ContextStage({ session, artistId, artistName, image }: { session
         {context.phase === 'ended' && replayAvailable && <button type="button" onClick={() => interact({ type: 'WATCH_REPLAY', sessionId: session.id })}>Ghi nhận xem lại</button>}
         {context.phase === 'ended' && !replayAvailable && <span>Chưa có bản xem lại. Kỷ niệm vẫn ở Kho lưu trữ.</span>}
         {session.format === 'concert' && session.setlist?.length ? <details><summary>Chương trình biểu diễn</summary><ul>{session.setlist.map((entry, index) => <li key={index}>{entry.title}</li>)}</ul></details> : null}
+        {session.format === 'listening' && session.trackNotes?.length ? <details className="artist-context-tracks"><summary>Bản thu & ghi chú ({session.trackNotes.length})</summary><ol>{session.trackNotes.map(track => <li key={`${track.trackNumber}-${track.title}`}><strong>{track.trackNumber}. {track.title}</strong> <small>{track.duration}{track.isCurrent ? ' · Bản chọn trong demo' : ''}</small><p>{track.notes}</p></li>)}</ol></details> : null}
       </div>
       <p className="artist-context-honesty">Phiên và avatar minh họa. Không có nghệ sĩ hay livestream thật; âm thanh demo chỉ phát khi bạn chọn.</p>
     </div><ContextHall artistId={artistId} artistName={artistName} roomId={context.hallRoomId || session.id} /></div>
