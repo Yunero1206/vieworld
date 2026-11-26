@@ -555,9 +555,9 @@ export const EXPANDED_PUBLIC_VOICES: PublicVoice[] = [
   { id: 'voice-a-general-2', worldId: 'artist-a', author: '@luna', text: 'Mình mới ghé world. Chào cả nhà nha!', selectedBy: 'community', sourceContextId: 'hall-artist-a', isDemo: true },
   // Artist A
   { id: 'voice-a-1', worldId: 'artist-a', author: '@minh', text: 'Nay nghe setlist vậy chắc tui xỉu mất 😭', selectedBy: 'artist', sourceContextId: 'session-dropin-01', isDemo: true },
-  { id: 'voice-a-2', worldId: 'artist-a', author: '@luna', text: 'Ai đi Hà Nội nhớ mang banner và lightstick nha 💙', selectedBy: 'community', sourceContextId: 'session-dropin-01', isDemo: true },
-  { id: 'voice-a-3', worldId: 'artist-a', author: '@linh', text: 'Bridge live hôm nay hòa giọng quá đỉnh.', selectedBy: 'community', sourceContextId: 'session-dropin-01', isDemo: true },
-  { id: 'voice-a-4', worldId: 'artist-a', author: '@nam_phan', text: 'Chiếc áo Star Club mặc vừa in, sẵn sàng cho tour!', selectedBy: 'artist', sourceContextId: 'session-dropin-01', isDemo: true },
+  { id: 'voice-a-2', worldId: 'artist-a', author: '@luna', text: 'Ai đi Hà Nội nhớ mang banner và lightstick nha 💙', selectedBy: 'community', sourceContextId: 'session-dropin-01', sourceMessageId: 'msg-a-02', isDemo: true },
+  { id: 'voice-a-3', worldId: 'artist-a', author: '@linh', text: 'Bridge live hôm nay hòa giọng quá đỉnh.', selectedBy: 'community', sourceContextId: 'session-dropin-01', sourceMessageId: 'msg-a-03', isDemo: true },
+  { id: 'voice-a-4', worldId: 'artist-a', author: '@nam_phan', text: 'Chiếc áo Star Club mặc vừa in, sẵn sàng cho tour!', selectedBy: 'artist', sourceContextId: 'session-dropin-01', sourceMessageId: 'msg-a-04', isDemo: true },
 
   // Artist B (Quiet)
   { id: 'voice-b-1', worldId: 'artist-b', author: '@nhi', text: 'Đoạn guitar tối qua vẫn ở trong đầu mình thật lâu.', selectedBy: 'community', sourceContextId: 'session-b-intimate', isDemo: true },
@@ -565,9 +565,9 @@ export const EXPANDED_PUBLIC_VOICES: PublicVoice[] = [
   { id: 'voice-b-3', worldId: 'artist-b', author: '@an', text: 'Hẹn gặp nhau ở buổi diễn nhỏ tiếp theo nhé.', selectedBy: 'community', sourceContextId: 'session-b-intimate', isDemo: true },
 
   // Artist C (Multi-context)
-  { id: 'voice-c-1', worldId: 'artist-c', author: '@mi', text: 'Sân khấu tím lần này phối màu nghệ thuật quá.', selectedBy: 'artist', sourceContextId: 'session-c-live', isDemo: true },
-  { id: 'voice-c-2', worldId: 'artist-c', author: '@yen', text: 'Điệp khúc bài mới cứ vang mãi trong tâm trí.', selectedBy: 'community', sourceContextId: 'session-c-live', isDemo: true },
-  { id: 'voice-c-3', worldId: 'artist-c', author: '@vy', text: 'Đã hoàn thành thiệp cho Birthday Project rồi nè 💜', selectedBy: 'community', sourceContextId: 'project-c-birthday', isDemo: true },
+  { id: 'voice-c-1', worldId: 'artist-c', author: '@mi', text: 'Sân khấu tím lần này phối màu nghệ thuật quá.', selectedBy: 'artist', sourceContextId: 'session-c-live', sourceMessageId: 'msg-c-01', isDemo: true },
+  { id: 'voice-c-2', worldId: 'artist-c', author: '@yen', text: 'Điệp khúc bài mới cứ vang mãi trong tâm trí.', selectedBy: 'community', sourceContextId: 'session-c-live', sourceMessageId: 'msg-c-02', isDemo: true },
+  { id: 'voice-c-3', worldId: 'artist-c', author: '@vy', text: 'Đã hoàn thành thiệp cho Birthday Project rồi nè 💜', selectedBy: 'community', sourceContextId: 'project-c-birthday', sourceMessageId: 'msg-c-03', isDemo: true },
 
   // Artist D (Archive & Acoustic)
   { id: 'voice-d-1', worldId: 'artist-d', author: '@hoang', text: 'Nhìn lại hành trình từ First Live 2024 đến nay mà rưng rưng.', selectedBy: 'artist', sourceContextId: 'session-d-2026-anniversary', isDemo: true },
@@ -579,16 +579,16 @@ export const EXPANDED_PUBLIC_VOICES: PublicVoice[] = [
   { id: 'voice-e-2', worldId: 'artist-e', author: '@thao_nhi', text: 'Tín hiệu đầu tiên siêu tiềm năng, ủng hộ bạn hết mình.', selectedBy: 'community', sourceContextId: 'session-e-debut', isDemo: true },
 
   // Artist MIRA (Commerce / Dream Pop)
-  { id: 'voice-mira-1', worldId: 'artist-mira', author: '@uyen', text: 'Bản Luna nghe như một tối trời dịu hẳn xuống.', selectedBy: 'artist', sourceContextId: 'session-mira-dropin', isDemo: true },
-  { id: 'voice-mira-2', worldId: 'artist-mira', author: '@bao', text: 'Hẹn cả nhà trong buổi nghe thử đĩa than nhé 🌙', selectedBy: 'community', sourceContextId: 'session-mira-dropin', isDemo: true },
-  { id: 'voice-mira-3', worldId: 'artist-mira', author: '@tram', text: 'Crescent Lightstick lên đèn tím lung linh quá.', selectedBy: 'artist', sourceContextId: 'session-mira-dropin', isDemo: true },
-  { id: 'voice-mira-4', worldId: 'artist-mira', author: '@quoc', text: 'Chiếc áo hoodie lavender chất vải sờ êm tay cực kỳ.', selectedBy: 'community', sourceContextId: 'session-mira-dropin', isDemo: true },
+  { id: 'voice-mira-1', worldId: 'artist-mira', author: '@uyen', text: 'Bản Luna nghe như một tối trời dịu hẳn xuống.', selectedBy: 'artist', sourceContextId: 'session-mira-dropin', sourceMessageId: 'msg-mira-01', isDemo: true },
+  { id: 'voice-mira-2', worldId: 'artist-mira', author: '@bao', text: 'Hẹn cả nhà trong buổi nghe thử đĩa than nhé 🌙', selectedBy: 'community', sourceContextId: 'session-mira-dropin', sourceMessageId: 'msg-mira-02', isDemo: true },
+  { id: 'voice-mira-3', worldId: 'artist-mira', author: '@tram', text: 'Crescent Lightstick lên đèn tím lung linh quá.', selectedBy: 'artist', sourceContextId: 'session-mira-dropin', sourceMessageId: 'msg-mira-03', isDemo: true },
+  { id: 'voice-mira-4', worldId: 'artist-mira', author: '@quoc', text: 'Chiếc áo hoodie lavender chất vải sờ êm tay cực kỳ.', selectedBy: 'community', sourceContextId: 'session-mira-dropin', sourceMessageId: 'msg-mira-04', isDemo: true },
 
   // Artist KAI (Community / Future Beats)
-  { id: 'voice-kai-1', worldId: 'artist-kai', author: '@chi', text: 'Đoạn beat mới nghe một lần đã muốn bật nhún nhảy.', selectedBy: 'artist', sourceContextId: 'session-kai-pulse', isDemo: true },
-  { id: 'voice-kai-2', worldId: 'artist-kai', author: '@khang', text: 'Ai tới buổi thử nhịp Cyber Jam thì gặp nhau ở hàng đầu!', selectedBy: 'community', sourceContextId: 'session-kai-meetup', isDemo: true },
-  { id: 'voice-kai-3', worldId: 'artist-kai', author: '@tuan_anh', text: 'Áo khoác bomber phản quang đi concert đêm là nổi bật nhất.', selectedBy: 'artist', sourceContextId: 'session-kai-meetup', isDemo: true },
-  { id: 'voice-kai-4', worldId: 'artist-kai', author: '@duc_phuc', text: 'Tape cassette trong suốt nhìn đậm chất cyberpunk retro.', selectedBy: 'community', sourceContextId: 'session-kai-meetup', isDemo: true },
+  { id: 'voice-kai-1', worldId: 'artist-kai', author: '@chi', text: 'Đoạn beat mới nghe một lần đã muốn bật nhún nhảy.', selectedBy: 'artist', sourceContextId: 'session-kai-pulse', sourceMessageId: 'msg-kai-01', isDemo: true },
+  { id: 'voice-kai-2', worldId: 'artist-kai', author: '@khang', text: 'Ai tới buổi thử nhịp Cyber Jam thì gặp nhau ở hàng đầu!', selectedBy: 'community', sourceContextId: 'session-kai-meetup', sourceMessageId: 'msg-kai-02', isDemo: true },
+  { id: 'voice-kai-3', worldId: 'artist-kai', author: '@tuan_anh', text: 'Áo khoác bomber phản quang đi concert đêm là nổi bật nhất.', selectedBy: 'artist', sourceContextId: 'session-kai-meetup', sourceMessageId: 'msg-kai-03', isDemo: true },
+  { id: 'voice-kai-4', worldId: 'artist-kai', author: '@duc_phuc', text: 'Tape cassette trong suốt nhìn đậm chất cyberpunk retro.', selectedBy: 'community', sourceContextId: 'session-kai-meetup', sourceMessageId: 'msg-kai-04', isDemo: true },
 ];
 
 /* ==========================================================================

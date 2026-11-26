@@ -9,7 +9,7 @@ import { getExploreMomentById } from '../world/exploreRows';
 import { hallEntries } from '../world/artistPresentation';
 import { getHallRoomPolicy, isMemberQASession, isArtistHallRoom, isPublicProjectableHallRoom, canReadArtistHallRoom, canWriteArtistHallRoom, canSubmitArtistHallQuestion } from '../world/hallRooms';
 import { hasActiveMembership, ownsDigitalProduct } from '../world/merchCatalog';
-import { artistForWorld } from '../world/worldContext';
+import { artistForWorld, sessionReminderCopy } from '../world/worldContext';
 import { validRoomDesign } from '../world/places';
 import { acquisitionPreviewOnly, commerceReducer } from '../world/commerce';
 import { shippingReducer } from '../world/shipping';
@@ -201,8 +201,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
             type: 'session_reminder',
             category: 'session',
             sourceAttribution: 'session_system',
-            title: `Nhắc nhở: Bạn đã giữ chỗ cho "${session.title}"`,
-            body: `Phiên tương tác ảo do Ban tổ chức quản lý sẽ diễn ra theo lịch trình. Sảnh chờ sẽ mở trước giờ diễn.`,
+            ...sessionReminderCopy(session),
             isRead: false,
             targetRoute: `/sessions/${session.id}`,
             createdAt: state.demoTime,

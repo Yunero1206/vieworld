@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Notification } from '../domain/types';
+import { notificationCopy } from '../components/notifications/notificationHelper';
 import {
   CheckCheck,
   Settings,
@@ -93,7 +94,7 @@ export const InboxView: React.FC = () => {
 
   const getNotificationActionLabel = (notif: Notification) => {
     const route = notif.targetRoute || '';
-    if (route.includes('/sessions') || route.includes('session=')) return 'Xem phiên trực tiếp';
+    if (route.includes('/sessions') || route.includes('session=')) return 'Xem cuộc hẹn';
     if (route.includes('/orders') || route.includes('panel=bag') || route.includes('/cart')) return 'Xem đơn hàng';
     if (route.includes('/support')) return 'Xem vụ việc hỗ trợ';
     if (route.includes('/benefits') || route.includes('panel=membership')) return 'Xem quyền lợi';
@@ -451,6 +452,7 @@ export const InboxView: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }} data-testid="notifications-list">
           {filteredNotifications.map((notif) => {
             const badge = getAttributionBadge(notif.sourceAttribution);
+            const copy = notificationCopy(notif, state.sessions);
 
             return (
               <article
@@ -532,7 +534,7 @@ export const InboxView: React.FC = () => {
                       margin: '0 0 6px 0',
                     }}
                   >
-                    {notif.title}
+                    {copy.title}
                   </h3>
 
                   <p
@@ -543,7 +545,7 @@ export const InboxView: React.FC = () => {
                       lineHeight: 1.5,
                     }}
                   >
-                    {notif.body}
+                    {copy.body}
                   </p>
 
                   {/* Actions Row */}

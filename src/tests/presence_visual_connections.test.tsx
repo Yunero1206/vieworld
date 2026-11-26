@@ -81,6 +81,12 @@ describe('Canonical visual connections without fabricated presence', () => {
     state.hallMessages = {'artist-a':[{...message(state,'sample'),isSample:true}]};
     expect(hallEntries(state,'artist-a','session-dropin-01').filter(m => m.id === 'sample')).toHaveLength(1);
   });
+  it('highlights the original Artist C message when a link targets a duplicate sample excerpt', () => {
+    const state = initial();
+    render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-c/hall?room=session-c-live&message=voice-c-1']}><ArtistHall artistId="artist-c" name="Artist C" sessions={[]}/></MemoryRouter></AppProvider>);
+    expect(screen.getAllByText('Sân khấu tím lần này phối màu nghệ thuật quá.')).toHaveLength(1);
+    expect(screen.getByLabelText('Lời nhắn được mở từ cộng đồng')).toHaveTextContent('Mi');
+  });
   it('highlights the requested public source without requiring membership', () => {
     const state = initial();
     const {unmount} = render(<AppProvider initialState={state}><MemoryRouter initialEntries={['/artist/artist-a/hall?room=session-dropin-01&message=voice-a-2']}><ArtistHall artistId="artist-a" name="Artist A" sessions={[]}/></MemoryRouter></AppProvider>);

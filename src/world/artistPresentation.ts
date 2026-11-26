@@ -32,11 +32,23 @@ export function artistRooms(state: AppState, artistId: string, selectedRoomId?: 
   const rank=(room:ArtistRoom)=>room.kind==='general'?0:room.access==='public'?(room.lifecycle==='scheduled'?2:1):room.kind==='member'?3:4;
   return rooms.sort((a,b)=>rank(a)-rank(b)||(a.session?.scheduledStartTime||'').localeCompare(b.session?.scheduledStartTime||''));
 }
-/** Same canonical room as Context Mode; demo excerpts remain visibly illustrative. */
-export function hallEntries(state: AppState, artistId: string, roomId: string): ChatMessage[] {
+/** The room and its embedded preview share the same messages and demo excerpts. */
+export function hallEntries(state: AppState, artistId: string, roomId: string): (ChatMessage & { excerptId?: string })[] {
   if (!canReadArtistHallRoom(state,artistId,roomId) || getHallRoomPolicy(state,artistId,roomId)?.mode !== 'chat') return [];
-  const messages = (state.hallMessages?.[artistId] || []).filter(message => message.sessionId === roomId && !message.isReported);
-  const fixtures = selectPublicVoices(state,artistId,roomId).filter(voice => voice.isDemo && !messages.some(message=>message.id===voice.id))
-    .map(voice => ({ id: voice.id, sessionId: roomId, fanId: `demo-${voice.id}`, authorName: voice.author, text: voice.text, timestamp: '', isSample: true }));
+  const roomMessages = (state.hallMessages?.[artistId] || []).filter(message => message.sessionId === roomId);
+  const roomMessageIds = new Set(roomMessages.map(message => message.id));
+  const excerptsBySource = new Map<string, string>();
+  const fixtures = selectPublicVoices(state, artistId, roomId).flatMap(voice => {
+    if (!voice.isDemo || roomMessageIds.has(voice.id)) return [];
+    if (voice.sourceMessageId && roomMessageIds.has(voice.sourceMessageId)) {
+      excerptsBySource.set(voice.sourceMessageId, voice.id);
+      return [];
+    }
+    return [{ id: voice.id, sessionId: roomId, fanId: `demo-${voice.id}`, authorName: voice.author, text: voice.text, timestamp: '', isSample: true }];
+  });
+  const messages = roomMessages.filter(message => !message.isReported).map(message => {
+    const excerptId = excerptsBySource.get(message.id);
+    return excerptId ? { ...message, excerptId } : message;
+  });
   return [...fixtures, ...messages];
 }

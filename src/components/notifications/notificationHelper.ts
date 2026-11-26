@@ -1,4 +1,5 @@
-import { Notification as DomainNotification } from '../../domain/types';
+import type { AppState, Notification as DomainNotification } from '../../domain/types';
+import { sessionReminderCopy } from '../../world/worldContext';
 import { DisplayNotification, NotificationCategory } from './notification.types';
 
 export function formatTimeAgo(isoString: string | undefined, referenceTime: string): string {
@@ -89,16 +90,28 @@ export function getCategoryInfo(notif: DomainNotification): {
   };
 }
 
-export function mapDomainToDisplay(notif: DomainNotification, referenceTime: string): DisplayNotification {
+export function notificationCopy(notif: DomainNotification, sessions: AppState['sessions']) {
+  const matchedSession = notif.type === 'session_reminder' && notif.targetRoute?.match(/^\/sessions\/([^/?#]+)\/?$/);
+  if (matchedSession) {
+    const session = sessions[matchedSession[1]];
+    return session?.tenantId === notif.tenantId
+      ? sessionReminderCopy(session)
+      : { title: 'Cuộc hẹn đã lưu', body: 'Phiên này hiện chưa thể mở.' };
+  }
+  return {
+    title: notif.title.replace(/vie\s?shop/gi, 'VieCollect'),
+    body: notif.body.replace(/vie\s?shop/gi, 'VieCollect'),
+  };
+}
+
+export function mapDomainToDisplay(notif: DomainNotification, referenceTime: string, sessions: AppState['sessions'] = {}): DisplayNotification {
   const { type, label, dotColor, thumbnailUrl, ctaLabel } = getCategoryInfo(notif);
   return {
     id: notif.id,
     type,
     categoryLabel: label,
     categoryDotColor: dotColor,
-    // Old locally saved notices keep their data; presentation follows the current brand.
-    title: notif.title.replace(/vie\s?shop/gi, 'VieCollect'),
-    body: notif.body.replace(/vie\s?shop/gi, 'VieCollect'),
+    ...notificationCopy(notif, sessions),
     createdAt: notif.createdAt || notif.updatedAt,
     timeAgo: formatTimeAgo(notif.createdAt || notif.updatedAt, referenceTime),
     read: Boolean(notif.isRead),

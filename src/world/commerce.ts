@@ -10,6 +10,13 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', cu
 export const money = (n:number) => currencyFormatter.format(n);
 export const cartFingerprint = (s:AppState) => JSON.stringify((s.cart || []).map(l=>[l.key,l.quantity,s.products[l.productId]?.priceVND]));
 export const orderAmount = (o:Order,s:AppState) => (o.unitPriceVND ?? s.products[o.productId]?.priceVND ?? 0)*(o.quantity || 1);
+export function orderDelivery(order: Order, state: AppState): Product['delivery'] {
+  const product = state.products[order.productId];
+  const catalogueDelivery = product?.tenantId === order.tenantId
+    ? product.delivery ?? product.kind ?? 'physical'
+    : undefined;
+  return order.deliveryType ?? catalogueDelivery;
+}
 const fail=(s:AppState,message:string):AppState=>({...s,lastError:{code:'CHECKOUT_INVALID',message}});
 
 export function cartProblem(s:AppState, lines:CartLine[]=s.cart || []):string|undefined {

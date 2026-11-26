@@ -36,8 +36,10 @@ export function ArtistHall({ artistId, name, sessions: _sessions }: { artistId: 
   const readable=canReadArtistHallRoom(state,artistId,selected.id);
   const writable=canWriteArtistHallRoom(state,artistId,selected.id);
   const entries = hallEntries(state,artistId,selected.id);
-  const highlightedId = params.get('message');
-  const highlightedReplyParent = entries.find(entry=>entry.id===highlightedId)?.replyToId;
+  const messageParam = params.get('message');
+  const highlightedMessage = entries.find(entry => entry.id === messageParam || entry.excerptId === messageParam);
+  const highlightedId = highlightedMessage?.id ?? messageParam;
+  const highlightedReplyParent = highlightedMessage?.replyToId;
   const highlightedRootId = highlightedReplyParent || highlightedId;
   const highlightedEntry = useRef<HTMLElement | null>(null);
   const messageLog = useRef<HTMLDivElement | null>(null);

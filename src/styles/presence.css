@@ -45,7 +45,7 @@
 .presence-home-tile:is(:hover,:focus-visible){border-color:var(--shell-focus);box-shadow:0 8px 24px #29453628}
 .presence-home-tile:focus-visible{outline:3px solid var(--shell-focus);outline-offset:5px}
 .presence-home-summary{display:grid;gap:10px;padding:14px 18px 18px}
-.presence-home-summary strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em;font:600 clamp(16px,1.65vw,23px)/1.35 var(--font-sans)}
+.presence-home-summary strong{display:block;overflow-wrap:anywhere;min-height:2.7em;font:600 clamp(16px,1.65vw,23px)/1.35 var(--font-sans)}
 .presence-home-summary small{display:flex;flex-wrap:wrap;gap:7px 14px;font:400 13px/1.5 var(--font-sans);color:var(--board-muted)}.presence-home-summary small>span{display:inline-flex;align-items:center;gap:6px}
 .presence-home-empty{aspect-ratio:1.5;border-radius:14px;padding:15px;color:inherit;display:flex;flex-direction:column;justify-content:center;gap:18px;font-size:14px}
 .presence-home-empty a{display:flex;gap:6px;align-items:center}
@@ -59,9 +59,9 @@
 .presence-home-echo small:before{content:'';position:absolute;right:calc(100% + 7px);top:4px;border:4px solid transparent;border-right-color:#718c9a}
 .presence-home-echo>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:400 14px/1.5 var(--font-sans)}
 .presence-home-echo:focus-visible{outline:3px solid #355a74;outline-offset:4px}
-.presence-home-art-note{margin-top:8px;padding:3px 9px;background:#fff9;border-radius:12px;color:#3f5b4c;font:400 10px var(--font-sans)}
+.presence-home-art-note{margin-top:8px;padding:5px 10px;background:var(--shell-surface);border-radius:12px;color:var(--shell-ink);font:400 11px/1.45 var(--font-sans);text-align:center}
 [data-theme=dark] .presence-home-slot{--board-surface:#192c38cf;--board-ink:#eff4f7;--board-muted:#c5d3db;--board-border:#b5cfde80}[data-theme=dark] .presence-home-slot.is-now{--board-surface:#192c38df}
-[data-theme=dark] .presence-home-echo{background:#203649bd;color:#f0f4f9}[data-theme=dark] .presence-home-echo small{color:#c5d2dd}[data-theme=dark] .presence-home-art-note{background:#1b2e39d9;color:#dde7de}
+[data-theme=dark] .presence-home-echo{background:#203649bd;color:#f0f4f9}[data-theme=dark] .presence-home-echo small{color:#c5d2dd}
 .presence-explore{padding:28px clamp(20px,3vw,50px);max-width:1640px;margin:auto}
 .presence-explore>.vw-search-combobox{max-width:1040px;margin-bottom:22px}.presence-explore .vw-search-input{min-height:48px}
 .presence-world-selector{display:flex;align-items:center;gap:18px;overflow-x:auto;padding:5px 0 24px;max-width:100%;font-size:13px}
@@ -79,6 +79,7 @@
 .presence-activity-copy{position:absolute;bottom:15px;left:17px;right:16px;display:grid;gap:5px}.presence-activity-copy strong{font-size:15px;font-weight:600}.presence-activity-copy small{font-size:11px;color:#dde5ec}
 .presence-note{font-size:12px;color:var(--shell-muted);line-height:1.6;margin:24px 0}
 .presence-utility{max-width:940px;margin:0 auto;padding:40px 32px 70px}.presence-utility h1{font:600 30px var(--font-editorial)!important;margin:24px 0}.presence-utility h2{font-size:19px;margin:30px 0 14px}
+.presence-order-detail .fw-text-button{color:var(--shell-accent);text-decoration:underline;text-underline-offset:.2em}
 .presence-benefit-card,.presence-detail-card{padding:20px;margin:18px 0;border:1px solid var(--shell-border);border-radius:16px;background:var(--shell-surface);font:400 14px/1.65 var(--font-sans)}
 .presence-benefit-card>header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.presence-benefit-card>header>strong{flex:1;min-width:180px}.presence-benefit-card>header>span{padding:5px 10px;border-radius:20px;background:var(--shell-selected);font-size:12px}.presence-benefit-card>header>svg{color:var(--shell-accent);flex-shrink:0}
 .presence-detail-card h2{margin:0 0 14px}.presence-detail-card a,.presence-benefit-card a{color:var(--shell-accent)}
@@ -186,7 +187,7 @@
  .presence-home{min-height:calc(100dvh - 72px);padding:24px 14px 12px}.presence-home-timeline{grid-template-columns:1fr 1fr;gap:16px 12px;align-items:start}.presence-home-slot{margin-top:0}.presence-home-slot.is-now{grid-column:1/-1;grid-row:1}.presence-home-slot.is-now .presence-home-media{aspect-ratio:2;min-height:0}.presence-home-media{width:calc(100% - 12px);aspect-ratio:1.12;min-height:0;margin:6px 6px 0}.presence-home-tile{border-radius:17px}
  .presence-home-caption{display:none}.presence-home-summary{padding:10px;gap:5px}.presence-home-summary strong{font-size:14px}.presence-home-slot.is-now .presence-home-summary strong{font-size:17px;min-height:0}.presence-home-summary small{font-size:12px}.presence-phase{top:8px;left:8px;font-size:11px;padding:4px 7px}
  .presence-home-slot:not(.is-now) .presence-home-summary small{min-height:43px;align-items:flex-start;align-content:flex-start}
- .presence-home-community{margin-top:26px}.presence-home-bench{width:min(400px,95%)}.presence-home-echo-host{min-height:85px}.presence-home-echo{max-width:100%;width:88%;top:0;font-size:12px}.presence-home-echo:is(.anchor-0,.anchor-1,.anchor-2){left:6%;right:auto}.presence-home-art-note{font-size:9px}
+ .presence-home-community{margin-top:26px}.presence-home-bench{width:min(400px,95%)}.presence-home-echo-host{min-height:85px}.presence-home-echo{max-width:100%;width:88%;top:0;font-size:12px}.presence-home-echo:is(.anchor-0,.anchor-1,.anchor-2){left:6%;right:auto}
  .presence-explore{padding:18px 14px}.presence-world-selector{gap:12px}.presence-explore-row{grid-template-columns:76px 1fr;gap:14px;padding:18px 0}.presence-explore-identity .fw-artist-avatar{width:56px;height:56px}.presence-explore-identity strong{font-size:13px}.presence-activity{height:155px}.presence-activity.is-primary{grid-column:1/-1}.presence-activity.is-secondary{grid-column:1/-1;height:110px}.presence-pulse{font-size:12px}
  .presence-utility{padding:24px 18px}.presence-utility h1{font-size:25px!important}
  .presence-shell .artist-world-hero{height:165px;min-height:165px;margin:10px 10px 0;padding:18px}.presence-shell .artist-world-hero.compact{height:105px;min-height:105px}.presence-shell .artist-world-hero-identity h1{font-size:30px!important}.presence-shell .artist-world-local-nav{margin:0 10px;padding:0 12px;gap:22px}.presence-shell .artist-world-hero-identity>span{font-size:12px}

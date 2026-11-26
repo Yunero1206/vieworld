@@ -10,6 +10,8 @@ import { MemberSpaceView } from '../views/MemberSpaceView';
 import { PersonalUtilityView } from '../views/PersonalUtilityView';
 import { ContextStage } from '../components/ContextStage';
 import { formatTimeAgo, mapDomainToDisplay } from '../components/notifications/notificationHelper';
+import { OrderTimeline } from '../components/OrderTimeline';
+import { appReducer } from '../domain/reducer';
 import { queryWorldGuide } from '../data/guideKnowledge';
 import { SessionView } from '../views/SessionView';
 import { ArtistWorldView } from '../views/ArtistWorldView';
@@ -147,5 +149,38 @@ describe('Quality upgrade domain clock', () => {
     const source = {...notification, createdAt: now, updatedAt: now};
     expect(mapDomainToDisplay(source, now).timeAgo).toBe('Vừa xong');
     expect(mapDomainToDisplay(source, '2026-09-09T14:00:00Z').timeAgo).toBe('1 giờ trước');
+  });
+  it('reads a saved RSVP reminder from its target session without changing the stored notification', () => {
+    const state = createInitialState('vieworld-demo');
+    const saved = { ...state.notifications['notif-rsvp-dropin'], title: 'Tên buổi cũ', body: 'Sắp diễn ra' };
+    const session = state.sessions['session-dropin-01'];
+    expect(mapDomainToDisplay(saved, now, state.sessions)).toMatchObject({
+      title: session.title, body: 'Phiên đang diễn ra.', targetRoute: saved.targetRoute,
+    });
+    expect(mapDomainToDisplay(saved, now, { [session.id]: { ...session, status: 'ended' } }).body).toBe('Phiên đã khép lại.');
+    expect(mapDomainToDisplay(saved, now, {}).body).toBe('Phiên này hiện chưa thể mở.');
+    expect(saved.title).toBe('Tên buổi cũ');
+  });
+});
+
+describe('Order timeline delivery snapshot', () => {
+  it('keeps a paid digital receipt digital when the catalogue changes or the item is removed', () => {
+    const initial = createInitialState('vieworld-demo');
+    const product = initial.products['product-cap-digital'];
+    const placed = appReducer(initial, { type: 'CREATE_ORDER', productId: product.id, requestId: 'timeline-snapshot' });
+    const original = Object.values(placed.orders)[0];
+    const order = { ...original, deliveryType: 'digital' as const, status: 'paid' as const };
+    const state = { ...placed, orders: { [order.id]: order }, products: { ...placed.products, [product.id]: { ...product, delivery: 'physical' as const } } };
+
+    const view = mount(state, '/', <OrderTimeline order={order}/>);
+    expect(screen.getByRole('heading', { name: 'Chờ nhận bản số' })).toBeVisible();
+    expect(screen.queryByText('Kiện đang ở đâu?')).toBeNull();
+    expect(appReducer(state, { type: 'ADVANCE_SHIPMENT', orderId: order.id, expectedStage: 0 }).orders[order.id]).toEqual(order);
+    view.unmount();
+
+    delete state.products[product.id];
+    mount(state, '/', <OrderTimeline order={order}/>);
+    expect(screen.getByRole('heading', { name: 'Chờ nhận bản số' })).toBeVisible();
+    expect(screen.queryByTestId('advance-shipment-btn')).toBeNull();
   });
 });

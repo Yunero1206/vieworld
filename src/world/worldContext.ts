@@ -39,3 +39,19 @@ export function sessionWorldContext(session: Session, artistId: string): WorldCo
 
 export const sessionContextUrl = (artistId: string, sessionId: string) =>
   `/artist/${encodeURIComponent(artistId)}?context=session:${encodeURIComponent(sessionId)}`;
+
+export function sessionReminderCopy(session: Session): { title: string; body: string } {
+  const status: Record<Session['status'], string> = {
+    scheduled: 'Xem giờ hẹn trong Artist World.',
+    open: 'Sảnh của phiên đã mở.',
+    running: 'Phiên đang diễn ra.',
+    paused: 'Phiên đang tạm dừng.',
+    ended: 'Phiên đã khép lại.',
+    cancelled: 'Phiên đã bị hủy.',
+  };
+  const available = session.rightsApproved === true && session.mediaStatus !== 'missing' && session.mediaStatus !== 'expired';
+  return {
+    title: session.title,
+    body: !available && session.status !== 'cancelled' ? 'Phiên này hiện chưa thể mở.' : status[session.status],
+  };
+}

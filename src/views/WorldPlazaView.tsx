@@ -11,11 +11,16 @@ function HomeTile({ activity, slot, artistName }: { activity?: PresenceActivity;
   const date = activity?.at ? new Date(activity.at).toLocaleString('vi-VN', {
     day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh',
   }) : undefined;
+  const verticalCrop = activity?.id === 'session-c-live' ? 'top' : 'center';
   return <div className={`presence-home-slot is-${slot}`}>
     <h2 className="sr-only">{LABELS[slot]}</h2>
     {activity ? <Link className="presence-home-tile" to={activity.to} aria-label={`${LABELS[slot]}: ${activity.title}`}>
       <span className="presence-home-media">
-      <span className="presence-home-art" style={{ backgroundImage: `url("${activity.media.src}")`, ...(activity.media.panel === undefined ? {} : { backgroundSize: '300% auto', backgroundPosition: `${activity.media.panel * 50}% center` }) }} />
+      <span className="presence-home-art" style={{
+        backgroundImage: `url("${activity.media.src}")`,
+        backgroundSize: activity.media.panel === undefined ? undefined : '300% auto',
+        backgroundPosition: `${activity.media.panel === undefined ? 'center' : `${activity.media.panel * 50}%`} ${verticalCrop}`,
+      }} />
       <span className={`presence-phase phase-${slot}`}><VieWorldIcon name={slot === 'recent' ? 'moment' : slot === 'next' ? 'calendar' : 'sound'} size={16}/>{slot === 'now' ? activity.label : LABELS[slot]}</span>
       <span className="presence-home-caption" aria-hidden="true"><VieWorldIcon name="arrow" size={18}/></span>
       </span>
@@ -36,7 +41,7 @@ export function WorldPlazaView() {
     <div className="presence-home-community">
       <div className="presence-home-echo-host"><AmbientHallEcho voices={home.voices}/></div>
       <img className="presence-home-bench" src="/images/presence-fans-bench.webp" width="1440" height="480" alt="" aria-hidden="true" fetchPriority="high" />
-      <small className="fw-muted">Fan minh họa · Artist và phiên demo, không có livestream hay người online thật{home.voices.length ? ' · Lời nhắn được chọn từ Hall' : ''}</small>
+      <small className="presence-home-art-note">Fan minh họa · Phiên demo, không có livestream thật{home.voices.length ? ' · Lời nhắn trích từ Hall' : ''}</small>
     </div>
   </section>;
 }

@@ -87,7 +87,7 @@ export function FanShell() {
       <ErrorBoundary resetKey={pathname+search} onReset={resetActiveTenant} onResetDemoData={resetActiveTenant}><Suspense fallback={<p role="status">Đang mở…</p>}><Outlet/></Suspense></ErrorBoundary>
     </main>
     {authOpen&&<AuthOverlay onClose={()=>setAuthOpen(false)} appearance={appearance} onToggleAppearance={toggleAppearance}/>}
-    <NotificationOverlay isOpen={inboxOpen} onClose={()=>setInboxOpen(false)} notifications={notifications.sort((a,b)=>(b.createdAt||b.updatedAt).localeCompare(a.createdAt||a.updatedAt)).map(notification=>mapDomainToDisplay(notification,state.demoTime))}
+    <NotificationOverlay isOpen={inboxOpen} onClose={()=>setInboxOpen(false)} notifications={notifications.sort((a,b)=>(b.createdAt||b.updatedAt).localeCompare(a.createdAt||a.updatedAt)).map(notification=>mapDomainToDisplay(notification,state.demoTime,state.sessions))}
       onSelectNotification={item=>{dispatch({type:'MARK_NOTIFICATION_READ',notificationId:item.id});setInboxOpen(false);if(item.targetRoute)navigate(item.targetRoute);}}
       onMarkAllAsRead={()=>dispatch({type:'MARK_ALL_NOTIFICATIONS_READ'})} returnFocusRef={inboxReturnRef}/>
   </div>;

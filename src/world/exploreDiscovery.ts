@@ -10,6 +10,7 @@ export interface PublicVoice {
   text: string;
   selectedBy: 'artist' | 'community';
   sourceContextId: string;
+  sourceMessageId?: string;
   isDemo: boolean;
   /** Known author only; never infer an avatar from a display name. */
   fanId?: string;

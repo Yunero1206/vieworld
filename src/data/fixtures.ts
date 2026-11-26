@@ -3,6 +3,7 @@
  */
 
 import { NEW_MERCH } from '../world/merchCatalog';
+import { sessionReminderCopy } from '../world/worldContext';
 import { ARTIST_A_QA_SESSION, ARTIST_A_QA_ANSWER } from './communityHall';
 import {
   CANONICAL_INITIAL_DEMO_TIME,
@@ -503,8 +504,7 @@ export const INITIAL_NOTIFICATIONS: Record<string, Notification> = {
     type: 'session_reminder',
     category: 'session',
     sourceAttribution: 'session_system',
-    title: 'Nhắc nhở: Phiên giao lưu nghệ sĩ ảo sắp diễn ra!',
-    body: 'Bạn đã đăng ký giữ chỗ (RSVP) cho "Đêm Nhạc Cùng VieWorld". Sảnh chờ sẽ mở trước 15 phút.',
+    ...sessionReminderCopy(CANONICAL_SESSIONS['session-dropin-01']),
     isRead: false,
     targetRoute: '/sessions/session-dropin-01',
     createdAt: '2026-09-09T18:00:00Z',

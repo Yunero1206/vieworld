@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { OrderTimeline } from '../components/OrderTimeline';
-import { orderAmount } from '../world/commerce';
+import { orderAmount, orderDelivery } from '../world/commerce';
 import { DELIVERY_LABELS } from '../world/merchCatalog';
 import { merchImageUrl } from '../world/merchImages';
 import { getTenantConfig } from '../domain/tenantConfig';
@@ -26,7 +26,7 @@ export const OrderDetailView: React.FC = () => {
   const world = order ? state.worlds[order.worldId] : undefined;
 
   const productTitle = order?.productTitle || product?.title || order?.productId;
-  const deliveryType = order?.deliveryType || product?.delivery || 'physical';
+  const deliveryType = (order && orderDelivery(order, state)) ?? 'physical';
   const productImage = order?.productImage || product?.image;
   const digitalSlot = order?.digitalSlot || product?.digitalSlot;
   const estimatedShipping = order?.estimatedShipping || product?.estimatedShipping;
